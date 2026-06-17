@@ -45,13 +45,20 @@ jobs:
           $tag = $env:GITHUB_REF_NAME
           $title = $tag.TrimStart('v')
 
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title $title --notes "Czatbox TT $title" --latest
+          $releaseExists = $true
+          try {
+            gh release view $tag *> $null
+          } catch {
+            $releaseExists = $false
           }
 
           $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
-          gh release edit $tag --title $title --notes "$body"
+
+          if ($releaseExists) {
+            gh release delete $tag --yes
+          }
+
+          gh release create $tag --title $title --notes "$body" --latest
 
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
