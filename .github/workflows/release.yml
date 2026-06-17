@@ -40,6 +40,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
           $tag = $env:GITHUB_REF_NAME
           $title = $tag.TrimStart('v')
 
@@ -48,15 +50,8 @@ jobs:
             gh release create $tag --title $title --notes "Czatbox TT $title" --latest
           }
 
-          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" | ConvertFrom-Json
           $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
-          $payload = @{
-            name = $title
-            body = $body
-            make_latest = 'true'
-          } | ConvertTo-Json
-
-          $payload | gh api "repos/$env:GITHUB_REPOSITORY/releases/$($release.id)" --method PATCH --input -
+          gh release edit $tag --title $title --notes "$body" --latest
 
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
