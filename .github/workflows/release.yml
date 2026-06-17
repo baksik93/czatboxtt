@@ -47,12 +47,25 @@ jobs:
 
           $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
 
-          $PSNativeCommandUseErrorActionPreference = $false
-          gh release delete $tag --yes *> $null
-          $PSNativeCommandUseErrorActionPreference = $true
-          Start-Sleep -Seconds 10
+          try {
+            gh release view $tag *> $null
+          } catch {
+            gh release create $tag --title $title --notes "$body" --latest
+          }
 
-          gh release create $tag --title $title --notes "$body" --latest
+          $releaseId = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" --jq ".id"
+          $payload = @{
+            name = $title
+            body = $body
+          } | ConvertTo-Json -Depth 4
+
+          Set-Content -Path release-payload.json -Value $payload -Encoding UTF8
+          curl.exe -fsSL -X PATCH `
+            -H "Authorization: Bearer $env:GH_TOKEN" `
+            -H "Accept: application/vnd.github+json" `
+            -H "Content-Type: application/json" `
+            --data-binary "@release-payload.json" `
+            "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/$releaseId"
 
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
