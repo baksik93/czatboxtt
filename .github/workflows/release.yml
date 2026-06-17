@@ -48,6 +48,8 @@ jobs:
             gh release create $tag --title $title --notes "Czatbox TT $title" --latest
           }
 
+          gh release edit $tag --title $title --notes-file RELEASE_NOTES.md --latest
+
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe.blockmap' | Select-Object -First 1).FullName,
