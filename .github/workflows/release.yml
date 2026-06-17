@@ -30,7 +30,28 @@ jobs:
       - name: Check syntax
         run: npm run check
 
-      - name: Build and publish
-        run: npm run release
+      - name: Build installer
+        run: npm run dist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $title = $tag.TrimStart('v')
+
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title $title --notes "Czatbox TT $title" --latest
+          }
+
+          $assets = @(
+            (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
+            (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe.blockmap' | Select-Object -First 1).FullName,
+            (Join-Path $PWD 'dist\latest.yml')
+          )
+
+          gh release upload $tag @assets --clobber
