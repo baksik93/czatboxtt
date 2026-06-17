@@ -45,18 +45,12 @@ jobs:
           $tag = $env:GITHUB_REF_NAME
           $title = $tag.TrimStart('v')
 
-          $releaseExists = $true
-          try {
-            gh release view $tag *> $null
-          } catch {
-            $releaseExists = $false
-          }
-
           $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
 
-          if ($releaseExists) {
-            gh release delete $tag --yes
-          }
+          $PSNativeCommandUseErrorActionPreference = $false
+          gh release delete $tag --yes *> $null
+          $PSNativeCommandUseErrorActionPreference = $true
+          Start-Sleep -Seconds 10
 
           gh release create $tag --title $title --notes "$body" --latest
 
