@@ -51,7 +51,7 @@ jobs:
           }
 
           $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
-          gh release edit $tag --title $title --notes "$body" --latest
+          gh release edit $tag --title $title --notes "$body"
 
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
