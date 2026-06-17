@@ -1,0 +1,71 @@
+{
+  "name": "tiktok-live-electron",
+  "version": "0.1.0",
+  "private": true,
+  "productName": "Czatbox TT",
+  "description": "Electron wrapper for a TikTok live stream with a separate chat pane.",
+  "author": "Baksik",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baksik93/czatboxtt.git"
+  },
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/app.js",
+    "pack": "electron-builder --dir --publish never",
+    "dist": "electron-builder --win nsis --publish never",
+    "release": "electron-builder --win nsis --publish always"
+  },
+  "build": {
+    "appId": "pl.czatboxtt.app",
+    "productName": "Czatbox TT",
+    "artifactName": "Czatbox-TT-Setup-${version}.${ext}",
+    "electronUpdaterCompatibility": ">=2.16",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "baksik93",
+        "repo": "czatboxtt",
+        "releaseType": "release"
+      }
+    ],
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!archives/**/*"
+    ],
+    "win": {
+      "icon": "src/assets/app-icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Czatbox TT",
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "tiktok-live-connector": "^2.1.1-beta1"
+  }
+}

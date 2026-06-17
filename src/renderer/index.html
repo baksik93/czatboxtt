@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Czatbox TT</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="chat-app">
+      <header class="chat-header">
+        <div class="brand">
+          <img class="app-icon" src="./assets/czatbox-icon.png" alt="" aria-hidden="true" draggable="false">
+          <div class="brand-copy">
+            <div class="title">Czatbox TT</div>
+            <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
+          </div>
+        </div>
+        <div class="creator-picker creator-combobox">
+          <label for="creatorInput">Twórca</label>
+          <span class="creator-input-wrap">
+            <input id="creatorInput" type="text" aria-label="Twórca LIVE" autocomplete="off" spellcheck="false" placeholder="@tworca lub link LIVE" aria-autocomplete="list" aria-expanded="false" aria-controls="creatorSuggestions">
+            <button class="creator-toggle" id="creatorToggle" type="button" aria-label="Pokaż listę twórców" aria-expanded="false">▾</button>
+            <span class="creator-suggestions" id="creatorSuggestions" role="listbox" hidden></span>
+          </span>
+        </div>
+      </header>
+
+      <aside class="sidebar" aria-label="Nawigacja">
+        <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
+        <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
+        <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
+        <button class="sidebar-button" type="button" data-section="recommended">Polecani</button>
+        <button class="sidebar-button" type="button" data-section="about">O programie</button>
+      </aside>
+
+      <section class="content">
+        <section class="view-panel chat-view" data-view="chatbox">
+          <section class="filters" aria-label="Filtry czatu">
+            <div class="filter-buttons">
+              <button class="filter-button" type="button" data-filter="chat" data-active="true">Czat</button>
+              <button class="filter-button" type="button" data-filter="like" data-active="true">Polubienia</button>
+              <button class="filter-button" type="button" data-filter="gift" data-active="true">Prezenty</button>
+              <button class="filter-button" type="button" data-filter="box" data-active="true">Skrzyneczki</button>
+              <button class="filter-button" type="button" data-filter="repost" data-active="true">Reposty</button>
+              <button class="filter-button" type="button" data-filter="share" data-active="true">Udostępnienia</button>
+              <button class="filter-button" type="button" data-filter="member" data-active="true">Dołączenia</button>
+            </div>
+            <div class="status" id="status">
+              <span id="statusConnection">🟡Łączę...</span>
+              <span id="statusDelay">⏰1.8s</span>
+              <span id="statusQueue">📩0</span>
+              <span class="status-stats" id="statusStats">
+                <span id="statusViewers">👤0</span>
+                <span class="top-gifters">
+                  <button class="top-gifters-button" type="button" id="topGiftersButton" aria-expanded="false">👑Top</button>
+                  <section class="top-gifters-panel" id="topGiftersPanel" hidden></section>
+                </span>
+                <span id="statusMessages">📧0</span>
+                <span id="statusMemberHeartsActive">❤️0</span>
+                <span id="statusMemberHeartsExpired">🖤0</span>
+              </span>
+            </div>
+          </section>
+
+          <section class="battle-banner" id="battleBanner" hidden></section>
+
+          <section class="messages" id="messages" aria-live="polite">
+            <div class="empty" id="empty">Po zalogowaniu pojawia sie tutaj spowolniony czat LIVE.</div>
+          </section>
+        </section>
+
+        <section class="view-panel archive-view" data-view="archive" hidden>
+          <section class="archive-toolbar">
+            <div>
+              <div class="archive-title">Archiwum</div>
+              <div class="archive-status">Zapisane transmisje</div>
+            </div>
+            <button class="page-action" type="button" id="refreshArchive">Odśwież</button>
+          </section>
+          <section class="archive-list" id="archiveList" aria-live="polite"></section>
+          <pre class="archive-text" id="archiveText" hidden></pre>
+        </section>
+
+        <section class="view-panel page-view" data-view="settings" hidden>
+          <div class="page-header">
+            <h1>Ustawienia</h1>
+          </div>
+          <div class="settings-tabs" role="tablist" aria-label="Kategorie ustawień">
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true">Ogólne</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">Wygląd</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="accessibility">Dostępność</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="system">System</button>
+          </div>
+          <section class="settings-panel" data-settings-panel="general">
+            <p class="page-note">Ogólne ustawienia aplikacji.</p>
+            <div class="settings-list">
+              <label class="setting-row" for="multiplierNotifications">
+                <span>Powiadomienia o mnożnikach</span>
+                <input class="setting-toggle" type="checkbox" id="multiplierNotifications">
+              </label>
+              <label class="setting-row" for="statsToolbox">
+                <span>Przybornik statystyk</span>
+                <input class="setting-toggle" type="checkbox" id="statsToolbox">
+              </label>
+            </div>
+          </section>
+          <section class="settings-panel" data-settings-panel="appearance" hidden>
+            <h2 class="settings-heading">Styl czatu:</h2>
+            <div class="settings-list choice-list">
+              <label class="setting-choice" for="chatStyleCompact">
+                <input type="radio" id="chatStyleCompact" name="chatStyle" value="compact">
+                <span>
+                  <strong>Kompaktowy</strong>
+                  <small>Standardowy styl pojawiających się wiadomości TikTok.</small>
+                </span>
+              </label>
+              <label class="setting-choice" for="chatStyleSpacious">
+                <input type="radio" id="chatStyleSpacious" name="chatStyle" value="spacious">
+                <span>
+                  <strong>Przestrzenny</strong>
+                  <small>Bardziej przejrzysty układ wiadomości.</small>
+                </span>
+              </label>
+              <label class="setting-choice" for="chatStyleTestowy">
+                <input type="radio" id="chatStyleTestowy" name="chatStyle" value="testowy">
+                <span>
+                  <strong>Nowoczesny</strong>
+                  <small>Nowoczesny styl czatu w dymkach.</small>
+                </span>
+              </label>
+            </div>
+            <section class="setting-section">
+              <h2 class="settings-heading">Motyw:</h2>
+              <div class="settings-list choice-list">
+                <label class="setting-choice" for="themeRoseBlack">
+                  <input type="radio" id="themeRoseBlack" name="appTheme" value="rose-black">
+                  <span>
+                    <strong>Rose Black (Domyślny)</strong>
+                    <small>Standardowe kolory aplikacji.</small>
+                  </span>
+                </label>
+                <label class="setting-choice" for="themeWhiteTitanium">
+                  <input type="radio" id="themeWhiteTitanium" name="appTheme" value="white-titanium">
+                  <span>
+                    <strong>White Titanium</strong>
+                    <small>Jasny wygląd aplikacji, w odcieniach białego tytanu.</small>
+                  </span>
+                </label>
+                <label class="setting-choice" for="themeChillSerwis">
+                  <input type="radio" id="themeChillSerwis" name="appTheme" value="chill-serwis">
+                  <span>
+                    <strong>Chill Serwis</strong>
+                    <small>Najbardziej wyczillowany motyw aplikacji dla hanysów i hanysek.</small>
+                  </span>
+                </label>
+                <label class="setting-choice" for="themeRoseGoldGlass">
+                  <input type="radio" id="themeRoseGoldGlass" name="appTheme" value="rose-gold-glass">
+                  <span>
+                    <strong>Rose Glass</strong>
+                    <small>Nieco bardziej kobiecy, delikatny motyw.</small>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="setting-section">
+              <h2 class="settings-heading">Wygląd aplikacji:</h2>
+              <div class="settings-list choice-list">
+                <label class="setting-choice" for="appAppearanceStandard">
+                  <input type="radio" id="appAppearanceStandard" name="appAppearance" value="standard">
+                  <span>
+                    <strong>Domyślny</strong>
+                    <small>Obecny układ headera, lewego sidebara, okien i buttonów.</small>
+                  </span>
+                </label>
+                <label class="setting-choice" for="appAppearanceDecorative">
+                  <input type="radio" id="appAppearanceDecorative" name="appAppearance" value="ozdobny">
+                  <span>
+                    <strong>Ozdobny</strong>
+                    <small>Elegancki, nowoczesny układ aplikacji.</small>
+                  </span>
+                </label>
+              </div>
+            </section>
+          </section>
+          <section class="settings-panel" data-settings-panel="accessibility" hidden>
+            <h2 class="settings-heading">Wiadomości TTS:</h2>
+            <div class="settings-list">
+              <label class="setting-row" for="ttsEnabled">
+                <span>Czytaj czat na głos</span>
+                <input class="setting-toggle" type="checkbox" id="ttsEnabled">
+              </label>
+              <label class="setting-row" for="ttsSkipVulgarNicknames">
+                <span>Pomijaj wulgarne nicki</span>
+                <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarNicknames">
+              </label>
+              <label class="setting-row" for="ttsSkipVulgarMessages">
+                <span>Pomijaj wulgarne wiadomości</span>
+                <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarMessages">
+              </label>
+              <label class="setting-row" for="ttsSkipSpamMessages">
+                <span>Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)</span>
+                <input class="setting-toggle" type="checkbox" id="ttsSkipSpamMessages">
+              </label>
+              <label class="setting-row" for="ttsVoice">
+                <span>Głos</span>
+                <select class="setting-select" id="ttsVoice"></select>
+              </label>
+              <label class="setting-row" for="ttsRate">
+                <span>Tempo</span>
+                <span class="setting-range">
+                  <input type="range" id="ttsRate" min="0.7" max="1.3" step="0.1" value="1">
+                  <output id="ttsRateValue">1.0x</output>
+                </span>
+              </label>
+            </div>
+            <section class="setting-section chat-delay-section">
+                <h2 class="settings-heading">Opóźnienie czatu:</h2>
+                <label class="setting-row setting-row-stacked chat-delay-control" for="chatDelay">
+                  <span class="setting-range">
+                    <input type="range" id="chatDelay" min="0" max="6" step="1" value="4" list="chatDelaySteps">
+                    <datalist id="chatDelaySteps">
+                      <option value="0" label="0.5s"></option>
+                      <option value="1" label="0.8s"></option>
+                      <option value="2" label="1.0s"></option>
+                      <option value="3" label="1.5s"></option>
+                      <option value="4" label="1.8s"></option>
+                      <option value="5" label="2.2s"></option>
+                      <option value="6" label="2.8s"></option>
+                    </datalist>
+                    <output id="chatDelayValue">1.8s</output>
+                    <span class="setting-range-marks" aria-hidden="true">
+                      <span>0.5s</span>
+                      <span>0.8s</span>
+                      <span>1.0s</span>
+                      <span>1.5s</span>
+                      <span>1.8s</span>
+                      <span>2.2s</span>
+                      <span>2.8s</span>
+                    </span>
+                  </span>
+                </label>
+            </section>
+          </section>
+          <section class="settings-panel" data-settings-panel="system" hidden>
+            <p class="page-note" data-i18n="settings.system.note">Informacje i ustawienia systemowe.</p>
+            <div class="settings-list">
+              <label class="setting-row" for="systemAutoLaunch">
+                <span data-i18n="settings.system.autoLaunch">Automatycznie otwieraj Czatbox TT po uruchomieniu komputera</span>
+                <input class="setting-toggle" type="checkbox" id="systemAutoLaunch">
+              </label>
+              <label class="setting-row" for="systemRunInBackground">
+                <span data-i18n="settings.system.runInBackground">Uruchom program w tle by nie przeszkadzał</span>
+                <input class="setting-toggle" type="checkbox" id="systemRunInBackground">
+              </label>
+              <label class="setting-row" for="systemMinimizeToTray">
+                <span data-i18n="settings.system.minimizeToTray">Minimalizuj Czatbox TT do zasobnika systemowego po kliknięciu X</span>
+                <input class="setting-toggle" type="checkbox" id="systemMinimizeToTray">
+              </label>
+              <label class="setting-row" for="appLanguage">
+                <span data-i18n="settings.system.language">Wybierz język aplikacji</span>
+                <select class="setting-select" id="appLanguage">
+                  <option value="pl" data-i18n="settings.system.language.pl">Polski</option>
+                  <option value="en" data-i18n="settings.system.language.en">Angielski</option>
+                  <option value="de" data-i18n="settings.system.language.de">Niemiecki</option>
+                </select>
+              </label>
+              <label class="setting-row" for="timeFormat">
+                <span data-i18n="settings.system.timeFormat">Format czasu</span>
+                <select class="setting-select" id="timeFormat">
+                  <option value="auto" data-i18n="settings.system.timeFormat.auto">Automatyczny (wykrywa czas w systemie)</option>
+                  <option value="12" data-i18n="settings.system.timeFormat.12">12-godzinny</option>
+                  <option value="24" data-i18n="settings.system.timeFormat.24">24-godzinny</option>
+                </select>
+              </label>
+              <div class="setting-row">
+                <span data-i18n="settings.system.clearSessionDescription">Problem z logowaniem lub sesją TikTok</span>
+                <button class="page-action" type="button" id="clearTikTokSession" data-i18n="settings.system.clearSession">Wyczyść sesję TikTok</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view-panel page-view recommended-view" data-view="recommended" hidden>
+          <div class="page-header">
+            <div>
+              <h1 data-i18n="recommended.title">Polecani</h1>
+              <p class="page-note" data-i18n="recommended.note">Twórcy dodani do programu, których możesz szybko wybrać.</p>
+            </div>
+          </div>
+          <section class="recommended-list" id="recommendedList" aria-live="polite"></section>
+        </section>
+
+        <section class="view-panel page-view" data-view="about" hidden>
+          <div class="page-header">
+            <h1>O programie</h1>
+          </div>
+          <div class="settings-tabs about-tabs" role="tablist" aria-label="Zakładki o programie">
+            <button class="settings-tab" type="button" role="tab" data-about-tab="program" data-active="true" aria-selected="true" aria-controls="aboutProgramPanel">O programie</button>
+            <button class="settings-tab" type="button" role="tab" data-about-tab="news" aria-selected="false" aria-controls="aboutNewsPanel">Co nowego?</button>
+            <button class="settings-tab" type="button" role="tab" data-about-tab="faq" aria-selected="false" aria-controls="aboutFaqPanel">FAQ</button>
+          </div>
+          <article class="about-content about-panel" id="aboutProgramPanel" role="tabpanel" data-about-panel="program">
+            <p>
+              Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić
+              wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą
+              o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.
+            </p>
+            <p>
+              Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w
+              uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować
+              typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.
+            </p>
+
+            <section class="about-section">
+              <h2>Jak działa program:</h2>
+              <p>
+                Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta,
+                aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany
+                w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.
+              </p>
+              <p>
+                Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić
+                przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia,
+                mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu,
+                motyw lub opóźnienie.
+              </p>
+              <p>
+                Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po
+                zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do
+                wcześniejszych rozmów.
+              </p>
+            </section>
+          </article>
+          <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
+            <section class="about-section">
+              <h2 class="about-version-title">Wersja programu <span id="appVersion">0.1</span>:</h2>
+
+              <h3>Główne funkcje:</h3>
+              <ul class="about-list">
+                <li>wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali</li>
+                <li>wyróżnianie moderatorów czerwonym nickiem</li>
+                <li>losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji</li>
+                <li>pasek informacji o mnożniku podczas bitwy</li>
+                <li>czytanie wiadomości na głos przez TTS</li>
+                <li>archiwizowanie czatu całej transmisji do pliku</li>
+                <li>różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny,</li>
+                <li>różne motywy kolorystyczne aplikacji,</li>
+                <li>różne wyglądy aplikacji: Domyślny i Ozdobny,</li>
+                <li>regulowane opóźnienie wyświetlania wiadomości czatu</li>
+                <li>przybornik statystyk live</li>
+              </ul>
+
+              <h3>Znane błędy:</h3>
+              <ul class="about-list">
+                <li>czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"</li>
+                <li>mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku</li>
+              </ul>
+
+              <h3>Co dalej:</h3>
+              <ul class="about-list">
+                <li>Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.</li>
+                <li>Poprawki pomniejszych błędów</li>
+              </ul>
+            </section>
+          </section>
+          <section class="about-content about-panel" id="aboutFaqPanel" role="tabpanel" data-about-panel="faq" hidden>
+            <section class="about-section about-faq">
+              <h2>FAQ</h2>
+
+              <h3>Skąd pomysł na aplikację?</h3>
+              <p>
+                Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują
+                lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie
+                do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest
+                dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna
+                aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość
+                dla każdego.
+              </p>
+
+              <h3>Czy powstanie wersja na inne systemy niż Windows?</h3>
+              <p>
+                Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego
+                systemu.
+              </p>
+
+              <h3>Co z iOS, android itd.?</h3>
+              <p>
+                Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować
+                coś pod coś, z czym nie mam doczynienia.
+              </p>
+
+              <h3>Wygląd programu, czy będą aktualizacje?</h3>
+              <p>
+                Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na
+                kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie,
+                wybierzcie to co wam odpowiada najlepiej.
+              </p>
+
+              <h3>Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?</h3>
+              <p>
+                Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun,
+                wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na
+                już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.
+              </p>
+
+              <h3>Mam pomysł na nowe funkcje!</h3>
+              <p>
+                I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na
+                discord pw (inavoxy).
+              </p>
+
+              <h3>Czy planuję rozwijać projekt dalej?</h3>
+              <p>
+                Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy
+                aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego
+                projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję
+                również każdemu za obecne pomysły, zainteresowanie i słowa wsparcia.
+              </p>
+            </section>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

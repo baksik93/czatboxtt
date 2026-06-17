@@ -1,0 +1,7 @@
+node_modules/
+dist/
+archives/
+tmp/
+*.log
+*.tmp
+*.bak

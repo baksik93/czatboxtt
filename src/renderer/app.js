@@ -1,0 +1,2668 @@
+const TTS_SETTINGS_KEY = 'czatbox.tts.settings';
+const CHAT_DELAY_SETTINGS_KEY = 'czatbox.chat.delay';
+const CHAT_STYLE_SETTINGS_KEY = 'czatbox.chat.style';
+const APP_THEME_SETTINGS_KEY = 'czatbox.app.theme';
+const APP_APPEARANCE_SETTINGS_KEY = 'czatbox.app.appearance';
+const APP_LANGUAGE_SETTINGS_KEY = 'czatbox.app.language';
+const TIME_FORMAT_SETTINGS_KEY = 'czatbox.time.format';
+const GENERAL_SETTINGS_KEY = 'czatbox.general.settings';
+const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
+const DEFAULT_CHAT_DELAY_MS = 1800;
+const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
+const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
+const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass'];
+const APP_APPEARANCES = ['standard', 'ozdobny'];
+const APP_LANGUAGES = ['pl', 'en', 'de'];
+const TIME_FORMATS = ['auto', '12', '24'];
+const TOP_GIFTERS_LIMIT = 5;
+const MAX_RECENT_CREATORS = 10;
+const HEART_ME_GIFT_NAME = 'heart me';
+const RECOMMENDED_EXCLUDED_CREATOR_IDS = new Set(['milusia313', 'szwagierkaqueen', 'krzysztofzdziars9']);
+const DEFAULT_SYSTEM_SETTINGS = {
+  autoLaunch: false,
+  runInBackground: false,
+  minimizeToTrayOnClose: false,
+  language: 'pl',
+  timeFormat: 'auto'
+};
+const DEFAULT_GENERAL_SETTINGS = {
+  multiplierNotifications: true,
+  statsToolbox: true
+};
+const LANGUAGE_LOCALES = {
+  pl: 'pl-PL',
+  en: 'en-US',
+  de: 'de-DE'
+};
+const MAX_SPEECH_QUEUE = 8;
+const VULGAR_SPEECH_PATTERNS = [
+  /\b(?:kurw\w*|chuj\w*|huj\w*|jeb\w*|pierd\w*|wypierd\w*|spierd\w*|skurw\w*|zjeb\w*)\b/u,
+  /\b(?:cwel\w*|kutas\w*|cip\w*|dziwk\w*)\b/u
+];
+const SPAM_SPEECH_PATTERNS = [
+  /^(?:ob|obs|obsik|obserwacja|obserwacje)$/u,
+  /\bobs\s*(?:za|4|\/)\s*obs\b/u,
+  /\bob\s*za\s*ob\b/u,
+  /\bobserwacj\w*\s*(?:za|4|\/)\s*obserwacj\w*\b/u,
+  /\bfollow\s*(?:for|4|za|\/)\s*follow\b/u,
+  /\bf4f\b/u,
+  /\bodd(?:am|aje|a[cm])\s+(?:ob|obs|obserwacj\w*|follow\w*)\b/u,
+  /\b(?:daj|dajcie|wbij|wbijajcie)\s+(?:ob|obs|obserwacj\w*|follow\w*)\b/u
+];
+
+const I18N = {
+  pl: {
+    'app.tagline': 'Śledź i zarządzaj czatem live w czasie rzeczywistym.',
+    'nav.chatbox': 'Czatbox',
+    'nav.archive': 'Archiwum',
+    'nav.settings': 'Ustawienia',
+    'nav.recommended': 'Polecani',
+    'nav.about': 'O programie',
+    'creator.label': 'Twórca',
+    'creator.recent': 'Ostatnio wpisany',
+    'creator.noMatches': 'Brak pasujących twórców',
+    'filters.chat': 'Czat',
+    'filters.like': 'Polubienia',
+    'filters.gift': 'Prezenty',
+    'filters.box': 'Skrzyneczki',
+    'filters.repost': 'Reposty',
+    'filters.share': 'Udostępnienia',
+    'filters.member': 'Dołączenia',
+    'archive.title': 'Archiwum',
+    'archive.status': 'Zapisane transmisje',
+    'archive.refresh': 'Odśwież',
+    'settings.title': 'Ustawienia',
+    'settings.tabs.general': 'Ogólne',
+    'settings.tabs.appearance': 'Wygląd',
+    'settings.tabs.accessibility': 'Dostępność',
+    'settings.tabs.system': 'System',
+    'settings.general.note': 'Ogólne ustawienia aplikacji.',
+    'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
+    'settings.general.statsToolbox': 'Przybornik statystyk',
+    'settings.appearance.chatStyle': 'Styl czatu:',
+    'settings.appearance.theme': 'Motyw:',
+    'settings.appearance.appAppearance': 'Wygląd aplikacji:',
+    'settings.chatStyle.compact.name': 'Kompaktowy',
+    'settings.chatStyle.compact.description': 'Standardowy styl pojawiających się wiadomości TikTok.',
+    'settings.chatStyle.spacious.name': 'Przestrzenny',
+    'settings.chatStyle.spacious.description': 'Bardziej przejrzysty układ wiadomości.',
+    'settings.chatStyle.modern.name': 'Nowoczesny',
+    'settings.chatStyle.modern.description': 'Nowoczesny styl czatu w dymkach.',
+    'settings.theme.roseBlack.name': 'Rose Black (Domyślny)',
+    'settings.theme.roseBlack.description': 'Standardowe kolory aplikacji.',
+    'settings.theme.whiteTitanium.description': 'Jasny wygląd aplikacji, w odcieniach białego tytanu.',
+    'settings.theme.chillSerwis.description': 'Najbardziej wyczillowany motyw aplikacji dla hanysów i hanysek.',
+    'settings.theme.roseGlass.description': 'Nieco bardziej kobiecy, delikatny motyw.',
+    'settings.appAppearance.default.name': 'Domyślny',
+    'settings.appAppearance.default.description': 'Obecny układ headera, lewego sidebara, okien i buttonów.',
+    'settings.appAppearance.decorative.name': 'Ozdobny',
+    'settings.appAppearance.decorative.description': 'Elegancki, nowoczesny układ aplikacji.',
+    'settings.accessibility.tts': 'Wiadomości TTS:',
+    'settings.accessibility.readAloud': 'Czytaj czat na głos',
+    'settings.accessibility.skipVulgarNicknames': 'Pomijaj wulgarne nicki',
+    'settings.accessibility.skipVulgarMessages': 'Pomijaj wulgarne wiadomości',
+    'settings.accessibility.skipSpamMessages': 'Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)',
+    'settings.accessibility.voice': 'Głos',
+    'settings.accessibility.systemVoice': 'Systemowy',
+    'settings.accessibility.rate': 'Tempo',
+    'settings.accessibility.delay': 'Opóźnienie czatu:',
+    'settings.system.note': 'Informacje i ustawienia systemowe.',
+    'settings.system.autoLaunch': 'Automatycznie otwieraj Czatbox TT po uruchomieniu komputera',
+    'settings.system.runInBackground': 'Uruchom program w tle by nie przeszkadzał',
+    'settings.system.minimizeToTray': 'Minimalizuj Czatbox TT do zasobnika systemowego po kliknięciu X',
+    'settings.system.language': 'Wybierz język aplikacji',
+    'settings.system.language.pl': 'Polski',
+    'settings.system.language.en': 'Angielski',
+    'settings.system.language.de': 'Niemiecki',
+    'settings.system.timeFormat': 'Format czasu',
+    'settings.system.timeFormat.auto': 'Automatyczny (wykrywa czas w systemie)',
+    'settings.system.timeFormat.12': '12-godzinny',
+    'settings.system.timeFormat.24': '24-godzinny',
+    'settings.system.clearSessionDescription': 'Problem z logowaniem lub sesją TikTok',
+    'settings.system.clearSession': 'Wyczyść sesję TikTok',
+    'settings.system.clearSessionConfirm': 'Wyczyścić sesję TikTok i wrócić do ekranu logowania?',
+    'about.title': 'O programie',
+    'about.tabs.program': 'O programie',
+    'about.tabs.news': 'Co nowego?',
+    'about.tabs.faq': 'FAQ',
+    'about.program.p1': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.',
+    'about.program.p2': 'Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.',
+    'about.program.how': 'Jak działa program:',
+    'about.program.how.p1': 'Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta, aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.',
+    'about.program.how.p2': 'Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia, mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu, motyw lub opóźnienie.',
+    'about.program.how.p3': 'Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do wcześniejszych rozmów.',
+    'status.connecting': '🟡Łączę...',
+    'status.online': '🟢Online',
+    'status.offline': '🔴Offline',
+    'chat.empty': 'Po zalogowaniu pojawia się tutaj spowolniony czat LIVE.',
+    'archive.loading': 'Wczytuję archiwum...',
+    'archive.loadFailed': 'Nie udało się odczytać archiwum.',
+    'archive.loadFailedWithError': 'Nie udało się odczytać archiwum: {error}',
+    'archive.empty': 'Brak zapisanych archiwów.',
+    'archive.defaultName': 'Archiwum',
+    'archive.refreshing': 'Odświeżam archiwum...',
+    'archive.listFailed': 'Nie udało się odczytać listy archiwów: {error}',
+    'recommended.title': 'Polecani',
+    'recommended.note': 'Twórcy dodani do programu, których możesz szybko wybrać.',
+    'recommended.open': 'Wybierz',
+    'recommended.empty': 'Brak polecanych twórców do wyświetlenia.',
+    'recommended.emptyBio': 'Brak opisu profilu.',
+    'topGifters.empty': 'Brak giftów od dołączenia do transmisji.',
+    'event.member.join': 'dołączył(a) do LIVE',
+    'event.gift': 'wysłał(a) prezent: {giftName}{countText}{costText}',
+    'event.box': 'wysyła {boxName}{costText}{audienceText}',
+    'event.box.chest': 'skrzynię',
+    'event.box.portal': 'portal',
+    'event.audience': ' dla (👥 {count})',
+    'event.like': 'polubił(a) LIVE (łącznie {total} polubień)',
+    'event.repost': '🔁 repostował live',
+    'event.share': '↩️ udostępnia live{countText}',
+    'battle.multiplier': 'BITWA: ZA CHWILĘ MNOŻNIK X{multiplier}',
+    'battle.authorJoin': 'Budzimy śpiocha, Baksik dołączył do LIVE!'
+  },
+  en: {
+    'app.tagline': 'Track and manage live chat in real time.',
+    'nav.chatbox': 'Chatbox',
+    'nav.archive': 'Archive',
+    'nav.settings': 'Settings',
+    'nav.recommended': 'Recommended',
+    'nav.about': 'About',
+    'creator.label': 'Creator',
+    'creator.recent': 'Recently typed',
+    'creator.noMatches': 'No matching creators',
+    'filters.chat': 'Chat',
+    'filters.like': 'Likes',
+    'filters.gift': 'Gifts',
+    'filters.box': 'Boxes',
+    'filters.repost': 'Reposts',
+    'filters.share': 'Shares',
+    'filters.member': 'Joins',
+    'archive.title': 'Archive',
+    'archive.status': 'Saved streams',
+    'archive.refresh': 'Refresh',
+    'settings.title': 'Settings',
+    'settings.tabs.general': 'General',
+    'settings.tabs.appearance': 'Appearance',
+    'settings.tabs.accessibility': 'Accessibility',
+    'settings.tabs.system': 'System',
+    'settings.general.note': 'General application settings.',
+    'settings.general.multiplierNotifications': 'Multiplier notifications',
+    'settings.general.statsToolbox': 'Statistics toolbox',
+    'settings.appearance.chatStyle': 'Chat style:',
+    'settings.appearance.theme': 'Theme:',
+    'settings.appearance.appAppearance': 'Application appearance:',
+    'settings.chatStyle.compact.name': 'Compact',
+    'settings.chatStyle.compact.description': 'Standard TikTok message style.',
+    'settings.chatStyle.spacious.name': 'Spacious',
+    'settings.chatStyle.spacious.description': 'A clearer message layout.',
+    'settings.chatStyle.modern.name': 'Modern',
+    'settings.chatStyle.modern.description': 'Modern bubble chat style.',
+    'settings.theme.roseBlack.name': 'Rose Black (Default)',
+    'settings.theme.roseBlack.description': 'Standard application colors.',
+    'settings.theme.whiteTitanium.description': 'Light application look in white titanium tones.',
+    'settings.theme.chillSerwis.description': 'The most chilled theme for the app.',
+    'settings.theme.roseGlass.description': 'A slightly softer, delicate theme.',
+    'settings.appAppearance.default.name': 'Default',
+    'settings.appAppearance.default.description': 'Current header, sidebar, panel and button layout.',
+    'settings.appAppearance.decorative.name': 'Decorative',
+    'settings.appAppearance.decorative.description': 'Elegant, modern application layout.',
+    'settings.accessibility.tts': 'Message TTS:',
+    'settings.accessibility.readAloud': 'Read chat aloud',
+    'settings.accessibility.skipVulgarNicknames': 'Skip vulgar nicknames',
+    'settings.accessibility.skipVulgarMessages': 'Skip vulgar messages',
+    'settings.accessibility.skipSpamMessages': 'Skip spam messages (follow for follow, obs, etc.)',
+    'settings.accessibility.voice': 'Voice',
+    'settings.accessibility.systemVoice': 'System',
+    'settings.accessibility.rate': 'Rate',
+    'settings.accessibility.delay': 'Chat delay:',
+    'settings.system.note': 'System information and settings.',
+    'settings.system.autoLaunch': 'Automatically open Czatbox TT when the computer starts',
+    'settings.system.runInBackground': 'Start the program in the background so it does not get in the way',
+    'settings.system.minimizeToTray': 'Minimize Czatbox TT to the system tray after clicking X',
+    'settings.system.language': 'Choose application language',
+    'settings.system.language.pl': 'Polish',
+    'settings.system.language.en': 'English',
+    'settings.system.language.de': 'German',
+    'settings.system.timeFormat': 'Time format',
+    'settings.system.timeFormat.auto': 'Automatic (detect system time)',
+    'settings.system.timeFormat.12': '12-hour',
+    'settings.system.timeFormat.24': '24-hour',
+    'settings.system.clearSessionDescription': 'Problem with TikTok login or session',
+    'settings.system.clearSession': 'Clear TikTok session',
+    'settings.system.clearSessionConfirm': 'Clear the TikTok session and return to the login screen?',
+    'about.title': 'About',
+    'about.tabs.program': 'About',
+    'about.tabs.news': 'What’s new?',
+    'about.tabs.faq': 'FAQ',
+    'about.program.p1': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
+    'about.program.p2': 'After logging in to TikTok, the program reads chat from the selected LIVE creator and displays it in an organized form. You can switch between supported creators, filter event types and adjust the application look to your preferences.',
+    'about.program.how': 'How the program works:',
+    'about.program.how.p1': 'After launching the application, the user logs in to TikTok. When the session is detected, the app switches to chat view and connects to the selected live stream. Chat is fetched in the background and displayed as a separate event list.',
+    'about.program.how.p2': 'Chat messages can be shown with a configured delay, making them easier to follow during active streams. Other events, such as gifts, joins and likes, can appear live. You can change the filter, chat style, theme or delay at any time.',
+    'about.program.how.p3': 'While the program is running, all stream events are saved to the archive. After ending or changing a stream, you can open the archive tab and return to earlier conversations.',
+    'status.connecting': '🟡Connecting...',
+    'status.online': '🟢Online',
+    'status.offline': '🔴Offline',
+    'chat.empty': 'After logging in, delayed LIVE chat will appear here.',
+    'archive.loading': 'Loading archive...',
+    'archive.loadFailed': 'Could not read the archive.',
+    'archive.loadFailedWithError': 'Could not read the archive: {error}',
+    'archive.empty': 'No saved archives.',
+    'archive.defaultName': 'Archive',
+    'archive.refreshing': 'Refreshing archive...',
+    'archive.listFailed': 'Could not read archive list: {error}',
+    'recommended.title': 'Recommended',
+    'recommended.note': 'Creators added to the program that you can quickly choose.',
+    'recommended.open': 'Choose',
+    'recommended.empty': 'No recommended creators to display.',
+    'recommended.emptyBio': 'No profile description.',
+    'topGifters.empty': 'No gifts since joining this stream.',
+    'event.member.join': 'joined the LIVE',
+    'event.gift': 'sent a gift: {giftName}{countText}{costText}',
+    'event.box': 'sends {boxName}{costText}{audienceText}',
+    'event.box.chest': 'a box',
+    'event.box.portal': 'a portal',
+    'event.audience': ' for (👥 {count})',
+    'event.like': 'liked the LIVE ({total} likes total)',
+    'event.repost': '🔁 reposted the live',
+    'event.share': '↩️ shares the live{countText}',
+    'battle.multiplier': 'BATTLE: MULTIPLIER X{multiplier} SOON',
+    'battle.authorJoin': 'Wake up, sleepyhead, Baksik joined the LIVE!'
+  },
+  de: {
+    'app.tagline': 'Live-Chat in Echtzeit verfolgen und verwalten.',
+    'nav.chatbox': 'Chatbox',
+    'nav.archive': 'Archiv',
+    'nav.settings': 'Einstellungen',
+    'nav.recommended': 'Empfohlen',
+    'nav.about': 'Über das Programm',
+    'creator.label': 'Creator',
+    'creator.recent': 'Zuletzt eingegeben',
+    'creator.noMatches': 'Keine passenden Creator',
+    'filters.chat': 'Chat',
+    'filters.like': 'Likes',
+    'filters.gift': 'Geschenke',
+    'filters.box': 'Boxen',
+    'filters.repost': 'Reposts',
+    'filters.share': 'Teilen',
+    'filters.member': 'Beitritte',
+    'archive.title': 'Archiv',
+    'archive.status': 'Gespeicherte Streams',
+    'archive.refresh': 'Aktualisieren',
+    'settings.title': 'Einstellungen',
+    'settings.tabs.general': 'Allgemein',
+    'settings.tabs.appearance': 'Aussehen',
+    'settings.tabs.accessibility': 'Barrierefreiheit',
+    'settings.tabs.system': 'System',
+    'settings.general.note': 'Allgemeine Anwendungseinstellungen.',
+    'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
+    'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
+    'settings.appearance.chatStyle': 'Chat-Stil:',
+    'settings.appearance.theme': 'Theme:',
+    'settings.appearance.appAppearance': 'App-Aussehen:',
+    'settings.chatStyle.compact.name': 'Kompakt',
+    'settings.chatStyle.compact.description': 'Standardstil für TikTok-Nachrichten.',
+    'settings.chatStyle.spacious.name': 'Geräumig',
+    'settings.chatStyle.spacious.description': 'Übersichtlichere Nachrichtenansicht.',
+    'settings.chatStyle.modern.name': 'Modern',
+    'settings.chatStyle.modern.description': 'Moderner Chat-Stil mit Sprechblasen.',
+    'settings.theme.roseBlack.name': 'Rose Black (Standard)',
+    'settings.theme.roseBlack.description': 'Standardfarben der Anwendung.',
+    'settings.theme.whiteTitanium.description': 'Helles App-Design in weißem Titan.',
+    'settings.theme.chillSerwis.description': 'Das entspannteste Theme der App.',
+    'settings.theme.roseGlass.description': 'Ein etwas weicheres, dezentes Theme.',
+    'settings.appAppearance.default.name': 'Standard',
+    'settings.appAppearance.default.description': 'Aktuelles Layout von Header, Sidebar, Fenstern und Buttons.',
+    'settings.appAppearance.decorative.name': 'Dekorativ',
+    'settings.appAppearance.decorative.description': 'Elegantes, modernes App-Layout.',
+    'settings.accessibility.tts': 'Nachrichten-TTS:',
+    'settings.accessibility.readAloud': 'Chat laut vorlesen',
+    'settings.accessibility.skipVulgarNicknames': 'Vulgäre Nicknames überspringen',
+    'settings.accessibility.skipVulgarMessages': 'Vulgäre Nachrichten überspringen',
+    'settings.accessibility.skipSpamMessages': 'Spam-Nachrichten überspringen (Follow for Follow usw.)',
+    'settings.accessibility.voice': 'Stimme',
+    'settings.accessibility.systemVoice': 'System',
+    'settings.accessibility.rate': 'Tempo',
+    'settings.accessibility.delay': 'Chat-Verzögerung:',
+    'settings.system.note': 'Systeminformationen und Einstellungen.',
+    'settings.system.autoLaunch': 'Czatbox TT automatisch beim Computerstart öffnen',
+    'settings.system.runInBackground': 'Programm im Hintergrund starten, damit es nicht stört',
+    'settings.system.minimizeToTray': 'Czatbox TT beim Klick auf X in den Infobereich minimieren',
+    'settings.system.language': 'Sprache der Anwendung wählen',
+    'settings.system.language.pl': 'Polnisch',
+    'settings.system.language.en': 'Englisch',
+    'settings.system.language.de': 'Deutsch',
+    'settings.system.timeFormat': 'Zeitformat',
+    'settings.system.timeFormat.auto': 'Automatisch (Systemzeit erkennen)',
+    'settings.system.timeFormat.12': '12-Stunden',
+    'settings.system.timeFormat.24': '24-Stunden',
+    'settings.system.clearSessionDescription': 'Problem mit TikTok-Anmeldung oder Sitzung',
+    'settings.system.clearSession': 'TikTok-Sitzung löschen',
+    'settings.system.clearSessionConfirm': 'TikTok-Sitzung löschen und zum Anmeldebildschirm zurückkehren?',
+    'about.title': 'Über das Programm',
+    'about.tabs.program': 'Über das Programm',
+    'about.tabs.news': 'Was ist neu?',
+    'about.tabs.faq': 'FAQ',
+    'about.program.p1': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
+    'about.program.p2': 'Nach der Anmeldung bei TikTok lädt das Programm den Chat des ausgewählten LIVE-Creators und zeigt ihn geordnet an. Du kannst zwischen unterstützten Creators wechseln, Ereignistypen filtern und das Aussehen anpassen.',
+    'about.program.how': 'So funktioniert das Programm:',
+    'about.program.how.p1': 'Nach dem Start der Anwendung meldet sich der Benutzer bei TikTok an. Sobald die Sitzung erkannt wird, wechselt die App zur Chatansicht und verbindet sich mit dem ausgewählten Live. Der Chat wird im Hintergrund geladen und als separate Ereignisliste angezeigt.',
+    'about.program.how.p2': 'Chatnachrichten können mit einer festgelegten Verzögerung angezeigt werden, damit sie bei aktiven Streams leichter zu verfolgen sind. Andere Ereignisse wie Geschenke, Beitritte oder Likes können live erscheinen. Filter, Chat-Stil, Theme und Verzögerung können jederzeit geändert werden.',
+    'about.program.how.p3': 'Während das Programm läuft, werden alle Stream-Ereignisse im Archiv gespeichert. Nach dem Ende oder Wechsel eines Streams kannst du das Archiv öffnen und zu früheren Gesprächen zurückkehren.',
+    'status.connecting': '🟡Verbinde...',
+    'status.online': '🟢Online',
+    'status.offline': '🔴Offline',
+    'chat.empty': 'Nach der Anmeldung erscheint hier der verzögerte LIVE-Chat.',
+    'archive.loading': 'Archiv wird geladen...',
+    'archive.loadFailed': 'Archiv konnte nicht gelesen werden.',
+    'archive.loadFailedWithError': 'Archiv konnte nicht gelesen werden: {error}',
+    'archive.empty': 'Keine gespeicherten Archive.',
+    'archive.defaultName': 'Archiv',
+    'archive.refreshing': 'Archiv wird aktualisiert...',
+    'archive.listFailed': 'Archivliste konnte nicht gelesen werden: {error}',
+    'recommended.title': 'Empfohlen',
+    'recommended.note': 'Im Programm hinzugefügte Creator, die du schnell auswählen kannst.',
+    'recommended.open': 'Auswählen',
+    'recommended.empty': 'Keine empfohlenen Creator zum Anzeigen.',
+    'recommended.emptyBio': 'Keine Profilbeschreibung.',
+    'topGifters.empty': 'Keine Gifts seit dem Beitritt zum Stream.',
+    'event.member.join': 'ist dem LIVE beigetreten',
+    'event.gift': 'hat ein Geschenk gesendet: {giftName}{countText}{costText}',
+    'event.box': 'sendet {boxName}{costText}{audienceText}',
+    'event.box.chest': 'eine Box',
+    'event.box.portal': 'ein Portal',
+    'event.audience': ' für (👥 {count})',
+    'event.like': 'hat den LIVE geliked (insgesamt {total} Likes)',
+    'event.repost': '🔁 hat den Live repostet',
+    'event.share': '↩️ teilt den Live{countText}',
+    'battle.multiplier': 'BATTLE: GLEICH MULTIPLIKATOR X{multiplier}',
+    'battle.authorJoin': 'Aufwachen, Schlafmütze, Baksik ist dem LIVE beigetreten!'
+  }
+};
+
+const statusEl = document.getElementById('status');
+const statusConnectionEl = document.getElementById('statusConnection');
+const statusDelayEl = document.getElementById('statusDelay');
+const statusQueueEl = document.getElementById('statusQueue');
+const statusViewersEl = document.getElementById('statusViewers');
+const topGiftersButton = document.getElementById('topGiftersButton');
+const topGiftersPanel = document.getElementById('topGiftersPanel');
+const statusMessagesEl = document.getElementById('statusMessages');
+const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
+const statusMemberHeartsExpiredEl = document.getElementById('statusMemberHeartsExpired');
+const statusStatsEl = document.getElementById('statusStats');
+const creatorInput = document.getElementById('creatorInput');
+const creatorToggle = document.getElementById('creatorToggle');
+const creatorSuggestions = document.getElementById('creatorSuggestions');
+const messagesEl = document.getElementById('messages');
+const emptyEl = document.getElementById('empty');
+const battleBanner = document.getElementById('battleBanner');
+const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
+const sidebarButtons = Array.from(document.querySelectorAll('[data-section]'));
+const viewPanels = Array.from(document.querySelectorAll('[data-view]'));
+const settingsTabs = Array.from(document.querySelectorAll('[data-settings-tab]'));
+const settingsPanels = Array.from(document.querySelectorAll('[data-settings-panel]'));
+const aboutTabs = Array.from(document.querySelectorAll('[data-about-tab]'));
+const aboutPanels = Array.from(document.querySelectorAll('[data-about-panel]'));
+const chatStyleInputs = Array.from(document.querySelectorAll('input[name="chatStyle"]'));
+const themeInputs = Array.from(document.querySelectorAll('input[name="appTheme"]'));
+const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="appAppearance"]'));
+const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
+const statsToolboxEl = document.getElementById('statsToolbox');
+const refreshArchiveButton = document.getElementById('refreshArchive');
+const archiveListEl = document.getElementById('archiveList');
+const archiveTextEl = document.getElementById('archiveText');
+const recommendedListEl = document.getElementById('recommendedList');
+const appVersionEl = document.getElementById('appVersion');
+const ttsEnabledEl = document.getElementById('ttsEnabled');
+const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
+const ttsSkipVulgarMessagesEl = document.getElementById('ttsSkipVulgarMessages');
+const ttsSkipSpamMessagesEl = document.getElementById('ttsSkipSpamMessages');
+const ttsVoiceEl = document.getElementById('ttsVoice');
+const ttsRateEl = document.getElementById('ttsRate');
+const ttsRateValueEl = document.getElementById('ttsRateValue');
+const chatDelayEl = document.getElementById('chatDelay');
+const chatDelayValueEl = document.getElementById('chatDelayValue');
+const systemAutoLaunchEl = document.getElementById('systemAutoLaunch');
+const systemRunInBackgroundEl = document.getElementById('systemRunInBackground');
+const systemMinimizeToTrayEl = document.getElementById('systemMinimizeToTray');
+const appLanguageEl = document.getElementById('appLanguage');
+const timeFormatEl = document.getElementById('timeFormat');
+const clearTikTokSessionButton = document.getElementById('clearTikTokSession');
+
+const queue = [];
+const visibleMessages = [];
+const userAvatars = new Map();
+const renderedMessageElements = new Map();
+const queuedMessagesById = new Map();
+const visibleMessagesById = new Map();
+const giftTotalsByUser = new Map();
+const activeChatUsers = new Map();
+const speechQueue = [];
+const activeFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
+let state = {};
+let avatarImages = [];
+let speechVoices = [];
+let ttsSettings = loadTtsSettings();
+let chatDelayMs = loadChatDelayMs();
+let chatStyle = loadChatStyle();
+let appTheme = loadAppTheme();
+let appAppearance = loadAppAppearance();
+let generalSettings = loadGeneralSettings();
+let systemSettings = loadSystemSettings();
+let appLanguage = systemSettings.language;
+let timeFormat = systemSettings.timeFormat;
+let speechPlaying = false;
+let revealTimer;
+let syncedCreatorSuggestionsKey = '';
+let battleBannerTimer;
+let activeSection = 'chatbox';
+let activeSettingsTab = 'general';
+let activeAboutTab = 'program';
+let selectedArchiveId = '';
+let renderKeyCounter = 0;
+let timeFormatterKey = '';
+let timeFormatter = null;
+let pendingScrollToEnd = false;
+let liveViewerCount = 0;
+let chatMessageCount = 0;
+let recentCreators = loadRecentCreators();
+let lastSubmittedCreator = '';
+let creatorSuggestionItems = [];
+let activeCreatorSuggestionIndex = -1;
+
+function getTimeFormatter() {
+  const key = `${appLanguage}:${timeFormat}`;
+  if (timeFormatter && timeFormatterKey === key) {
+    return timeFormatter;
+  }
+
+  const options = {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  };
+
+  if (timeFormat === '12') {
+    options.hour12 = true;
+  } else if (timeFormat === '24') {
+    options.hour12 = false;
+  }
+
+  timeFormatterKey = key;
+  timeFormatter = new Intl.DateTimeFormat(
+    timeFormat === 'auto' ? undefined : LANGUAGE_LOCALES[appLanguage],
+    options
+  );
+  return timeFormatter;
+}
+
+function formatTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return getTimeFormatter().format(date);
+}
+
+function loadTtsSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TTS_SETTINGS_KEY) || '{}');
+    return {
+      enabled: Boolean(saved.enabled),
+      voiceURI: typeof saved.voiceURI === 'string' ? saved.voiceURI : '',
+      rate: Number(saved.rate) || 1,
+      skipVulgarNicknames: Boolean(saved.skipVulgarNicknames),
+      skipVulgarMessages: Boolean(saved.skipVulgarMessages),
+      skipSpamMessages: Boolean(saved.skipSpamMessages)
+    };
+  } catch {
+    return {
+      enabled: false,
+      voiceURI: '',
+      rate: 1,
+      skipVulgarNicknames: false,
+      skipVulgarMessages: false,
+      skipSpamMessages: false
+    };
+  }
+}
+
+function saveTtsSettings() {
+  localStorage.setItem(TTS_SETTINGS_KEY, JSON.stringify(ttsSettings));
+}
+
+function normalizeGeneralSettings(value) {
+  const next = { ...DEFAULT_GENERAL_SETTINGS, ...(value && typeof value === 'object' ? value : {}) };
+  return {
+    multiplierNotifications: next.multiplierNotifications !== false,
+    statsToolbox: next.statsToolbox !== false
+  };
+}
+
+function loadGeneralSettings() {
+  try {
+    return normalizeGeneralSettings(JSON.parse(localStorage.getItem(GENERAL_SETTINGS_KEY) || '{}'));
+  } catch {
+    return { ...DEFAULT_GENERAL_SETTINGS };
+  }
+}
+
+function saveGeneralSettings() {
+  localStorage.setItem(GENERAL_SETTINGS_KEY, JSON.stringify(generalSettings));
+}
+
+function getChatDelayIndex(delayMs) {
+  const index = CHAT_DELAY_OPTIONS.indexOf(Number(delayMs));
+  return index >= 0 ? index : CHAT_DELAY_OPTIONS.indexOf(DEFAULT_CHAT_DELAY_MS);
+}
+
+function loadChatDelayMs() {
+  const saved = Number(localStorage.getItem(CHAT_DELAY_SETTINGS_KEY));
+  return CHAT_DELAY_OPTIONS[getChatDelayIndex(saved)];
+}
+
+function saveChatDelayMs() {
+  localStorage.setItem(CHAT_DELAY_SETTINGS_KEY, String(chatDelayMs));
+}
+
+function loadChatStyle() {
+  const saved = localStorage.getItem(CHAT_STYLE_SETTINGS_KEY);
+  return CHAT_STYLES.includes(saved) ? saved : 'compact';
+}
+
+function saveChatStyle() {
+  localStorage.setItem(CHAT_STYLE_SETTINGS_KEY, chatStyle);
+}
+
+function loadAppTheme() {
+  const saved = localStorage.getItem(APP_THEME_SETTINGS_KEY);
+  return APP_THEMES.includes(saved) ? saved : 'rose-black';
+}
+
+function saveAppTheme() {
+  localStorage.setItem(APP_THEME_SETTINGS_KEY, appTheme);
+}
+
+function loadAppAppearance() {
+  const saved = localStorage.getItem(APP_APPEARANCE_SETTINGS_KEY);
+  return APP_APPEARANCES.includes(saved) ? saved : 'standard';
+}
+
+function saveAppAppearance() {
+  localStorage.setItem(APP_APPEARANCE_SETTINGS_KEY, appAppearance);
+}
+
+function normalizeCreatorHandle(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const raw = value.trim();
+  if (!raw) {
+    return '';
+  }
+
+  const labelMatch = raw.match(/\(@([^)]+)\)/);
+  if (labelMatch) {
+    return normalizeCreatorHandle(labelMatch[1]);
+  }
+
+  try {
+    const parsed = new URL(raw.includes('://') ? raw : `https://${raw}`);
+    const pathMatch = parsed.pathname.match(/\/@([^/?#]+)/);
+    if (pathMatch) {
+      return normalizeCreatorHandle(pathMatch[1]);
+    }
+  } catch {
+    // Plain creator names are normalized below.
+  }
+
+  return raw
+    .replace(/^@+/, '')
+    .replace(/^https?:\/\/(?:www\.)?tiktok\.com\/@?/i, '')
+    .replace(/\/live(?:[/?#].*)?$/i, '')
+    .replace(/[?#].*$/, '')
+    .replace(/[^\w.]+/g, '')
+    .toLowerCase();
+}
+
+function loadRecentCreators() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RECENT_CREATORS_KEY) || '[]');
+    return Array.isArray(saved)
+      ? saved.map(normalizeCreatorHandle).filter(Boolean).slice(0, MAX_RECENT_CREATORS)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentCreators() {
+  localStorage.setItem(RECENT_CREATORS_KEY, JSON.stringify(recentCreators.slice(0, MAX_RECENT_CREATORS)));
+}
+
+function rememberCreator(value) {
+  const handle = normalizeCreatorHandle(value);
+  if (!handle) {
+    return;
+  }
+
+  recentCreators = [
+    handle,
+    ...recentCreators.filter((item) => item !== handle)
+  ].slice(0, MAX_RECENT_CREATORS);
+  saveRecentCreators();
+  syncCreatorOptions(state.creators);
+}
+
+function normalizeSystemSettings(value) {
+  const next = { ...DEFAULT_SYSTEM_SETTINGS, ...(value && typeof value === 'object' ? value : {}) };
+  return {
+    autoLaunch: Boolean(next.autoLaunch),
+    runInBackground: Boolean(next.runInBackground),
+    minimizeToTrayOnClose: Boolean(next.minimizeToTrayOnClose),
+    language: APP_LANGUAGES.includes(next.language) ? next.language : DEFAULT_SYSTEM_SETTINGS.language,
+    timeFormat: TIME_FORMATS.includes(next.timeFormat) ? next.timeFormat : DEFAULT_SYSTEM_SETTINGS.timeFormat
+  };
+}
+
+function loadSystemSettings() {
+  return normalizeSystemSettings({
+    language: localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY),
+    timeFormat: localStorage.getItem(TIME_FORMAT_SETTINGS_KEY)
+  });
+}
+
+function saveLocalSystemSettings() {
+  localStorage.setItem(APP_LANGUAGE_SETTINGS_KEY, systemSettings.language);
+  localStorage.setItem(TIME_FORMAT_SETTINGS_KEY, systemSettings.timeFormat);
+}
+
+function t(key, params = {}) {
+  const dictionary = I18N[appLanguage] || I18N.pl;
+  const fallback = I18N.pl[key] || key;
+  return String(dictionary[key] || fallback).replace(/\{(\w+)\}/g, (_match, name) => (
+    Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : ''
+  ));
+}
+
+function setText(selector, key) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.textContent = t(key);
+  }
+}
+
+function applyI18n() {
+  document.documentElement.lang = appLanguage;
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  [
+    ['.tagline', 'app.tagline'],
+    ['.creator-picker > label', 'creator.label'],
+    ['.sidebar-button[data-section="chatbox"]', 'nav.chatbox'],
+    ['.sidebar-button[data-section="archive"]', 'nav.archive'],
+    ['.sidebar-button[data-section="settings"]', 'nav.settings'],
+    ['.sidebar-button[data-section="recommended"]', 'nav.recommended'],
+    ['.sidebar-button[data-section="about"]', 'nav.about'],
+    ['.filter-button[data-filter="chat"]', 'filters.chat'],
+    ['.filter-button[data-filter="like"]', 'filters.like'],
+    ['.filter-button[data-filter="gift"]', 'filters.gift'],
+    ['.filter-button[data-filter="box"]', 'filters.box'],
+    ['.filter-button[data-filter="repost"]', 'filters.repost'],
+    ['.filter-button[data-filter="share"]', 'filters.share'],
+    ['.filter-button[data-filter="member"]', 'filters.member'],
+    ['.archive-title', 'archive.title'],
+    ['.archive-status', 'archive.status'],
+    ['#refreshArchive', 'archive.refresh'],
+    ['.view-panel[data-view="recommended"] .page-header h1', 'recommended.title'],
+    ['.view-panel[data-view="recommended"] .page-note', 'recommended.note'],
+    ['.view-panel[data-view="settings"] .page-header h1', 'settings.title'],
+    ['.settings-tab[data-settings-tab="general"]', 'settings.tabs.general'],
+    ['.settings-tab[data-settings-tab="appearance"]', 'settings.tabs.appearance'],
+    ['.settings-tab[data-settings-tab="accessibility"]', 'settings.tabs.accessibility'],
+    ['.settings-tab[data-settings-tab="system"]', 'settings.tabs.system'],
+    ['.settings-panel[data-settings-panel="general"] .page-note', 'settings.general.note'],
+    ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
+    ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
+    ['.settings-panel[data-settings-panel="appearance"] > .settings-heading', 'settings.appearance.chatStyle'],
+    ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(1) .settings-heading', 'settings.appearance.theme'],
+    ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(2) .settings-heading', 'settings.appearance.appAppearance'],
+    ['#chatStyleCompact + span strong', 'settings.chatStyle.compact.name'],
+    ['#chatStyleCompact + span small', 'settings.chatStyle.compact.description'],
+    ['#chatStyleSpacious + span strong', 'settings.chatStyle.spacious.name'],
+    ['#chatStyleSpacious + span small', 'settings.chatStyle.spacious.description'],
+    ['#chatStyleTestowy + span strong', 'settings.chatStyle.modern.name'],
+    ['#chatStyleTestowy + span small', 'settings.chatStyle.modern.description'],
+    ['#themeRoseBlack + span strong', 'settings.theme.roseBlack.name'],
+    ['#themeRoseBlack + span small', 'settings.theme.roseBlack.description'],
+    ['#themeWhiteTitanium + span small', 'settings.theme.whiteTitanium.description'],
+    ['#themeChillSerwis + span small', 'settings.theme.chillSerwis.description'],
+    ['#themeRoseGoldGlass + span small', 'settings.theme.roseGlass.description'],
+    ['#appAppearanceStandard + span strong', 'settings.appAppearance.default.name'],
+    ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
+    ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
+    ['#appAppearanceDecorative + span small', 'settings.appAppearance.decorative.description'],
+    ['.settings-panel[data-settings-panel="accessibility"] > .settings-heading', 'settings.accessibility.tts'],
+    ['label[for="ttsEnabled"] > span', 'settings.accessibility.readAloud'],
+    ['label[for="ttsSkipVulgarNicknames"] > span', 'settings.accessibility.skipVulgarNicknames'],
+    ['label[for="ttsSkipVulgarMessages"] > span', 'settings.accessibility.skipVulgarMessages'],
+    ['label[for="ttsSkipSpamMessages"] > span', 'settings.accessibility.skipSpamMessages'],
+    ['label[for="ttsVoice"] > span', 'settings.accessibility.voice'],
+    ['label[for="ttsRate"] > span', 'settings.accessibility.rate'],
+    ['.chat-delay-section .settings-heading', 'settings.accessibility.delay'],
+    ['.view-panel[data-view="about"] .page-header h1', 'about.title'],
+    ['.settings-tab[data-about-tab="program"]', 'about.tabs.program'],
+    ['.settings-tab[data-about-tab="news"]', 'about.tabs.news'],
+    ['.settings-tab[data-about-tab="faq"]', 'about.tabs.faq'],
+    ['#aboutProgramPanel > p:nth-of-type(1)', 'about.program.p1'],
+    ['#aboutProgramPanel > p:nth-of-type(2)', 'about.program.p2'],
+    ['#aboutProgramPanel .about-section h2', 'about.program.how'],
+    ['#aboutProgramPanel .about-section p:nth-of-type(1)', 'about.program.how.p1'],
+    ['#aboutProgramPanel .about-section p:nth-of-type(2)', 'about.program.how.p2'],
+    ['#aboutProgramPanel .about-section p:nth-of-type(3)', 'about.program.how.p3']
+  ].forEach(([selector, key]) => setText(selector, key));
+
+  syncTtsVoices();
+  syncSystemControls();
+  renderRecommendedCreators();
+  updateStatus();
+  if (!visibleMessages.length && emptyEl) {
+    emptyEl.textContent = t('chat.empty');
+  }
+}
+
+function applyAppearanceSettings() {
+  document.documentElement.dataset.chatStyle = chatStyle;
+  document.documentElement.dataset.theme = appTheme;
+  document.documentElement.dataset.appAppearance = appAppearance;
+
+  chatStyleInputs.forEach((input) => {
+    input.checked = input.value === chatStyle;
+  });
+
+  themeInputs.forEach((input) => {
+    input.checked = input.value === appTheme;
+  });
+
+  appAppearanceInputs.forEach((input) => {
+    input.checked = input.value === appAppearance;
+  });
+}
+
+function initAppearanceSettings() {
+  applyAppearanceSettings();
+
+  chatStyleInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (!input.checked) {
+        return;
+      }
+
+      chatStyle = CHAT_STYLES.includes(input.value) ? input.value : 'compact';
+      saveChatStyle();
+      applyAppearanceSettings();
+      renderVisibleMessages();
+    });
+  });
+
+  themeInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (!input.checked) {
+        return;
+      }
+
+      appTheme = APP_THEMES.includes(input.value) ? input.value : 'rose-black';
+      saveAppTheme();
+      applyAppearanceSettings();
+    });
+  });
+
+  appAppearanceInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (!input.checked) {
+        return;
+      }
+
+      appAppearance = APP_APPEARANCES.includes(input.value) ? input.value : 'standard';
+      saveAppAppearance();
+      applyAppearanceSettings();
+    });
+  });
+}
+
+function applyGeneralSettings() {
+  if (multiplierNotificationsEl) {
+    multiplierNotificationsEl.checked = generalSettings.multiplierNotifications;
+  }
+
+  if (statsToolboxEl) {
+    statsToolboxEl.checked = generalSettings.statsToolbox;
+  }
+
+  if (statusStatsEl) {
+    statusStatsEl.hidden = !generalSettings.statsToolbox;
+  }
+
+  if (!generalSettings.statsToolbox && topGiftersPanel) {
+    topGiftersPanel.hidden = true;
+    if (topGiftersButton) {
+      topGiftersButton.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  if (!generalSettings.multiplierNotifications && battleBanner && battleBanner.dataset.tone === 'battle') {
+    clearTimeout(battleBannerTimer);
+    battleBanner.hidden = true;
+  }
+}
+
+function initGeneralSettings() {
+  applyGeneralSettings();
+
+  if (multiplierNotificationsEl) {
+    multiplierNotificationsEl.addEventListener('change', () => {
+      generalSettings.multiplierNotifications = multiplierNotificationsEl.checked;
+      saveGeneralSettings();
+      applyGeneralSettings();
+    });
+  }
+
+  if (statsToolboxEl) {
+    statsToolboxEl.addEventListener('change', () => {
+      generalSettings.statsToolbox = statsToolboxEl.checked;
+      saveGeneralSettings();
+      applyGeneralSettings();
+    });
+  }
+}
+
+function syncSystemControls() {
+  if (systemAutoLaunchEl) {
+    systemAutoLaunchEl.checked = systemSettings.autoLaunch;
+  }
+  if (systemRunInBackgroundEl) {
+    systemRunInBackgroundEl.checked = systemSettings.runInBackground;
+  }
+  if (systemMinimizeToTrayEl) {
+    systemMinimizeToTrayEl.checked = systemSettings.minimizeToTrayOnClose;
+  }
+  if (appLanguageEl) {
+    appLanguageEl.value = systemSettings.language;
+  }
+  if (timeFormatEl) {
+    timeFormatEl.value = systemSettings.timeFormat;
+  }
+}
+
+function systemSettingsEqual(left, right) {
+  return left.autoLaunch === right.autoLaunch
+    && left.runInBackground === right.runInBackground
+    && left.minimizeToTrayOnClose === right.minimizeToTrayOnClose
+    && left.language === right.language
+    && left.timeFormat === right.timeFormat;
+}
+
+function applyIncomingSystemSettings(nextSettings, options = {}) {
+  const normalized = normalizeSystemSettings({ ...systemSettings, ...(nextSettings || {}) });
+  const previousLanguage = appLanguage;
+  const previousTimeFormat = timeFormat;
+
+  if (!options.force && systemSettingsEqual(systemSettings, normalized)) {
+    return false;
+  }
+
+  systemSettings = normalized;
+  appLanguage = systemSettings.language;
+  timeFormat = systemSettings.timeFormat;
+  saveLocalSystemSettings();
+  syncSystemControls();
+
+  const languageChanged = previousLanguage !== appLanguage;
+  const timeFormatChanged = previousTimeFormat !== timeFormat;
+
+  if (languageChanged) {
+    applyI18n();
+  } else {
+    updateStatus();
+  }
+
+  if (languageChanged || timeFormatChanged) {
+    renderVisibleMessages();
+  }
+
+  return true;
+}
+
+async function updateSystemSettings(patch) {
+  applyIncomingSystemSettings(patch, { force: true });
+
+  if (window.tiktokLive && typeof window.tiktokLive.setSystemSettings === 'function') {
+    try {
+      const result = await window.tiktokLive.setSystemSettings(systemSettings);
+      if (result && result.ok && result.settings) {
+        applyIncomingSystemSettings(result.settings);
+      }
+    } catch {
+      // Keep local settings responsive even when the shell setting write fails.
+    }
+  }
+}
+
+async function loadSystemSettingsFromShell() {
+  if (!window.tiktokLive || typeof window.tiktokLive.getSystemSettings !== 'function') {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.getSystemSettings();
+    if (result && result.ok && result.settings) {
+      applyIncomingSystemSettings(result.settings);
+    }
+  } catch {
+    syncSystemControls();
+  }
+}
+
+function initSystemSettings() {
+  syncSystemControls();
+
+  if (systemAutoLaunchEl) {
+    systemAutoLaunchEl.addEventListener('change', () => {
+      updateSystemSettings({ autoLaunch: systemAutoLaunchEl.checked });
+    });
+  }
+
+  if (systemRunInBackgroundEl) {
+    systemRunInBackgroundEl.addEventListener('change', () => {
+      updateSystemSettings({ runInBackground: systemRunInBackgroundEl.checked });
+    });
+  }
+
+  if (systemMinimizeToTrayEl) {
+    systemMinimizeToTrayEl.addEventListener('change', () => {
+      updateSystemSettings({ minimizeToTrayOnClose: systemMinimizeToTrayEl.checked });
+    });
+  }
+
+  if (appLanguageEl) {
+    appLanguageEl.addEventListener('change', () => {
+      updateSystemSettings({ language: appLanguageEl.value });
+    });
+  }
+
+  if (timeFormatEl) {
+    timeFormatEl.addEventListener('change', () => {
+      updateSystemSettings({ timeFormat: timeFormatEl.value });
+    });
+  }
+
+  if (clearTikTokSessionButton) {
+    clearTikTokSessionButton.addEventListener('click', async () => {
+      if (!window.confirm(t('settings.system.clearSessionConfirm'))) {
+        return;
+      }
+
+      clearTikTokSessionButton.disabled = true;
+      try {
+        if (window.tiktokLive && typeof window.tiktokLive.clearSession === 'function') {
+          await window.tiktokLive.clearSession();
+        }
+      } finally {
+        clearTikTokSessionButton.disabled = false;
+      }
+    });
+  }
+
+  loadSystemSettingsFromShell();
+}
+
+function formatDelaySeconds(delayMs) {
+  return `${(delayMs / 1000).toFixed(1)}s`;
+}
+
+function canUseSpeech() {
+  return 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
+}
+
+function clampSpeechRate(value) {
+  const rate = Number(value) || 1;
+  return Math.min(1.3, Math.max(0.7, rate));
+}
+
+function stopSpeech() {
+  speechQueue.length = 0;
+  speechPlaying = false;
+  if (canUseSpeech()) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function getSelectedVoice() {
+  return speechVoices.find((voice) => voice.voiceURI === ttsSettings.voiceURI)
+    || speechVoices.find((voice) => /^pl\b/i.test(voice.lang))
+    || null;
+}
+
+function playNextSpeech() {
+  if (!canUseSpeech() || speechPlaying || !ttsSettings.enabled || !speechQueue.length) {
+    return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(speechQueue.shift());
+  const voice = getSelectedVoice();
+  if (voice) {
+    utterance.voice = voice;
+    utterance.lang = voice.lang;
+  } else {
+    utterance.lang = 'pl-PL';
+  }
+
+  utterance.rate = clampSpeechRate(ttsSettings.rate);
+  utterance.onend = () => {
+    speechPlaying = false;
+    playNextSpeech();
+  };
+  utterance.onerror = () => {
+    speechPlaying = false;
+    playNextSpeech();
+  };
+
+  speechPlaying = true;
+  window.speechSynthesis.speak(utterance);
+}
+
+function sanitizeSpeechText(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value
+    .normalize('NFKC')
+    .replace(/\[[\p{L}\p{N}_ -]{1,40}\]/gu, ' ')
+    .replace(/:[a-z0-9_+-]+:/gi, ' ')
+    .replace(/(^|\s)(?:<3|x+d+|[:;=8][-']?[\])([{}dDpPoO/\\|])(?=$|[\s.!?,])/gi, ' ')
+    .replace(/[\u200d\ufe0e\ufe0f]/gi, '')
+    .replace(/[\u{1f1e6}-\u{1f1ff}\u{1f3fb}-\u{1f3ff}]/gu, ' ')
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{S}]/gu, ' ')
+    .replace(/[@#_*~`^|<>{}[\]\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,.!?])/g, '$1')
+    .trim();
+}
+
+function normalizeSpeechFilterText(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value
+    .normalize('NFKD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[@$]/g, 'a')
+    .replace(/[0ø]/g, 'o')
+    .replace(/[1!|]/g, 'i')
+    .replace(/[3]/g, 'e')
+    .replace(/[5]/g, 's')
+    .replace(/[7]/g, 't')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function matchesAnyPattern(text, patterns) {
+  return patterns.some((pattern) => pattern.test(text));
+}
+
+function containsVulgarSpeech(value) {
+  const normalized = normalizeSpeechFilterText(value);
+  return normalized ? matchesAnyPattern(normalized, VULGAR_SPEECH_PATTERNS) : false;
+}
+
+function containsSpamSpeech(value) {
+  const normalized = normalizeSpeechFilterText(value);
+  return normalized ? matchesAnyPattern(normalized, SPAM_SPEECH_PATTERNS) : false;
+}
+
+function shouldSkipSpeechMessage(message) {
+  if (!message) {
+    return true;
+  }
+
+  if (ttsSettings.skipVulgarNicknames && containsVulgarSpeech(message.authorName)) {
+    return true;
+  }
+
+  if (ttsSettings.skipVulgarMessages && containsVulgarSpeech(message.text)) {
+    return true;
+  }
+
+  if (ttsSettings.skipSpamMessages && containsSpamSpeech(message.text)) {
+    return true;
+  }
+
+  return false;
+}
+
+function getSpeechText(message) {
+  const text = sanitizeSpeechText(message.text);
+  if (!text || !/[\p{L}\p{N}]/u.test(text)) {
+    return '';
+  }
+
+  const author = sanitizeSpeechText(message.authorName);
+  return author ? `${author} ${text}` : text;
+}
+
+function shouldReadMessage(message) {
+  return ttsSettings.enabled
+    && activeSection === 'chatbox'
+    && activeFilters.has('chat')
+    && (message.kind || 'chat') === 'chat'
+    && !shouldSkipSpeechMessage(message);
+}
+
+function readMessageAloud(message) {
+  if (!canUseSpeech() || !shouldReadMessage(message)) {
+    return;
+  }
+
+  const text = getSpeechText(message);
+  if (!text) {
+    return;
+  }
+
+  while (speechQueue.length >= MAX_SPEECH_QUEUE) {
+    speechQueue.shift();
+  }
+
+  speechQueue.push(text);
+  playNextSpeech();
+}
+
+function syncTtsVoices() {
+  if (!canUseSpeech() || !ttsVoiceEl) {
+    return;
+  }
+
+  speechVoices = window.speechSynthesis.getVoices()
+    .slice()
+    .sort((a, b) => {
+      const aPolish = /^pl\b/i.test(a.lang) ? 0 : 1;
+      const bPolish = /^pl\b/i.test(b.lang) ? 0 : 1;
+      return aPolish - bPolish || a.name.localeCompare(b.name);
+    });
+
+  const selected = ttsSettings.voiceURI;
+  const options = [
+    new Option(t('settings.accessibility.systemVoice'), ''),
+    ...speechVoices.map((voice) => new Option(`${voice.name} (${voice.lang})`, voice.voiceURI))
+  ];
+  ttsVoiceEl.replaceChildren(...options);
+  ttsVoiceEl.value = speechVoices.some((voice) => voice.voiceURI === selected) ? selected : '';
+}
+
+function syncTtsControls() {
+  const supported = canUseSpeech();
+  if (ttsEnabledEl) {
+    ttsEnabledEl.checked = supported && ttsSettings.enabled;
+    ttsEnabledEl.disabled = !supported;
+  }
+  [
+    [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
+    [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
+    [ttsSkipSpamMessagesEl, 'skipSpamMessages']
+  ].forEach(([input, key]) => {
+    if (input) {
+      input.checked = Boolean(ttsSettings[key]);
+      input.disabled = !supported;
+    }
+  });
+  if (ttsVoiceEl) {
+    ttsVoiceEl.disabled = !supported;
+  }
+  if (ttsRateEl) {
+    ttsRateEl.value = String(clampSpeechRate(ttsSettings.rate));
+    ttsRateEl.disabled = !supported;
+  }
+  if (ttsRateValueEl) {
+    ttsRateValueEl.value = `${clampSpeechRate(ttsSettings.rate).toFixed(1)}x`;
+  }
+}
+
+function syncChatDelayControls() {
+  if (chatDelayEl) {
+    chatDelayEl.value = String(getChatDelayIndex(chatDelayMs));
+  }
+  if (chatDelayValueEl) {
+    chatDelayValueEl.value = formatDelaySeconds(chatDelayMs);
+  }
+  updateStatus();
+}
+
+function initTextToSpeech() {
+  syncTtsControls();
+  syncTtsVoices();
+
+  if (canUseSpeech()) {
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      syncTtsVoices();
+      syncTtsControls();
+    });
+  }
+
+  if (ttsEnabledEl) {
+    ttsEnabledEl.addEventListener('change', () => {
+      ttsSettings.enabled = ttsEnabledEl.checked;
+      saveTtsSettings();
+      if (!ttsSettings.enabled) {
+        stopSpeech();
+      }
+      syncTtsControls();
+    });
+  }
+
+  [
+    [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
+    [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
+    [ttsSkipSpamMessagesEl, 'skipSpamMessages']
+  ].forEach(([input, key]) => {
+    if (!input) {
+      return;
+    }
+
+    input.addEventListener('change', () => {
+      ttsSettings[key] = input.checked;
+      saveTtsSettings();
+      stopSpeech();
+      syncTtsControls();
+    });
+  });
+
+  if (ttsVoiceEl) {
+    ttsVoiceEl.addEventListener('change', () => {
+      ttsSettings.voiceURI = ttsVoiceEl.value;
+      saveTtsSettings();
+    });
+  }
+
+  if (ttsRateEl) {
+    ttsRateEl.addEventListener('input', () => {
+      ttsSettings.rate = clampSpeechRate(ttsRateEl.value);
+      saveTtsSettings();
+      syncTtsControls();
+    });
+  }
+
+  if (chatDelayEl) {
+    chatDelayEl.addEventListener('input', () => {
+      const index = Math.min(CHAT_DELAY_OPTIONS.length - 1, Math.max(0, Number(chatDelayEl.value) || 0));
+      chatDelayMs = CHAT_DELAY_OPTIONS[index];
+      saveChatDelayMs();
+      syncChatDelayControls();
+      startRevealTimer();
+    });
+  }
+
+  syncChatDelayControls();
+}
+
+function getConnectionStatusText() {
+  if (isOfflineConnectionState(state)) {
+    return t('status.offline');
+  }
+
+  if (isOnlineConnectionState(state)) {
+    return t('status.online');
+  }
+
+  return t('status.connecting');
+}
+
+function isOfflineConnectionState(value) {
+  const lastMessage = typeof value.lastMessage === 'string' ? value.lastMessage : '';
+  const source = typeof value.source === 'string' ? value.source : '';
+  const combined = `${lastMessage} ${source}`.toLowerCase();
+
+  return value.mode === 'chat'
+    && (
+      combined.includes('nie moge pobrac czatu')
+      || combined.includes('blad')
+      || combined.includes('offline')
+      || combined.includes('zakonczony')
+    );
+}
+
+function isOnlineConnectionState(value) {
+  const lastMessage = typeof value.lastMessage === 'string' ? value.lastMessage : '';
+  const source = typeof value.source === 'string' ? value.source : '';
+  const combined = `${lastMessage} ${source}`.toLowerCase();
+
+  return value.mode === 'chat'
+    && (combined.includes('polaczono') || source.startsWith('polaczono: room'));
+}
+
+function formatCounter(value) {
+  const number = Math.max(0, Math.floor(Number(value) || 0));
+  return new Intl.NumberFormat(LANGUAGE_LOCALES[appLanguage] || undefined).format(number);
+}
+
+function setStatusSegment(element, text) {
+  if (element) {
+    element.textContent = text;
+  }
+}
+
+function getTopGifters() {
+  return Array.from(giftTotalsByUser.values())
+    .filter((entry) => entry.coins > 0)
+    .sort((left, right) => right.coins - left.coins || left.name.localeCompare(right.name))
+    .slice(0, TOP_GIFTERS_LIMIT);
+}
+
+function getHeartMeGiftStats() {
+  let active = 0;
+  let inactive = 0;
+
+  activeChatUsers.forEach((entry) => {
+    if (entry.hasSentHeartMeGift) {
+      active += 1;
+      return;
+    }
+
+    inactive += 1;
+  });
+
+  return { active, inactive };
+}
+
+function renderTopGiftersPanel() {
+  if (!topGiftersPanel) {
+    return;
+  }
+
+  const topGifters = getTopGifters();
+  if (!topGifters.length) {
+    const empty = document.createElement('div');
+    empty.className = 'top-gifters-empty';
+    empty.textContent = t('topGifters.empty');
+    topGiftersPanel.replaceChildren(empty);
+    return;
+  }
+
+  const list = document.createElement('ol');
+  list.className = 'top-gifters-list';
+  topGifters.forEach((entry) => {
+    const item = document.createElement('li');
+    const name = document.createElement('span');
+    name.className = 'top-gifter-name';
+    name.textContent = entry.name;
+
+    const coins = document.createElement('span');
+    coins.className = 'top-gifter-coins';
+    coins.textContent = `(🪙 ${formatCounter(entry.coins)})`;
+
+    item.append(name, coins);
+    list.appendChild(item);
+  });
+
+  topGiftersPanel.replaceChildren(list);
+}
+
+function updateStatus() {
+  const statusText = getConnectionStatusText();
+  const delayText = `⏰${formatDelaySeconds(chatDelayMs)}`;
+  const queueText = `📩${queue.length}`;
+  const heartMeGiftStats = getHeartMeGiftStats();
+
+  if (statusConnectionEl) {
+    setStatusSegment(statusConnectionEl, statusText);
+    setStatusSegment(statusDelayEl, delayText);
+    setStatusSegment(statusQueueEl, queueText);
+    setStatusSegment(statusViewersEl, `👤${formatCounter(liveViewerCount)}`);
+    setStatusSegment(statusMessagesEl, `📧${formatCounter(chatMessageCount)}`);
+    setStatusSegment(statusMemberHeartsActiveEl, `❤️${formatCounter(heartMeGiftStats.active)}`);
+    setStatusSegment(statusMemberHeartsExpiredEl, `🖤${formatCounter(heartMeGiftStats.inactive)}`);
+    if (topGiftersPanel && !topGiftersPanel.hidden) {
+      renderTopGiftersPanel();
+    }
+  } else {
+    statusEl.textContent = `${statusText} | ${delayText} | ${queueText}`;
+  }
+  emptyEl.hidden = renderedMessageElements.size > 0;
+}
+
+function syncAppVersion() {
+  if (!appVersionEl) {
+    return;
+  }
+
+  appVersionEl.textContent = typeof state.appVersion === 'string' && state.appVersion
+    ? state.appVersion
+    : '0.1';
+}
+
+function getCreatorUsernameFromState() {
+  if (state.currentCreator && state.currentCreator.username) {
+    return state.currentCreator.username;
+  }
+
+  const creators = Array.isArray(state.creators) ? state.creators : [];
+  const current = creators.find((creator) => creator.id === state.creatorId);
+  return current && current.username ? current.username : '';
+}
+
+function syncCreatorInputValue(force = false) {
+  if (!creatorInput) {
+    return;
+  }
+
+  const username = getCreatorUsernameFromState();
+  if (!username) {
+    return;
+  }
+
+  if (!force && document.activeElement === creatorInput && creatorInput.dataset.dirty === 'true') {
+    return;
+  }
+
+  creatorInput.value = `@${username}`;
+  creatorInput.dataset.dirty = 'false';
+}
+
+function getRecommendedCreators() {
+  const creators = Array.isArray(state.creators) ? state.creators : [];
+  return creators.filter((creator) => (
+    creator
+    && creator.id
+    && !RECOMMENDED_EXCLUDED_CREATOR_IDS.has(String(creator.id))
+  ));
+}
+
+function getCreatorDisplayName(creator) {
+  const fallback = `@${creator.username || creator.id}`;
+  if (typeof creator.label !== 'string') {
+    return fallback;
+  }
+
+  return creator.label.replace(/\s*\(@[^)]*\)\s*$/, '').trim() || fallback;
+}
+
+function setCreatorSuggestionsExpanded(isExpanded) {
+  if (!creatorInput || !creatorSuggestions) {
+    return;
+  }
+
+  creatorSuggestions.hidden = !isExpanded;
+  creatorInput.setAttribute('aria-expanded', String(isExpanded));
+  if (creatorToggle) {
+    creatorToggle.setAttribute('aria-expanded', String(isExpanded));
+  }
+  if (!isExpanded) {
+    activeCreatorSuggestionIndex = -1;
+    creatorInput.removeAttribute('aria-activedescendant');
+  }
+}
+
+function getCreatorSuggestionQuery() {
+  if (!creatorInput) {
+    return '';
+  }
+
+  if (creatorInput.dataset.dirty !== 'true') {
+    return '';
+  }
+
+  const normalized = normalizeCreatorHandle(creatorInput.value);
+  return normalized || creatorInput.value.trim().replace(/^@+/, '').toLowerCase();
+}
+
+function getFilteredCreatorSuggestions() {
+  const query = getCreatorSuggestionQuery();
+  if (!query) {
+    return creatorSuggestionItems;
+  }
+
+  return creatorSuggestionItems.filter((item) => (
+    item.handle.includes(query)
+    || item.label.toLowerCase().includes(query)
+    || item.detail.toLowerCase().includes(query)
+  ));
+}
+
+function setActiveCreatorSuggestion(index) {
+  if (!creatorInput || !creatorSuggestions || creatorSuggestions.hidden) {
+    return;
+  }
+
+  const buttons = Array.from(creatorSuggestions.querySelectorAll('.creator-suggestion'));
+  if (!buttons.length) {
+    activeCreatorSuggestionIndex = -1;
+    creatorInput.removeAttribute('aria-activedescendant');
+    return;
+  }
+
+  activeCreatorSuggestionIndex = Math.max(0, Math.min(index, buttons.length - 1));
+  buttons.forEach((button, buttonIndex) => {
+    const isActive = buttonIndex === activeCreatorSuggestionIndex;
+    button.dataset.active = String(isActive);
+    button.setAttribute('aria-selected', String(isActive));
+    if (isActive) {
+      creatorInput.setAttribute('aria-activedescendant', button.id);
+      button.scrollIntoView({ block: 'nearest' });
+    }
+  });
+}
+
+function renderCreatorSuggestions() {
+  if (!creatorSuggestions) {
+    return;
+  }
+
+  const suggestions = getFilteredCreatorSuggestions();
+  const fragment = document.createDocumentFragment();
+  if (!suggestions.length) {
+    const empty = document.createElement('span');
+    empty.className = 'creator-suggestion-empty';
+    empty.textContent = t('creator.noMatches');
+    fragment.appendChild(empty);
+    activeCreatorSuggestionIndex = -1;
+  } else {
+    suggestions.forEach((item, index) => {
+      const button = document.createElement('button');
+      button.className = 'creator-suggestion';
+      button.type = 'button';
+      button.id = `creatorSuggestion-${index}`;
+      button.dataset.creator = item.handle;
+      button.dataset.active = String(index === activeCreatorSuggestionIndex);
+      button.setAttribute('role', 'option');
+      button.setAttribute('aria-selected', String(index === activeCreatorSuggestionIndex));
+
+      const main = document.createElement('span');
+      main.className = 'creator-suggestion-main';
+      main.textContent = item.label;
+
+      const detail = document.createElement('span');
+      detail.className = 'creator-suggestion-detail';
+      detail.textContent = item.detail;
+
+      button.append(main, detail);
+      button.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+      });
+      button.addEventListener('click', () => {
+        chooseCreatorSuggestion(item.handle);
+      });
+      fragment.appendChild(button);
+    });
+
+    if (activeCreatorSuggestionIndex >= suggestions.length) {
+      activeCreatorSuggestionIndex = suggestions.length - 1;
+    }
+  }
+
+  creatorSuggestions.replaceChildren(fragment);
+  if (!creatorSuggestions.hidden && activeCreatorSuggestionIndex >= 0) {
+    setActiveCreatorSuggestion(activeCreatorSuggestionIndex);
+  }
+}
+
+function openCreatorSuggestions() {
+  if (!creatorSuggestions) {
+    return;
+  }
+
+  renderCreatorSuggestions();
+  setCreatorSuggestionsExpanded(true);
+}
+
+function closeCreatorSuggestions() {
+  setCreatorSuggestionsExpanded(false);
+}
+
+function chooseCreatorSuggestion(handle) {
+  if (!creatorInput || !handle) {
+    return;
+  }
+
+  creatorInput.value = `@${handle}`;
+  creatorInput.dataset.dirty = 'false';
+  closeCreatorSuggestions();
+  submitCreatorInput();
+}
+
+function syncCreatorOptions(creators) {
+  if (!creatorSuggestions) {
+    return;
+  }
+
+  const list = Array.isArray(creators) ? creators : [];
+  const nextKey = [
+    ...list.map((creator) => `${creator.id}:${creator.username || ''}:${creator.label || ''}`),
+    ...recentCreators.map((creator) => `recent:${creator}`)
+  ].join('|');
+  if (nextKey === syncedCreatorSuggestionsKey) {
+    return;
+  }
+
+  syncedCreatorSuggestionsKey = nextKey;
+  const knownByHandle = new Map();
+  const items = [];
+
+  list.forEach((creator) => {
+    const handle = normalizeCreatorHandle(creator.username || creator.id);
+    if (!handle || knownByHandle.has(handle)) {
+      return;
+    }
+
+    knownByHandle.set(handle, creator);
+  });
+
+  const seenHandles = new Set();
+  recentCreators.forEach((creator) => {
+    const handle = normalizeCreatorHandle(creator);
+    if (!handle || seenHandles.has(handle)) {
+      return;
+    }
+
+    const knownCreator = knownByHandle.get(handle);
+    seenHandles.add(handle);
+    items.push({
+      handle,
+      label: knownCreator ? getCreatorDisplayName(knownCreator) : `@${handle}`,
+      detail: `${t('creator.recent')} · @${handle}`
+    });
+  });
+
+  list.forEach((creator) => {
+    const handle = normalizeCreatorHandle(creator.username || creator.id);
+    if (!handle || seenHandles.has(handle)) {
+      return;
+    }
+
+    seenHandles.add(handle);
+    items.push({
+      handle,
+      label: getCreatorDisplayName(creator),
+      detail: `@${handle}`
+    });
+  });
+
+  creatorSuggestionItems = items;
+  renderCreatorSuggestions();
+}
+
+function renderRecommendedCreators() {
+  if (!recommendedListEl) {
+    return;
+  }
+
+  const creators = getRecommendedCreators();
+  if (!creators.length) {
+    const empty = document.createElement('div');
+    empty.className = 'recommended-empty';
+    empty.textContent = t('recommended.empty');
+    recommendedListEl.replaceChildren(empty);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  creators.forEach((creator) => {
+    const button = document.createElement('button');
+    button.className = 'recommended-card';
+    button.type = 'button';
+    button.dataset.creatorId = creator.id;
+    button.dataset.active = String(creator.id === state.creatorId);
+
+    if (creator.avatar) {
+      const avatar = document.createElement('img');
+      avatar.className = 'recommended-avatar';
+      avatar.src = creator.avatar;
+      avatar.alt = '';
+      avatar.decoding = 'async';
+      avatar.loading = 'lazy';
+      button.appendChild(avatar);
+    }
+
+    const content = document.createElement('span');
+    content.className = 'recommended-card-content';
+
+    const name = document.createElement('strong');
+    name.textContent = getCreatorDisplayName(creator);
+
+    const username = document.createElement('small');
+    username.textContent = `@${creator.username || creator.id}`;
+
+    const bio = document.createElement('span');
+    bio.className = 'recommended-bio';
+    bio.textContent = typeof creator.bio === 'string' && creator.bio.trim()
+      ? creator.bio.trim()
+      : t('recommended.emptyBio');
+
+    const action = document.createElement('span');
+    action.className = 'recommended-action';
+    action.textContent = t('recommended.open');
+
+    content.append(name, username, bio);
+    button.append(content, action);
+    button.addEventListener('click', () => {
+      if (state.creatorId !== creator.id) {
+        resetMessages();
+        if (creatorInput) {
+          creatorInput.value = `@${creator.username || creator.id}`;
+          creatorInput.dataset.dirty = 'false';
+        }
+        rememberCreator(creator.username || creator.id);
+        window.tiktokLive.setCreator(creator.username || creator.id);
+      }
+      setActiveSection('chatbox');
+    });
+
+    fragment.appendChild(button);
+  });
+
+  recommendedListEl.replaceChildren(fragment);
+}
+
+function syncAvatarImages(images) {
+  const nextImages = Array.isArray(images) ? images.filter((image) => typeof image === 'string' && image) : [];
+  if (nextImages.join('|') === avatarImages.join('|')) {
+    return;
+  }
+
+  avatarImages = nextImages;
+  userAvatars.clear();
+}
+
+function getAvatarKey(message) {
+  const key = message && (message.uniqueId || message.authorName);
+  return typeof key === 'string' ? key.trim().toLowerCase() : '';
+}
+
+function pickRandomAvatar() {
+  if (!avatarImages.length) {
+    return '';
+  }
+
+  const index = Math.floor(Math.random() * avatarImages.length);
+  return avatarImages[index];
+}
+
+function assignAvatarForJoin(message) {
+  const key = getAvatarKey(message);
+  const avatar = pickRandomAvatar();
+  if (key && avatar) {
+    userAvatars.set(key, avatar);
+  }
+}
+
+function getAvatarForMessage(message) {
+  const key = getAvatarKey(message);
+  if (!key || !avatarImages.length) {
+    return '';
+  }
+
+  if (!userAvatars.has(key)) {
+    userAvatars.set(key, pickRandomAvatar());
+  }
+
+  return userAvatars.get(key);
+}
+
+function resetStreamStats() {
+  giftTotalsByUser.clear();
+  activeChatUsers.clear();
+  liveViewerCount = 0;
+  chatMessageCount = 0;
+  if (topGiftersPanel) {
+    topGiftersPanel.hidden = true;
+  }
+  if (topGiftersButton) {
+    topGiftersButton.setAttribute('aria-expanded', 'false');
+  }
+}
+
+function resetMessages() {
+  queue.length = 0;
+  visibleMessages.length = 0;
+  userAvatars.clear();
+  queuedMessagesById.clear();
+  visibleMessagesById.clear();
+  resetStreamStats();
+  messagesEl.querySelectorAll('.message').forEach((item) => item.remove());
+  renderedMessageElements.clear();
+  updateStatus();
+}
+
+function getStatsUserKey(message) {
+  const uniqueId = typeof message.uniqueId === 'string' ? message.uniqueId.trim() : '';
+  const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
+  const key = (uniqueId || authorName).toLowerCase();
+  return key === 'unknown' ? '' : key;
+}
+
+function getGiftStatsKey(message) {
+  return getStatsUserKey(message);
+}
+
+function normalizeGiftNameForStats(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value
+    .normalize('NFKD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isHeartMeGift(message) {
+  const kind = message && (message.kind || 'chat');
+  return kind === 'gift' && normalizeGiftNameForStats(message.giftName) === HEART_ME_GIFT_NAME;
+}
+
+function trackGiftStats(message) {
+  const coins = Math.max(0, Number(message.giftCost) || 0);
+  const key = getGiftStatsKey(message);
+  if (!key || coins <= 0) {
+    return;
+  }
+
+  const current = giftTotalsByUser.get(key) || {
+    name: message.authorName || message.uniqueId || key,
+    coins: 0
+  };
+  current.name = message.authorName || current.name;
+  current.coins += coins;
+  giftTotalsByUser.set(key, current);
+}
+
+function trackActiveUserStats(message) {
+  const key = getStatsUserKey(message);
+  if (!key) {
+    return;
+  }
+
+  const current = activeChatUsers.get(key) || {
+    name: message.authorName || message.uniqueId || key,
+    hasSentHeartMeGift: false
+  };
+  current.name = message.authorName || current.name;
+  current.hasSentHeartMeGift = current.hasSentHeartMeGift || isHeartMeGift(message);
+  activeChatUsers.set(key, current);
+}
+
+function trackIncomingMessageStats(message) {
+  if (!message) {
+    return;
+  }
+
+  trackActiveUserStats(message);
+
+  if (message.upsert) {
+    return;
+  }
+
+  const kind = message.kind || 'chat';
+  if (kind === 'chat') {
+    chatMessageCount += 1;
+  }
+
+  if (kind === 'gift' || kind === 'box') {
+    trackGiftStats(message);
+  }
+}
+
+function isMessageVisible(message) {
+  return activeFilters.has(message.kind || 'chat');
+}
+
+function getMessageIdKey(message) {
+  if (!message || message.id === undefined || message.id === null || message.id === '') {
+    return '';
+  }
+
+  return String(message.id);
+}
+
+function getMessageRenderKey(message) {
+  if (!message || typeof message !== 'object') {
+    return '';
+  }
+
+  if (message.id) {
+    return String(message.id);
+  }
+
+  if (!message.__renderKey) {
+    Object.defineProperty(message, '__renderKey', {
+      value: `local:${++renderKeyCounter}`,
+      enumerable: false
+    });
+  }
+
+  return message.__renderKey;
+}
+
+function scrollMessagesToEnd() {
+  if (pendingScrollToEnd) {
+    return;
+  }
+
+  pendingScrollToEnd = true;
+  window.requestAnimationFrame(() => {
+    pendingScrollToEnd = false;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  });
+}
+
+function getMessageDisplayText(message) {
+  if (!message || !message.textKey) {
+    return message && message.text ? message.text : '';
+  }
+
+  if (message.textKey === 'event.gift') {
+    const repeatCount = Math.max(1, Number(message.repeatCount) || 1);
+    const giftCost = Number(message.giftCost) || 0;
+    return t('event.gift', {
+      giftName: message.giftName || '',
+      countText: repeatCount > 1 ? ` x${repeatCount}` : '',
+      costText: giftCost > 0 ? ` (🪙 ${giftCost})` : ''
+    });
+  }
+
+  if (message.textKey === 'event.box') {
+    const giftCost = Number(message.giftCost) || 0;
+    const audienceCount = Number(message.audienceCount) || 0;
+    return t('event.box', {
+      boxName: t(message.boxKey === 'portal' ? 'event.box.portal' : 'event.box.chest'),
+      costText: giftCost > 0 ? ` (🪙 ${giftCost})` : '',
+      audienceText: audienceCount > 0 ? t('event.audience', { count: audienceCount }) : ''
+    });
+  }
+
+  if (message.textKey === 'event.like') {
+    return t('event.like', { total: Number(message.total) || 0 });
+  }
+
+  if (message.textKey === 'event.share') {
+    const shareCount = Number(message.shareCount) || 0;
+    return t('event.share', {
+      countText: shareCount > 0 ? ` (👥 ${shareCount})` : ''
+    });
+  }
+
+  return t(message.textKey);
+}
+
+function renderMessageElement(message) {
+  const item = document.createElement('article');
+  item.className = `message message-${message.kind || 'chat'}`;
+  item.dataset.renderKey = getMessageRenderKey(message);
+  if (message.isModerator) {
+    item.classList.add('message-moderator');
+  }
+
+  const time = document.createElement('time');
+  time.className = 'message-time';
+  time.textContent = formatTime(message.timestamp);
+
+  const content = document.createElement('div');
+  content.className = 'message-content';
+
+  const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
+  if (authorName) {
+    const avatarSrc = getAvatarForMessage(message);
+    const author = document.createElement('span');
+    author.className = 'message-author';
+    author.textContent = authorName;
+
+    const inlineTime = document.createElement('time');
+    inlineTime.className = 'message-inline-time';
+    inlineTime.textContent = formatTime(message.timestamp);
+
+    const meta = document.createElement('div');
+    meta.className = 'message-meta';
+    meta.append(author, inlineTime);
+
+    const body = document.createElement('span');
+    body.className = 'message-body';
+    body.textContent = getMessageDisplayText(message);
+
+    const text = document.createElement('div');
+    text.className = 'message-text';
+    text.append(meta, body);
+
+    if (avatarSrc) {
+      const avatar = document.createElement('img');
+      avatar.className = 'message-avatar';
+      avatar.src = avatarSrc;
+      avatar.alt = '';
+      avatar.decoding = 'async';
+      avatar.loading = 'lazy';
+      content.append(avatar, text);
+    } else {
+      content.appendChild(text);
+    }
+  } else {
+    const body = document.createElement('span');
+    body.className = 'message-body';
+    body.textContent = getMessageDisplayText(message);
+    content.appendChild(body);
+  }
+
+  item.append(time, content);
+  return item;
+}
+
+function renderVisibleMessages(scrollToEnd = false) {
+  messagesEl.querySelectorAll('.message').forEach((item) => item.remove());
+  renderedMessageElements.clear();
+
+  const fragment = document.createDocumentFragment();
+  visibleMessages
+    .filter(isMessageVisible)
+    .forEach((message) => {
+      const item = renderMessageElement(message);
+      renderedMessageElements.set(getMessageRenderKey(message), item);
+      fragment.appendChild(item);
+    });
+
+  messagesEl.appendChild(fragment);
+
+  if (scrollToEnd) {
+    scrollMessagesToEnd();
+  }
+
+  updateStatus();
+}
+
+function upsertRenderedMessage(message, scrollToEnd = false) {
+  const key = getMessageRenderKey(message);
+  if (!key) {
+    updateStatus();
+    return;
+  }
+
+  const existing = renderedMessageElements.get(key);
+  if (!isMessageVisible(message)) {
+    if (existing) {
+      existing.remove();
+      renderedMessageElements.delete(key);
+    }
+    updateStatus();
+    return;
+  }
+
+  const item = renderMessageElement(message);
+  if (existing) {
+    existing.replaceWith(item);
+  } else {
+    messagesEl.appendChild(item);
+  }
+  renderedMessageElements.set(key, item);
+
+  if (scrollToEnd) {
+    scrollMessagesToEnd();
+  }
+
+  updateStatus();
+}
+
+function showMessageNow(message, scrollToEnd = true) {
+  visibleMessages.push(message);
+  const idKey = getMessageIdKey(message);
+  if (idKey) {
+    queuedMessagesById.delete(idKey);
+    visibleMessagesById.set(idKey, message);
+  }
+  upsertRenderedMessage(message, scrollToEnd);
+  if (isMessageVisible(message)) {
+    readMessageAloud(message);
+  }
+}
+
+function revealNextMessage() {
+  if (!queue.length) {
+    updateStatus();
+    return;
+  }
+
+  const message = queue.shift();
+  const idKey = getMessageIdKey(message);
+  if (idKey) {
+    queuedMessagesById.delete(idKey);
+  }
+  showMessageNow(message, true);
+}
+
+function startRevealTimer() {
+  clearInterval(revealTimer);
+  revealTimer = setInterval(revealNextMessage, chatDelayMs);
+}
+
+async function submitCreatorInput() {
+  if (!creatorInput) {
+    return;
+  }
+
+  const handle = normalizeCreatorHandle(creatorInput.value);
+  if (!handle) {
+    syncCreatorInputValue(true);
+    return;
+  }
+
+  if (handle === lastSubmittedCreator && handle === normalizeCreatorHandle(getCreatorUsernameFromState())) {
+    creatorInput.value = `@${handle}`;
+    creatorInput.dataset.dirty = 'false';
+    return;
+  }
+
+  lastSubmittedCreator = handle;
+  creatorInput.value = `@${handle}`;
+  creatorInput.dataset.dirty = 'false';
+  resetMessages();
+
+  try {
+    const result = await window.tiktokLive.setCreator(handle);
+    if (result && result.ok) {
+      rememberCreator(result.creator && result.creator.username ? result.creator.username : handle);
+      if (result.creator && result.creator.username) {
+        creatorInput.value = `@${result.creator.username}`;
+      }
+      return;
+    }
+  } catch {
+    // Keep the typed value visible; status will continue showing connection state.
+  }
+}
+
+window.tiktokLive.onState((nextState) => {
+  const previousCreatorId = state.creatorId;
+  const wasOffline = isOfflineConnectionState(state);
+  state = nextState;
+  if (state.systemSettings) {
+    applyIncomingSystemSettings(state.systemSettings);
+  }
+  syncCreatorOptions(state.creators);
+  syncAvatarImages(state.avatarImages);
+  syncAppVersion();
+  syncCreatorInputValue();
+  renderRecommendedCreators();
+  if (previousCreatorId && state.creatorId !== previousCreatorId) {
+    resetMessages();
+  } else if (isOfflineConnectionState(state) && (!wasOffline || queue.length || visibleMessages.length || renderedMessageElements.size)) {
+    resetMessages();
+  }
+  updateStatus();
+});
+
+if (creatorInput) {
+  creatorInput.dataset.dirty = 'false';
+
+  creatorInput.addEventListener('focus', () => {
+    openCreatorSuggestions();
+  });
+
+  creatorInput.addEventListener('input', () => {
+    creatorInput.dataset.dirty = 'true';
+    activeCreatorSuggestionIndex = -1;
+    openCreatorSuggestions();
+  });
+
+  creatorInput.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (creatorSuggestions && creatorSuggestions.hidden) {
+        openCreatorSuggestions();
+      }
+      setActiveCreatorSuggestion(activeCreatorSuggestionIndex + 1);
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (creatorSuggestions && creatorSuggestions.hidden) {
+        openCreatorSuggestions();
+      }
+      const buttons = creatorSuggestions
+        ? Array.from(creatorSuggestions.querySelectorAll('.creator-suggestion'))
+        : [];
+      setActiveCreatorSuggestion(activeCreatorSuggestionIndex < 0 ? buttons.length - 1 : activeCreatorSuggestionIndex - 1);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeCreatorSuggestions();
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const suggestions = getFilteredCreatorSuggestions();
+      if (creatorSuggestions && !creatorSuggestions.hidden && activeCreatorSuggestionIndex >= 0 && suggestions[activeCreatorSuggestionIndex]) {
+        chooseCreatorSuggestion(suggestions[activeCreatorSuggestionIndex].handle);
+        return;
+      }
+
+      closeCreatorSuggestions();
+      submitCreatorInput();
+    }
+  });
+
+  creatorInput.addEventListener('change', () => {
+    if (creatorInput.dataset.dirty === 'true') {
+      submitCreatorInput();
+    }
+  });
+
+  creatorInput.addEventListener('blur', () => {
+    window.setTimeout(() => {
+      const activeElement = document.activeElement;
+      if (creatorSuggestions && creatorSuggestions.contains(activeElement)) {
+        return;
+      }
+
+      if (creatorToggle && activeElement === creatorToggle) {
+        return;
+      }
+
+      if (creatorInput.dataset.dirty === 'true') {
+        submitCreatorInput();
+      }
+      closeCreatorSuggestions();
+    }, 120);
+  });
+}
+
+if (creatorToggle) {
+  creatorToggle.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+  });
+
+  creatorToggle.addEventListener('click', () => {
+    if (!creatorSuggestions) {
+      return;
+    }
+
+    if (creatorSuggestions.hidden) {
+      openCreatorSuggestions();
+      if (creatorInput) {
+        creatorInput.focus();
+      }
+      return;
+    }
+
+    closeCreatorSuggestions();
+  });
+}
+
+document.addEventListener('pointerdown', (event) => {
+  const target = event.target;
+  if (!(target instanceof Element) || target.closest('.creator-picker')) {
+    return;
+  }
+
+  closeCreatorSuggestions();
+});
+
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const filter = button.dataset.filter;
+    if (!filter) {
+      return;
+    }
+
+    if (activeFilters.has(filter)) {
+      activeFilters.delete(filter);
+    } else {
+      activeFilters.add(filter);
+    }
+
+    button.dataset.active = String(activeFilters.has(filter));
+    renderVisibleMessages();
+    if (filter === 'chat' && !activeFilters.has('chat')) {
+      stopSpeech();
+    }
+  });
+});
+
+function setActiveSettingsTab(tab) {
+  const nextTab = settingsPanels.some((panel) => panel.dataset.settingsPanel === tab) ? tab : 'general';
+  activeSettingsTab = nextTab;
+
+  settingsTabs.forEach((button) => {
+    const isActive = button.dataset.settingsTab === activeSettingsTab;
+    button.dataset.active = String(isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  settingsPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.settingsPanel !== activeSettingsTab;
+  });
+}
+
+settingsTabs.forEach((button) => {
+  button.addEventListener('click', () => {
+    setActiveSettingsTab(button.dataset.settingsTab);
+  });
+});
+
+function setActiveAboutTab(tab) {
+  const nextTab = aboutPanels.some((panel) => panel.dataset.aboutPanel === tab) ? tab : 'program';
+  activeAboutTab = nextTab;
+
+  aboutTabs.forEach((button) => {
+    const isActive = button.dataset.aboutTab === activeAboutTab;
+    button.dataset.active = String(isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  aboutPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.aboutPanel !== activeAboutTab;
+  });
+}
+
+aboutTabs.forEach((button) => {
+  button.addEventListener('click', () => {
+    setActiveAboutTab(button.dataset.aboutTab);
+  });
+});
+
+function updateArchiveSelection() {
+  if (!archiveListEl) {
+    return;
+  }
+
+  archiveListEl.querySelectorAll('[data-archive-id]').forEach((button) => {
+    button.dataset.active = String(button.dataset.archiveId === selectedArchiveId);
+  });
+}
+
+function closeArchive() {
+  selectedArchiveId = '';
+  updateArchiveSelection();
+  if (archiveTextEl) {
+    archiveTextEl.hidden = true;
+    archiveTextEl.textContent = '';
+  }
+}
+
+async function openArchive(archiveId, forceOpen = false) {
+  if (!archiveTextEl || !archiveId) {
+    return;
+  }
+
+  if (!forceOpen && selectedArchiveId === archiveId && !archiveTextEl.hidden) {
+    closeArchive();
+    return;
+  }
+
+  selectedArchiveId = archiveId;
+  updateArchiveSelection();
+  const archiveButton = archiveListEl
+    ? archiveListEl.querySelector(`[data-archive-id="${CSS.escape(archiveId)}"]`)
+    : null;
+  if (archiveButton) {
+    const row = archiveButton.closest('.archive-entry');
+    (row || archiveButton).insertAdjacentElement('afterend', archiveTextEl);
+  }
+  archiveTextEl.hidden = false;
+  archiveTextEl.textContent = t('archive.loading');
+
+  try {
+    const result = await window.tiktokLive.getArchiveContent(archiveId);
+    archiveTextEl.textContent = result && result.ok && result.text
+      ? result.text
+      : t('archive.loadFailed');
+  } catch (error) {
+    archiveTextEl.textContent = t('archive.loadFailedWithError', {
+      error: error && error.message ? error.message : error
+    });
+  }
+}
+
+function renderArchiveList(archives) {
+  if (!archiveListEl) {
+    return;
+  }
+
+  const entries = Array.isArray(archives) ? archives : [];
+  archiveListEl.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement('div');
+    empty.className = 'archive-empty';
+    empty.textContent = t('archive.empty');
+    archiveListEl.appendChild(empty);
+    closeArchive();
+    return;
+  }
+
+  entries.forEach((entry) => {
+    const row = document.createElement('article');
+    row.className = 'archive-entry';
+
+    const button = document.createElement('button');
+    button.className = 'archive-row';
+    button.type = 'button';
+    button.dataset.archiveId = entry.id;
+
+    const time = document.createElement('time');
+    time.textContent = entry.time || '';
+
+    const content = document.createElement('div');
+    content.className = 'archive-row-content';
+
+    const name = document.createElement('span');
+    name.className = 'archive-name';
+    name.textContent = entry.name || t('archive.defaultName');
+
+    const meta = document.createElement('span');
+    meta.className = 'archive-meta';
+    meta.textContent = entry.date || '';
+
+    content.append(name, meta);
+    button.append(time, content);
+    button.addEventListener('click', () => openArchive(entry.id));
+
+    row.appendChild(button);
+    archiveListEl.appendChild(row);
+  });
+  updateArchiveSelection();
+}
+
+async function refreshArchive() {
+  if (!archiveListEl) {
+    return;
+  }
+
+  archiveListEl.textContent = t('archive.refreshing');
+  try {
+    const result = await window.tiktokLive.listArchives();
+    const archives = result && result.ok ? result.archives : [];
+    renderArchiveList(archives);
+    const hasSelectedArchive = selectedArchiveId && archives.some((entry) => entry.id === selectedArchiveId);
+    if (hasSelectedArchive) {
+      openArchive(selectedArchiveId, true);
+    } else if (archiveTextEl) {
+      closeArchive();
+    }
+  } catch (error) {
+    archiveListEl.textContent = t('archive.listFailed', {
+      error: error && error.message ? error.message : error
+    });
+  }
+}
+
+function setActiveSection(section) {
+  const nextSection = viewPanels.some((panel) => panel.dataset.view === section) ? section : 'chatbox';
+  activeSection = nextSection;
+
+  sidebarButtons.forEach((button) => {
+    button.dataset.active = String(button.dataset.section === activeSection);
+  });
+
+  viewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.view !== activeSection;
+  });
+
+  if (activeSection === 'archive') {
+    refreshArchive();
+  }
+
+  if (activeSection !== 'chatbox') {
+    stopSpeech();
+  }
+}
+
+sidebarButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    setActiveSection(button.dataset.section);
+  });
+});
+
+if (refreshArchiveButton) {
+  refreshArchiveButton.addEventListener('click', refreshArchive);
+}
+
+if (topGiftersButton && topGiftersPanel) {
+  topGiftersButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const shouldOpen = topGiftersPanel.hidden;
+    if (shouldOpen) {
+      renderTopGiftersPanel();
+    }
+    topGiftersPanel.hidden = !shouldOpen;
+    topGiftersButton.setAttribute('aria-expanded', String(shouldOpen));
+  });
+
+  topGiftersPanel.addEventListener('click', (event) => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener('click', () => {
+    if (!topGiftersPanel.hidden) {
+      topGiftersPanel.hidden = true;
+      topGiftersButton.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !topGiftersPanel.hidden) {
+      topGiftersPanel.hidden = true;
+      topGiftersButton.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+window.tiktokLive.onChatReset(() => {
+  resetMessages();
+});
+
+if (typeof window.tiktokLive.onRoomStats === 'function') {
+  window.tiktokLive.onRoomStats((stats) => {
+    liveViewerCount = Math.max(0, Number(stats && stats.viewerCount) || 0);
+    updateStatus();
+  });
+}
+
+window.tiktokLive.onBattleAlert((alert) => {
+  const isMultiplierAlert = alert && (alert.textKey === 'battle.multiplier' || alert.tone === 'battle');
+  if (isMultiplierAlert && !generalSettings.multiplierNotifications) {
+    return;
+  }
+
+  const text = alert && alert.textKey
+    ? t(alert.textKey, { multiplier: alert.multiplier || '' })
+    : (alert && alert.text ? alert.text : '');
+  if (!text || !battleBanner) {
+    return;
+  }
+
+  clearTimeout(battleBannerTimer);
+  battleBanner.dataset.tone = alert && alert.tone ? alert.tone : 'battle';
+  battleBanner.textContent = alert && alert.uppercase === false ? text : text.toUpperCase();
+  battleBanner.hidden = false;
+  battleBannerTimer = setTimeout(() => {
+    battleBanner.hidden = true;
+  }, 12000);
+});
+
+window.tiktokLive.onChatMessage((message) => {
+  if (!message || !message.text) {
+    return;
+  }
+
+  if (message.kind === 'member') {
+    assignAvatarForJoin(message);
+  }
+
+  trackIncomingMessageStats(message);
+
+  const messageIdKey = getMessageIdKey(message);
+
+  if (message.upsert && messageIdKey) {
+    const existingVisible = visibleMessagesById.get(messageIdKey);
+    if (existingVisible) {
+      Object.assign(existingVisible, message);
+      upsertRenderedMessage(existingVisible);
+      return;
+    }
+
+    const existingQueued = queuedMessagesById.get(messageIdKey);
+    if (existingQueued) {
+      Object.assign(existingQueued, message);
+      updateStatus();
+      return;
+    }
+  }
+
+  if ((message.kind || 'chat') === 'chat') {
+    queue.push(message);
+    if (messageIdKey) {
+      queuedMessagesById.set(messageIdKey, message);
+    }
+    updateStatus();
+    return;
+  }
+
+  showMessageNow(message, true);
+});
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'F5' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'r')) {
+    event.preventDefault();
+    window.tiktokLive.reload();
+  }
+
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'l') {
+    event.preventDefault();
+    window.tiktokLive.showLogin();
+  }
+
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'i') {
+    event.preventDefault();
+    window.tiktokLive.openDevTools('shell');
+  }
+});
+
+initAppearanceSettings();
+initGeneralSettings();
+initSystemSettings();
+applyI18n();
+initTextToSpeech();
+startRevealTimer();
+setActiveSettingsTab(activeSettingsTab);
+setActiveAboutTab(activeAboutTab);
+setActiveSection(activeSection);
+syncAppVersion();
+updateStatus();
