@@ -48,7 +48,15 @@ jobs:
             gh release create $tag --title $title --notes "Czatbox TT $title" --latest
           }
 
-          gh release edit $tag --title $title --notes-file RELEASE_NOTES.md --latest
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" | ConvertFrom-Json
+          $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
+          $payload = @{
+            name = $title
+            body = $body
+            make_latest = 'true'
+          } | ConvertTo-Json
+
+          $payload | gh api "repos/$env:GITHUB_REPOSITORY/releases/$($release.id)" --method PATCH --input -
 
           $assets = @(
             (Get-ChildItem -Path dist -Filter 'Czatbox-TT-Setup-*.exe' | Select-Object -First 1).FullName,
