@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { app, BaseWindow, WebContentsView, ipcMain, Menu, Tray, session, shell } = require('electron');
+const { app, BaseWindow, WebContentsView, dialog, ipcMain, Menu, Tray, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const {
   TikTokLiveConnection,
@@ -179,6 +179,7 @@ let tiktokSession;
 let authPoll;
 let archiveFile;
 let archiveSession;
+let archiveWriteTimer;
 let liveConnection;
 let isConnecting = false;
 let connectionAttemptId = 0;
@@ -351,12 +352,12 @@ function getLocalDateParts(date) {
   };
 }
 
-function getUniqueArchivePath(baseName) {
-  let candidate = path.join(ARCHIVE_DIR, `${baseName}.txt`);
+function getUniqueArchivePath(baseName, extension = '.json') {
+  let candidate = path.join(ARCHIVE_DIR, `${baseName}${extension}`);
   let index = 2;
 
   while (fs.existsSync(candidate)) {
-    candidate = path.join(ARCHIVE_DIR, `${baseName}-${index}.txt`);
+    candidate = path.join(ARCHIVE_DIR, `${baseName}-${index}${extension}`);
     index += 1;
   }
 
@@ -393,11 +394,13 @@ function startArchiveSession(creator) {
     name: `@${creator.username}`,
     date: parts.date,
     time: parts.time,
-    startedAt: startedAt.toISOString()
+    startedAt: startedAt.toISOString(),
+    endTime: '',
+    endedAt: ''
   };
   recentMessages.length = 0;
 
-  fs.writeFileSync(archiveFile, buildArchiveHeader(archiveSession), 'utf8');
+  writeFullArchiveFile();
 }
 
 function ensureArchiveSession() {
@@ -414,9 +417,20 @@ function buildArchiveBody() {
 
 function writeFullArchiveFile() {
   ensureArchiveSession();
-  const body = buildArchiveBody();
-  const text = `${buildArchiveHeader(archiveSession)}${body}${body ? '\n' : ''}`;
-  fs.writeFileSync(archiveFile, text, 'utf8');
+  const document = {
+    version: 2,
+    session: { ...archiveSession },
+    messages: recentMessages
+  };
+  fs.writeFileSync(archiveFile, `${JSON.stringify(document, null, 2)}\n`, 'utf8');
+}
+
+function scheduleArchiveWrite() {
+  clearTimeout(archiveWriteTimer);
+  archiveWriteTimer = setTimeout(() => {
+    archiveWriteTimer = null;
+    writeFullArchiveFile();
+  }, 250);
 }
 
 function finalizeArchiveSession(endDate = new Date()) {
@@ -425,6 +439,9 @@ function finalizeArchiveSession(endDate = new Date()) {
   }
 
   archiveSession.endTime = getLocalDateParts(endDate).time;
+  archiveSession.endedAt = endDate.toISOString();
+  clearTimeout(archiveWriteTimer);
+  archiveWriteTimer = null;
   writeFullArchiveFile();
 }
 
@@ -433,6 +450,8 @@ function resetChatBuffers() {
   seenMessageKeys.clear();
   likeTotalsByUser.clear();
   battleActive = false;
+  clearTimeout(archiveWriteTimer);
+  archiveWriteTimer = null;
   archiveFile = '';
   archiveSession = null;
 }
@@ -477,22 +496,19 @@ function archiveChatMessage(message) {
       payload[key] = message[key];
     }
   });
-  const line = `[${formatArchiveTime(timestamp)}] ${payload.archiveText}\n`;
-
   const existingIndex = payload.upsert && payload.id
     ? recentMessages.findIndex((item) => item.id === payload.id)
     : -1;
 
   if (existingIndex >= 0) {
     recentMessages[existingIndex] = payload;
-    writeFullArchiveFile();
+    scheduleArchiveWrite();
     sendToShell('shell:chat-message', payload);
     return;
   }
 
-  fs.appendFileSync(archiveFile, line, 'utf8');
-
   recentMessages.push(payload);
+  scheduleArchiveWrite();
   sendToShell('shell:chat-message', payload);
 }
 
@@ -1924,7 +1940,138 @@ function getArchiveLineTimeRange(fullPath, fallbackDate, fallbackStartTime, fall
   return { date, time };
 }
 
-function buildArchiveEntry(fileName) {
+function summarizeArchiveMessages(messages) {
+  const kinds = {
+    chat: 0,
+    like: 0,
+    gift: 0,
+    box: 0,
+    repost: 0,
+    share: 0,
+    member: 0
+  };
+  const moderators = new Set();
+  let giftCoins = 0;
+
+  messages.forEach((message) => {
+    const kind = Object.prototype.hasOwnProperty.call(kinds, message.kind) ? message.kind : 'chat';
+    kinds[kind] += 1;
+    giftCoins += kind === 'gift' || kind === 'box' ? Math.max(0, Number(message.giftCost) || 0) : 0;
+    if (message.isModerator) {
+      moderators.add(String(message.uniqueId || message.authorName || '').toLowerCase());
+    }
+  });
+
+  return {
+    total: messages.length,
+    kinds,
+    giftCoins,
+    moderators: Array.from(moderators).filter(Boolean).length
+  };
+}
+
+function readStructuredArchive(fullPath) {
+  const document = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+  const sessionData = document && document.session && typeof document.session === 'object'
+    ? document.session
+    : {};
+  const messages = Array.isArray(document && document.messages) ? document.messages : [];
+  return {
+    version: Number(document && document.version) || 2,
+    session: sessionData,
+    messages
+  };
+}
+
+function parseLegacyArchiveTimestamp(value, fallbackDate) {
+  const match = String(value || '').match(/^(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{2}:\d{2}:\d{2})$/);
+  if (match) {
+    return `${match[3]}-${match[2]}-${match[1]}T${match[4]}`;
+  }
+
+  const time = String(value || '').match(/(\d{2}:\d{2}:\d{2})/);
+  return time && fallbackDate ? `${fallbackDate}T${time[1]}` : new Date().toISOString();
+}
+
+function inferLegacyArchiveKind(text) {
+  const normalized = String(text || '').toLowerCase();
+  if (normalized.includes('skrzyn') || normalized.includes('portal')) {
+    return 'box';
+  }
+  if (normalized.includes('prezent') || normalized.includes('gift')) {
+    return 'gift';
+  }
+  if (normalized.includes('polubi') || normalized.includes('like')) {
+    return 'like';
+  }
+  if (normalized.includes('repost')) {
+    return 'repost';
+  }
+  if (normalized.includes('udost') || normalized.includes('share')) {
+    return 'share';
+  }
+  if (normalized.includes('dołączy') || normalized.includes('dolacz') || normalized.includes('joined')) {
+    return 'member';
+  }
+  return 'chat';
+}
+
+function parseLegacyArchive(fullPath, entry) {
+  const text = fs.readFileSync(fullPath, 'utf8');
+  const messages = [];
+  const linePattern = /^\[([^\]]+)\]\s+(.+)$/gm;
+  let match;
+
+  while ((match = linePattern.exec(text)) !== null) {
+    const raw = match[2].trim();
+    const authorMatch = raw.match(/^(.+?)\s+\(@([^)]+)\)\s*:?\s*(.*)$/);
+    const authorName = authorMatch ? authorMatch[1].trim() : '';
+    const uniqueId = authorMatch ? authorMatch[2].trim() : '';
+    const messageText = authorMatch ? authorMatch[3].trim() : raw;
+    messages.push({
+      id: `legacy:${messages.length + 1}`,
+      timestamp: parseLegacyArchiveTimestamp(match[1], entry.date),
+      kind: inferLegacyArchiveKind(messageText),
+      authorName,
+      uniqueId,
+      isModerator: false,
+      text: messageText,
+      archiveText: raw
+    });
+  }
+
+  return { text, messages };
+}
+
+function buildStructuredArchiveEntry(fileName) {
+  const fullPath = path.join(ARCHIVE_DIR, fileName);
+  const stats = fs.statSync(fullPath);
+  const document = readStructuredArchive(fullPath);
+  const sessionData = document.session;
+  const startedAt = sessionData.startedAt ? new Date(sessionData.startedAt) : stats.birthtime;
+  const endedAt = sessionData.endedAt
+    ? new Date(sessionData.endedAt)
+    : (document.messages.length ? new Date(document.messages[document.messages.length - 1].timestamp) : stats.mtime);
+  const startParts = getLocalDateParts(Number.isNaN(startedAt.getTime()) ? stats.birthtime : startedAt);
+  const endParts = getLocalDateParts(Number.isNaN(endedAt.getTime()) ? stats.mtime : endedAt);
+  const startTime = sessionData.time || startParts.time;
+  const endTime = sessionData.endTime || endParts.time;
+
+  return {
+    id: fileName,
+    format: 'structured',
+    date: sessionData.date || startParts.date,
+    time: startTime && endTime && startTime !== endTime ? `${startTime} - ${endTime}` : startTime,
+    name: sessionData.name || (sessionData.username ? `@${sessionData.username}` : 'Archiwum'),
+    username: sessionData.username || '',
+    startedAt: sessionData.startedAt || startedAt.toISOString(),
+    endedAt: sessionData.endedAt || endedAt.toISOString(),
+    modifiedAt: stats.mtimeMs,
+    summary: summarizeArchiveMessages(document.messages)
+  };
+}
+
+function buildLegacyArchiveEntry(fileName) {
   const fullPath = path.join(ARCHIVE_DIR, fileName);
   const stats = fs.statSync(fullPath);
   const modified = getLocalDateParts(stats.mtime);
@@ -1932,25 +2079,33 @@ function buildArchiveEntry(fileName) {
   if (transmissionMatch) {
     const startTime = transmissionMatch[2].replace(/-/g, ':');
     const range = getArchiveLineTimeRange(fullPath, transmissionMatch[1], startTime, modified.time);
-    return {
+    const entry = {
       id: fileName,
+      format: 'legacy',
       date: range.date,
       time: range.time,
       name: `@${transmissionMatch[3]}`,
+      username: transmissionMatch[3],
       modifiedAt: stats.mtimeMs
     };
+    entry.summary = summarizeArchiveMessages(parseLegacyArchive(fullPath, entry).messages);
+    return entry;
   }
 
   const dailyMatch = fileName.match(/^chat-archiwum-(\d{4}-\d{2}-\d{2})\.txt$/);
   if (dailyMatch) {
     const range = getArchiveLineTimeRange(fullPath, dailyMatch[1], '', modified.time);
-    return {
+    const entry = {
       id: fileName,
+      format: 'legacy',
       date: range.date,
       time: range.time,
       name: 'Archiwum dzienne',
+      username: '',
       modifiedAt: stats.mtimeMs
     };
+    entry.summary = summarizeArchiveMessages(parseLegacyArchive(fullPath, entry).messages);
+    return entry;
   }
 
   return null;
@@ -1959,8 +2114,16 @@ function buildArchiveEntry(fileName) {
 function listArchiveEntries() {
   ensureArchiveDir();
   return fs.readdirSync(ARCHIVE_DIR, { withFileTypes: true })
-    .filter((item) => item.isFile() && item.name.endsWith('.txt') && item.name !== 'ostatnie-100-wiadomosci.txt')
-    .map((item) => buildArchiveEntry(item.name))
+    .filter((item) => item.isFile() && ['.json', '.txt'].includes(path.extname(item.name).toLowerCase()) && item.name !== 'ostatnie-100-wiadomosci.txt')
+    .map((item) => {
+      try {
+        return path.extname(item.name).toLowerCase() === '.json'
+          ? buildStructuredArchiveEntry(item.name)
+          : buildLegacyArchiveEntry(item.name);
+      } catch {
+        return null;
+      }
+    })
     .filter(Boolean)
     .sort((a, b) => b.modifiedAt - a.modifiedAt);
 }
@@ -1974,11 +2137,83 @@ function getArchiveContent(archiveId) {
   }
 
   const fullPath = path.join(ARCHIVE_DIR, entry.id);
+  if (archiveFile && path.resolve(fullPath) === path.resolve(archiveFile) && archiveWriteTimer) {
+    clearTimeout(archiveWriteTimer);
+    archiveWriteTimer = null;
+    writeFullArchiveFile();
+  }
+  if (entry.format === 'structured') {
+    const document = readStructuredArchive(fullPath);
+    return {
+      ok: true,
+      entry,
+      messages: document.messages,
+      legacy: false
+    };
+  }
+
+  const legacy = parseLegacyArchive(fullPath, entry);
   return {
     ok: true,
     entry,
-    text: fs.readFileSync(fullPath, 'utf8')
+    messages: legacy.messages,
+    legacy: true,
+    text: legacy.text
   };
+}
+
+function buildArchiveExportText(entry, messages) {
+  const timeRange = entry.time || '';
+  const username = entry.username || String(entry.name || '').replace(/^@/, '');
+  const header = [
+    'Czatbox TT - archiwum transmisji',
+    `Data: ${entry.date || ''}`,
+    `Godzina: ${timeRange}`,
+    `Nazwa live: ${entry.name || ''}`,
+    `Tworca: ${username ? `@${username}` : ''}`,
+    '',
+    '-----------------------------------------------------------------------------',
+    ''
+  ].join('\n');
+  const body = messages
+    .map((message) => `[${formatArchiveTime(message.timestamp)}] ${message.archiveText || buildArchiveText(message)}`)
+    .join('\n');
+  return `${header}${body}${body ? '\n' : ''}`;
+}
+
+async function exportArchive(archiveId) {
+  const content = getArchiveContent(archiveId);
+  if (!content.ok) {
+    return content;
+  }
+
+  const defaultName = path.basename(content.entry.id, path.extname(content.entry.id));
+  const result = await dialog.showSaveDialog({
+    title: 'Eksportuj archiwum',
+    defaultPath: `${defaultName}.txt`,
+    filters: [{ name: 'Plik tekstowy', extensions: ['txt'] }]
+  });
+  if (result.canceled || !result.filePath) {
+    return { ok: false, canceled: true };
+  }
+
+  fs.writeFileSync(result.filePath, buildArchiveExportText(content.entry, content.messages), 'utf8');
+  return { ok: true, filePath: result.filePath };
+}
+
+function deleteArchive(archiveId) {
+  ensureArchiveDir();
+  const safeId = path.basename(String(archiveId || ''));
+  const fullPath = path.join(ARCHIVE_DIR, safeId);
+  if (!safeId || !fs.existsSync(fullPath)) {
+    return { ok: false, error: 'archive-not-found' };
+  }
+  if (archiveFile && path.resolve(fullPath) === path.resolve(archiveFile)) {
+    return { ok: false, error: 'archive-active' };
+  }
+
+  fs.unlinkSync(fullPath);
+  return { ok: true };
 }
 
 function senderIsShell(event) {
@@ -2032,6 +2267,13 @@ function installIpc() {
 
   handleShell('shell:list-archives', async () => ({ ok: true, archives: listArchiveEntries() }));
   handleShell('shell:get-archive-content', async (archiveId) => getArchiveContent(archiveId));
+  handleShell('shell:export-archive', async (archiveId) => exportArchive(archiveId));
+  handleShell('shell:delete-archive', async (archiveId) => deleteArchive(archiveId));
+  handleShell('shell:open-archive-folder', async () => {
+    ensureArchiveDir();
+    const error = await shell.openPath(ARCHIVE_DIR);
+    return error ? { ok: false, error } : { ok: true };
+  });
   handleShell('shell:get-system-settings', async () => ({ ok: true, settings: getPublicSystemSettings() }));
   handleShell('shell:set-system-settings', async (patch) => ({ ok: true, settings: updateSystemSettings(patch) }));
 

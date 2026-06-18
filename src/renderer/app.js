@@ -31,7 +31,15 @@ const UI_ICONS = {
   chart: '<path d="M5 19V11h3v8M10.5 19V5h3v14M16 19V8h3v11"/><path d="M3.5 19.5h17"/>',
   trophy: '<path d="M8 5h8v4.5a4 4 0 0 1-8 0V5Z"/><path d="M8 7H5v1.5A3.5 3.5 0 0 0 8.5 12M16 7h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13.5V17M8.5 19h7M10 17h4"/>',
   shield: '<path d="M12 3.75 19 6.5v5.25c0 4.1-2.35 7.1-7 8.5-4.65-1.4-7-4.4-7-8.5V6.5l7-2.75Z"/><path d="m8.75 12 2.1 2.1 4.4-4.45"/>',
-  coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>'
+  coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
+  folder: '<path d="M3.5 7.5h6l1.7 2H20a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5h5l1.5 2H20"/>',
+  refresh: '<path d="M19 8a7.5 7.5 0 1 0 .35 7"/><path d="M19 4.5V8h-3.5"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.25 15.25 4.25 4.25"/>',
+  archive: '<path d="M4.5 7.5h15v11h-15z"/><path d="M3.5 4.5h17v3h-17zM9 11h6"/>',
+  broadcast: '<circle cx="12" cy="12" r="2.25"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 7.4a6.5 6.5 0 0 1 0 9.2M4.25 4.25a11 11 0 0 0 0 15.5M19.75 4.25a11 11 0 0 1 0 15.5"/>',
+  download: '<path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 18.5h14"/>',
+  trash: '<path d="M5.5 7h13M9 4.5h6l1 2.5H8l1-2.5ZM7.5 7l.75 12h7.5l.75-12M10 10v6M14 10v6"/>',
+  chat: '<path d="M5 5.5h14A1.5 1.5 0 0 1 20.5 7v8A1.5 1.5 0 0 1 19 16.5h-8L6 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5Z"/>'
 };
 const DEFAULT_SYSTEM_SETTINGS = {
   autoLaunch: false,
@@ -86,6 +94,18 @@ const I18N = {
     'archive.title': 'Archiwum',
     'archive.status': 'Zapisane transmisje',
     'archive.refresh': 'Odśwież',
+    'archive.openFolder': 'Otwórz folder',
+    'archive.searchPlaceholder': 'Szukaj twórcy lub daty...',
+    'archive.selectTitle': 'Wybierz transmisję',
+    'archive.selectDescription': 'Po lewej znajdziesz wszystkie zapisane czaty.',
+    'archive.export': 'Eksportuj TXT',
+    'archive.delete': 'Usuń',
+    'archive.summaryAria': 'Podsumowanie transmisji',
+    'archive.summary.events': 'Zdarzenia',
+    'archive.summary.messages': 'Wiadomości',
+    'archive.summary.coins': 'Monety',
+    'archive.summary.moderators': 'Moderatorzy',
+    'archive.filtersAria': 'Filtry archiwum',
     'settings.title': 'Ustawienia',
     'settings.tabs.general': 'Ogólne',
     'settings.tabs.appearance': 'Wygląd',
@@ -210,6 +230,15 @@ const I18N = {
     'archive.defaultName': 'Archiwum',
     'archive.refreshing': 'Odświeżam archiwum...',
     'archive.listFailed': 'Nie udało się odczytać listy archiwów: {error}',
+    'archive.noMatches': 'Brak archiwów pasujących do wyszukiwania.',
+    'archive.filteredEmpty': 'Brak zdarzeń pasujących do wybranych filtrów.',
+    'archive.legacy': 'Stary format TXT',
+    'archive.deleteConfirm': 'Usunąć archiwum „{name}”? Tej operacji nie można cofnąć.',
+    'archive.deleteFailed': 'Nie udało się usunąć archiwum.',
+    'archive.activeDeleteFailed': 'Nie można usunąć aktualnie zapisywanej transmisji.',
+    'archive.exported': 'Archiwum wyeksportowano.',
+    'archive.exportFailed': 'Nie udało się wyeksportować archiwum.',
+    'archive.folderFailed': 'Nie udało się otworzyć folderu archiwów.',
     'recommended.title': 'Polecani',
     'recommended.note': 'Twórcy dodani do programu, których możesz szybko wybrać.',
     'recommended.open': 'Wybierz',
@@ -248,6 +277,18 @@ const I18N = {
     'archive.title': 'Archive',
     'archive.status': 'Saved streams',
     'archive.refresh': 'Refresh',
+    'archive.openFolder': 'Open folder',
+    'archive.searchPlaceholder': 'Search creator or date...',
+    'archive.selectTitle': 'Select a stream',
+    'archive.selectDescription': 'All saved chats are listed on the left.',
+    'archive.export': 'Export TXT',
+    'archive.delete': 'Delete',
+    'archive.summaryAria': 'Stream summary',
+    'archive.summary.events': 'Events',
+    'archive.summary.messages': 'Messages',
+    'archive.summary.coins': 'Coins',
+    'archive.summary.moderators': 'Moderators',
+    'archive.filtersAria': 'Archive filters',
     'settings.title': 'Settings',
     'settings.tabs.general': 'General',
     'settings.tabs.appearance': 'Appearance',
@@ -372,6 +413,15 @@ const I18N = {
     'archive.defaultName': 'Archive',
     'archive.refreshing': 'Refreshing archive...',
     'archive.listFailed': 'Could not read archive list: {error}',
+    'archive.noMatches': 'No archives match your search.',
+    'archive.filteredEmpty': 'No events match the selected filters.',
+    'archive.legacy': 'Legacy TXT format',
+    'archive.deleteConfirm': 'Delete archive “{name}”? This cannot be undone.',
+    'archive.deleteFailed': 'Could not delete the archive.',
+    'archive.activeDeleteFailed': 'The stream currently being saved cannot be deleted.',
+    'archive.exported': 'Archive exported.',
+    'archive.exportFailed': 'Could not export the archive.',
+    'archive.folderFailed': 'Could not open the archive folder.',
     'recommended.title': 'Recommended',
     'recommended.note': 'Creators added to the program that you can quickly choose.',
     'recommended.open': 'Choose',
@@ -410,6 +460,18 @@ const I18N = {
     'archive.title': 'Archiv',
     'archive.status': 'Gespeicherte Streams',
     'archive.refresh': 'Aktualisieren',
+    'archive.openFolder': 'Ordner öffnen',
+    'archive.searchPlaceholder': 'Creator oder Datum suchen...',
+    'archive.selectTitle': 'Stream auswählen',
+    'archive.selectDescription': 'Alle gespeicherten Chats befinden sich links.',
+    'archive.export': 'TXT exportieren',
+    'archive.delete': 'Löschen',
+    'archive.summaryAria': 'Stream-Zusammenfassung',
+    'archive.summary.events': 'Ereignisse',
+    'archive.summary.messages': 'Nachrichten',
+    'archive.summary.coins': 'Münzen',
+    'archive.summary.moderators': 'Moderatoren',
+    'archive.filtersAria': 'Archivfilter',
     'settings.title': 'Einstellungen',
     'settings.tabs.general': 'Allgemein',
     'settings.tabs.appearance': 'Aussehen',
@@ -534,6 +596,15 @@ const I18N = {
     'archive.defaultName': 'Archiv',
     'archive.refreshing': 'Archiv wird aktualisiert...',
     'archive.listFailed': 'Archivliste konnte nicht gelesen werden: {error}',
+    'archive.noMatches': 'Keine Archive entsprechen der Suche.',
+    'archive.filteredEmpty': 'Keine Ereignisse entsprechen den ausgewählten Filtern.',
+    'archive.legacy': 'Altes TXT-Format',
+    'archive.deleteConfirm': 'Archiv „{name}“ löschen? Dies kann nicht rückgängig gemacht werden.',
+    'archive.deleteFailed': 'Archiv konnte nicht gelöscht werden.',
+    'archive.activeDeleteFailed': 'Der aktuell gespeicherte Stream kann nicht gelöscht werden.',
+    'archive.exported': 'Archiv wurde exportiert.',
+    'archive.exportFailed': 'Archiv konnte nicht exportiert werden.',
+    'archive.folderFailed': 'Archivordner konnte nicht geöffnet werden.',
     'recommended.title': 'Empfohlen',
     'recommended.note': 'Im Programm hinzugefügte Creator, die du schnell auswählen kannst.',
     'recommended.open': 'Auswählen',
@@ -586,8 +657,21 @@ const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="ap
 const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
 const statsToolboxEl = document.getElementById('statsToolbox');
 const refreshArchiveButton = document.getElementById('refreshArchive');
+const openArchiveFolderButton = document.getElementById('openArchiveFolder');
 const archiveListEl = document.getElementById('archiveList');
-const archiveTextEl = document.getElementById('archiveText');
+const archiveSearchEl = document.getElementById('archiveSearch');
+const archiveDetailEmptyEl = document.getElementById('archiveDetailEmpty');
+const archiveSessionEl = document.getElementById('archiveSession');
+const archiveSessionNameEl = document.getElementById('archiveSessionName');
+const archiveSessionMetaEl = document.getElementById('archiveSessionMeta');
+const archiveMessagesEl = document.getElementById('archiveMessages');
+const archiveFilterButtons = Array.from(document.querySelectorAll('[data-archive-filter]'));
+const archiveSummaryMessagesEl = document.getElementById('archiveSummaryMessages');
+const archiveSummaryChatEl = document.getElementById('archiveSummaryChat');
+const archiveSummaryCoinsEl = document.getElementById('archiveSummaryCoins');
+const archiveSummaryModeratorsEl = document.getElementById('archiveSummaryModerators');
+const exportArchiveButton = document.getElementById('exportArchive');
+const deleteArchiveButton = document.getElementById('deleteArchive');
 const recommendedListEl = document.getElementById('recommendedList');
 const appVersionEl = document.getElementById('appVersion');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
@@ -617,6 +701,7 @@ const activeChatUsers = new Map();
 const activeModerators = new Map();
 const speechQueue = [];
 const activeFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
+const activeArchiveFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
 let state = {};
 let avatarImages = [];
 let speechVoices = [];
@@ -637,6 +722,8 @@ let activeSection = 'chatbox';
 let activeSettingsTab = 'general';
 let activeAboutTab = 'program';
 let selectedArchiveId = '';
+let archiveEntries = [];
+let selectedArchive = null;
 let renderKeyCounter = 0;
 let timeFormatterKey = '';
 let timeFormatter = null;
@@ -880,6 +967,9 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
     element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+    element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
+  });
 
   [
     ['.tagline', 'app.tagline'],
@@ -896,9 +986,15 @@ function applyI18n() {
     ['.filter-button[data-filter="repost"]', 'filters.repost'],
     ['.filter-button[data-filter="share"]', 'filters.share'],
     ['.filter-button[data-filter="member"]', 'filters.member'],
+    ['.filter-button[data-archive-filter="chat"]', 'filters.chat'],
+    ['.filter-button[data-archive-filter="like"]', 'filters.like'],
+    ['.filter-button[data-archive-filter="gift"]', 'filters.gift'],
+    ['.filter-button[data-archive-filter="box"]', 'filters.box'],
+    ['.filter-button[data-archive-filter="repost"]', 'filters.repost'],
+    ['.filter-button[data-archive-filter="share"]', 'filters.share'],
+    ['.filter-button[data-archive-filter="member"]', 'filters.member'],
     ['.archive-title', 'archive.title'],
     ['.archive-status', 'archive.status'],
-    ['#refreshArchive', 'archive.refresh'],
     ['.view-panel[data-view="recommended"] .page-header h1', 'recommended.title'],
     ['.view-panel[data-view="recommended"] .page-note', 'recommended.note'],
     ['.view-panel[data-view="settings"] .page-header h1', 'settings.title'],
@@ -954,6 +1050,12 @@ function applyI18n() {
   updateStatus();
   if (!visibleMessages.length && emptyEl) {
     emptyEl.textContent = t('chat.empty');
+  }
+  if (archiveEntries.length) {
+    renderArchiveList();
+  }
+  if (selectedArchive) {
+    renderArchiveSession();
   }
 }
 
@@ -2794,60 +2896,182 @@ function updateArchiveSelection() {
 
 function closeArchive() {
   selectedArchiveId = '';
+  selectedArchive = null;
   updateArchiveSelection();
-  if (archiveTextEl) {
-    archiveTextEl.hidden = true;
-    archiveTextEl.textContent = '';
+  if (archiveSessionEl) {
+    archiveSessionEl.hidden = true;
+  }
+  if (archiveDetailEmptyEl) {
+    archiveDetailEmptyEl.hidden = false;
+  }
+  if (archiveMessagesEl) {
+    archiveMessagesEl.replaceChildren();
   }
 }
 
-async function openArchive(archiveId, forceOpen = false) {
-  if (!archiveTextEl || !archiveId) {
+function getArchiveSummary(messages) {
+  const kinds = {
+    chat: 0,
+    like: 0,
+    gift: 0,
+    box: 0,
+    repost: 0,
+    share: 0,
+    member: 0
+  };
+  const moderators = new Set();
+  let giftCoins = 0;
+
+  messages.forEach((message) => {
+    const kind = Object.prototype.hasOwnProperty.call(kinds, message.kind) ? message.kind : 'chat';
+    kinds[kind] += 1;
+    if (kind === 'gift' || kind === 'box') {
+      giftCoins += Math.max(0, Number(message.giftCost) || 0);
+    }
+    if (message.isModerator) {
+      moderators.add(String(message.uniqueId || message.authorName || '').toLowerCase());
+    }
+  });
+
+  return {
+    total: messages.length,
+    chat: kinds.chat,
+    giftCoins,
+    moderators: Array.from(moderators).filter(Boolean).length
+  };
+}
+
+function renderArchiveSummary(messages) {
+  const summary = getArchiveSummary(messages);
+  if (archiveSummaryMessagesEl) {
+    archiveSummaryMessagesEl.textContent = formatCounter(summary.total);
+  }
+  if (archiveSummaryChatEl) {
+    archiveSummaryChatEl.textContent = formatCounter(summary.chat);
+  }
+  if (archiveSummaryCoinsEl) {
+    archiveSummaryCoinsEl.textContent = formatCounter(summary.giftCoins);
+  }
+  if (archiveSummaryModeratorsEl) {
+    archiveSummaryModeratorsEl.textContent = formatCounter(summary.moderators);
+  }
+}
+
+function renderArchiveMessages() {
+  if (!archiveMessagesEl || !selectedArchive) {
     return;
   }
 
-  if (!forceOpen && selectedArchiveId === archiveId && !archiveTextEl.hidden) {
+  const messages = Array.isArray(selectedArchive.messages) ? selectedArchive.messages : [];
+  const filtered = messages.filter((message) => activeArchiveFilters.has(message.kind || 'chat'));
+  archiveMessagesEl.replaceChildren();
+
+  if (!filtered.length) {
+    const empty = document.createElement('div');
+    empty.className = 'archive-filter-empty';
+    empty.textContent = t('archive.filteredEmpty');
+    archiveMessagesEl.appendChild(empty);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((message) => {
+    const item = renderMessageElement(message);
+    item.classList.add('archive-message');
+    fragment.appendChild(item);
+  });
+  archiveMessagesEl.appendChild(fragment);
+}
+
+function renderArchiveSession() {
+  if (!selectedArchive || !archiveSessionEl) {
     closeArchive();
+    return;
+  }
+
+  const entry = selectedArchive.entry || {};
+  archiveSessionEl.hidden = false;
+  if (archiveDetailEmptyEl) {
+    archiveDetailEmptyEl.hidden = true;
+  }
+  if (archiveSessionNameEl) {
+    archiveSessionNameEl.textContent = entry.name || t('archive.defaultName');
+  }
+  if (archiveSessionMetaEl) {
+    const parts = [entry.date, entry.time];
+    if (selectedArchive.legacy) {
+      parts.push(t('archive.legacy'));
+    }
+    archiveSessionMetaEl.textContent = parts.filter(Boolean).join(' · ');
+  }
+  renderArchiveSummary(selectedArchive.messages || []);
+  renderArchiveMessages();
+}
+
+async function openArchive(archiveId) {
+  if (!archiveSessionEl || !archiveId) {
     return;
   }
 
   selectedArchiveId = archiveId;
   updateArchiveSelection();
-  const archiveButton = archiveListEl
-    ? archiveListEl.querySelector(`[data-archive-id="${CSS.escape(archiveId)}"]`)
-    : null;
-  if (archiveButton) {
-    const row = archiveButton.closest('.archive-entry');
-    (row || archiveButton).insertAdjacentElement('afterend', archiveTextEl);
+  if (archiveSessionNameEl) {
+    archiveSessionNameEl.textContent = t('archive.loading');
   }
-  archiveTextEl.hidden = false;
-  archiveTextEl.textContent = t('archive.loading');
+  archiveSessionEl.hidden = false;
+  if (archiveDetailEmptyEl) {
+    archiveDetailEmptyEl.hidden = true;
+  }
 
   try {
     const result = await window.tiktokLive.getArchiveContent(archiveId);
-    archiveTextEl.textContent = result && result.ok && result.text
-      ? result.text
-      : t('archive.loadFailed');
+    if (!result || !result.ok) {
+      throw new Error(result && result.error ? result.error : t('archive.loadFailed'));
+    }
+    selectedArchive = {
+      entry: result.entry,
+      messages: Array.isArray(result.messages) ? result.messages : [],
+      legacy: Boolean(result.legacy)
+    };
+    renderArchiveSession();
   } catch (error) {
-    archiveTextEl.textContent = t('archive.loadFailedWithError', {
-      error: error && error.message ? error.message : error
-    });
+    closeArchive();
+    if (archiveDetailEmptyEl) {
+      archiveDetailEmptyEl.hidden = false;
+      const description = archiveDetailEmptyEl.querySelector('span:last-child');
+      if (description) {
+        description.textContent = t('archive.loadFailedWithError', {
+          error: error && error.message ? error.message : error
+        });
+      }
+    }
   }
 }
 
-function renderArchiveList(archives) {
+function getFilteredArchiveEntries() {
+  const query = archiveSearchEl ? archiveSearchEl.value.trim().toLowerCase() : '';
+  if (!query) {
+    return archiveEntries;
+  }
+
+  return archiveEntries.filter((entry) => (
+    [entry.name, entry.username, entry.date, entry.time]
+      .some((value) => String(value || '').toLowerCase().includes(query))
+  ));
+}
+
+function renderArchiveList() {
   if (!archiveListEl) {
     return;
   }
 
-  const entries = Array.isArray(archives) ? archives : [];
+  const entries = getFilteredArchiveEntries();
   archiveListEl.replaceChildren();
   if (!entries.length) {
     const empty = document.createElement('div');
     empty.className = 'archive-empty';
-    empty.textContent = t('archive.empty');
+    empty.textContent = archiveEntries.length ? t('archive.noMatches') : t('archive.empty');
     archiveListEl.appendChild(empty);
-    closeArchive();
     return;
   }
 
@@ -2860,28 +3084,103 @@ function renderArchiveList(archives) {
     button.type = 'button';
     button.dataset.archiveId = entry.id;
 
-    const time = document.createElement('time');
-    time.textContent = entry.time || '';
+    const icon = document.createElement('span');
+    icon.className = 'archive-row-icon';
+    icon.appendChild(createUiIcon('broadcast'));
 
-    const content = document.createElement('div');
+    const content = document.createElement('span');
     content.className = 'archive-row-content';
 
-    const name = document.createElement('span');
+    const name = document.createElement('strong');
     name.className = 'archive-name';
     name.textContent = entry.name || t('archive.defaultName');
 
-    const meta = document.createElement('span');
-    meta.className = 'archive-meta';
-    meta.textContent = entry.date || '';
+    const date = document.createElement('span');
+    date.className = 'archive-meta';
+    date.textContent = entry.date || '';
 
-    content.append(name, meta);
-    button.append(time, content);
+    const time = document.createElement('time');
+    time.textContent = entry.time || '';
+
+    const count = document.createElement('span');
+    count.className = 'archive-count';
+    count.append(createUiIcon('message'), document.createTextNode(formatCounter(entry.summary && entry.summary.total)));
+
+    content.append(name, date, time);
+    button.append(icon, content, count);
     button.addEventListener('click', () => openArchive(entry.id));
 
     row.appendChild(button);
     archiveListEl.appendChild(row);
   });
   updateArchiveSelection();
+}
+
+function setArchiveStatus(message, restore = true) {
+  const status = document.querySelector('.archive-status');
+  if (!status) {
+    return;
+  }
+
+  status.textContent = message;
+  if (restore) {
+    window.setTimeout(() => {
+      status.textContent = t('archive.status');
+    }, 2400);
+  }
+}
+
+async function exportSelectedArchive() {
+  if (!selectedArchiveId) {
+    return;
+  }
+  try {
+    const result = await window.tiktokLive.exportArchive(selectedArchiveId);
+    if (result && result.ok) {
+      setArchiveStatus(t('archive.exported'));
+    } else if (!result || !result.canceled) {
+      setArchiveStatus(t('archive.exportFailed'));
+    }
+  } catch {
+    setArchiveStatus(t('archive.exportFailed'));
+  }
+}
+
+async function deleteSelectedArchive() {
+  if (!selectedArchiveId || !selectedArchive) {
+    return;
+  }
+  const name = selectedArchive.entry && selectedArchive.entry.name
+    ? selectedArchive.entry.name
+    : t('archive.defaultName');
+  if (!window.confirm(t('archive.deleteConfirm', { name }))) {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.deleteArchive(selectedArchiveId);
+    if (!result || !result.ok) {
+      setArchiveStatus(result && result.error === 'archive-active'
+        ? t('archive.activeDeleteFailed')
+        : t('archive.deleteFailed'));
+      return;
+    }
+    closeArchive();
+    await refreshArchive();
+  } catch {
+    setArchiveStatus(t('archive.deleteFailed'));
+  }
+}
+
+async function openArchiveFolder() {
+  try {
+    const result = await window.tiktokLive.openArchiveFolder();
+    if (!result || !result.ok) {
+      setArchiveStatus(t('archive.folderFailed'));
+    }
+  } catch {
+    setArchiveStatus(t('archive.folderFailed'));
+  }
 }
 
 async function refreshArchive() {
@@ -2892,12 +3191,12 @@ async function refreshArchive() {
   archiveListEl.textContent = t('archive.refreshing');
   try {
     const result = await window.tiktokLive.listArchives();
-    const archives = result && result.ok ? result.archives : [];
-    renderArchiveList(archives);
-    const hasSelectedArchive = selectedArchiveId && archives.some((entry) => entry.id === selectedArchiveId);
+    archiveEntries = result && result.ok && Array.isArray(result.archives) ? result.archives : [];
+    renderArchiveList();
+    const hasSelectedArchive = selectedArchiveId && archiveEntries.some((entry) => entry.id === selectedArchiveId);
     if (hasSelectedArchive) {
-      openArchive(selectedArchiveId, true);
-    } else if (archiveTextEl) {
+      await openArchive(selectedArchiveId);
+    } else if (selectedArchiveId) {
       closeArchive();
     }
   } catch (error) {
@@ -2936,6 +3235,38 @@ sidebarButtons.forEach((button) => {
 
 if (refreshArchiveButton) {
   refreshArchiveButton.addEventListener('click', refreshArchive);
+}
+
+if (openArchiveFolderButton) {
+  openArchiveFolderButton.addEventListener('click', openArchiveFolder);
+}
+
+if (archiveSearchEl) {
+  archiveSearchEl.addEventListener('input', renderArchiveList);
+}
+
+archiveFilterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const filter = button.dataset.archiveFilter;
+    if (!filter) {
+      return;
+    }
+    if (activeArchiveFilters.has(filter)) {
+      activeArchiveFilters.delete(filter);
+    } else {
+      activeArchiveFilters.add(filter);
+    }
+    button.dataset.active = String(activeArchiveFilters.has(filter));
+    renderArchiveMessages();
+  });
+});
+
+if (exportArchiveButton) {
+  exportArchiveButton.addEventListener('click', exportSelectedArchive);
+}
+
+if (deleteArchiveButton) {
+  deleteArchiveButton.addEventListener('click', deleteSelectedArchive);
 }
 
 document.addEventListener('keydown', (event) => {
