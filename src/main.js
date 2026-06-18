@@ -2,7 +2,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { app, BaseWindow, WebContentsView, ipcMain, Menu, Tray, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
-const { TikTokLiveConnection, WebcastEvent, ControlEvent } = require('tiktok-live-connector');
+const {
+  TikTokLiveConnection,
+  WebcastEvent,
+  ControlEvent,
+  UserOfflineError,
+  SignatureRateLimitError
+} = require('tiktok-live-connector');
 
 const LOGIN_URL = 'https://www.tiktok.com/login';
 const PARTITION = 'persist:tiktok-live-session';
@@ -16,6 +22,10 @@ const PROGRAM_AUTHOR_UNIQUE_ID = 'bakus.03';
 const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
 const APP_VERSION = app.getVersion();
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+const RECONNECT_BASE_DELAY_MS = 30 * 1000;
+const RECONNECT_MAX_DELAY_MS = 5 * 60 * 1000;
+const OFFLINE_RECONNECT_DELAY_MS = 10 * 60 * 1000;
+const RATE_LIMIT_FALLBACK_DELAY_MS = 60 * 60 * 1000;
 const START_BACKGROUND_ARG = '--czatbox-background';
 const DEFAULT_SYSTEM_SETTINGS = {
   autoLaunch: false,
@@ -173,6 +183,8 @@ let liveConnection;
 let isConnecting = false;
 let connectionAttemptId = 0;
 let reconnectTimer;
+let reconnectAttemptCount = 0;
+let reconnectBlockedUntil = 0;
 let battleActive = false;
 let lastBattleAlertKey = '';
 let lastBattleAlertAt = 0;
@@ -186,6 +198,7 @@ const seenMessageKeys = new Map();
 const likeTotalsByUser = new Map();
 const state = {
   mode: 'login',
+  connectionStatus: 'idle',
   loggedIn: false,
   lastMessage: 'Logowanie',
   archiveDir: ARCHIVE_DIR,
@@ -974,6 +987,7 @@ async function showChatMode() {
   }
 
   state.mode = 'chat';
+  state.connectionStatus = 'connecting';
   state.lastMessage = 'Lacze z czatem LIVE';
   resetChatBuffers();
   layoutViews();
@@ -984,6 +998,7 @@ async function showChatMode() {
 async function showLoginMode() {
   finalizeArchiveSession();
   state.mode = 'login';
+  state.connectionStatus = 'idle';
   state.lastMessage = 'Logowanie';
   state.source = 'rozlaczony';
   disconnectLiveConnection();
@@ -1008,15 +1023,94 @@ function getConnectorOptions() {
   };
 }
 
+function getConnectionErrorMessage(error) {
+  if (error && typeof error.message === 'string' && error.message.trim()) {
+    return error.message.trim();
+  }
+
+  if (error && typeof error === 'object') {
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+
+  return String(error || 'Nieznany blad');
+}
+
+function classifyConnectionError(error) {
+  const message = getConnectionErrorMessage(error);
+  const normalized = message.toLowerCase();
+
+  if (
+    error instanceof SignatureRateLimitError
+    || normalized.includes('rate limited')
+    || normalized.includes('rate_limit')
+    || normalized.includes('too many connections')
+  ) {
+    return 'rate-limited';
+  }
+
+  if (
+    error instanceof UserOfflineError
+    || normalized.includes('user is offline')
+    || normalized.includes('live has ended')
+    || normalized.includes('room is offline')
+  ) {
+    return 'offline';
+  }
+
+  return 'error';
+}
+
+function getRateLimitDelay(error) {
+  const now = Date.now();
+  const resetTime = Number(error && error.resetTime);
+  if (Number.isFinite(resetTime) && resetTime > now) {
+    return Math.max(60 * 1000, resetTime - now + 1000);
+  }
+
+  const retryAfter = Number(error && error.retryAfter);
+  if (Number.isFinite(retryAfter) && retryAfter > 0) {
+    return Math.max(60 * 1000, retryAfter + 1000);
+  }
+
+  return RATE_LIMIT_FALLBACK_DELAY_MS;
+}
+
+function getReconnectDelay() {
+  const exponent = Math.max(0, reconnectAttemptCount - 1);
+  return Math.min(RECONNECT_MAX_DELAY_MS, RECONNECT_BASE_DELAY_MS * (2 ** exponent));
+}
+
+function formatRetryClock(timestamp) {
+  return new Intl.DateTimeFormat('pl-PL', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(timestamp));
+}
+
 async function connectLiveChat() {
   if (isConnecting || (liveConnection && liveConnection.isConnected)) {
     return;
   }
 
   clearTimeout(reconnectTimer);
+  const now = Date.now();
+  if (reconnectBlockedUntil > now) {
+    state.connectionStatus = 'rate-limited';
+    state.source = 'limit polaczen';
+    state.lastMessage = `Limit polaczen z TikTok. Kolejna proba o ${formatRetryClock(reconnectBlockedUntil)}`;
+    scheduleReconnect(reconnectBlockedUntil - now);
+    publishState();
+    return;
+  }
+
   isConnecting = true;
   const attemptId = ++connectionAttemptId;
   const creator = getCurrentCreator();
+  state.connectionStatus = 'connecting';
   state.source = 'laczenie';
   state.lastMessage = `Lacze z @${creator.username}`;
   publishState();
@@ -1136,6 +1230,9 @@ async function connectLiveChat() {
         return;
       }
 
+      reconnectAttemptCount = 0;
+      reconnectBlockedUntil = 0;
+      state.connectionStatus = 'online';
       state.source = `polaczono: room ${connectionState.roomId || '?'}`;
       state.lastMessage = `Polaczono z @${creator.username}`;
       publishState();
@@ -1146,11 +1243,18 @@ async function connectLiveChat() {
         return;
       }
 
+      if (state.connectionStatus === 'offline') {
+        return;
+      }
+
       battleActive = false;
+      state.connectionStatus = 'reconnecting';
       state.source = 'rozlaczono';
-      state.lastMessage = 'Rozlaczono z czatem, ponawiam za 5s';
+      reconnectAttemptCount += 1;
+      const delay = getReconnectDelay();
+      state.lastMessage = `Rozlaczono z czatem, ponawiam za ${Math.ceil(delay / 1000)}s`;
       publishState();
-      scheduleReconnect();
+      scheduleReconnect(delay);
     });
 
     connection.on(WebcastEvent.STREAM_END, () => {
@@ -1159,6 +1263,10 @@ async function connectLiveChat() {
       }
 
       battleActive = false;
+      clearTimeout(reconnectTimer);
+      reconnectAttemptCount = 0;
+      reconnectBlockedUntil = 0;
+      state.connectionStatus = 'offline';
       state.source = 'live zakonczony';
       state.lastMessage = 'Live jest zakonczony albo offline';
       finalizeArchiveSession();
@@ -1170,8 +1278,24 @@ async function connectLiveChat() {
         return;
       }
 
-      state.source = 'blad';
-      state.lastMessage = `Blad czatu: ${error && error.message ? error.message : String(error)}`;
+      if (isConnecting) {
+        return;
+      }
+
+      if (connection.isConnected) {
+        state.connectionStatus = 'online';
+        state.source = 'polaczono z ostrzezeniem';
+        state.lastMessage = `Polaczono; chwilowy blad czatu: ${getConnectionErrorMessage(error)}`;
+        publishState();
+        return;
+      }
+
+      const failureType = classifyConnectionError(error);
+      state.connectionStatus = failureType;
+      state.source = failureType === 'rate-limited' ? 'limit polaczen' : 'blad';
+      state.lastMessage = failureType === 'rate-limited'
+        ? 'Osiagnieto limit polaczen z TikTok'
+        : `Blad czatu: ${getConnectionErrorMessage(error)}`;
       publishState();
     });
 
@@ -1180,6 +1304,9 @@ async function connectLiveChat() {
       return;
     }
 
+    reconnectAttemptCount = 0;
+    reconnectBlockedUntil = 0;
+    state.connectionStatus = 'online';
     state.source = `polaczono: room ${connectedState.roomId || '?'}`;
     state.lastMessage = `Polaczono z @${creator.username}`;
   } catch (error) {
@@ -1187,9 +1314,28 @@ async function connectLiveChat() {
       return;
     }
 
-    state.source = 'blad polaczenia';
-    state.lastMessage = `Nie moge pobrac czatu: ${error && error.message ? error.message : String(error)}`;
-    scheduleReconnect();
+    const failureType = classifyConnectionError(error);
+    if (failureType === 'rate-limited') {
+      const delay = getRateLimitDelay(error);
+      reconnectBlockedUntil = Date.now() + delay;
+      state.connectionStatus = 'rate-limited';
+      state.source = 'limit polaczen';
+      state.lastMessage = `Limit polaczen z TikTok. Kolejna proba o ${formatRetryClock(reconnectBlockedUntil)}`;
+      scheduleReconnect(delay);
+    } else if (failureType === 'offline') {
+      reconnectAttemptCount = 0;
+      state.connectionStatus = 'offline';
+      state.source = 'live offline';
+      state.lastMessage = `@${creator.username} nie prowadzi teraz LIVE`;
+      scheduleReconnect(OFFLINE_RECONNECT_DELAY_MS);
+    } else {
+      reconnectAttemptCount += 1;
+      const delay = getReconnectDelay();
+      state.connectionStatus = 'error';
+      state.source = 'blad polaczenia';
+      state.lastMessage = `Blad polaczenia. Ponawiam za ${Math.ceil(delay / 1000)}s: ${getConnectionErrorMessage(error)}`;
+      scheduleReconnect(delay);
+    }
   } finally {
     if (connectionAttemptId === attemptId) {
       isConnecting = false;
@@ -1207,11 +1353,22 @@ async function selectCreator(creatorInput) {
   if (state.creatorId === creator.id) {
     syncCurrentCreatorState(creator);
     publishState();
+    if (
+      state.mode === 'chat'
+      && !isConnecting
+      && (!liveConnection || !liveConnection.isConnected)
+      && reconnectBlockedUntil <= Date.now()
+    ) {
+      clearTimeout(reconnectTimer);
+      await connectLiveChat();
+    }
     return { ok: true, creator: publicCreator(creator) };
   }
 
   customCreator = creator.custom ? creator : null;
   syncCurrentCreatorState(creator);
+  reconnectAttemptCount = 0;
+  state.connectionStatus = state.mode === 'chat' ? 'connecting' : state.connectionStatus;
   state.lastMessage = `Wybrano @${creator.username}`;
   state.source = state.mode === 'chat' ? 'przelaczam' : state.source;
   finalizeArchiveSession();
@@ -1248,15 +1405,16 @@ function disconnectLiveConnection(options = {}) {
   }
 }
 
-function scheduleReconnect() {
+function scheduleReconnect(delayMs = RECONNECT_BASE_DELAY_MS) {
   clearTimeout(reconnectTimer);
   if (state.mode !== 'chat') {
     return;
   }
 
+  const safeDelay = Math.max(1000, Number(delayMs) || RECONNECT_BASE_DELAY_MS);
   reconnectTimer = setTimeout(() => {
     connectLiveChat().catch(() => {});
-  }, 5000);
+  }, safeDelay);
 }
 
 function formatChatEvent(data) {
@@ -1933,7 +2091,17 @@ function reloadCurrentMode() {
     return;
   }
 
+  finalizeArchiveSession();
   disconnectLiveConnection();
+  resetChatBuffers();
+  sendToShell('shell:chat-reset', {
+    creatorId: state.creatorId,
+    reason: 'reload'
+  });
+  state.connectionStatus = 'connecting';
+  state.source = 'ponowne laczenie';
+  state.lastMessage = `Ponownie lacze z @${getCurrentCreator().username}`;
+  publishState();
   connectLiveChat().catch(() => {});
 }
 

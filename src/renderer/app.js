@@ -15,9 +15,24 @@ const APP_APPEARANCES = ['standard', 'ozdobny'];
 const APP_LANGUAGES = ['pl', 'en', 'de'];
 const TIME_FORMATS = ['auto', '12', '24'];
 const TOP_GIFTERS_LIMIT = 5;
+const MODERATOR_ACTIVE_WINDOW_MS = 5 * 60 * 1000;
+const ACTIVE_MODERATORS_LIMIT = 20;
 const MAX_RECENT_CREATORS = 10;
 const HEART_ME_GIFT_NAME = 'heart me';
 const RECOMMENDED_EXCLUDED_CREATOR_IDS = new Set(['milusia313', 'szwagierkaqueen', 'krzysztofzdziars9']);
+const UI_ICONS = {
+  'chevron-down': '<path d="m7 10 5 5 5-5"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  inbox: '<path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5Z"/><path d="M3.5 14h4l1.5 2h6l1.5-2h4"/>',
+  users: '<circle cx="9" cy="9" r="3"/><path d="M3.75 19c.55-3.15 2.3-5 5.25-5s4.7 1.85 5.25 5"/><path d="M15.5 6.75a3 3 0 0 1 0 5.5M15.75 14.25c2.45.3 3.9 1.9 4.4 4.75"/>',
+  message: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  heart: '<path d="M12 19.25 5.35 13A4.65 4.65 0 0 1 12 6.55 4.65 4.65 0 0 1 18.65 13L12 19.25Z"/>',
+  'heart-off': '<path d="m4 4 16 16"/><path d="M9.3 6.05A4.65 4.65 0 0 1 12 7.2 4.65 4.65 0 0 1 18.65 13l-1.15 1.1M14.5 16.9 12 19.25 5.35 13A4.65 4.65 0 0 1 7 5.4"/>',
+  chart: '<path d="M5 19V11h3v8M10.5 19V5h3v14M16 19V8h3v11"/><path d="M3.5 19.5h17"/>',
+  trophy: '<path d="M8 5h8v4.5a4 4 0 0 1-8 0V5Z"/><path d="M8 7H5v1.5A3.5 3.5 0 0 0 8.5 12M16 7h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13.5V17M8.5 19h7M10 17h4"/>',
+  shield: '<path d="M12 3.75 19 6.5v5.25c0 4.1-2.35 7.1-7 8.5-4.65-1.4-7-4.4-7-8.5V6.5l7-2.75Z"/><path d="m8.75 12 2.1 2.1 4.4-4.45"/>',
+  coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>'
+};
 const DEFAULT_SYSTEM_SETTINGS = {
   autoLaunch: false,
   runInBackground: false,
@@ -171,11 +186,22 @@ const I18N = {
     'statsWidget.messages': 'Wysłane wiadomości',
     'statsWidget.activeHearts': 'Odbite serca',
     'statsWidget.inactiveHearts': 'Nieodbite serca',
+    'statsWidget.dock': 'Narzędzia LIVE',
     'statsWidget.expand': 'Rozwiń statystyki LIVE',
     'statsWidget.collapse': 'Zwiń statystyki LIVE',
-    'status.connecting': '🟡Łączę...',
-    'status.online': '🟢Online',
-    'status.offline': '🔴Offline',
+    'topGifters.title': 'Top giftujący',
+    'topGifters.expand': 'Rozwiń top giftujących',
+    'topGifters.collapse': 'Zwiń top giftujących',
+    'moderatorsWidget.title': 'Aktywni moderatorzy',
+    'moderatorsWidget.empty': 'Brak aktywnych moderatorów w ostatnich 5 minutach.',
+    'moderatorsWidget.expand': 'Rozwiń listę aktywnych moderatorów',
+    'moderatorsWidget.collapse': 'Zwiń listę aktywnych moderatorów',
+    'status.connecting': 'Łączę...',
+    'status.online': 'Online',
+    'status.offline': 'Offline',
+    'status.reconnecting': 'Ponawiam...',
+    'status.rateLimited': 'Limit połączeń',
+    'status.error': 'Błąd połączenia',
     'chat.empty': 'Po zalogowaniu pojawia się tutaj spowolniony czat LIVE.',
     'archive.loading': 'Wczytuję archiwum...',
     'archive.loadFailed': 'Nie udało się odczytać archiwum.',
@@ -322,11 +348,22 @@ const I18N = {
     'statsWidget.messages': 'Messages sent',
     'statsWidget.activeHearts': 'Heart Me sent',
     'statsWidget.inactiveHearts': 'Heart Me not sent',
+    'statsWidget.dock': 'LIVE tools',
     'statsWidget.expand': 'Expand LIVE statistics',
     'statsWidget.collapse': 'Collapse LIVE statistics',
-    'status.connecting': '🟡Connecting...',
-    'status.online': '🟢Online',
-    'status.offline': '🔴Offline',
+    'topGifters.title': 'Top gifters',
+    'topGifters.expand': 'Expand top gifters',
+    'topGifters.collapse': 'Collapse top gifters',
+    'moderatorsWidget.title': 'Active moderators',
+    'moderatorsWidget.empty': 'No active moderators in the last 5 minutes.',
+    'moderatorsWidget.expand': 'Expand active moderators',
+    'moderatorsWidget.collapse': 'Collapse active moderators',
+    'status.connecting': 'Connecting...',
+    'status.online': 'Online',
+    'status.offline': 'Offline',
+    'status.reconnecting': 'Retrying...',
+    'status.rateLimited': 'Connection limit',
+    'status.error': 'Connection error',
     'chat.empty': 'After logging in, delayed LIVE chat will appear here.',
     'archive.loading': 'Loading archive...',
     'archive.loadFailed': 'Could not read the archive.',
@@ -473,11 +510,22 @@ const I18N = {
     'statsWidget.messages': 'Gesendete Nachrichten',
     'statsWidget.activeHearts': 'Heart Me gesendet',
     'statsWidget.inactiveHearts': 'Heart Me nicht gesendet',
+    'statsWidget.dock': 'LIVE-Werkzeuge',
     'statsWidget.expand': 'LIVE-Statistiken öffnen',
     'statsWidget.collapse': 'LIVE-Statistiken schließen',
-    'status.connecting': '🟡Verbinde...',
-    'status.online': '🟢Online',
-    'status.offline': '🔴Offline',
+    'topGifters.title': 'Top-Geschenkgeber',
+    'topGifters.expand': 'Top-Geschenkgeber öffnen',
+    'topGifters.collapse': 'Top-Geschenkgeber schließen',
+    'moderatorsWidget.title': 'Aktive Moderatoren',
+    'moderatorsWidget.empty': 'Keine aktiven Moderatoren in den letzten 5 Minuten.',
+    'moderatorsWidget.expand': 'Aktive Moderatoren öffnen',
+    'moderatorsWidget.collapse': 'Aktive Moderatoren schließen',
+    'status.connecting': 'Verbinde...',
+    'status.online': 'Online',
+    'status.offline': 'Offline',
+    'status.reconnecting': 'Erneuter Versuch...',
+    'status.rateLimited': 'Verbindungslimit',
+    'status.error': 'Verbindungsfehler',
     'chat.empty': 'Nach der Anmeldung erscheint hier der verzögerte LIVE-Chat.',
     'archive.loading': 'Archiv wird geladen...',
     'archive.loadFailed': 'Archiv konnte nicht gelesen werden.',
@@ -511,13 +559,14 @@ const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
 const statusQueueEl = document.getElementById('statusQueue');
 const statusViewersEl = document.getElementById('statusViewers');
-const topGiftersButton = document.getElementById('topGiftersButton');
-const topGiftersPanel = document.getElementById('topGiftersPanel');
+const topGiftersContent = document.getElementById('topGiftersContent');
+const moderatorsWidgetContent = document.getElementById('moderatorsWidgetContent');
 const statusMessagesEl = document.getElementById('statusMessages');
 const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
 const statusMemberHeartsExpiredEl = document.getElementById('statusMemberHeartsExpired');
 const statusStatsEl = document.getElementById('statusStats');
-const statsWidgetToggle = document.getElementById('statsWidgetToggle');
+const rightWidgets = Array.from(document.querySelectorAll('[data-right-widget]'));
+const rightWidgetButtons = Array.from(document.querySelectorAll('[data-widget-target]'));
 const creatorInput = document.getElementById('creatorInput');
 const creatorToggle = document.getElementById('creatorToggle');
 const creatorSuggestions = document.getElementById('creatorSuggestions');
@@ -565,6 +614,7 @@ const queuedMessagesById = new Map();
 const visibleMessagesById = new Map();
 const giftTotalsByUser = new Map();
 const activeChatUsers = new Map();
+const activeModerators = new Map();
 const speechQueue = [];
 const activeFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
 let state = {};
@@ -900,7 +950,7 @@ function applyI18n() {
   syncTtsVoices();
   syncSystemControls();
   renderRecommendedCreators();
-  syncStatsWidgetToggle();
+  syncRightWidgetDock();
   updateStatus();
   if (!visibleMessages.length && emptyEl) {
     emptyEl.textContent = t('chat.empty');
@@ -979,9 +1029,8 @@ function applyGeneralSettings() {
     statusStatsEl.hidden = !generalSettings.statsToolbox;
   }
 
-  if (!generalSettings.statsToolbox && statusStatsEl) {
-    statusStatsEl.dataset.expanded = 'false';
-    syncStatsWidgetToggle();
+  if (!generalSettings.statsToolbox) {
+    setOpenRightWidget('');
   }
 
   if (!generalSettings.multiplierNotifications && battleBanner && battleBanner.dataset.tone === 'battle') {
@@ -1009,28 +1058,42 @@ function initGeneralSettings() {
     });
   }
 
-  if (statsWidgetToggle && statusStatsEl) {
-    statsWidgetToggle.addEventListener('click', () => {
-      const expanded = statusStatsEl.dataset.expanded === 'true';
-      statusStatsEl.dataset.expanded = String(!expanded);
-      syncStatsWidgetToggle();
+  rightWidgetButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button.dataset.widgetTarget || '';
+      const widget = rightWidgets.find((item) => item.dataset.rightWidget === target);
+      const shouldOpen = Boolean(widget && widget.dataset.expanded !== 'true');
+      if (target === 'top' && shouldOpen) {
+        renderTopGiftersPanel();
+      } else if (target === 'moderators' && shouldOpen) {
+        renderModeratorsWidget();
+      }
+      setOpenRightWidget(shouldOpen ? target : '');
     });
-  }
+  });
 }
 
-function syncStatsWidgetToggle() {
-  if (!statsWidgetToggle || !statusStatsEl) {
-    return;
-  }
+function setOpenRightWidget(target) {
+  rightWidgets.forEach((widget) => {
+    widget.dataset.expanded = String(Boolean(target) && widget.dataset.rightWidget === target);
+  });
+  syncRightWidgetDock();
+}
 
-  const expanded = statusStatsEl.dataset.expanded === 'true';
-  statsWidgetToggle.setAttribute('aria-expanded', String(expanded));
-  statsWidgetToggle.setAttribute('aria-label', t(expanded ? 'statsWidget.collapse' : 'statsWidget.expand'));
-  statsWidgetToggle.title = t(expanded ? 'statsWidget.collapse' : 'statsWidget.expand');
-  const icon = statsWidgetToggle.querySelector('span');
-  if (icon) {
-    icon.textContent = expanded ? '›' : '‹';
-  }
+function syncRightWidgetDock() {
+  rightWidgetButtons.forEach((button) => {
+    const target = button.dataset.widgetTarget || '';
+    const widget = rightWidgets.find((item) => item.dataset.rightWidget === target);
+    const expanded = Boolean(widget && widget.dataset.expanded === 'true');
+    const keyPrefix = target === 'top'
+      ? 'topGifters'
+      : target === 'moderators'
+        ? 'moderatorsWidget'
+        : 'statsWidget';
+    button.setAttribute('aria-expanded', String(expanded));
+    button.setAttribute('aria-label', t(`${keyPrefix}.${expanded ? 'collapse' : 'expand'}`));
+    button.title = t(`${keyPrefix}.${expanded ? 'collapse' : 'expand'}`);
+  });
 }
 
 function syncSystemControls() {
@@ -1465,6 +1528,30 @@ function initTextToSpeech() {
 }
 
 function getConnectionStatusText() {
+  if (state.connectionStatus === 'online') {
+    return t('status.online');
+  }
+
+  if (state.connectionStatus === 'offline') {
+    return t('status.offline');
+  }
+
+  if (state.connectionStatus === 'rate-limited') {
+    return t('status.rateLimited');
+  }
+
+  if (state.connectionStatus === 'error') {
+    return t('status.error');
+  }
+
+  if (state.connectionStatus === 'reconnecting') {
+    return t('status.reconnecting');
+  }
+
+  if (state.connectionStatus === 'connecting') {
+    return t('status.connecting');
+  }
+
   if (isOfflineConnectionState(state)) {
     return t('status.offline');
   }
@@ -1483,9 +1570,7 @@ function isOfflineConnectionState(value) {
 
   return value.mode === 'chat'
     && (
-      combined.includes('nie moge pobrac czatu')
-      || combined.includes('blad')
-      || combined.includes('offline')
+      combined.includes('offline')
       || combined.includes('zakonczony')
     );
 }
@@ -1504,10 +1589,79 @@ function formatCounter(value) {
   return new Intl.NumberFormat(LANGUAGE_LOCALES[appLanguage] || undefined).format(number);
 }
 
-function setStatusSegment(element, text) {
-  if (element) {
-    element.textContent = text;
+function createUiIcon(name, className = '') {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.classList.add('ui-icon');
+  if (className) {
+    svg.classList.add(...className.split(/\s+/).filter(Boolean));
   }
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.8');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = UI_ICONS[name] || UI_ICONS.message;
+  return svg;
+}
+
+function hydrateUiIcons(root = document) {
+  root.querySelectorAll('[data-ui-icon]').forEach((slot) => {
+    const iconName = slot.dataset.uiIcon;
+    if (!iconName || slot.querySelector('.ui-icon')) {
+      return;
+    }
+    slot.replaceChildren(createUiIcon(iconName));
+  });
+}
+
+function getConnectionStatusTone() {
+  const status = state.connectionStatus;
+  if (status === 'online') {
+    return 'online';
+  }
+  if (status === 'offline') {
+    return 'offline';
+  }
+  if (status === 'error' || status === 'rate-limited') {
+    return 'warning';
+  }
+  return 'connecting';
+}
+
+function setStatusSegment(element, text, options = {}) {
+  if (!element) {
+    return;
+  }
+
+  if (options.tone) {
+    element.dataset.tone = options.tone;
+    let dot = element.querySelector('.status-dot');
+    let label = element.querySelector('.status-text');
+    if (!dot) {
+      dot = document.createElement('span');
+      dot.className = 'status-dot';
+      dot.setAttribute('aria-hidden', 'true');
+    }
+    if (!label) {
+      label = document.createElement('span');
+      label.className = 'status-text';
+    }
+    label.textContent = text;
+    element.replaceChildren(dot, label);
+    return;
+  }
+
+  if (options.icon) {
+    const label = document.createElement('span');
+    label.className = 'status-text';
+    label.textContent = text;
+    element.replaceChildren(createUiIcon(options.icon), label);
+    return;
+  }
+
+  element.textContent = text;
 }
 
 function getTopGifters() {
@@ -1534,7 +1688,7 @@ function getHeartMeGiftStats() {
 }
 
 function renderTopGiftersPanel() {
-  if (!topGiftersPanel) {
+  if (!topGiftersContent) {
     return;
   }
 
@@ -1543,45 +1697,111 @@ function renderTopGiftersPanel() {
     const empty = document.createElement('div');
     empty.className = 'top-gifters-empty';
     empty.textContent = t('topGifters.empty');
-    topGiftersPanel.replaceChildren(empty);
+    topGiftersContent.replaceChildren(empty);
     return;
   }
 
   const list = document.createElement('ol');
   list.className = 'top-gifters-list';
-  topGifters.forEach((entry) => {
+  topGifters.forEach((entry, index) => {
     const item = document.createElement('li');
+    item.className = 'stats-widget-row top-gifter-row';
+
+    const rank = document.createElement('span');
+    rank.className = 'stats-widget-icon top-gifter-rank';
+    rank.textContent = String(index + 1);
+
     const name = document.createElement('span');
-    name.className = 'top-gifter-name';
+    name.className = 'stats-widget-label top-gifter-name';
     name.textContent = entry.name;
 
-    const coins = document.createElement('span');
+    const coins = document.createElement('strong');
     coins.className = 'top-gifter-coins';
-    coins.textContent = `(🪙 ${formatCounter(entry.coins)})`;
+    coins.append(createUiIcon('coin'), document.createTextNode(formatCounter(entry.coins)));
 
-    item.append(name, coins);
+    item.append(rank, name, coins);
     list.appendChild(item);
   });
 
-  topGiftersPanel.replaceChildren(list);
+  topGiftersContent.replaceChildren(list);
+}
+
+function getActiveModerators() {
+  const threshold = Date.now() - MODERATOR_ACTIVE_WINDOW_MS;
+  const moderators = [];
+
+  activeModerators.forEach((entry, key) => {
+    if (entry.lastSeen < threshold) {
+      activeModerators.delete(key);
+      return;
+    }
+
+    moderators.push(entry);
+  });
+
+  return moderators
+    .sort((left, right) => right.lastSeen - left.lastSeen || left.name.localeCompare(right.name))
+    .slice(0, ACTIVE_MODERATORS_LIMIT);
+}
+
+function renderModeratorsWidget() {
+  if (!moderatorsWidgetContent) {
+    return;
+  }
+
+  const moderators = getActiveModerators();
+  if (!moderators.length) {
+    const empty = document.createElement('div');
+    empty.className = 'top-gifters-empty moderators-widget-empty';
+    empty.textContent = t('moderatorsWidget.empty');
+    moderatorsWidgetContent.replaceChildren(empty);
+    return;
+  }
+
+  const list = document.createElement('ul');
+  list.className = 'top-gifters-list moderators-widget-list';
+
+  moderators.forEach((entry) => {
+    const item = document.createElement('li');
+    item.className = 'stats-widget-row moderator-widget-row';
+
+    const icon = document.createElement('span');
+    icon.className = 'stats-widget-icon moderator-widget-icon';
+    icon.appendChild(createUiIcon('shield'));
+
+    const name = document.createElement('span');
+    name.className = 'stats-widget-label moderator-widget-name';
+    name.textContent = entry.name;
+
+    item.append(icon, name);
+    list.appendChild(item);
+  });
+
+  moderatorsWidgetContent.replaceChildren(list);
 }
 
 function updateStatus() {
   const statusText = getConnectionStatusText();
-  const delayText = `⏰${formatDelaySeconds(chatDelayMs)}`;
-  const queueText = `📩${queue.length}`;
+  const delayText = formatDelaySeconds(chatDelayMs);
+  const queueText = formatCounter(queue.length);
   const heartMeGiftStats = getHeartMeGiftStats();
 
   if (statusConnectionEl) {
-    setStatusSegment(statusConnectionEl, statusText);
-    setStatusSegment(statusDelayEl, delayText);
-    setStatusSegment(statusQueueEl, queueText);
+    setStatusSegment(statusConnectionEl, statusText, { tone: getConnectionStatusTone() });
+    statusConnectionEl.title = typeof state.lastMessage === 'string' ? state.lastMessage : '';
+    setStatusSegment(statusDelayEl, delayText, { icon: 'clock' });
+    setStatusSegment(statusQueueEl, queueText, { icon: 'inbox' });
     setStatusSegment(statusViewersEl, formatCounter(liveViewerCount));
     setStatusSegment(statusMessagesEl, formatCounter(chatMessageCount));
     setStatusSegment(statusMemberHeartsActiveEl, formatCounter(heartMeGiftStats.active));
     setStatusSegment(statusMemberHeartsExpiredEl, formatCounter(heartMeGiftStats.inactive));
-    if (topGiftersPanel && !topGiftersPanel.hidden) {
+    const topWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'top');
+    if (topWidget && topWidget.dataset.expanded === 'true') {
       renderTopGiftersPanel();
+    }
+    const moderatorsWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'moderators');
+    if (moderatorsWidget && moderatorsWidget.dataset.expanded === 'true') {
+      renderModeratorsWidget();
     }
   } else {
     statusEl.textContent = `${statusText} | ${delayText} | ${queueText}`;
@@ -1969,14 +2189,10 @@ function getAvatarForMessage(message) {
 function resetStreamStats() {
   giftTotalsByUser.clear();
   activeChatUsers.clear();
+  activeModerators.clear();
   liveViewerCount = 0;
   chatMessageCount = 0;
-  if (topGiftersPanel) {
-    topGiftersPanel.hidden = true;
-  }
-  if (topGiftersButton) {
-    topGiftersButton.setAttribute('aria-expanded', 'false');
-  }
+  setOpenRightWidget('');
 }
 
 function resetMessages() {
@@ -2066,12 +2282,34 @@ function trackActiveUserStats(message) {
   activeChatUsers.set(key, current);
 }
 
+function trackModeratorStats(message) {
+  if (!message.isModerator) {
+    return;
+  }
+
+  const key = getStatsUserKey(message);
+  if (!key) {
+    return;
+  }
+
+  const current = activeModerators.get(key) || {
+    name: message.authorName || message.uniqueId || key,
+    uniqueId: message.uniqueId || '',
+    lastSeen: 0
+  };
+  current.name = message.authorName || current.name;
+  current.uniqueId = message.uniqueId || current.uniqueId;
+  current.lastSeen = Date.now();
+  activeModerators.set(key, current);
+}
+
 function trackIncomingMessageStats(message) {
   if (!message) {
     return;
   }
 
   trackActiveUserStats(message);
+  trackModeratorStats(message);
 
   if (message.upsert) {
     return;
@@ -2700,35 +2938,11 @@ if (refreshArchiveButton) {
   refreshArchiveButton.addEventListener('click', refreshArchive);
 }
 
-if (topGiftersButton && topGiftersPanel) {
-  topGiftersButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    const shouldOpen = topGiftersPanel.hidden;
-    if (shouldOpen) {
-      renderTopGiftersPanel();
-    }
-    topGiftersPanel.hidden = !shouldOpen;
-    topGiftersButton.setAttribute('aria-expanded', String(shouldOpen));
-  });
-
-  topGiftersPanel.addEventListener('click', (event) => {
-    event.stopPropagation();
-  });
-
-  document.addEventListener('click', () => {
-    if (!topGiftersPanel.hidden) {
-      topGiftersPanel.hidden = true;
-      topGiftersButton.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !topGiftersPanel.hidden) {
-      topGiftersPanel.hidden = true;
-      topGiftersButton.setAttribute('aria-expanded', 'false');
-    }
-  });
-}
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    setOpenRightWidget('');
+  }
+});
 
 window.tiktokLive.onChatReset(() => {
   resetMessages();
@@ -2825,6 +3039,7 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
+hydrateUiIcons();
 initAppearanceSettings();
 initGeneralSettings();
 initSystemSettings();

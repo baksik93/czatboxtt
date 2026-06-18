@@ -20,7 +20,9 @@
           <label for="creatorInput">Twórca</label>
           <span class="creator-input-wrap">
             <input id="creatorInput" type="text" aria-label="Twórca LIVE" autocomplete="off" spellcheck="false" placeholder="@tworca lub link LIVE" aria-autocomplete="list" aria-expanded="false" aria-controls="creatorSuggestions">
-            <button class="creator-toggle" id="creatorToggle" type="button" aria-label="Pokaż listę twórców" aria-expanded="false">▾</button>
+            <button class="creator-toggle" id="creatorToggle" type="button" aria-label="Pokaż listę twórców" aria-expanded="false">
+              <span class="ui-icon-slot" data-ui-icon="chevron-down" aria-hidden="true"></span>
+            </button>
             <span class="creator-suggestions" id="creatorSuggestions" role="listbox" hidden></span>
           </span>
         </div>
@@ -47,12 +49,17 @@
               <button class="filter-button" type="button" data-filter="member" data-active="true">Dołączenia</button>
             </div>
             <div class="status" id="status">
-              <span id="statusConnection">🟡Łączę...</span>
-              <span id="statusDelay">⏰1.8s</span>
-              <span id="statusQueue">📩0</span>
-              <span class="top-gifters">
-                <button class="top-gifters-button" type="button" id="topGiftersButton" aria-expanded="false">👑Top</button>
-                <section class="top-gifters-panel" id="topGiftersPanel" hidden></section>
+              <span class="status-segment status-connection" id="statusConnection" data-tone="connecting">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span class="status-text">Łączę...</span>
+              </span>
+              <span class="status-segment" id="statusDelay">
+                <span class="ui-icon-slot" data-ui-icon="clock" aria-hidden="true"></span>
+                <span class="status-text">1.8s</span>
+              </span>
+              <span class="status-segment" id="statusQueue">
+                <span class="ui-icon-slot" data-ui-icon="inbox" aria-hidden="true"></span>
+                <span class="status-text">0</span>
               </span>
             </div>
           </section>
@@ -63,41 +70,58 @@
             <div class="empty" id="empty">Po zalogowaniu pojawia sie tutaj spowolniony czat LIVE.</div>
           </section>
 
-          <aside class="stats-widget" id="statusStats" data-expanded="false" aria-label="Statystyki LIVE" data-i18n-aria-label="statsWidget.title">
-            <section class="stats-widget-panel" id="statsWidgetPanel">
-              <h2 data-i18n="statsWidget.title">Statystyki LIVE</h2>
-              <div class="stats-widget-row">
-                <span class="stats-widget-icon" aria-hidden="true">👤</span>
-                <span class="stats-widget-label" data-i18n="statsWidget.viewers">Osoby na czacie</span>
-                <strong id="statusViewers">0</strong>
+          <aside class="right-widget-dock" id="statusStats" aria-label="Narzędzia LIVE" data-i18n-aria-label="statsWidget.dock">
+            <section class="right-widget" data-right-widget="stats" data-expanded="false">
+              <div class="right-widget-panel stats-widget-panel" id="statsWidgetPanel">
+                <h2 data-i18n="statsWidget.title">Statystyki LIVE</h2>
+                <div class="stats-widget-row">
+                  <span class="stats-widget-icon" data-ui-icon="users" aria-hidden="true"></span>
+                  <span class="stats-widget-label" data-i18n="statsWidget.viewers">Osoby na czacie</span>
+                  <strong id="statusViewers">0</strong>
+                </div>
+                <div class="stats-widget-row">
+                  <span class="stats-widget-icon" data-ui-icon="message" aria-hidden="true"></span>
+                  <span class="stats-widget-label" data-i18n="statsWidget.messages">Wysłane wiadomości</span>
+                  <strong id="statusMessages">0</strong>
+                </div>
+                <div class="stats-widget-row">
+                  <span class="stats-widget-icon stats-widget-icon-accent" data-ui-icon="heart" aria-hidden="true"></span>
+                  <span class="stats-widget-label" data-i18n="statsWidget.activeHearts">Odbite serca</span>
+                  <strong id="statusMemberHeartsActive">0</strong>
+                </div>
+                <div class="stats-widget-row">
+                  <span class="stats-widget-icon stats-widget-icon-muted" data-ui-icon="heart-off" aria-hidden="true"></span>
+                  <span class="stats-widget-label" data-i18n="statsWidget.inactiveHearts">Nieodbite serca</span>
+                  <strong id="statusMemberHeartsExpired">0</strong>
+                </div>
               </div>
-              <div class="stats-widget-row">
-                <span class="stats-widget-icon" aria-hidden="true">📧</span>
-                <span class="stats-widget-label" data-i18n="statsWidget.messages">Wysłane wiadomości</span>
-                <strong id="statusMessages">0</strong>
-              </div>
-              <div class="stats-widget-row">
-                <span class="stats-widget-icon" aria-hidden="true">❤️</span>
-                <span class="stats-widget-label" data-i18n="statsWidget.activeHearts">Odbite serca</span>
-                <strong id="statusMemberHeartsActive">0</strong>
-              </div>
-              <div class="stats-widget-row">
-                <span class="stats-widget-icon" aria-hidden="true">🖤</span>
-                <span class="stats-widget-label" data-i18n="statsWidget.inactiveHearts">Nieodbite serca</span>
-                <strong id="statusMemberHeartsExpired">0</strong>
-              </div>
-            </section>
-            <div class="stats-widget-controls">
-              <button class="stats-widget-toggle" type="button" id="statsWidgetToggle" aria-expanded="false" aria-controls="statsWidgetPanel">
-                <span aria-hidden="true">‹</span>
+              <button class="right-widget-tab" type="button" id="statsWidgetToggle" data-widget-target="stats" aria-expanded="false" aria-controls="statsWidgetPanel">
+                <span class="right-widget-tab-icon" data-ui-icon="chart" aria-hidden="true"></span>
+                <span class="right-widget-tab-text">STAT</span>
               </button>
-              <div class="stats-widget-rail" aria-hidden="true">
-                <span>👤</span>
-                <span>📧</span>
-                <span>❤️</span>
-                <span>🖤</span>
+            </section>
+
+            <section class="right-widget" data-right-widget="top" data-expanded="false">
+              <div class="right-widget-panel top-gifters-panel" id="topGiftersPanel">
+                <h2 data-i18n="topGifters.title">Top giftujący</h2>
+                <div id="topGiftersContent"></div>
               </div>
-            </div>
+              <button class="right-widget-tab" type="button" id="topGiftersButton" data-widget-target="top" aria-expanded="false" aria-controls="topGiftersPanel">
+                <span class="right-widget-tab-icon" data-ui-icon="trophy" aria-hidden="true"></span>
+                <span class="right-widget-tab-text">TOP</span>
+              </button>
+            </section>
+
+            <section class="right-widget" data-right-widget="moderators" data-expanded="false">
+              <div class="right-widget-panel moderators-widget-panel" id="moderatorsWidgetPanel">
+                <h2 data-i18n="moderatorsWidget.title">Aktywni moderatorzy</h2>
+                <div id="moderatorsWidgetContent"></div>
+              </div>
+              <button class="right-widget-tab" type="button" id="moderatorsWidgetButton" data-widget-target="moderators" aria-expanded="false" aria-controls="moderatorsWidgetPanel">
+                <span class="right-widget-tab-icon" data-ui-icon="shield" aria-hidden="true"></span>
+                <span class="right-widget-tab-text">MOD</span>
+              </button>
+            </section>
           </aside>
         </section>
 
