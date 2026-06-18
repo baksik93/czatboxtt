@@ -125,12 +125,54 @@ const I18N = {
     'about.tabs.program': 'O programie',
     'about.tabs.news': 'Co nowego?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.aria': 'Zakładki o programie',
     'about.program.p1': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.',
     'about.program.p2': 'Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.',
     'about.program.how': 'Jak działa program:',
     'about.program.how.p1': 'Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta, aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.',
     'about.program.how.p2': 'Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia, mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu, motyw lub opóźnienie.',
     'about.program.how.p3': 'Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do wcześniejszych rozmów.',
+    'about.news.version': 'Wersja programu',
+    'about.news.features.title': 'Główne funkcje:',
+    'about.news.features.events': 'wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali',
+    'about.news.features.moderators': 'wyróżnianie moderatorów czerwonym nickiem',
+    'about.news.features.avatars': 'losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji',
+    'about.news.features.multiplier': 'pasek informacji o mnożniku podczas bitwy',
+    'about.news.features.tts': 'czytanie wiadomości na głos przez TTS',
+    'about.news.features.archive': 'archiwizowanie czatu całej transmisji do pliku',
+    'about.news.features.styles': 'różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny',
+    'about.news.features.themes': 'różne motywy kolorystyczne aplikacji',
+    'about.news.features.appearances': 'różne wyglądy aplikacji: Domyślny i Ozdobny',
+    'about.news.features.delay': 'regulowane opóźnienie wyświetlania wiadomości czatu',
+    'about.news.features.stats': 'przybornik statystyk live',
+    'about.news.known.title': 'Znane błędy:',
+    'about.news.known.box': 'czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"',
+    'about.news.known.multiplier': 'mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku',
+    'about.news.next.title': 'Co dalej:',
+    'about.news.next.archive': 'Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.',
+    'about.news.next.fixes': 'Poprawki pomniejszych błędów',
+    'about.faq.title': 'FAQ',
+    'about.faq.idea.question': 'Skąd pomysł na aplikację?',
+    'about.faq.idea.answer': 'Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość dla każdego.',
+    'about.faq.systems.question': 'Czy powstanie wersja na inne systemy niż Windows?',
+    'about.faq.systems.answer': 'Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego systemu.',
+    'about.faq.mobile.question': 'Co z iOS, android itd.?',
+    'about.faq.mobile.answer': 'Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować coś pod coś, z czym nie mam doczynienia.',
+    'about.faq.appearance.question': 'Wygląd programu, czy będą aktualizacje?',
+    'about.faq.appearance.answer': 'Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie, wybierzcie to co wam odpowiada najlepiej.',
+    'about.faq.support.question': 'Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?',
+    'about.faq.support.answer': 'Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun, wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.',
+    'about.faq.features.question': 'Mam pomysł na nowe funkcje!',
+    'about.faq.features.answer': 'I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na discord pw (inavoxy).',
+    'about.faq.future.question': 'Czy planuję rozwijać projekt dalej?',
+    'about.faq.future.answer': 'Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję również każdemu za obecne pomysły, zainteresowanie i słowa wsparcia.',
+    'statsWidget.title': 'Statystyki LIVE',
+    'statsWidget.viewers': 'Osoby na czacie',
+    'statsWidget.messages': 'Wysłane wiadomości',
+    'statsWidget.activeHearts': 'Odbite serca',
+    'statsWidget.inactiveHearts': 'Nieodbite serca',
+    'statsWidget.expand': 'Rozwiń statystyki LIVE',
+    'statsWidget.collapse': 'Zwiń statystyki LIVE',
     'status.connecting': '🟡Łączę...',
     'status.online': '🟢Online',
     'status.offline': '🔴Offline',
@@ -234,12 +276,54 @@ const I18N = {
     'about.tabs.program': 'About',
     'about.tabs.news': 'What’s new?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.aria': 'About application tabs',
     'about.program.p1': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.program.p2': 'After logging in to TikTok, the program reads chat from the selected LIVE creator and displays it in an organized form. You can switch between supported creators, filter event types and adjust the application look to your preferences.',
     'about.program.how': 'How the program works:',
     'about.program.how.p1': 'After launching the application, the user logs in to TikTok. When the session is detected, the app switches to chat view and connects to the selected live stream. Chat is fetched in the background and displayed as a separate event list.',
     'about.program.how.p2': 'Chat messages can be shown with a configured delay, making them easier to follow during active streams. Other events, such as gifts, joins and likes, can appear live. You can change the filter, chat style, theme or delay at any time.',
     'about.program.how.p3': 'While the program is running, all stream events are saved to the archive. After ending or changing a stream, you can open the archive tab and return to earlier conversations.',
+    'about.news.version': 'Program version',
+    'about.news.features.title': 'Main features:',
+    'about.news.features.events': 'displaying TikTok LIVE chat messages with filters for messages, likes, gifts, joins, reposts, shares, boxes and portals',
+    'about.news.features.moderators': 'highlighting moderators with a red nickname',
+    'about.news.features.avatars': 'random user avatars from the local application image pool to reduce network usage during streams',
+    'about.news.features.multiplier': 'multiplier information banner during battles',
+    'about.news.features.tts': 'reading chat messages aloud using TTS',
+    'about.news.features.archive': 'archiving the entire stream chat to a file',
+    'about.news.features.styles': 'multiple chat styles: Compact, Spacious and Modern',
+    'about.news.features.themes': 'multiple application color themes',
+    'about.news.features.appearances': 'multiple application layouts: Default and Decorative',
+    'about.news.features.delay': 'adjustable chat message display delay',
+    'about.news.features.stats': 'live statistics toolbox',
+    'about.news.known.title': 'Known issues:',
+    'about.news.known.box': 'after a coin box opens, the chat may sometimes show the message "unknow sends a box"',
+    'about.news.known.multiplier': 'battle multipliers are an experimental feature and may occasionally appear incorrectly during the final minute',
+    'about.news.next.title': 'What comes next:',
+    'about.news.next.archive': 'Improvements to archived chat reading. To be honest, I am not satisfied with the current version and it needs to be rebuilt.',
+    'about.news.next.fixes': 'Fixes for minor issues',
+    'about.faq.title': 'FAQ',
+    'about.faq.idea.question': 'Where did the idea for the application come from?',
+    'about.faq.idea.answer': 'The program was mainly created to keep up with fast chat when messages jump around or appear for one person but not another. I also wanted to make a TikTok tool that makes hosting live streams a little easier. Streamers on other platforms have many plugins for programs such as OBS, while TikTok is fairly limited. There is an application that reads messages aloud, but it is paid, and I wanted everyone to have the same opportunity.',
+    'about.faq.systems.question': 'Will there be a version for systems other than Windows?',
+    'about.faq.systems.answer': 'For now, I only plan to develop this version. The program was made for Windows because that is the system I use.',
+    'about.faq.mobile.question': 'What about iOS, Android and other platforms?',
+    'about.faq.mobile.answer': 'Honestly? I do not know. It is a very distant topic. I do not own an iMac, so it would be difficult to build something for a platform I do not work with.',
+    'about.faq.appearance.question': 'Will the appearance of the program receive updates?',
+    'about.faq.appearance.answer': 'I think more options will appear over time. There are currently three ways to customize the appearance, divided into several choices. That already offers plenty of combinations, so experiment and choose what suits you best.',
+    'about.faq.support.question': 'Can I financially support the development of the project?',
+    'about.faq.support.answer': 'To be honest, several people have already suggested it, but for now I work on the project for fun in my free time. If money were involved, I would feel pressure to do everything immediately. A voluntary donation option may appear in the future, but time will tell.',
+    'about.faq.features.question': 'I have an idea for a new feature!',
+    'about.faq.features.answer': 'That makes me very happy! Feel free to contact me through TikTok private messages (Baksik.03) or Discord private messages (inavoxy).',
+    'about.faq.future.question': 'Do I plan to continue developing the project?',
+    'about.faq.future.answer': 'Of course. I will record ideas in the second tab, together with update descriptions. I would also like to thank Kama, without whom I would not have started this project. Her chatting and the activity of her viewers motivated me to act. Thank you as well to everyone for the ideas, interest and words of support.',
+    'statsWidget.title': 'LIVE statistics',
+    'statsWidget.viewers': 'People in chat',
+    'statsWidget.messages': 'Messages sent',
+    'statsWidget.activeHearts': 'Heart Me sent',
+    'statsWidget.inactiveHearts': 'Heart Me not sent',
+    'statsWidget.expand': 'Expand LIVE statistics',
+    'statsWidget.collapse': 'Collapse LIVE statistics',
     'status.connecting': '🟡Connecting...',
     'status.online': '🟢Online',
     'status.offline': '🔴Offline',
@@ -343,12 +427,54 @@ const I18N = {
     'about.tabs.program': 'Über das Programm',
     'about.tabs.news': 'Was ist neu?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.aria': 'Registerkarten über das Programm',
     'about.program.p1': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.program.p2': 'Nach der Anmeldung bei TikTok lädt das Programm den Chat des ausgewählten LIVE-Creators und zeigt ihn geordnet an. Du kannst zwischen unterstützten Creators wechseln, Ereignistypen filtern und das Aussehen anpassen.',
     'about.program.how': 'So funktioniert das Programm:',
     'about.program.how.p1': 'Nach dem Start der Anwendung meldet sich der Benutzer bei TikTok an. Sobald die Sitzung erkannt wird, wechselt die App zur Chatansicht und verbindet sich mit dem ausgewählten Live. Der Chat wird im Hintergrund geladen und als separate Ereignisliste angezeigt.',
     'about.program.how.p2': 'Chatnachrichten können mit einer festgelegten Verzögerung angezeigt werden, damit sie bei aktiven Streams leichter zu verfolgen sind. Andere Ereignisse wie Geschenke, Beitritte oder Likes können live erscheinen. Filter, Chat-Stil, Theme und Verzögerung können jederzeit geändert werden.',
     'about.program.how.p3': 'Während das Programm läuft, werden alle Stream-Ereignisse im Archiv gespeichert. Nach dem Ende oder Wechsel eines Streams kannst du das Archiv öffnen und zu früheren Gesprächen zurückkehren.',
+    'about.news.version': 'Programmversion',
+    'about.news.features.title': 'Hauptfunktionen:',
+    'about.news.features.events': 'Anzeige von TikTok-LIVE-Chatnachrichten mit Filtern für Nachrichten, Likes, Geschenke, Beitritte, Reposts, Teilen, Boxen und Portale',
+    'about.news.features.moderators': 'Moderatoren werden mit einem roten Nickname hervorgehoben',
+    'about.news.features.avatars': 'zufällige Benutzeravatare aus dem lokalen Bilderpool der App, um während des Streams möglichst wenig Daten zu laden',
+    'about.news.features.multiplier': 'Informationsleiste für Multiplikatoren während eines Battles',
+    'about.news.features.tts': 'Vorlesen von Chatnachrichten per TTS',
+    'about.news.features.archive': 'Archivierung des gesamten Stream-Chats in einer Datei',
+    'about.news.features.styles': 'verschiedene Chat-Stile: Kompakt, Geräumig und Modern',
+    'about.news.features.themes': 'verschiedene Farbthemen der Anwendung',
+    'about.news.features.appearances': 'verschiedene App-Layouts: Standard und Dekorativ',
+    'about.news.features.delay': 'einstellbare Verzögerung für Chatnachrichten',
+    'about.news.features.stats': 'LIVE-Statistik-Werkzeugleiste',
+    'about.news.known.title': 'Bekannte Fehler:',
+    'about.news.known.box': 'nach dem Öffnen einer Münzbox kann gelegentlich die Nachricht „unknow sendet eine Box“ im Chat erscheinen',
+    'about.news.known.multiplier': 'Battle-Multiplikatoren sind eine Testfunktion und können in der letzten Minute gelegentlich fälschlich erscheinen',
+    'about.news.next.title': 'Wie geht es weiter:',
+    'about.news.next.archive': 'Verbesserungen beim Lesen archivierter Chats. Ehrlich gesagt bin ich mit der aktuellen Version nicht zufrieden und sie muss überarbeitet werden.',
+    'about.news.next.fixes': 'Behebung kleinerer Fehler',
+    'about.faq.title': 'FAQ',
+    'about.faq.idea.question': 'Wie entstand die Idee für die Anwendung?',
+    'about.faq.idea.answer': 'Das Programm entstand hauptsächlich, um bei einem schnellen Chat mithalten zu können, wenn Nachrichten springen oder bei einer Person erscheinen und bei einer anderen nicht. Außerdem wollte ich ein TikTok-Werkzeug entwickeln, das das Durchführen von Live-Streams etwas erleichtert. Für Streamer auf anderen Plattformen gibt es viele Plugins für Programme wie OBS, während TikTok recht eingeschränkt ist. Es gibt zwar eine Anwendung, die Nachrichten vorliest, sie ist jedoch kostenpflichtig. Ich wollte allen die gleichen Möglichkeiten geben.',
+    'about.faq.systems.question': 'Wird es eine Version für andere Systeme als Windows geben?',
+    'about.faq.systems.answer': 'Derzeit plane ich nur diese Version weiterzuentwickeln. Das Programm wurde für Windows erstellt, weil ich dieses System selbst benutze.',
+    'about.faq.mobile.question': 'Was ist mit iOS, Android und anderen Plattformen?',
+    'about.faq.mobile.answer': 'Ehrlich gesagt weiß ich es nicht. Das ist ein sehr weit entferntes Thema. Ich besitze keinen iMac, daher wäre es schwierig, etwas für eine Plattform zu entwickeln, mit der ich nicht arbeite.',
+    'about.faq.appearance.question': 'Wird das Aussehen des Programms aktualisiert?',
+    'about.faq.appearance.answer': 'Mit der Zeit werden wahrscheinlich weitere Optionen erscheinen. Derzeit gibt es drei Möglichkeiten, das Aussehen mit mehreren Auswahlvarianten anzupassen. Das bietet bereits viele Kombinationen. Probiert sie aus und wählt, was euch am besten gefällt.',
+    'about.faq.support.question': 'Kann ich die Entwicklung des Projekts finanziell unterstützen?',
+    'about.faq.support.answer': 'Ehrlich gesagt haben das bereits mehrere Personen vorgeschlagen. Momentan arbeite ich jedoch in meiner Freizeit und aus Spaß an dem Projekt. Sobald Geld im Spiel wäre, würde ich den Druck spüren, alles sofort erledigen zu müssen. Vielleicht wird es in Zukunft eine freiwillige Spendenmöglichkeit geben, aber das wird sich zeigen.',
+    'about.faq.features.question': 'Ich habe eine Idee für eine neue Funktion!',
+    'about.faq.features.answer': 'Das freut mich sehr! Kontaktiert mich gerne per TikTok-Privatnachricht (Baksik.03) oder Discord-Privatnachricht (inavoxy).',
+    'about.faq.future.question': 'Plane ich, das Projekt weiterzuentwickeln?',
+    'about.faq.future.answer': 'Natürlich. Alle Ideen werde ich im zweiten Tab zusammen mit den Beschreibungen der Updates festhalten. Außerdem möchte ich Kama danken, ohne die ich dieses Projekt nicht begonnen hätte. Ihr Reden mit dem Chat und dessen Aktivität haben mich zum Handeln motiviert. Vielen Dank auch an alle für die bisherigen Ideen, das Interesse und die unterstützenden Worte.',
+    'statsWidget.title': 'LIVE-Statistiken',
+    'statsWidget.viewers': 'Personen im Chat',
+    'statsWidget.messages': 'Gesendete Nachrichten',
+    'statsWidget.activeHearts': 'Heart Me gesendet',
+    'statsWidget.inactiveHearts': 'Heart Me nicht gesendet',
+    'statsWidget.expand': 'LIVE-Statistiken öffnen',
+    'statsWidget.collapse': 'LIVE-Statistiken schließen',
     'status.connecting': '🟡Verbinde...',
     'status.online': '🟢Online',
     'status.offline': '🔴Offline',
@@ -391,6 +517,7 @@ const statusMessagesEl = document.getElementById('statusMessages');
 const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
 const statusMemberHeartsExpiredEl = document.getElementById('statusMemberHeartsExpired');
 const statusStatsEl = document.getElementById('statusStats');
+const statsWidgetToggle = document.getElementById('statsWidgetToggle');
 const creatorInput = document.getElementById('creatorInput');
 const creatorToggle = document.getElementById('creatorToggle');
 const creatorSuggestions = document.getElementById('creatorSuggestions');
@@ -700,6 +827,9 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     element.textContent = t(element.dataset.i18n);
   });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+    element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
+  });
 
   [
     ['.tagline', 'app.tagline'],
@@ -770,6 +900,7 @@ function applyI18n() {
   syncTtsVoices();
   syncSystemControls();
   renderRecommendedCreators();
+  syncStatsWidgetToggle();
   updateStatus();
   if (!visibleMessages.length && emptyEl) {
     emptyEl.textContent = t('chat.empty');
@@ -848,11 +979,9 @@ function applyGeneralSettings() {
     statusStatsEl.hidden = !generalSettings.statsToolbox;
   }
 
-  if (!generalSettings.statsToolbox && topGiftersPanel) {
-    topGiftersPanel.hidden = true;
-    if (topGiftersButton) {
-      topGiftersButton.setAttribute('aria-expanded', 'false');
-    }
+  if (!generalSettings.statsToolbox && statusStatsEl) {
+    statusStatsEl.dataset.expanded = 'false';
+    syncStatsWidgetToggle();
   }
 
   if (!generalSettings.multiplierNotifications && battleBanner && battleBanner.dataset.tone === 'battle') {
@@ -878,6 +1007,29 @@ function initGeneralSettings() {
       saveGeneralSettings();
       applyGeneralSettings();
     });
+  }
+
+  if (statsWidgetToggle && statusStatsEl) {
+    statsWidgetToggle.addEventListener('click', () => {
+      const expanded = statusStatsEl.dataset.expanded === 'true';
+      statusStatsEl.dataset.expanded = String(!expanded);
+      syncStatsWidgetToggle();
+    });
+  }
+}
+
+function syncStatsWidgetToggle() {
+  if (!statsWidgetToggle || !statusStatsEl) {
+    return;
+  }
+
+  const expanded = statusStatsEl.dataset.expanded === 'true';
+  statsWidgetToggle.setAttribute('aria-expanded', String(expanded));
+  statsWidgetToggle.setAttribute('aria-label', t(expanded ? 'statsWidget.collapse' : 'statsWidget.expand'));
+  statsWidgetToggle.title = t(expanded ? 'statsWidget.collapse' : 'statsWidget.expand');
+  const icon = statsWidgetToggle.querySelector('span');
+  if (icon) {
+    icon.textContent = expanded ? '›' : '‹';
   }
 }
 
@@ -1424,10 +1576,10 @@ function updateStatus() {
     setStatusSegment(statusConnectionEl, statusText);
     setStatusSegment(statusDelayEl, delayText);
     setStatusSegment(statusQueueEl, queueText);
-    setStatusSegment(statusViewersEl, `👤${formatCounter(liveViewerCount)}`);
-    setStatusSegment(statusMessagesEl, `📧${formatCounter(chatMessageCount)}`);
-    setStatusSegment(statusMemberHeartsActiveEl, `❤️${formatCounter(heartMeGiftStats.active)}`);
-    setStatusSegment(statusMemberHeartsExpiredEl, `🖤${formatCounter(heartMeGiftStats.inactive)}`);
+    setStatusSegment(statusViewersEl, formatCounter(liveViewerCount));
+    setStatusSegment(statusMessagesEl, formatCounter(chatMessageCount));
+    setStatusSegment(statusMemberHeartsActiveEl, formatCounter(heartMeGiftStats.active));
+    setStatusSegment(statusMemberHeartsExpiredEl, formatCounter(heartMeGiftStats.inactive));
     if (topGiftersPanel && !topGiftersPanel.hidden) {
       renderTopGiftersPanel();
     }
@@ -1444,7 +1596,7 @@ function syncAppVersion() {
 
   appVersionEl.textContent = typeof state.appVersion === 'string' && state.appVersion
     ? state.appVersion
-    : '0.1';
+    : '0.1.0';
 }
 
 function getCreatorUsernameFromState() {
@@ -1839,11 +1991,25 @@ function resetMessages() {
   updateStatus();
 }
 
+function isUnknownUserValue(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return !normalized || ['unknown', 'unknow', 'undefined', 'null'].includes(normalized);
+}
+
+function isAnonymousBoxMessage(message) {
+  return Boolean(
+    message
+    && (message.kind || 'chat') === 'box'
+    && isUnknownUserValue(message.authorName)
+    && isUnknownUserValue(message.uniqueId)
+  );
+}
+
 function getStatsUserKey(message) {
   const uniqueId = typeof message.uniqueId === 'string' ? message.uniqueId.trim() : '';
   const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
   const key = (uniqueId || authorName).toLowerCase();
-  return key === 'unknown' ? '' : key;
+  return isUnknownUserValue(key) ? '' : key;
 }
 
 function getGiftStatsKey(message) {
@@ -2599,6 +2765,10 @@ window.tiktokLive.onBattleAlert((alert) => {
 
 window.tiktokLive.onChatMessage((message) => {
   if (!message || !message.text) {
+    return;
+  }
+
+  if (isAnonymousBoxMessage(message)) {
     return;
   }
 

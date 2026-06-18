@@ -50,15 +50,9 @@
               <span id="statusConnection">🟡Łączę...</span>
               <span id="statusDelay">⏰1.8s</span>
               <span id="statusQueue">📩0</span>
-              <span class="status-stats" id="statusStats">
-                <span id="statusViewers">👤0</span>
-                <span class="top-gifters">
-                  <button class="top-gifters-button" type="button" id="topGiftersButton" aria-expanded="false">👑Top</button>
-                  <section class="top-gifters-panel" id="topGiftersPanel" hidden></section>
-                </span>
-                <span id="statusMessages">📧0</span>
-                <span id="statusMemberHeartsActive">❤️0</span>
-                <span id="statusMemberHeartsExpired">🖤0</span>
+              <span class="top-gifters">
+                <button class="top-gifters-button" type="button" id="topGiftersButton" aria-expanded="false">👑Top</button>
+                <section class="top-gifters-panel" id="topGiftersPanel" hidden></section>
               </span>
             </div>
           </section>
@@ -68,6 +62,43 @@
           <section class="messages" id="messages" aria-live="polite">
             <div class="empty" id="empty">Po zalogowaniu pojawia sie tutaj spowolniony czat LIVE.</div>
           </section>
+
+          <aside class="stats-widget" id="statusStats" data-expanded="false" aria-label="Statystyki LIVE" data-i18n-aria-label="statsWidget.title">
+            <section class="stats-widget-panel" id="statsWidgetPanel">
+              <h2 data-i18n="statsWidget.title">Statystyki LIVE</h2>
+              <div class="stats-widget-row">
+                <span class="stats-widget-icon" aria-hidden="true">👤</span>
+                <span class="stats-widget-label" data-i18n="statsWidget.viewers">Osoby na czacie</span>
+                <strong id="statusViewers">0</strong>
+              </div>
+              <div class="stats-widget-row">
+                <span class="stats-widget-icon" aria-hidden="true">📧</span>
+                <span class="stats-widget-label" data-i18n="statsWidget.messages">Wysłane wiadomości</span>
+                <strong id="statusMessages">0</strong>
+              </div>
+              <div class="stats-widget-row">
+                <span class="stats-widget-icon" aria-hidden="true">❤️</span>
+                <span class="stats-widget-label" data-i18n="statsWidget.activeHearts">Odbite serca</span>
+                <strong id="statusMemberHeartsActive">0</strong>
+              </div>
+              <div class="stats-widget-row">
+                <span class="stats-widget-icon" aria-hidden="true">🖤</span>
+                <span class="stats-widget-label" data-i18n="statsWidget.inactiveHearts">Nieodbite serca</span>
+                <strong id="statusMemberHeartsExpired">0</strong>
+              </div>
+            </section>
+            <div class="stats-widget-controls">
+              <button class="stats-widget-toggle" type="button" id="statsWidgetToggle" aria-expanded="false" aria-controls="statsWidgetPanel">
+                <span aria-hidden="true">‹</span>
+              </button>
+              <div class="stats-widget-rail" aria-hidden="true">
+                <span>👤</span>
+                <span>📧</span>
+                <span>❤️</span>
+                <span>🖤</span>
+              </div>
+            </div>
+          </aside>
         </section>
 
         <section class="view-panel archive-view" data-view="archive" hidden>
@@ -295,7 +326,7 @@
           <div class="page-header">
             <h1>O programie</h1>
           </div>
-          <div class="settings-tabs about-tabs" role="tablist" aria-label="Zakładki o programie">
+          <div class="settings-tabs about-tabs" role="tablist" aria-label="Zakładki o programie" data-i18n-aria-label="about.tabs.aria">
             <button class="settings-tab" type="button" role="tab" data-about-tab="program" data-active="true" aria-selected="true" aria-controls="aboutProgramPanel">O programie</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="news" aria-selected="false" aria-controls="aboutNewsPanel">Co nowego?</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="faq" aria-selected="false" aria-controls="aboutFaqPanel">FAQ</button>
@@ -334,42 +365,42 @@
           </article>
           <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
             <section class="about-section">
-              <h2 class="about-version-title">Wersja programu <span id="appVersion">0.1</span>:</h2>
+              <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
 
-              <h3>Główne funkcje:</h3>
+              <h3 data-i18n="about.news.features.title">Główne funkcje:</h3>
               <ul class="about-list">
-                <li>wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali</li>
-                <li>wyróżnianie moderatorów czerwonym nickiem</li>
-                <li>losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji</li>
-                <li>pasek informacji o mnożniku podczas bitwy</li>
-                <li>czytanie wiadomości na głos przez TTS</li>
-                <li>archiwizowanie czatu całej transmisji do pliku</li>
-                <li>różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny,</li>
-                <li>różne motywy kolorystyczne aplikacji,</li>
-                <li>różne wyglądy aplikacji: Domyślny i Ozdobny,</li>
-                <li>regulowane opóźnienie wyświetlania wiadomości czatu</li>
-                <li>przybornik statystyk live</li>
+                <li data-i18n="about.news.features.events">wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali</li>
+                <li data-i18n="about.news.features.moderators">wyróżnianie moderatorów czerwonym nickiem</li>
+                <li data-i18n="about.news.features.avatars">losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji</li>
+                <li data-i18n="about.news.features.multiplier">pasek informacji o mnożniku podczas bitwy</li>
+                <li data-i18n="about.news.features.tts">czytanie wiadomości na głos przez TTS</li>
+                <li data-i18n="about.news.features.archive">archiwizowanie czatu całej transmisji do pliku</li>
+                <li data-i18n="about.news.features.styles">różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny</li>
+                <li data-i18n="about.news.features.themes">różne motywy kolorystyczne aplikacji</li>
+                <li data-i18n="about.news.features.appearances">różne wyglądy aplikacji: Domyślny i Ozdobny</li>
+                <li data-i18n="about.news.features.delay">regulowane opóźnienie wyświetlania wiadomości czatu</li>
+                <li data-i18n="about.news.features.stats">przybornik statystyk live</li>
               </ul>
 
-              <h3>Znane błędy:</h3>
+              <h3 data-i18n="about.news.known.title">Znane błędy:</h3>
               <ul class="about-list">
-                <li>czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"</li>
-                <li>mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku</li>
+                <li data-i18n="about.news.known.box">czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"</li>
+                <li data-i18n="about.news.known.multiplier">mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku</li>
               </ul>
 
-              <h3>Co dalej:</h3>
+              <h3 data-i18n="about.news.next.title">Co dalej:</h3>
               <ul class="about-list">
-                <li>Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.</li>
-                <li>Poprawki pomniejszych błędów</li>
+                <li data-i18n="about.news.next.archive">Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.</li>
+                <li data-i18n="about.news.next.fixes">Poprawki pomniejszych błędów</li>
               </ul>
             </section>
           </section>
           <section class="about-content about-panel" id="aboutFaqPanel" role="tabpanel" data-about-panel="faq" hidden>
             <section class="about-section about-faq">
-              <h2>FAQ</h2>
+              <h2 data-i18n="about.faq.title">FAQ</h2>
 
-              <h3>Skąd pomysł na aplikację?</h3>
-              <p>
+              <h3 data-i18n="about.faq.idea.question">Skąd pomysł na aplikację?</h3>
+              <p data-i18n="about.faq.idea.answer">
                 Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują
                 lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie
                 do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest
@@ -378,40 +409,40 @@
                 dla każdego.
               </p>
 
-              <h3>Czy powstanie wersja na inne systemy niż Windows?</h3>
-              <p>
+              <h3 data-i18n="about.faq.systems.question">Czy powstanie wersja na inne systemy niż Windows?</h3>
+              <p data-i18n="about.faq.systems.answer">
                 Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego
                 systemu.
               </p>
 
-              <h3>Co z iOS, android itd.?</h3>
-              <p>
+              <h3 data-i18n="about.faq.mobile.question">Co z iOS, android itd.?</h3>
+              <p data-i18n="about.faq.mobile.answer">
                 Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować
                 coś pod coś, z czym nie mam doczynienia.
               </p>
 
-              <h3>Wygląd programu, czy będą aktualizacje?</h3>
-              <p>
+              <h3 data-i18n="about.faq.appearance.question">Wygląd programu, czy będą aktualizacje?</h3>
+              <p data-i18n="about.faq.appearance.answer">
                 Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na
                 kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie,
                 wybierzcie to co wam odpowiada najlepiej.
               </p>
 
-              <h3>Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?</h3>
-              <p>
+              <h3 data-i18n="about.faq.support.question">Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?</h3>
+              <p data-i18n="about.faq.support.answer">
                 Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun,
                 wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na
                 już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.
               </p>
 
-              <h3>Mam pomysł na nowe funkcje!</h3>
-              <p>
+              <h3 data-i18n="about.faq.features.question">Mam pomysł na nowe funkcje!</h3>
+              <p data-i18n="about.faq.features.answer">
                 I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na
                 discord pw (inavoxy).
               </p>
 
-              <h3>Czy planuję rozwijać projekt dalej?</h3>
-              <p>
+              <h3 data-i18n="about.faq.future.question">Czy planuję rozwijać projekt dalej?</h3>
+              <p data-i18n="about.faq.future.answer">
                 Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy
                 aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego
                 projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję

@@ -14,7 +14,7 @@ const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 const AVATAR_EXTENSIONS = new Set(['.gif', '.jpg', '.jpeg', '.png', '.webp']);
 const PROGRAM_AUTHOR_UNIQUE_ID = 'bakus.03';
 const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
-const APP_VERSION = '0.1';
+const APP_VERSION = app.getVersion();
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const START_BACKGROUND_ARG = '--czatbox-background';
 const DEFAULT_SYSTEM_SETTINGS = {
@@ -1282,6 +1282,11 @@ function normalizeUniqueId(value) {
   return String(value || '').trim().replace(/^@/, '').toLowerCase();
 }
 
+function isUnknownIdentityValue(value) {
+  const normalized = normalizeUniqueId(value);
+  return !normalized || ['unknown', 'unknow', 'undefined', 'null'].includes(normalized);
+}
+
 function formatGiftEvent(data) {
   const giftType = Number(data && (data.giftType || (data.giftDetails && data.giftDetails.giftType))) || 0;
   if (giftType === 1 && !Boolean(data && data.repeatEnd)) {
@@ -1296,6 +1301,10 @@ function formatGiftEvent(data) {
   const costText = giftCost > 0 ? ` (🪙 ${giftCost * repeatCount})` : '';
 
   if (isBoxLikeGift(data, giftName)) {
+    if (isUnknownIdentityValue(user.nickname) && isUnknownIdentityValue(user.uniqueId)) {
+      return null;
+    }
+
     const boxName = /portal/i.test(giftName) ? 'portal' : 'skrzynię';
     const boxKey = /portal/i.test(giftName) ? 'portal' : 'chest';
     const audienceCount = getAudienceCount(data);
@@ -1320,9 +1329,15 @@ function formatGiftEvent(data) {
 
 function formatEnvelopeEvent(data) {
   const info = data && data.envelopeInfo ? data.envelopeInfo : {};
+  const senderName = String(info.sendUserName || '').trim();
+  const senderId = String(info.sendUserId || '').trim();
+  if (isUnknownIdentityValue(senderName) && isUnknownIdentityValue(senderId)) {
+    return null;
+  }
+
   const user = {
-    nickname: String(info.sendUserName || 'unknown'),
-    uniqueId: String(info.sendUserId || info.sendUserName || 'unknown')
+    nickname: senderName || senderId,
+    uniqueId: senderId || senderName
   };
   const coinCount = Number(info.diamondCount) || 0;
   const peopleCount = Number(info.peopleCount) || 0;
