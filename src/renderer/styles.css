@@ -29,31 +29,6 @@
   margin: 0;
 }
 
-:root[data-desktop-widgets="true"] body * {
-  visibility: hidden;
-}
-
-:root[data-desktop-widgets="true"] .right-widget-dock,
-:root[data-desktop-widgets="true"] .right-widget-dock * {
-  visibility: visible;
-}
-
-:root[data-desktop-widgets="true"] .right-widget-dock {
-  top: 50%;
-  right: 0;
-  width: min(410px, 100vw);
-  max-height: calc(100vh - 16px);
-}
-
-:root[data-desktop-widgets="true"] .right-widget {
-  width: 56px;
-  background: rgba(22, 24, 29, 0.96);
-}
-
-:root[data-desktop-widgets="true"] .right-widget[data-expanded="true"] {
-  width: min(410px, 100vw);
-}
-
 * {
   box-sizing: border-box;
 }
@@ -216,6 +191,13 @@ body {
   display: grid;
   grid-template-rows: 54px minmax(0, 1fr);
   background: #111214;
+}
+
+.notes-view {
+  display: grid;
+  grid-template-rows: 54px minmax(0, 1fr);
+  background: #111214;
+  overflow: hidden;
 }
 
 .archive-toolbar {
@@ -604,9 +586,19 @@ body {
   background: #111214;
 }
 
+.notes-workspace {
+  height: 100%;
+  min-height: 0;
+}
+
 .notes-detail {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
+  height: 100%;
+  min-height: 0;
   padding: 12px;
+  overflow: hidden;
 }
 
 .note-title-input,
@@ -628,9 +620,61 @@ body {
   font-weight: 850;
 }
 
+.note-format-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dropdown-surface) 72%, transparent);
+}
+
+.note-format-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dropdown-bg) 54%, transparent);
+  color: var(--dropdown-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.note-format-button:hover,
+.note-format-button:focus-visible {
+  outline: 0;
+  border-color: color-mix(in srgb, var(--dropdown-active-bg) 68%, var(--dropdown-border));
+  background: var(--dropdown-active-bg);
+  color: var(--dropdown-active-text);
+}
+
+.note-format-button code {
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-weight: 850;
+}
+
+.note-format-underline {
+  text-decoration: underline;
+}
+
+.note-format-strike {
+  text-decoration: line-through;
+}
+
 .note-content-input {
-  flex: 1;
-  min-height: 320px;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 12px;
   resize: none;
   font-size: 13px;
@@ -2090,7 +2134,8 @@ body {
 :root[data-theme="white-titanium"] body,
 :root[data-theme="white-titanium"] .chat-app,
 :root[data-theme="white-titanium"] .page-view,
-:root[data-theme="white-titanium"] .archive-view {
+:root[data-theme="white-titanium"] .archive-view,
+:root[data-theme="white-titanium"] .notes-view {
   background: #f6f5f0;
 }
 
@@ -2401,7 +2446,8 @@ body {
 }
 
 :root[data-theme="chill-serwis"] .page-view,
-:root[data-theme="chill-serwis"] .archive-view {
+:root[data-theme="chill-serwis"] .archive-view,
+:root[data-theme="chill-serwis"] .notes-view {
   background:
     linear-gradient(160deg, rgba(7, 31, 61, 0.96), rgba(5, 18, 38, 0.98)),
     #06172e;
@@ -2709,7 +2755,8 @@ body {
 }
 
 :root[data-theme="rose-gold-glass"] .page-view,
-:root[data-theme="rose-gold-glass"] .archive-view {
+:root[data-theme="rose-gold-glass"] .archive-view,
+:root[data-theme="rose-gold-glass"] .notes-view {
   background:
     linear-gradient(145deg, rgba(255, 250, 247, 0.64), rgba(244, 203, 190, 0.44)),
     rgba(255, 248, 245, 0.72);
@@ -3201,7 +3248,8 @@ body {
 
 :root[data-app-appearance="ozdobny"] .view-panel,
 :root[data-app-appearance="ozdobny"] .chat-view,
-:root[data-app-appearance="ozdobny"] .archive-view {
+:root[data-app-appearance="ozdobny"] .archive-view,
+:root[data-app-appearance="ozdobny"] .notes-view {
   overflow: hidden;
   border-radius: inherit;
 }
@@ -3211,7 +3259,8 @@ body {
 }
 
 :root[data-app-appearance="ozdobny"] .page-view,
-:root[data-app-appearance="ozdobny"] .archive-view {
+:root[data-app-appearance="ozdobny"] .archive-view,
+:root[data-app-appearance="ozdobny"] .notes-view {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
     transparent;
@@ -3585,7 +3634,8 @@ body {
     grid-template-rows: 32px auto minmax(0, 1fr);
   }
 
-  .archive-view {
+  .archive-view,
+  .notes-view {
     grid-template-rows: 44px minmax(0, 1fr);
   }
 
@@ -3877,4 +3927,87 @@ body {
   .message-content {
     font-size: 14px;
   }
+}
+
+/* Final override: desktop-pinned widgets use a narrow overlay window, so they must
+   not inherit the small-screen app layout from the responsive block above. */
+:root[data-desktop-widgets="true"],
+:root[data-desktop-widgets="true"] body,
+:root[data-desktop-widgets="true"] .chat-app {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+:root[data-desktop-widgets="true"] .chat-app {
+  display: block;
+}
+
+:root[data-desktop-widgets="true"] .content,
+:root[data-desktop-widgets="true"] .view-panel,
+:root[data-desktop-widgets="true"] .chat-view {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+:root[data-desktop-widgets="true"] .chat-app > :not(.content),
+:root[data-desktop-widgets="true"] .content > .view-panel:not(.chat-view),
+:root[data-desktop-widgets="true"] .chat-view > :not(.right-widget-dock) {
+  display: none !important;
+}
+
+:root[data-desktop-widgets="true"] .content {
+  display: block;
+  grid-column: auto;
+  grid-row: auto;
+}
+
+:root[data-desktop-widgets="true"] .chat-view {
+  display: block !important;
+}
+
+:root[data-desktop-widgets="true"] .right-widget-dock {
+  display: flex !important;
+  position: fixed;
+  top: 50%;
+  right: 0;
+  width: min(350px, 100vw);
+  max-height: calc(100vh - 16px);
+  transform: translateY(-50%);
+}
+
+:root[data-desktop-widgets="true"] .right-widget {
+  display: grid;
+  grid-template-columns: 0 43px;
+  align-items: stretch;
+  justify-content: end;
+  width: 43px;
+  min-height: 68px;
+  max-height: min(330px, calc(100vh - 16px));
+}
+
+:root[data-desktop-widgets="true"] .right-widget[data-expanded="true"] {
+  grid-template-columns: minmax(0, calc(min(350px, 100vw) - 43px)) 43px;
+  width: min(350px, 100vw);
+}
+
+:root[data-desktop-widgets="true"] .right-widget-tab {
+  grid-column: 2;
+  grid-row: 1;
+  flex: 0 0 43px;
+  width: 43px;
+  min-height: 68px;
+}
+
+:root[data-desktop-widgets="true"] .right-widget-panel {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 13px 14px;
 }

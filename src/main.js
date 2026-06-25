@@ -181,6 +181,7 @@ let desktopWidgetsWindow;
 let desktopWidgetsEnabled = true;
 let desktopWidgetsExpanded = false;
 let desktopWidgetsAlwaysOnTop = true;
+const DESKTOP_WIDGETS_WINDOW_WIDTH = 360;
 let latestRoomStats = { viewerCount: 0 };
 let shellView;
 let loginView;
@@ -786,7 +787,7 @@ function positionDesktopWidgets() {
   }
   const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
   const { x, y, width, height } = display.workArea;
-  const windowWidth = Math.min(420, width);
+  const windowWidth = Math.min(DESKTOP_WIDGETS_WINDOW_WIDTH, width);
   desktopWidgetsWindow.setBounds({
     x: x + width - windowWidth,
     y,
@@ -803,7 +804,7 @@ function ensureDesktopWidgetsWindow() {
   }
 
   desktopWidgetsWindow = new BrowserWindow({
-    width: 420,
+    width: DESKTOP_WIDGETS_WINDOW_WIDTH,
     height: 760,
     show: false,
     frame: false,

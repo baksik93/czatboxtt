@@ -119,7 +119,7 @@ const I18N = {
     'archive.summary.moderators': 'Moderatorzy',
     'archive.filtersAria': 'Filtry archiwum',
     'notes.title': 'Notatki',
-    'notes.status': 'Krótkie zapiski z live',
+    'notes.status': 'Twój notes na zapiski',
     'notes.new': 'Nowa',
     'notes.save': 'Zapisz',
     'notes.delete': 'Usuń',
@@ -137,6 +137,15 @@ const I18N = {
     'notes.deleteFailed': 'Nie udało się usunąć notatki.',
     'notes.deleteConfirm': 'Usunąć notatkę „{title}”?',
     'notes.updatedAt': 'Edytowano: {time}',
+    'notes.formatToolbar': 'Formatowanie notatki',
+    'notes.format.bold': 'Pogrubienie',
+    'notes.format.italic': 'Kursywa',
+    'notes.format.underline': 'Podkreślenie',
+    'notes.format.strike': 'Przekreślenie',
+    'notes.format.code': 'Kod',
+    'notes.format.codeblock': 'Blok kodu',
+    'notes.format.quote': 'Cytat',
+    'notes.format.list': 'Lista',
     'settings.title': 'Ustawienia',
     'settings.tabs.general': 'Ogólne',
     'settings.tabs.appearance': 'Wygląd',
@@ -351,7 +360,7 @@ const I18N = {
     'archive.summary.moderators': 'Moderators',
     'archive.filtersAria': 'Archive filters',
     'notes.title': 'Notes',
-    'notes.status': 'Short live notes',
+    'notes.status': 'Your notebook for notes',
     'notes.new': 'New',
     'notes.save': 'Save',
     'notes.delete': 'Delete',
@@ -369,6 +378,15 @@ const I18N = {
     'notes.deleteFailed': 'Could not delete the note.',
     'notes.deleteConfirm': 'Delete note “{title}”?',
     'notes.updatedAt': 'Edited: {time}',
+    'notes.formatToolbar': 'Note formatting',
+    'notes.format.bold': 'Bold',
+    'notes.format.italic': 'Italic',
+    'notes.format.underline': 'Underline',
+    'notes.format.strike': 'Strikethrough',
+    'notes.format.code': 'Code',
+    'notes.format.codeblock': 'Code block',
+    'notes.format.quote': 'Quote',
+    'notes.format.list': 'List',
     'settings.title': 'Settings',
     'settings.tabs.general': 'General',
     'settings.tabs.appearance': 'Appearance',
@@ -583,7 +601,7 @@ const I18N = {
     'archive.summary.moderators': 'Moderatoren',
     'archive.filtersAria': 'Archivfilter',
     'notes.title': 'Notizen',
-    'notes.status': 'Kurze Live-Notizen',
+    'notes.status': 'Dein Notizbuch für Notizen',
     'notes.new': 'Neu',
     'notes.save': 'Speichern',
     'notes.delete': 'Löschen',
@@ -601,6 +619,15 @@ const I18N = {
     'notes.deleteFailed': 'Notiz konnte nicht gelöscht werden.',
     'notes.deleteConfirm': 'Notiz „{title}“ löschen?',
     'notes.updatedAt': 'Bearbeitet: {time}',
+    'notes.formatToolbar': 'Notizformatierung',
+    'notes.format.bold': 'Fett',
+    'notes.format.italic': 'Kursiv',
+    'notes.format.underline': 'Unterstrichen',
+    'notes.format.strike': 'Durchgestrichen',
+    'notes.format.code': 'Code',
+    'notes.format.codeblock': 'Codeblock',
+    'notes.format.quote': 'Zitat',
+    'notes.format.list': 'Liste',
     'settings.title': 'Einstellungen',
     'settings.tabs.general': 'Allgemein',
     'settings.tabs.appearance': 'Aussehen',
@@ -841,6 +868,7 @@ const notesListEl = document.getElementById('notesList');
 const noteTitleInput = document.getElementById('noteTitleInput');
 const noteContentInput = document.getElementById('noteContentInput');
 const noteMetaEl = document.getElementById('noteMeta');
+const noteFormatButtons = Array.from(document.querySelectorAll('[data-note-format]'));
 const recommendedListEl = document.getElementById('recommendedList');
 const appVersionEl = document.getElementById('appVersion');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
@@ -1148,6 +1176,9 @@ function applyI18n() {
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
     element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach((element) => {
+    element.setAttribute('title', t(element.dataset.i18nTitle));
   });
 
   [
@@ -3555,6 +3586,68 @@ function resetNoteEditor() {
   renderNotesList();
 }
 
+function getNoteFormatSample(format) {
+  if (appLanguage === 'en') {
+    return format === 'codeblock' ? 'code block' : 'text';
+  }
+  if (appLanguage === 'de') {
+    return format === 'codeblock' ? 'Codeblock' : 'Text';
+  }
+  return format === 'codeblock' ? 'blok kodu' : 'tekst';
+}
+
+function applyNoteMarkdownFormat(format) {
+  if (!noteContentInput) {
+    return;
+  }
+
+  const textarea = noteContentInput;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selectedText = textarea.value.slice(start, end);
+  const sample = getNoteFormatSample(format);
+  let replacement = '';
+  let innerStart = 0;
+  let innerEnd = 0;
+
+  if (format === 'quote' || format === 'list') {
+    const marker = format === 'quote' ? '> ' : '- ';
+    const text = selectedText || sample;
+    replacement = text
+      .split(/\r?\n/)
+      .map((line) => `${marker}${line}`)
+      .join('\n');
+    innerStart = replacement.length;
+    innerEnd = replacement.length;
+  } else if (format === 'codeblock') {
+    const text = selectedText || sample;
+    replacement = `\`\`\`\n${text}\n\`\`\``;
+    innerStart = 4;
+    innerEnd = innerStart + text.length;
+  } else {
+    const wrappers = {
+      bold: ['**', '**'],
+      italic: ['*', '*'],
+      underline: ['__', '__'],
+      strike: ['~~', '~~'],
+      code: ['`', '`']
+    };
+    const [prefix, suffix] = wrappers[format] || wrappers.bold;
+    const text = selectedText || sample;
+    replacement = `${prefix}${text}${suffix}`;
+    innerStart = prefix.length;
+    innerEnd = prefix.length + text.length;
+  }
+
+  textarea.setRangeText(replacement, start, end, 'select');
+  if (selectedText) {
+    textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+  } else {
+    textarea.setSelectionRange(start + innerStart, start + innerEnd);
+  }
+  textarea.focus();
+}
+
 function renderNotesList() {
   if (!notesListEl) {
     return;
@@ -3759,6 +3852,10 @@ if (saveNoteButton) {
 if (deleteNoteButton) {
   deleteNoteButton.addEventListener('click', deleteCurrentNote);
 }
+
+noteFormatButtons.forEach((button) => {
+  button.addEventListener('click', () => applyNoteMarkdownFormat(button.dataset.noteFormat || 'bold'));
+});
 
 archiveFilterButtons.forEach((button) => {
   button.addEventListener('click', () => {

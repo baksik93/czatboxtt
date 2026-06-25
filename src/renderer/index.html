@@ -430,7 +430,7 @@
           <section class="archive-toolbar">
             <div>
               <div class="archive-title" data-i18n="notes.title">Notatki</div>
-              <div class="archive-status" id="notesStatus" data-i18n="notes.status">Krótkie zapiski z live</div>
+              <div class="archive-status" id="notesStatus" data-i18n="notes.status">Twój notes na zapiski</div>
             </div>
             <div class="archive-toolbar-actions">
               <button class="page-action archive-icon-action" type="button" id="newNoteButton">
@@ -458,6 +458,16 @@
 
             <section class="archive-detail notes-detail">
               <input class="note-title-input" id="noteTitleInput" type="text" maxlength="120" placeholder="Tytuł notatki" data-i18n-placeholder="notes.titlePlaceholder">
+              <div class="note-format-toolbar" aria-label="Formatowanie notatki" data-i18n-aria-label="notes.formatToolbar">
+                <button class="note-format-button" type="button" data-note-format="bold" title="Pogrubienie" data-i18n-title="notes.format.bold" aria-label="Pogrubienie" data-i18n-aria-label="notes.format.bold"><strong>B</strong></button>
+                <button class="note-format-button" type="button" data-note-format="italic" title="Kursywa" data-i18n-title="notes.format.italic" aria-label="Kursywa" data-i18n-aria-label="notes.format.italic"><em>I</em></button>
+                <button class="note-format-button" type="button" data-note-format="underline" title="Podkreślenie" data-i18n-title="notes.format.underline" aria-label="Podkreślenie" data-i18n-aria-label="notes.format.underline"><span class="note-format-underline">U</span></button>
+                <button class="note-format-button" type="button" data-note-format="strike" title="Przekreślenie" data-i18n-title="notes.format.strike" aria-label="Przekreślenie" data-i18n-aria-label="notes.format.strike"><span class="note-format-strike">S</span></button>
+                <button class="note-format-button" type="button" data-note-format="code" title="Kod" data-i18n-title="notes.format.code" aria-label="Kod" data-i18n-aria-label="notes.format.code"><code>&lt;/&gt;</code></button>
+                <button class="note-format-button" type="button" data-note-format="codeblock" title="Blok kodu" data-i18n-title="notes.format.codeblock" aria-label="Blok kodu" data-i18n-aria-label="notes.format.codeblock"><code>{ }</code></button>
+                <button class="note-format-button" type="button" data-note-format="quote" title="Cytat" data-i18n-title="notes.format.quote" aria-label="Cytat" data-i18n-aria-label="notes.format.quote">“”</button>
+                <button class="note-format-button" type="button" data-note-format="list" title="Lista" data-i18n-title="notes.format.list" aria-label="Lista" data-i18n-aria-label="notes.format.list">•</button>
+              </div>
               <textarea class="note-content-input" id="noteContentInput" maxlength="20000" placeholder="Napisz notatkę..." data-i18n-placeholder="notes.contentPlaceholder"></textarea>
               <div class="note-meta" id="noteMeta" data-i18n="notes.unsaved">Nowa niezapisana notatka</div>
             </section>
