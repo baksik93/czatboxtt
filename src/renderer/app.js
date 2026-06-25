@@ -10,7 +10,7 @@ const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
 const DEFAULT_CHAT_DELAY_MS = 1800;
 const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
 const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
-const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass'];
+const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony'];
 const APP_APPEARANCES = ['standard', 'ozdobny'];
 const APP_LANGUAGES = ['pl', 'en', 'de'];
 const TIME_FORMATS = ['auto', '12', '24'];
@@ -130,6 +130,7 @@ const I18N = {
     'notes.unsaved': 'Nowa niezapisana notatka',
     'notes.empty': 'Brak zapisanych notatek.',
     'notes.noMatches': 'Brak notatek pasujących do wyszukiwania.',
+    'notes.previewEmpty': 'Brak treści notatki.',
     'notes.saved': 'Notatka zapisana.',
     'notes.deleted': 'Notatka usunięta.',
     'notes.loadFailed': 'Nie udało się wczytać notatek.',
@@ -170,6 +171,8 @@ const I18N = {
     'settings.theme.whiteTitanium.description': 'Jasny wygląd aplikacji, w odcieniach białego tytanu.',
     'settings.theme.chillSerwis.description': 'Najbardziej wyczillowany motyw aplikacji dla hanysów i hanysek.',
     'settings.theme.roseGlass.description': 'Nieco bardziej kobiecy, delikatny motyw.',
+    'settings.theme.lazarskieRejony.name': 'Enigma-Z',
+    'settings.theme.lazarskieRejony.description': 'Półprzezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.',
     'settings.appAppearance.default.name': 'Domyślny',
     'settings.appAppearance.default.description': 'Obecny układ headera, lewego sidebara, okien i buttonów.',
     'settings.appAppearance.decorative.name': 'Ozdobny',
@@ -210,7 +213,12 @@ const I18N = {
     'about.program.how.p2': 'Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia, mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu, motyw lub opóźnienie.',
     'about.program.how.p3': 'Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do wcześniejszych rozmów.',
     'about.news.version': 'Wersja programu',
+    'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
+    'about.news.features.notes': 'dodany został notatnik do zapisywania bieżących spraw',
+    'about.news.features.updates': 'program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.',
+    'about.news.features.enigmaTheme': 'dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z',
+    'about.news.features.superFans': 'wyróżnienie super fanów na czacie',
     'about.news.features.events': 'wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali',
     'about.news.features.moderators': 'wyróżnianie moderatorów czerwonym nickiem',
     'about.news.features.avatars': 'losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji',
@@ -228,6 +236,8 @@ const I18N = {
     'about.news.features.archiveActions': 'archiwum można eksportować do pliku *.txt, kasować, odświeżać.',
     'about.news.features.languages': 'język polski, angielski i niemiecki aplikacji',
     'about.news.fixes.title': 'Poprawki:',
+    'about.news.fixes.notes': 'poprawione funkcje notatnika',
+    'about.news.fixes.desktopWidgets': 'poprawione działanie widgetów na pulpicie',
     'about.news.fixes.box': 'poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"',
     'about.news.fixes.optimization': 'optymalizacja działania programu',
     'about.news.known.title': 'Znane błędy:',
@@ -371,6 +381,7 @@ const I18N = {
     'notes.unsaved': 'New unsaved note',
     'notes.empty': 'No saved notes.',
     'notes.noMatches': 'No notes match your search.',
+    'notes.previewEmpty': 'No note content.',
     'notes.saved': 'Note saved.',
     'notes.deleted': 'Note deleted.',
     'notes.loadFailed': 'Could not load notes.',
@@ -411,6 +422,8 @@ const I18N = {
     'settings.theme.whiteTitanium.description': 'Light application look in white titanium tones.',
     'settings.theme.chillSerwis.description': 'The most chilled theme for the app.',
     'settings.theme.roseGlass.description': 'A slightly softer, delicate theme.',
+    'settings.theme.lazarskieRejony.name': 'Enigma-Z',
+    'settings.theme.lazarskieRejony.description': 'A translucent dark grey-blue style with neon accents.',
     'settings.appAppearance.default.name': 'Default',
     'settings.appAppearance.default.description': 'Current header, sidebar, panel and button layout.',
     'settings.appAppearance.decorative.name': 'Decorative',
@@ -451,7 +464,12 @@ const I18N = {
     'about.program.how.p2': 'Chat messages can be shown with a configured delay, making them easier to follow during active streams. Other events, such as gifts, joins and likes, can appear live. You can change the filter, chat style, theme or delay at any time.',
     'about.program.how.p3': 'While the program is running, all stream events are saved to the archive. After ending or changing a stream, you can open the archive tab and return to earlier conversations.',
     'about.news.version': 'Program version',
+    'about.news.intro': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.news.features.title': 'Main features:',
+    'about.news.features.notes': 'a notes module was added for saving current live matters',
+    'about.news.features.updates': 'the program checks whether a newer version exists, then downloads it and informs about the update and restart.',
+    'about.news.features.enigmaTheme': 'a new theme and its variants were added in different settings - Enigma-Z',
+    'about.news.features.superFans': 'super fans are highlighted in chat',
     'about.news.features.events': 'displaying TikTok LIVE chat messages with filters for messages, likes, gifts, joins, reposts, shares, boxes and portals',
     'about.news.features.moderators': 'highlighting moderators with a red nickname',
     'about.news.features.avatars': 'random user avatars from the local application image pool to reduce network usage during streams',
@@ -469,6 +487,8 @@ const I18N = {
     'about.news.features.archiveActions': 'archives can be exported to *.txt, deleted and refreshed.',
     'about.news.features.languages': 'Polish, English and German application languages',
     'about.news.fixes.title': 'Fixes:',
+    'about.news.fixes.notes': 'notes module functions were improved',
+    'about.news.fixes.desktopWidgets': 'desktop widget behavior was improved',
     'about.news.fixes.box': 'fixed the coin box message that could show "unknow sends a box" when a box opened in chat',
     'about.news.fixes.optimization': 'program performance optimization',
     'about.news.known.title': 'Known issues:',
@@ -612,6 +632,7 @@ const I18N = {
     'notes.unsaved': 'Neue ungespeicherte Notiz',
     'notes.empty': 'Keine gespeicherten Notizen.',
     'notes.noMatches': 'Keine Notizen entsprechen der Suche.',
+    'notes.previewEmpty': 'Kein Notizinhalt.',
     'notes.saved': 'Notiz gespeichert.',
     'notes.deleted': 'Notiz gelöscht.',
     'notes.loadFailed': 'Notizen konnten nicht geladen werden.',
@@ -652,6 +673,8 @@ const I18N = {
     'settings.theme.whiteTitanium.description': 'Helles App-Design in weißem Titan.',
     'settings.theme.chillSerwis.description': 'Das entspannteste Theme der App.',
     'settings.theme.roseGlass.description': 'Ein etwas weicheres, dezentes Theme.',
+    'settings.theme.lazarskieRejony.name': 'Enigma-Z',
+    'settings.theme.lazarskieRejony.description': 'Halbtransparentes dunkelgrau-blaues Design mit Neon-Akzenten.',
     'settings.appAppearance.default.name': 'Standard',
     'settings.appAppearance.default.description': 'Aktuelles Layout von Header, Sidebar, Fenstern und Buttons.',
     'settings.appAppearance.decorative.name': 'Dekorativ',
@@ -692,7 +715,12 @@ const I18N = {
     'about.program.how.p2': 'Chatnachrichten können mit einer festgelegten Verzögerung angezeigt werden, damit sie bei aktiven Streams leichter zu verfolgen sind. Andere Ereignisse wie Geschenke, Beitritte oder Likes können live erscheinen. Filter, Chat-Stil, Theme und Verzögerung können jederzeit geändert werden.',
     'about.program.how.p3': 'Während das Programm läuft, werden alle Stream-Ereignisse im Archiv gespeichert. Nach dem Ende oder Wechsel eines Streams kannst du das Archiv öffnen und zu früheren Gesprächen zurückkehren.',
     'about.news.version': 'Programmversion',
+    'about.news.intro': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.news.features.title': 'Hauptfunktionen:',
+    'about.news.features.notes': 'ein Notizmodul zum Speichern laufender Live-Themen wurde hinzugefügt',
+    'about.news.features.updates': 'das Programm prüft, ob eine neuere Version verfügbar ist, lädt sie herunter und informiert über Update und Neustart.',
+    'about.news.features.enigmaTheme': 'ein neues Theme und seine Varianten wurden in verschiedenen Einstellungen hinzugefügt - Enigma-Z',
+    'about.news.features.superFans': 'Superfans werden im Chat hervorgehoben',
     'about.news.features.events': 'Anzeige von TikTok-LIVE-Chatnachrichten mit Filtern für Nachrichten, Likes, Geschenke, Beitritte, Reposts, Teilen, Boxen und Portale',
     'about.news.features.moderators': 'Moderatoren werden mit einem roten Nickname hervorgehoben',
     'about.news.features.avatars': 'zufällige Benutzeravatare aus dem lokalen Bilderpool der App, um während des Streams möglichst wenig Daten zu laden',
@@ -710,6 +738,8 @@ const I18N = {
     'about.news.features.archiveActions': 'Archive können als *.txt exportiert, gelöscht und aktualisiert werden.',
     'about.news.features.languages': 'Polnisch, Englisch und Deutsch als App-Sprachen',
     'about.news.fixes.title': 'Korrekturen:',
+    'about.news.fixes.notes': 'Funktionen des Notizmoduls wurden verbessert',
+    'about.news.fixes.desktopWidgets': 'das Verhalten der Desktop-Widgets wurde verbessert',
     'about.news.fixes.box': 'die Nachricht zur Münzbox wurde korrigiert, wenn beim Öffnen im Chat „unknow sendet eine Box“ erscheinen konnte',
     'about.news.fixes.optimization': 'Optimierung der Programmleistung',
     'about.news.known.title': 'Bekannte Fehler:',
@@ -861,12 +891,14 @@ const exportArchiveButton = document.getElementById('exportArchive');
 const deleteArchiveButton = document.getElementById('deleteArchive');
 const notesStatusEl = document.getElementById('notesStatus');
 const newNoteButton = document.getElementById('newNoteButton');
+const editNoteButton = document.getElementById('editNoteButton');
 const saveNoteButton = document.getElementById('saveNoteButton');
 const deleteNoteButton = document.getElementById('deleteNoteButton');
 const notesSearchEl = document.getElementById('notesSearch');
 const notesListEl = document.getElementById('notesList');
 const noteTitleInput = document.getElementById('noteTitleInput');
 const noteContentInput = document.getElementById('noteContentInput');
+const notePreviewEl = document.getElementById('notePreview');
 const noteMetaEl = document.getElementById('noteMeta');
 const noteFormatButtons = Array.from(document.querySelectorAll('[data-note-format]'));
 const recommendedListEl = document.getElementById('recommendedList');
@@ -925,11 +957,13 @@ let selectedArchive = null;
 let noteEntries = [];
 let selectedNoteId = '';
 let selectedNote = null;
+let noteEditorMode = 'edit';
 let renderKeyCounter = 0;
 let timeFormatterKey = '';
 let timeFormatter = null;
 let pendingScrollToEnd = false;
 let liveViewerCount = 0;
+let desktopWidgetRegionsFrame = 0;
 let chatMessageCount = 0;
 let recentCreators = loadRecentCreators();
 let lastSubmittedCreator = '';
@@ -938,6 +972,52 @@ let activeCreatorSuggestionIndex = -1;
 
 if (DESKTOP_WIDGET_MODE) {
   document.documentElement.dataset.desktopWidgets = 'true';
+}
+
+function updateDesktopWidgetInteractiveRegions() {
+  if (
+    !DESKTOP_WIDGET_MODE
+    || !window.tiktokLive
+    || typeof window.tiktokLive.setDesktopWidgetsInteractiveRegions !== 'function'
+  ) {
+    return;
+  }
+
+  const regions = Array.from(document.querySelectorAll('.right-widget'))
+    .filter((widget) => {
+      const style = window.getComputedStyle(widget);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    })
+    .map((widget) => {
+      const rect = widget.getBoundingClientRect();
+      return {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height
+      };
+    })
+    .filter((region) => region.width > 0 && region.height > 0);
+
+  window.tiktokLive.setDesktopWidgetsInteractiveRegions(regions).catch(() => {});
+}
+
+function scheduleDesktopWidgetInteractiveRegions() {
+  if (!DESKTOP_WIDGET_MODE) {
+    return;
+  }
+
+  window.cancelAnimationFrame(desktopWidgetRegionsFrame);
+  desktopWidgetRegionsFrame = window.requestAnimationFrame(updateDesktopWidgetInteractiveRegions);
+}
+
+function initDesktopWidgetInteractiveRegions() {
+  if (!DESKTOP_WIDGET_MODE) {
+    return;
+  }
+
+  scheduleDesktopWidgetInteractiveRegions();
+  window.addEventListener('resize', scheduleDesktopWidgetInteractiveRegions);
 }
 
 function getTimeFormatter() {
@@ -1232,6 +1312,8 @@ function applyI18n() {
     ['#themeWhiteTitanium + span small', 'settings.theme.whiteTitanium.description'],
     ['#themeChillSerwis + span small', 'settings.theme.chillSerwis.description'],
     ['#themeRoseGoldGlass + span small', 'settings.theme.roseGlass.description'],
+    ['#themeLazarskieRejony + span strong', 'settings.theme.lazarskieRejony.name'],
+    ['#themeLazarskieRejony + span small', 'settings.theme.lazarskieRejony.description'],
     ['#appAppearanceStandard + span strong', 'settings.appAppearance.default.name'],
     ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
     ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
@@ -1377,6 +1459,8 @@ function applyGeneralSettings() {
       delete battleBanner.dataset.tone;
     }
   }
+
+  scheduleDesktopWidgetInteractiveRegions();
 }
 
 function initGeneralSettings() {
@@ -1439,6 +1523,7 @@ function setOpenRightWidget(target) {
     window.tiktokLive.setDesktopWidgetsExpanded(Boolean(target));
   }
   syncRightWidgetDock();
+  scheduleDesktopWidgetInteractiveRegions();
 }
 
 function syncRightWidgetDock() {
@@ -2831,6 +2916,9 @@ function renderMessageElement(message) {
   if (message.isModerator) {
     item.classList.add('message-moderator');
   }
+  if (message.isSuperFan) {
+    item.classList.add('message-super-fan');
+  }
 
   const time = document.createElement('time');
   time.className = 'message-time';
@@ -3573,6 +3661,149 @@ function updateNoteEditorMeta() {
   }
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderNoteInlineMarkdown(value) {
+  const codeParts = [];
+  let html = escapeHtml(value).replace(/`([^`\n]+)`/g, (_match, code) => {
+    const key = `\u0000CODE${codeParts.length}\u0000`;
+    codeParts.push(`<code>${code}</code>`);
+    return key;
+  });
+
+  html = html
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/__([^_\n]+)__/g, '<u>$1</u>')
+    .replace(/~~([^~\n]+)~~/g, '<s>$1</s>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+
+  codeParts.forEach((part, index) => {
+    html = html.replace(`\u0000CODE${index}\u0000`, part);
+  });
+
+  return html;
+}
+
+function renderNoteMarkdown(content) {
+  const lines = String(content || '').replace(/\r\n/g, '\n').split('\n');
+  const html = [];
+  let listItems = [];
+  let codeLines = [];
+  let inCodeBlock = false;
+
+  const flushList = () => {
+    if (!listItems.length) {
+      return;
+    }
+    html.push(`<ul>${listItems.map((item) => `<li>${renderNoteInlineMarkdown(item)}</li>`).join('')}</ul>`);
+    listItems = [];
+  };
+
+  const flushCode = () => {
+    html.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+    codeLines = [];
+  };
+
+  lines.forEach((line) => {
+    if (/^\s*```\s*$/.test(line)) {
+      if (inCodeBlock) {
+        flushCode();
+        inCodeBlock = false;
+      } else {
+        flushList();
+        inCodeBlock = true;
+        codeLines = [];
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeLines.push(line);
+      return;
+    }
+
+    const listMatch = line.match(/^\s*[-*]\s+(.+)$/);
+    if (listMatch) {
+      listItems.push(listMatch[1]);
+      return;
+    }
+
+    flushList();
+
+    const quoteMatch = line.match(/^\s*>\s?(.*)$/);
+    if (quoteMatch) {
+      html.push(`<blockquote>${renderNoteInlineMarkdown(quoteMatch[1]) || '&nbsp;'}</blockquote>`);
+      return;
+    }
+
+    if (!line.trim()) {
+      html.push('<p class="note-preview-empty">&nbsp;</p>');
+      return;
+    }
+
+    html.push(`<p>${renderNoteInlineMarkdown(line)}</p>`);
+  });
+
+  if (inCodeBlock) {
+    flushCode();
+  }
+  flushList();
+
+  return html.join('');
+}
+
+function updateNotePreview() {
+  if (!notePreviewEl || !noteContentInput) {
+    return;
+  }
+  const content = noteContentInput.value;
+  notePreviewEl.innerHTML = content.trim()
+    ? renderNoteMarkdown(content)
+    : `<p class="note-preview-empty">${escapeHtml(t('notes.previewEmpty'))}</p>`;
+}
+
+function setNoteEditorMode(mode) {
+  noteEditorMode = mode === 'read' ? 'read' : 'edit';
+  const readMode = noteEditorMode === 'read';
+  const notesDetail = noteContentInput ? noteContentInput.closest('.notes-detail') : null;
+
+  if (notesDetail) {
+    notesDetail.dataset.noteMode = noteEditorMode;
+  }
+  if (noteTitleInput) {
+    noteTitleInput.readOnly = readMode;
+  }
+  if (noteContentInput) {
+    noteContentInput.readOnly = readMode;
+    noteContentInput.hidden = readMode;
+  }
+  if (notePreviewEl) {
+    notePreviewEl.hidden = !readMode;
+  }
+  noteFormatButtons.forEach((button) => {
+    button.hidden = readMode;
+  });
+  const toolbar = noteFormatButtons[0] ? noteFormatButtons[0].closest('.note-format-toolbar') : null;
+  if (toolbar) {
+    toolbar.hidden = readMode;
+  }
+  if (editNoteButton) {
+    editNoteButton.hidden = !readMode || !selectedNoteId;
+  }
+  if (saveNoteButton) {
+    saveNoteButton.hidden = readMode;
+  }
+
+  updateNotePreview();
+}
+
 function resetNoteEditor() {
   selectedNoteId = '';
   selectedNote = null;
@@ -3583,6 +3814,7 @@ function resetNoteEditor() {
     noteContentInput.value = '';
   }
   updateNoteEditorMeta();
+  setNoteEditorMode('edit');
   renderNotesList();
 }
 
@@ -3728,6 +3960,7 @@ async function openNote(noteId) {
       noteContentInput.value = selectedNote.content || '';
     }
     updateNoteEditorMeta();
+    setNoteEditorMode('read');
     renderNotesList();
   } catch {
     setNotesStatus(t('notes.loadFailed'));
@@ -3758,8 +3991,15 @@ async function saveCurrentNote() {
     selectedNote = result.note;
     selectedNoteId = selectedNote.id;
     noteEntries = Array.isArray(result.notes) ? result.notes : noteEntries;
+    if (noteTitleInput) {
+      noteTitleInput.value = selectedNote.title || title;
+    }
+    if (noteContentInput) {
+      noteContentInput.value = selectedNote.content || content;
+    }
     renderNotesList();
     updateNoteEditorMeta();
+    setNoteEditorMode('read');
     setNotesStatus(t('notes.saved'));
   } catch {
     setNotesStatus(t('notes.saveFailed'));
@@ -3845,6 +4085,15 @@ if (newNoteButton) {
   });
 }
 
+if (editNoteButton) {
+  editNoteButton.addEventListener('click', () => {
+    setNoteEditorMode('edit');
+    if (noteContentInput) {
+      noteContentInput.focus();
+    }
+  });
+}
+
 if (saveNoteButton) {
   saveNoteButton.addEventListener('click', saveCurrentNote);
 }
@@ -3856,6 +4105,10 @@ if (deleteNoteButton) {
 noteFormatButtons.forEach((button) => {
   button.addEventListener('click', () => applyNoteMarkdownFormat(button.dataset.noteFormat || 'bold'));
 });
+
+if (noteContentInput) {
+  noteContentInput.addEventListener('input', updateNotePreview);
+}
 
 archiveFilterButtons.forEach((button) => {
   button.addEventListener('click', () => {
@@ -3995,6 +4248,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 hydrateUiIcons();
+initDesktopWidgetInteractiveRegions();
 initAppearanceSettings();
 initGeneralSettings();
 initSystemSettings();

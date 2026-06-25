@@ -306,6 +306,13 @@
                     <small>Nieco bardziej kobiecy, delikatny motyw.</small>
                   </span>
                 </label>
+                <label class="setting-choice" for="themeLazarskieRejony">
+                  <input type="radio" id="themeLazarskieRejony" name="appTheme" value="lazarskie-rejony">
+                  <span>
+                    <strong>Enigma-Z</strong>
+                    <small>Półprzezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.</small>
+                  </span>
+                </label>
               </div>
             </section>
             <section class="setting-section">
@@ -437,6 +444,10 @@
                 <span data-ui-icon="message" aria-hidden="true"></span>
                 <span data-i18n="notes.new">Nowa</span>
               </button>
+              <button class="page-action archive-icon-action" type="button" id="editNoteButton" hidden>
+                <span data-ui-icon="message" aria-hidden="true"></span>
+                <span data-i18n="notes.edit">Edytuj</span>
+              </button>
               <button class="page-action archive-icon-action" type="button" id="saveNoteButton">
                 <span data-ui-icon="check" aria-hidden="true"></span>
                 <span data-i18n="notes.save">Zapisz</span>
@@ -469,6 +480,7 @@
                 <button class="note-format-button" type="button" data-note-format="list" title="Lista" data-i18n-title="notes.format.list" aria-label="Lista" data-i18n-aria-label="notes.format.list">•</button>
               </div>
               <textarea class="note-content-input" id="noteContentInput" maxlength="20000" placeholder="Napisz notatkę..." data-i18n-placeholder="notes.contentPlaceholder"></textarea>
+              <article class="note-preview" id="notePreview" hidden></article>
               <div class="note-meta" id="noteMeta" data-i18n="notes.unsaved">Nowa niezapisana notatka</div>
             </section>
           </section>
@@ -528,20 +540,20 @@
           <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
             <section class="about-section">
               <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
+              <p data-i18n="about.news.intro">Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.</p>
 
               <h3 data-i18n="about.news.features.title">Główne funkcje:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.features.widgets">przybornik live został zastąpiony widgetami. Od teraz możesz sprawdzić moderację online na czacie, statystyki i top 5 giftujących osób</li>
-                <li data-i18n="about.news.features.flexibleWidgets">wszystkie widgety są elastyczne tj. możesz je ukryć, pokazać, przypiąć do pulpitu gdy aplikacja jest pomniejszona</li>
-                <li data-i18n="about.news.features.archiveCenter">poprawione i rozbudowane centrum archiwizacji czatu live, z podziałem na filtry, podsumowaniami ilości zdarzeń, wiadomości na czacie, monetami, moderatorami online podczas sesji</li>
-                <li data-i18n="about.news.features.archiveActions">archiwum można eksportować do pliku *.txt, kasować, odświeżać.</li>
-                <li data-i18n="about.news.features.languages">język polski, angielski i niemiecki aplikacji</li>
+                <li data-i18n="about.news.features.notes">dodany został notatnik do zapisywania bieżących spraw</li>
+                <li data-i18n="about.news.features.updates">program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.</li>
+                <li data-i18n="about.news.features.enigmaTheme">dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z</li>
+                <li data-i18n="about.news.features.superFans">wyróżnienie super fanów na czacie</li>
               </ul>
 
               <h3 data-i18n="about.news.fixes.title">Poprawki:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.fixes.box">poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"</li>
-                <li data-i18n="about.news.fixes.optimization">optymalizacja działania programu</li>
+                <li data-i18n="about.news.fixes.notes">poprawione funkcje notatnika</li>
+                <li data-i18n="about.news.fixes.desktopWidgets">poprawione działanie widgetów na pulpicie</li>
               </ul>
 
               <h3 data-i18n="about.news.known.title">Znane błędy:</h3>
@@ -551,9 +563,7 @@
 
               <h3 data-i18n="about.news.next.title">Co dalej:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.next.widgets">rozbudowa systemu widgetów</li>
                 <li data-i18n="about.news.next.ttsLanguages">dodatkowe języki odczytu czatu TTS</li>
-                <li data-i18n="about.news.next.superFans">wyróżnienie super fanów na czacie</li>
                 <li data-i18n="about.news.next.connection">optymalizacja połączenia z danym twórcą</li>
                 <li data-i18n="about.news.next.giftSounds">powiadomienia dźwiękowe dla większych prezentów</li>
               </ul>

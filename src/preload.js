@@ -22,6 +22,7 @@ const api = {
   setDesktopWidgetsEnabled: (enabled) => ipcRenderer.invoke('shell:set-desktop-widgets-enabled', enabled),
   setDesktopWidgetsExpanded: (expanded) => ipcRenderer.invoke('shell:set-desktop-widgets-expanded', expanded),
   setDesktopWidgetsAlwaysOnTop: (enabled) => ipcRenderer.invoke('shell:set-desktop-widgets-always-on-top', enabled),
+  setDesktopWidgetsInteractiveRegions: (regions) => ipcRenderer.invoke('shell:set-desktop-widgets-interactive-regions', regions),
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on('shell:state', listener);

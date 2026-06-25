@@ -24,6 +24,7 @@ const PARTITION = 'persist:tiktok-live-session';
 const ARCHIVE_DIR = path.join(app.isPackaged ? app.getPath('userData') : app.getAppPath(), 'archives');
 const SYSTEM_SETTINGS_FILE = path.join(app.getPath('userData'), 'system-settings.json');
 const NOTES_FILE = path.join(app.getPath('userData'), 'notes.json');
+const UPDATE_COMPLETED_FILE = path.join(app.getPath('userData'), 'update-completed.json');
 const TRANSMISSION_ARCHIVE_PREFIX = 'transmisja-';
 const AVATAR_DIR = path.join(__dirname, 'pic');
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
@@ -32,6 +33,25 @@ const PROGRAM_AUTHOR_UNIQUE_ID = 'bakus.03';
 const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
 const APP_VERSION = app.getVersion();
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+const RELEASE_NOTES_012 = `Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.
+
+Główne funkcje
+- dodany został notatnik do zapisywania bieżących spraw
+- program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.
+- dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z
+- wyróżnienie super fanów na czacie
+
+Poprawki
+- poprawione funkcje notatnika
+- poprawione działanie widgetów na pulpicie
+
+Znane błędy
+- mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku
+
+Co dalej
+- dodatkowe języki odczytu czatu TTS
+- optymalizacja połączenia z danym twórcą
+- powiadomienia dźwiękowe dla większych prezentów`;
 const RECONNECT_BASE_DELAY_MS = 30 * 1000;
 const RECONNECT_MAX_DELAY_MS = 5 * 60 * 1000;
 const OFFLINE_RECONNECT_DELAY_MS = 10 * 60 * 1000;
@@ -208,6 +228,7 @@ const battleUserDirectory = new Map();
 const battleHostDirectory = new Map();
 const battleSideByUser = new Map();
 const recentBattleEffects = new Map();
+const superFanUsers = new Set();
 let currentCreatorLiveUserId = '';
 const currentCreatorLiveAliases = new Set();
 let tray;
@@ -472,6 +493,7 @@ function resetChatBuffers() {
   likeTotalsByUser.clear();
   latestRoomStats = { viewerCount: 0 };
   liveUserDirectory.clear();
+  superFanUsers.clear();
   currentCreatorLiveUserId = '';
   currentCreatorLiveAliases.clear();
   battleActive = false;
@@ -506,6 +528,7 @@ function archiveChatMessage(message) {
     authorName: normalizeMessageText(message.authorName),
     uniqueId: normalizeMessageText(message.uniqueId),
     isModerator: Boolean(message.isModerator),
+    isSuperFan: Boolean(message.isSuperFan),
     upsert: Boolean(message.upsert)
   };
   [
@@ -888,6 +911,31 @@ function applyDesktopWidgetsAlwaysOnTop() {
     desktopWidgetsAlwaysOnTop,
     desktopWidgetsAlwaysOnTop ? 'screen-saver' : 'normal'
   );
+}
+
+function setDesktopWidgetsInteractiveRegions(regions) {
+  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
+    return [];
+  }
+
+  desktopWidgetsWindow.setIgnoreMouseEvents(false);
+  if (typeof desktopWidgetsWindow.setShape !== 'function') {
+    return [];
+  }
+
+  const safeRegions = Array.isArray(regions)
+    ? regions
+      .map((region) => ({
+        x: Math.max(0, Math.floor(Number(region && region.x) || 0)),
+        y: Math.max(0, Math.floor(Number(region && region.y) || 0)),
+        width: Math.max(1, Math.ceil(Number(region && region.width) || 0)),
+        height: Math.max(1, Math.ceil(Number(region && region.height) || 0))
+      }))
+      .filter((region) => region.width > 0 && region.height > 0)
+    : [];
+
+  desktopWidgetsWindow.setShape(safeRegions.length ? safeRegions : [{ x: 0, y: 0, width: 1, height: 1 }]);
+  return safeRegions;
 }
 
 function setDesktopWidgetsAlwaysOnTop(enabled) {
@@ -1389,6 +1437,9 @@ async function connectLiveChat() {
         return;
       }
 
+      if (hasSuperFanSignal(data)) {
+        markSuperFanUser(data);
+      }
       const event = formatMemberEvent(data);
       archiveChatMessage(event);
       if (isProgramAuthorEvent(event)) {
@@ -1506,6 +1557,38 @@ async function connectLiveChat() {
         }
 
         handleBattleBoostCard(data);
+      });
+    }
+
+    if (WebcastEvent.SUPER_FAN) {
+      connection.on(WebcastEvent.SUPER_FAN, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        markSuperFanUser(data);
+      });
+    }
+
+    if (WebcastEvent.SUPER_FAN_JOIN) {
+      connection.on(WebcastEvent.SUPER_FAN_JOIN, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        markSuperFanUser(data);
+      });
+    }
+
+    if (WebcastEvent.BARRAGE) {
+      connection.on(WebcastEvent.BARRAGE, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        if (hasSuperFanSignal(data)) {
+          markSuperFanUser(data);
+        }
       });
     }
 
@@ -1888,6 +1971,7 @@ function createDisplayEvent(data, kind, user, text, archiveText, extra = {}) {
     authorName: user.nickname,
     uniqueId: user.uniqueId,
     isModerator: isModeratorEvent(data),
+    isSuperFan: isSuperFanEvent(data, user),
     text: normalizeMessageText(text),
     archiveText: normalizeMessageText(archiveText),
     ...extra
@@ -2221,6 +2305,93 @@ function hasModeratorText(value, depth) {
   }
 
   return Object.values(value).some((item) => hasModeratorText(item, depth - 1));
+}
+
+function isSuperFanEvent(data, user = getEventUser(data)) {
+  return Boolean(
+    isKnownSuperFanUser(user)
+    || hasTruthyKey(data, 'isSuperFan', 5)
+    || hasTruthyKey(data, 'superFan', 5)
+    || hasSuperFanBadgeMarker(user)
+    || hasSuperFanBadgeMarker(data && data.user)
+    || hasSuperFanSignal(data)
+  );
+}
+
+function markSuperFanUser(data) {
+  getSuperFanUserKeys(data).forEach((key) => superFanUsers.add(key));
+}
+
+function isKnownSuperFanUser(value) {
+  return getSuperFanUserKeys(value).some((key) => superFanUsers.has(key));
+}
+
+function hasSuperFanBadgeMarker(value) {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const badgeSources = [
+    value.badges,
+    value.badgeList,
+    value.userBadges,
+    value.userBadgeList,
+    value.badgeImageList
+  ];
+  return badgeSources.some((source) => hasSuperFanSignalValue(source, 5));
+}
+
+function getSuperFanUserKeys(value) {
+  const user = value && value.user && typeof value.user === 'object' ? value.user : value;
+  const registered = user && typeof user === 'object' ? registerLiveUser(user, user.userId || user.id) : null;
+  const keys = [
+    user && user.uniqueId,
+    user && user.displayId,
+    user && user.unique_id,
+    user && user.display_id,
+    user && user.nickname,
+    user && user.nickName,
+    user && user.name,
+    registered && registered.displayId,
+    registered && registered.nickname
+  ];
+  return [...new Set(keys.map((key) => normalizeUniqueId(key)).filter(Boolean))];
+}
+
+function hasSuperFanSignal(data) {
+  return hasSuperFanSignalValue(data, 4);
+}
+
+function hasSuperFanSignalValue(value, depth) {
+  if (!value || depth < 0) {
+    return false;
+  }
+
+  if (typeof value === 'string') {
+    return /ttlive[_-]?superfan|ttlive[_-]?superFan|super[_\s-]*fan|becameSuperFan|superFanJoined/i.test(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((item) => hasSuperFanSignalValue(item, depth - 1));
+  }
+
+  if (typeof value !== 'object') {
+    return false;
+  }
+
+  const signalKeys = new Set([
+    'type',
+    'displayType',
+    'display_type',
+    'label',
+    'defaultPattern',
+    'pattern',
+    'content'
+  ]);
+
+  return Object.entries(value).some(([key, item]) => (
+    signalKeys.has(key) && hasSuperFanSignalValue(item, depth - 1)
+  ));
 }
 
 function getGiftName(data) {
@@ -3596,6 +3767,7 @@ function parseLegacyArchive(fullPath, entry) {
       authorName,
       uniqueId,
       isModerator: false,
+      isSuperFan: false,
       text: messageText,
       archiveText: raw
     });
@@ -3853,6 +4025,10 @@ function installIpc() {
     ok: true,
     enabled: setDesktopWidgetsAlwaysOnTop(enabled)
   }));
+  handleShell('shell:set-desktop-widgets-interactive-regions', async (regions) => ({
+    ok: true,
+    regions: setDesktopWidgetsInteractiveRegions(regions)
+  }));
 
   handleShell('shell:open-in-browser', async () => {
     await shell.openExternal(getCurrentCreator().liveUrl);
@@ -3871,12 +4047,118 @@ function setUpdateMessage(text) {
   publishState();
 }
 
-function setupAutoUpdates() {
-  if (!app.isPackaged || isSmokeRun()) {
+let autoUpdatesConfigured = false;
+let updatePromptVisible = false;
+let updateInstallInProgress = false;
+let updateDownloadReject = null;
+
+function normalizeVersionParts(version) {
+  return String(version || '')
+    .split(/[.-]/)
+    .map((part) => Number.parseInt(part, 10))
+    .map((part) => (Number.isFinite(part) ? part : 0));
+}
+
+function isVersionNewer(candidate, current) {
+  const candidateParts = normalizeVersionParts(candidate);
+  const currentParts = normalizeVersionParts(current);
+  const length = Math.max(candidateParts.length, currentParts.length);
+  for (let index = 0; index < length; index += 1) {
+    const candidatePart = candidateParts[index] || 0;
+    const currentPart = currentParts[index] || 0;
+    if (candidatePart > currentPart) {
+      return true;
+    }
+    if (candidatePart < currentPart) {
+      return false;
+    }
+  }
+  return false;
+}
+
+function getReleaseNotesText() {
+  return RELEASE_NOTES_012;
+}
+
+function getUpdateNotes(info) {
+  const releaseNotes = info && info.releaseNotes;
+  if (Array.isArray(releaseNotes)) {
+    return releaseNotes
+      .map((entry) => {
+        if (!entry) {
+          return '';
+        }
+        if (typeof entry === 'string') {
+          return entry;
+        }
+        return entry.note || entry.notes || '';
+      })
+      .filter(Boolean)
+      .join('\n\n');
+  }
+  if (typeof releaseNotes === 'string' && releaseNotes.trim()) {
+    return releaseNotes.trim();
+  }
+  return getReleaseNotesText();
+}
+
+function markUpdateCompleted(version) {
+  try {
+    fs.writeFileSync(UPDATE_COMPLETED_FILE, JSON.stringify({
+      version: version || '',
+      completedAt: new Date().toISOString()
+    }), 'utf8');
+  } catch (error) {
+    // The update must not fail only because the completion notice marker could not be saved.
+  }
+}
+
+function consumeUpdateCompletedMarker() {
+  try {
+    if (!fs.existsSync(UPDATE_COMPLETED_FILE)) {
+      return null;
+    }
+    const raw = fs.readFileSync(UPDATE_COMPLETED_FILE, 'utf8');
+    fs.unlinkSync(UPDATE_COMPLETED_FILE);
+    return JSON.parse(raw);
+  } catch (error) {
+    try {
+      fs.unlinkSync(UPDATE_COMPLETED_FILE);
+    } catch (cleanupError) {
+      // Ignore cleanup problems.
+    }
+    return {};
+  }
+}
+
+function showUpdateCompletedDialogIfNeeded() {
+  const marker = consumeUpdateCompletedMarker();
+  if (!marker) {
     return;
   }
 
-  autoUpdater.autoDownload = true;
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Aktualizacja ukończona',
+    message: 'Aktualizacja ukończona',
+    detail: getReleaseNotesText(),
+    buttons: ['OK'],
+    defaultId: 0,
+    noLink: true
+  }).catch(() => {});
+}
+
+function configureAutoUpdates() {
+  if (!app.isPackaged || isSmokeRun()) {
+    return false;
+  }
+
+  if (autoUpdatesConfigured) {
+    return true;
+  }
+
+  autoUpdatesConfigured = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.logger = {
     info() {},
@@ -3886,19 +4168,139 @@ function setupAutoUpdates() {
   };
 
   autoUpdater.on('update-available', (info) => {
-    setUpdateMessage(`Pobieram aktualizacje ${info && info.version ? info.version : ''}`.trim());
+    setUpdateMessage(`Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
   });
 
-  autoUpdater.on('update-downloaded', (info) => {
-    setUpdateMessage(`Aktualizacja ${info && info.version ? info.version : ''} pobrana. Zainstaluje sie po zamknieciu aplikacji.`.trim());
+  autoUpdater.on('update-downloaded', async (info) => {
+    setUpdateMessage(`Aktualizacja ${info && info.version ? info.version : ''} pobrana.`.trim());
+    if (!updateInstallInProgress) {
+      return;
+    }
+
+    markUpdateCompleted(info && info.version ? info.version : '');
+    await dialog.showMessageBox({
+      type: 'info',
+      title: 'Aktualizacja pobrana',
+      message: 'Aktualizacja pobrana',
+      detail: 'Program zostanie teraz zamknięty i uruchomiony ponownie, aby dokończyć instalację.',
+      buttons: ['OK'],
+      defaultId: 0,
+      noLink: true
+    }).catch(() => {});
+    autoUpdater.quitAndInstall(false, true);
   });
 
   autoUpdater.on('error', (error) => {
     setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
+    if (updateDownloadReject) {
+      const reject = updateDownloadReject;
+      updateDownloadReject = null;
+      reject(error);
+    }
   });
 
+  return true;
+}
+
+async function beginUpdateInstall(info) {
+  updateInstallInProgress = true;
+  await dialog.showMessageBox({
+    type: 'info',
+    title: 'Aktualizacja',
+    message: 'Rozpoczynam aktualizację',
+    detail: 'Funkcje programu będą niedostępne do czasu zakończenia aktualizacji i ponownego uruchomienia aplikacji.',
+    buttons: ['OK'],
+    defaultId: 0,
+    noLink: true
+  }).catch(() => {});
+
+  setUpdateMessage(`Pobieram aktualizację ${info && info.version ? info.version : ''}`.trim());
+  await new Promise((resolve, reject) => {
+    updateDownloadReject = reject;
+    autoUpdater.downloadUpdate()
+      .then(resolve)
+      .catch(reject);
+  });
+}
+
+async function promptForUpdate(info) {
+  if (!info || !info.version || updatePromptVisible || updateInstallInProgress) {
+    return false;
+  }
+
+  if (!isVersionNewer(info.version, APP_VERSION)) {
+    return false;
+  }
+
+  updatePromptVisible = true;
+  const result = await dialog.showMessageBox({
+    type: 'question',
+    title: 'Dostępna aktualizacja',
+    message: `Dostępna jest aktualizacja ${info.version}`,
+    detail: `${getUpdateNotes(info)}\n\nObecna wersja: ${APP_VERSION}`,
+    buttons: ['Aktualizuj teraz', 'Uruchom bez aktualizacji'],
+    defaultId: 0,
+    cancelId: 1,
+    noLink: true
+  }).catch(() => ({ response: 1 }));
+  updatePromptVisible = false;
+
+  if (result.response !== 0) {
+    return false;
+  }
+
+  try {
+    await beginUpdateInstall(info);
+    return true;
+  } catch (error) {
+    updateInstallInProgress = false;
+    updateDownloadReject = null;
+    await dialog.showMessageBox({
+      type: 'error',
+      title: 'Błąd aktualizacji',
+      message: 'Nie udało się pobrać aktualizacji',
+      detail: getConnectionErrorMessage(error),
+      buttons: ['OK'],
+      defaultId: 0,
+      noLink: true
+    }).catch(() => {});
+    return false;
+  }
+}
+
+async function runStartupUpdateCheck() {
+  if (!configureAutoUpdates()) {
+    return false;
+  }
+
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    const info = result && result.updateInfo ? result.updateInfo : null;
+    if (!info || !isVersionNewer(info.version, APP_VERSION)) {
+      return false;
+    }
+    return promptForUpdate(info);
+  } catch (error) {
+    return false;
+  }
+}
+
+function setupAutoUpdates() {
+  if (!configureAutoUpdates()) {
+    return;
+  }
+
   const checkForUpdates = () => {
-    autoUpdater.checkForUpdatesAndNotify().catch(() => {});
+    if (updateInstallInProgress || updatePromptVisible) {
+      return;
+    }
+
+    autoUpdater.checkForUpdates()
+      .then((result) => {
+        const info = result && result.updateInfo ? result.updateInfo : null;
+        return promptForUpdate(info);
+      })
+      .catch(() => {});
   };
 
   setTimeout(checkForUpdates, 15000);
@@ -3956,6 +4358,11 @@ app.setAppUserModelId('pl.czatboxtt.app');
 installIpc();
 
 app.whenReady().then(async () => {
+  const updateStarted = await runStartupUpdateCheck();
+  if (updateStarted) {
+    return new Promise(() => {});
+  }
+
   const connector = await import('tiktok-live-connector');
   ({
     TikTokLiveConnection,
@@ -3966,6 +4373,7 @@ app.whenReady().then(async () => {
   } = connector);
 
   return createWindow().then(() => {
+    showUpdateCompletedDialogIfNeeded();
     setupAutoUpdates();
 
     if (isSmokeRun()) {

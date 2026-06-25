@@ -620,6 +620,11 @@ body {
   font-weight: 850;
 }
 
+.note-title-input[readonly] {
+  background: color-mix(in srgb, var(--dropdown-surface) 78%, transparent);
+  cursor: default;
+}
+
 .note-format-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -679,6 +684,77 @@ body {
   resize: none;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.note-preview {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 14px;
+  overflow: hidden auto;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dropdown-surface) 88%, transparent);
+  color: var(--dropdown-text);
+  font-size: 13px;
+  line-height: 1.5;
+  scrollbar-width: thin;
+}
+
+.note-preview[hidden] {
+  display: none;
+}
+
+.note-preview p,
+.note-preview ul,
+.note-preview blockquote,
+.note-preview pre {
+  margin: 0 0 10px;
+}
+
+.note-preview p:last-child,
+.note-preview ul:last-child,
+.note-preview blockquote:last-child,
+.note-preview pre:last-child {
+  margin-bottom: 0;
+}
+
+.note-preview ul {
+  padding-left: 20px;
+}
+
+.note-preview blockquote {
+  padding: 8px 10px;
+  border-left: 3px solid color-mix(in srgb, var(--dropdown-active-bg) 78%, var(--dropdown-border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dropdown-bg) 50%, transparent);
+  color: var(--dropdown-muted);
+}
+
+.note-preview code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--dropdown-bg) 68%, transparent);
+  color: var(--dropdown-text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+.note-preview pre {
+  padding: 10px;
+  overflow: auto;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--dropdown-bg) 78%, transparent);
+}
+
+.note-preview pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  white-space: pre;
+}
+
+.note-preview-empty {
+  color: var(--dropdown-muted);
 }
 
 .note-title-input:focus,
@@ -1833,8 +1909,24 @@ body {
   font-weight: 750;
 }
 
+.message-super-fan .message-author {
+  color: #ffd166;
+  text-shadow: 0 0 10px rgba(255, 209, 102, 0.32);
+}
+
+.message-super-fan .message-author::after {
+  content: " ★";
+  color: #ffd166;
+  font-size: 0.82em;
+  text-shadow: 0 0 10px rgba(255, 209, 102, 0.45);
+}
+
 .message-moderator .message-author {
   color: #ff1f3d;
+}
+
+.message-moderator.message-super-fan .message-author::after {
+  color: #ffd166;
 }
 
 .message-body {
@@ -3097,10 +3189,414 @@ body {
   background: linear-gradient(180deg, rgba(238, 231, 255, 0.84), rgba(207, 196, 238, 0.62));
 }
 
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .messages {
+  padding: 16px;
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-content {
+  gap: 10px;
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-avatar {
+  box-shadow:
+    0 0 0 1px rgba(73, 211, 255, 0.22),
+    0 0 16px rgba(73, 211, 255, 0.12);
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-content > .message-body {
+  border-color: rgba(73, 211, 255, 0.24);
+  background:
+    linear-gradient(145deg, rgba(22, 39, 58, 0.9), rgba(9, 16, 26, 0.84)),
+    rgba(12, 20, 32, 0.78);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.26),
+    0 0 18px rgba(73, 211, 255, 0.055);
+  -webkit-backdrop-filter: blur(12px) saturate(1.18);
+  backdrop-filter: blur(12px) saturate(1.18);
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-author {
+  color: #e9f7ff;
+  text-shadow: 0 0 10px rgba(73, 211, 255, 0.14);
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-inline-time {
+  color: #9fc5da;
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-body {
+  color: #f4fbff;
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-member .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-member .message-content > .message-body {
+  border-color: rgba(73, 211, 255, 0.34);
+  background: linear-gradient(145deg, rgba(24, 105, 151, 0.88), rgba(10, 46, 79, 0.84));
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-gift .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-gift .message-content > .message-body {
+  border-color: rgba(255, 211, 77, 0.36);
+  background: linear-gradient(145deg, rgba(128, 93, 22, 0.9), rgba(53, 39, 13, 0.84));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), 0 0 18px rgba(255, 211, 77, 0.075);
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-box .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-box .message-content > .message-body {
+  border-color: rgba(104, 255, 141, 0.34);
+  background: linear-gradient(145deg, rgba(36, 109, 60, 0.86), rgba(13, 46, 27, 0.82));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), 0 0 18px rgba(104, 255, 141, 0.07);
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-like .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-like .message-content > .message-body {
+  border-color: rgba(104, 255, 141, 0.34);
+  background: linear-gradient(145deg, rgba(22, 104, 69, 0.86), rgba(10, 42, 30, 0.82));
+}
+
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-repost .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-share .message-text,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-repost .message-content > .message-body,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-share .message-content > .message-body {
+  border-color: rgba(155, 140, 255, 0.34);
+  background: linear-gradient(145deg, rgba(65, 55, 128, 0.88), rgba(29, 26, 67, 0.84));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), 0 0 18px rgba(155, 140, 255, 0.075);
+}
+
+:root[data-theme="lazarskie-rejony"] {
+  color-scheme: dark;
+  background: #0a0f17;
+  color: #eef4ff;
+  --dropdown-bg: rgba(12, 17, 26, 0.82);
+  --dropdown-surface: rgba(24, 32, 46, 0.78);
+  --dropdown-border: rgba(108, 132, 178, 0.26);
+  --dropdown-text: #f2f7ff;
+  --dropdown-muted: #98a6bb;
+  --dropdown-hover-bg: rgba(42, 58, 82, 0.82);
+  --dropdown-active-bg: rgba(38, 77, 119, 0.76);
+  --dropdown-active-text: #ffffff;
+  --dropdown-shadow: 0 22px 54px rgba(0, 0, 0, 0.46);
+}
+
+:root[data-theme="lazarskie-rejony"] body,
+:root[data-theme="lazarskie-rejony"] .chat-app,
+:root[data-theme="lazarskie-rejony"] .page-view,
+:root[data-theme="lazarskie-rejony"] .archive-view,
+:root[data-theme="lazarskie-rejony"] .notes-view {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(61, 91, 138, 0.22), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(58, 149, 201, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(8, 12, 19, 0.96), rgba(13, 19, 29, 0.9) 48%, rgba(8, 13, 21, 0.96)),
+    #0a0f17;
+}
+
+:root[data-theme="lazarskie-rejony"] .chat-app {
+  color: #eef4ff;
+}
+
+:root[data-theme="lazarskie-rejony"] .chat-header,
+:root[data-theme="lazarskie-rejony"] .sidebar,
+:root[data-theme="lazarskie-rejony"] .filters,
+:root[data-theme="lazarskie-rejony"] .archive-toolbar,
+:root[data-theme="lazarskie-rejony"] .archive-browser,
+:root[data-theme="lazarskie-rejony"] .archive-session-header,
+:root[data-theme="lazarskie-rejony"] .archive-filters,
+:root[data-theme="lazarskie-rejony"] .archive-detail,
+:root[data-theme="lazarskie-rejony"] .archive-summary,
+:root[data-theme="lazarskie-rejony"] .archive-messages,
+:root[data-theme="lazarskie-rejony"] .notes-sidebar,
+:root[data-theme="lazarskie-rejony"] .notes-detail,
+:root[data-theme="lazarskie-rejony"] .about-content {
+  border-color: rgba(111, 133, 177, 0.22);
+  background:
+    linear-gradient(145deg, rgba(24, 31, 43, 0.76), rgba(10, 15, 23, 0.72)),
+    rgba(13, 18, 27, 0.72);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.045),
+    0 18px 50px rgba(0, 0, 0, 0.28);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  backdrop-filter: blur(18px) saturate(1.18);
+}
+
+:root[data-theme="lazarskie-rejony"] .messages,
+:root[data-theme="lazarskie-rejony"] .archive-list,
+:root[data-theme="lazarskie-rejony"] .notes-list {
+  scrollbar-color: rgba(88, 113, 155, 0.7) rgba(9, 14, 22, 0.42);
+}
+
+:root[data-theme="lazarskie-rejony"] .title,
+:root[data-theme="lazarskie-rejony"] .page-header h1,
+:root[data-theme="lazarskie-rejony"] .archive-title,
+:root[data-theme="lazarskie-rejony"] .settings-heading,
+:root[data-theme="lazarskie-rejony"] .about-section h2,
+:root[data-theme="lazarskie-rejony"] .about-section h3,
+:root[data-theme="lazarskie-rejony"] .setting-choice strong,
+:root[data-theme="lazarskie-rejony"] .recommended-card strong,
+:root[data-theme="lazarskie-rejony"] .archive-name,
+:root[data-theme="lazarskie-rejony"] .note-title-input,
+:root[data-theme="lazarskie-rejony"] .note-preview {
+  color: #f2f7ff;
+}
+
+:root[data-theme="lazarskie-rejony"] .status,
+:root[data-theme="lazarskie-rejony"] .tagline,
+:root[data-theme="lazarskie-rejony"] .creator-picker,
+:root[data-theme="lazarskie-rejony"] .archive-status,
+:root[data-theme="lazarskie-rejony"] .archive-row time,
+:root[data-theme="lazarskie-rejony"] .page-note,
+:root[data-theme="lazarskie-rejony"] .setting-choice small,
+:root[data-theme="lazarskie-rejony"] .setting-range-marks,
+:root[data-theme="lazarskie-rejony"] .message-time,
+:root[data-theme="lazarskie-rejony"] .message-inline-time,
+:root[data-theme="lazarskie-rejony"] .recommended-card small,
+:root[data-theme="lazarskie-rejony"] .recommended-bio,
+:root[data-theme="lazarskie-rejony"] .recommended-empty,
+:root[data-theme="lazarskie-rejony"] .archive-meta,
+:root[data-theme="lazarskie-rejony"] .note-meta,
+:root[data-theme="lazarskie-rejony"] .note-preview-empty {
+  color: #98a6bb;
+}
+
+:root[data-theme="lazarskie-rejony"] .sidebar-button,
+:root[data-theme="lazarskie-rejony"] .settings-tab,
+:root[data-theme="lazarskie-rejony"] .filter-button,
+:root[data-theme="lazarskie-rejony"] .page-action,
+:root[data-theme="lazarskie-rejony"] .note-format-button,
+:root[data-theme="lazarskie-rejony"] .creator-picker select,
+:root[data-theme="lazarskie-rejony"] .creator-picker input,
+:root[data-theme="lazarskie-rejony"] .setting-select,
+:root[data-theme="lazarskie-rejony"] .note-title-input,
+:root[data-theme="lazarskie-rejony"] .note-content-input,
+:root[data-theme="lazarskie-rejony"] .notes-search-input,
+:root[data-theme="lazarskie-rejony"] .archive-search-input {
+  border-color: rgba(111, 133, 177, 0.24);
+  background:
+    linear-gradient(180deg, rgba(28, 37, 52, 0.72), rgba(15, 21, 31, 0.68)),
+    rgba(17, 24, 36, 0.66);
+  color: #d9e5f8;
+  -webkit-backdrop-filter: blur(12px) saturate(1.12);
+  backdrop-filter: blur(12px) saturate(1.12);
+}
+
+:root[data-theme="lazarskie-rejony"] .sidebar-button:hover,
+:root[data-theme="lazarskie-rejony"] .settings-tab:hover,
+:root[data-theme="lazarskie-rejony"] .filter-button:hover,
+:root[data-theme="lazarskie-rejony"] .page-action:hover,
+:root[data-theme="lazarskie-rejony"] .note-format-button:hover,
+:root[data-theme="lazarskie-rejony"] .creator-picker input:hover {
+  border-color: rgba(70, 153, 220, 0.54);
+  background:
+    linear-gradient(180deg, rgba(35, 50, 72, 0.82), rgba(19, 28, 42, 0.76)),
+    rgba(21, 32, 49, 0.78);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(70, 153, 220, 0.08), 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+:root[data-theme="lazarskie-rejony"] .sidebar-button[data-active="true"],
+:root[data-theme="lazarskie-rejony"] .settings-tab[data-active="true"],
+:root[data-theme="lazarskie-rejony"] .filter-button[data-active="true"],
+:root[data-theme="lazarskie-rejony"] .note-format-button[data-active="true"] {
+  border-color: rgba(78, 164, 255, 0.58);
+  background:
+    linear-gradient(135deg, rgba(34, 77, 116, 0.86), rgba(17, 34, 54, 0.82)),
+    rgba(30, 64, 98, 0.78);
+  color: #ffffff;
+}
+
+:root[data-theme="lazarskie-rejony"] .setting-choice,
+:root[data-theme="lazarskie-rejony"] .setting-row,
+:root[data-theme="lazarskie-rejony"] .setting-section,
+:root[data-theme="lazarskie-rejony"] .chat-delay-section,
+:root[data-theme="lazarskie-rejony"] .recommended-card,
+:root[data-theme="lazarskie-rejony"] .recommended-empty,
+:root[data-theme="lazarskie-rejony"] .archive-row,
+:root[data-theme="lazarskie-rejony"] .note-row,
+:root[data-theme="lazarskie-rejony"] .note-preview {
+  border-color: rgba(111, 133, 177, 0.2);
+}
+
+:root[data-theme="lazarskie-rejony"] .setting-choice,
+:root[data-theme="lazarskie-rejony"] .recommended-card,
+:root[data-theme="lazarskie-rejony"] .recommended-empty,
+:root[data-theme="lazarskie-rejony"] .note-preview {
+  background:
+    linear-gradient(145deg, rgba(25, 34, 49, 0.68), rgba(12, 18, 28, 0.62)),
+    rgba(16, 23, 34, 0.58);
+}
+
+:root[data-theme="lazarskie-rejony"] .setting-choice:hover,
+:root[data-theme="lazarskie-rejony"] .recommended-card:hover,
+:root[data-theme="lazarskie-rejony"] .archive-row:hover,
+:root[data-theme="lazarskie-rejony"] .note-row:hover {
+  border-color: rgba(78, 164, 255, 0.42);
+  background:
+    linear-gradient(145deg, rgba(33, 46, 67, 0.78), rgba(14, 22, 34, 0.72)),
+    rgba(21, 31, 47, 0.68);
+}
+
+:root[data-theme="lazarskie-rejony"] .recommended-card[data-active="true"],
+:root[data-theme="lazarskie-rejony"] .archive-row[data-active="true"],
+:root[data-theme="lazarskie-rejony"] .note-row[data-active="true"] {
+  border-color: rgba(78, 164, 255, 0.56);
+  background:
+    linear-gradient(135deg, rgba(35, 77, 116, 0.76), rgba(17, 35, 55, 0.72)),
+    rgba(23, 44, 68, 0.74);
+}
+
+:root[data-theme="lazarskie-rejony"] .message {
+  border-bottom-color: rgba(111, 133, 177, 0.13);
+}
+
+:root[data-theme="lazarskie-rejony"] .message-content {
+  color: #e7eefb;
+}
+
+:root[data-theme="lazarskie-rejony"] .message-body {
+  color: #d7e1ef;
+}
+
+:root[data-theme="lazarskie-rejony"] .message-author {
+  color: #f4f7fb;
+}
+
+:root[data-theme="lazarskie-rejony"] .message-moderator .message-author {
+  color: #ff4d6d;
+}
+
+:root[data-theme="lazarskie-rejony"] .message-avatar,
+:root[data-theme="lazarskie-rejony"] .recommended-avatar {
+  background: rgba(25, 34, 49, 0.72);
+  box-shadow: 0 0 0 1px rgba(111, 133, 177, 0.22), 0 0 22px rgba(74, 143, 214, 0.08);
+}
+
+:root[data-theme="lazarskie-rejony"] .setting-choice input,
+:root[data-theme="lazarskie-rejony"] .setting-toggle,
+:root[data-theme="lazarskie-rejony"] .setting-range input {
+  accent-color: #49d3ff;
+}
+
+:root[data-theme="lazarskie-rejony"] .stats-widget-row {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  min-height: 48px;
+}
+
+:root[data-theme="lazarskie-rejony"] .stats-widget-label {
+  padding-left: 0;
+  line-height: 1.18;
+}
+
+:root[data-theme="lazarskie-rejony"] .status-segment .ui-icon,
+:root[data-theme="lazarskie-rejony"] .page-action .ui-icon,
+:root[data-theme="lazarskie-rejony"] .page-action [data-ui-icon],
+:root[data-theme="lazarskie-rejony"] .archive-summary article > .ui-icon,
+:root[data-theme="lazarskie-rejony"] .archive-session-avatar,
+:root[data-theme="lazarskie-rejony"] .archive-row-icon,
+:root[data-theme="lazarskie-rejony"] .stats-widget-icon,
+:root[data-theme="lazarskie-rejony"] .moderator-widget-icon,
+:root[data-theme="lazarskie-rejony"] .top-gifter-rank,
+:root[data-theme="lazarskie-rejony"] .right-widget-tab-icon,
+:root[data-theme="lazarskie-rejony"] .note-format-button .ui-icon,
+:root[data-theme="lazarskie-rejony"] .note-format-button [data-ui-icon] {
+  color: #49d3ff;
+  filter: drop-shadow(0 0 8px rgba(73, 211, 255, 0.28));
+}
+
+:root[data-theme="lazarskie-rejony"] .stats-widget-icon,
+:root[data-theme="lazarskie-rejony"] .archive-row-icon,
+:root[data-theme="lazarskie-rejony"] .archive-session-avatar,
+:root[data-theme="lazarskie-rejony"] .archive-summary article > .ui-icon,
+:root[data-theme="lazarskie-rejony"] .right-widget-tab-icon,
+:root[data-theme="lazarskie-rejony"] .moderator-widget-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(73, 211, 255, 0.28);
+  border-radius: 9px;
+  background:
+    linear-gradient(145deg, rgba(37, 61, 87, 0.68), rgba(14, 22, 34, 0.72)),
+    rgba(16, 24, 37, 0.72);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 0 18px rgba(73, 211, 255, 0.08);
+}
+
+:root[data-theme="lazarskie-rejony"] .stats-widget-icon-accent,
+:root[data-theme="lazarskie-rejony"] .top-gifter-coins .ui-icon {
+  color: #68ff8d;
+  border-color: rgba(104, 255, 141, 0.34);
+  filter: drop-shadow(0 0 8px rgba(104, 255, 141, 0.26));
+}
+
+:root[data-theme="lazarskie-rejony"] .stats-widget-icon-muted {
+  color: #8ea0b8;
+  border-color: rgba(142, 160, 184, 0.26);
+  filter: none;
+}
+
+:root[data-theme="lazarskie-rejony"] .right-widget:nth-child(2) .right-widget-tab-icon,
+:root[data-theme="lazarskie-rejony"] .archive-summary article:nth-child(3) > .ui-icon {
+  color: #ffd34d;
+  border-color: rgba(255, 211, 77, 0.34);
+  filter: drop-shadow(0 0 8px rgba(255, 211, 77, 0.26));
+}
+
+:root[data-theme="lazarskie-rejony"] .right-widget:nth-child(3) .right-widget-tab-icon,
+:root[data-theme="lazarskie-rejony"] .archive-summary article:nth-child(4) > .ui-icon {
+  color: #9b8cff;
+  border-color: rgba(155, 140, 255, 0.34);
+  filter: drop-shadow(0 0 8px rgba(155, 140, 255, 0.28));
+}
+
+:root[data-theme="lazarskie-rejony"] .creator-picker select option,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .creator-picker select option {
+  background: #111827;
+  color: #f2f7ff;
+}
+
+:root[data-theme="lazarskie-rejony"] .creator-picker select option:checked,
+:root[data-theme="lazarskie-rejony"] .creator-picker select option:hover,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .creator-picker select option:checked,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .creator-picker select option:hover {
+  background: #244d77;
+  color: #ffffff;
+}
+
+:root[data-theme="white-titanium"] .message-super-fan .message-author,
+:root[data-theme="chill-serwis"] .message-super-fan .message-author,
+:root[data-theme="rose-gold-glass"] .message-super-fan .message-author,
+:root[data-theme="lazarskie-rejony"] .message-super-fan .message-author,
+:root[data-chat-style="testowy"] .message-super-fan .message-author,
+:root[data-theme="white-titanium"][data-chat-style="testowy"] .message-super-fan .message-author,
+:root[data-theme="chill-serwis"][data-chat-style="testowy"] .message-super-fan .message-author,
+:root[data-theme="rose-gold-glass"][data-chat-style="testowy"] .message-super-fan .message-author,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-super-fan .message-author {
+  color: #ffd166;
+  text-shadow: 0 0 10px rgba(255, 209, 102, 0.32);
+}
+
+:root[data-theme="white-titanium"] .message-moderator.message-super-fan .message-author {
+  color: #d3112f;
+}
+
+:root[data-theme="chill-serwis"] .message-moderator.message-super-fan .message-author {
+  color: #ff314f;
+}
+
+:root[data-theme="rose-gold-glass"] .message-moderator.message-super-fan .message-author {
+  color: #e0002f;
+}
+
+:root[data-theme="lazarskie-rejony"] .message-moderator.message-super-fan .message-author {
+  color: #ff4d6d;
+}
+
 :root[data-chat-style="testowy"] .message-moderator .message-author,
 :root[data-theme="white-titanium"][data-chat-style="testowy"] .message-moderator .message-author,
 :root[data-theme="chill-serwis"][data-chat-style="testowy"] .message-moderator .message-author,
-:root[data-theme="rose-gold-glass"][data-chat-style="testowy"] .message-moderator .message-author {
+:root[data-theme="rose-gold-glass"][data-chat-style="testowy"] .message-moderator .message-author,
+:root[data-theme="lazarskie-rejony"][data-chat-style="testowy"] .message-moderator .message-author {
   color: #ff1f3d;
 }
 
@@ -3186,6 +3682,46 @@ body {
   --glass-sidebar-button-active-bg: linear-gradient(180deg, rgba(24, 128, 210, 0.98), rgba(13, 82, 151, 0.98));
 }
 
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] {
+  --glass-surface: rgba(13, 20, 31, 0.62);
+  --glass-surface-strong: rgba(18, 27, 41, 0.72);
+  --glass-surface-soft: rgba(73, 211, 255, 0.075);
+  --glass-border: rgba(73, 211, 255, 0.22);
+  --glass-border-strong: rgba(104, 255, 141, 0.38);
+  --glass-shadow: 0 20px 54px rgba(0, 0, 0, 0.26), 0 0 42px rgba(73, 211, 255, 0.055);
+  --glass-backdrop:
+    radial-gradient(circle at 15% 8%, rgba(73, 211, 255, 0.18), transparent 28vw),
+    radial-gradient(circle at 86% 18%, rgba(104, 255, 141, 0.12), transparent 30vw),
+    radial-gradient(circle at 96% 94%, rgba(155, 140, 255, 0.1), transparent 26vw),
+    linear-gradient(135deg, #08101a 0%, #101a27 48%, #07111d 100%);
+  --glass-accent: #49d3ff;
+  --glass-accent-strong: #68ff8d;
+  --glass-highlight: rgba(73, 211, 255, 0.14);
+  --glass-control-text: #e9f7ff;
+  --glass-control-hover-text: #ffffff;
+  --glass-control-active-text: #07111d;
+  --glass-control-border: rgba(73, 211, 255, 0.24);
+  --glass-control-bg: rgba(18, 30, 45, 0.58);
+  --glass-control-hover-bg: rgba(29, 53, 77, 0.66);
+  --glass-control-active-bg: linear-gradient(135deg, rgba(73, 211, 255, 0.94), rgba(104, 255, 141, 0.86));
+  --glass-control-active-border: rgba(104, 255, 141, 0.62);
+  --glass-control-active-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 0 18px rgba(73, 211, 255, 0.16);
+  --glass-sidebar-button-bg: linear-gradient(180deg, rgba(21, 33, 48, 0.92), rgba(12, 20, 31, 0.92));
+  --glass-sidebar-button-hover-bg: linear-gradient(180deg, rgba(31, 52, 74, 0.96), rgba(16, 28, 43, 0.96));
+  --glass-sidebar-button-active-bg: linear-gradient(135deg, rgba(73, 211, 255, 0.9), rgba(104, 255, 141, 0.82));
+  --dropdown-bg: var(--glass-surface-strong);
+  --dropdown-surface: var(--glass-control-bg);
+  --dropdown-border: var(--glass-control-border);
+  --dropdown-text: var(--glass-control-text);
+  --dropdown-muted: color-mix(in srgb, var(--glass-control-text) 66%, transparent);
+  --dropdown-hover-bg: var(--glass-control-hover-bg);
+  --dropdown-active-bg: rgba(73, 211, 255, 0.24);
+  --dropdown-active-text: #ffffff;
+  --dropdown-shadow: var(--glass-shadow);
+}
+
 :root[data-theme="rose-gold-glass"][data-app-appearance="ozdobny"] {
   --glass-backdrop: linear-gradient(135deg, #fff8f5 0%, #f2d5cb 46%, #e8b39c 100%);
   --glass-accent: #e28c7a;
@@ -3226,6 +3762,19 @@ body {
   -webkit-backdrop-filter: blur(18px) saturate(1.24);
   backdrop-filter: blur(18px) saturate(1.24);
   box-shadow: var(--glass-shadow);
+}
+
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .chat-header,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .sidebar,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .content {
+  background:
+    linear-gradient(135deg, rgba(21, 32, 47, 0.78), rgba(8, 14, 22, 0.66)),
+    linear-gradient(90deg, rgba(73, 211, 255, 0.04), rgba(104, 255, 141, 0.035)),
+    var(--glass-surface);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 50px rgba(0, 0, 0, 0.24),
+    0 0 34px rgba(73, 211, 255, 0.04);
 }
 
 :root[data-app-appearance="ozdobny"] .chat-header {
@@ -3274,6 +3823,13 @@ body {
   background: var(--glass-surface-soft);
   -webkit-backdrop-filter: blur(14px) saturate(1.18);
   backdrop-filter: blur(14px) saturate(1.18);
+}
+
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .filters,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .archive-toolbar {
+  background:
+    linear-gradient(90deg, rgba(73, 211, 255, 0.08), rgba(104, 255, 141, 0.04)),
+    rgba(13, 21, 33, 0.52);
 }
 
 :root[data-app-appearance="ozdobny"] .title {
@@ -3338,6 +3894,13 @@ body {
   box-shadow: var(--glass-control-active-shadow);
 }
 
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .sidebar-button[data-active="true"],
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .settings-tab[data-active="true"],
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .filter-button[data-active="true"] {
+  color: #07111d;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.22);
+}
+
 :root[data-app-appearance="ozdobny"] .right-widget {
   border-color: var(--glass-border);
   border-radius: 20px 0 0 20px;
@@ -3345,6 +3908,16 @@ body {
   box-shadow: var(--glass-shadow);
   -webkit-backdrop-filter: blur(20px) saturate(1.24);
   backdrop-filter: blur(20px) saturate(1.24);
+}
+
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .right-widget,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .setting-choice,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .setting-row,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .about-content {
+  border-color: rgba(73, 211, 255, 0.2);
+  background:
+    linear-gradient(145deg, rgba(25, 39, 56, 0.64), rgba(8, 15, 24, 0.58)),
+    rgba(13, 21, 33, 0.56);
 }
 
 :root[data-app-appearance="ozdobny"] .right-widget[data-expanded="true"] {
@@ -3357,11 +3930,25 @@ body {
   color: var(--glass-control-text);
 }
 
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .right-widget-tab {
+  background:
+    linear-gradient(180deg, rgba(21, 40, 58, 0.86), rgba(9, 17, 28, 0.82)),
+    rgba(13, 21, 33, 0.72);
+}
+
 :root[data-app-appearance="ozdobny"] .right-widget-tab:hover,
 :root[data-app-appearance="ozdobny"] .right-widget-tab:focus-visible,
 :root[data-app-appearance="ozdobny"] .right-widget-tab[aria-expanded="true"] {
   background: var(--glass-control-hover-bg);
   color: var(--glass-control-hover-text);
+}
+
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .right-widget-tab:hover,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .right-widget-tab:focus-visible,
+:root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .right-widget-tab[aria-expanded="true"] {
+  background:
+    linear-gradient(180deg, rgba(37, 74, 104, 0.9), rgba(12, 25, 39, 0.86)),
+    rgba(18, 35, 52, 0.78);
 }
 
 :root[data-app-appearance="ozdobny"] .stats-widget-row,
@@ -3929,8 +4516,8 @@ body {
   }
 }
 
-/* Final override: desktop-pinned widgets use a narrow overlay window, so they must
-   not inherit the small-screen app layout from the responsive block above. */
+/* Final override: desktop-pinned widgets run in a transparent overlay window, so they
+   must not inherit the small-screen app layout from the responsive block above. */
 :root[data-desktop-widgets="true"],
 :root[data-desktop-widgets="true"] body,
 :root[data-desktop-widgets="true"] .chat-app {
@@ -3989,11 +4576,18 @@ body {
   width: 43px;
   min-height: 68px;
   max-height: min(330px, calc(100vh - 16px));
+  overflow: visible;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 :root[data-desktop-widgets="true"] .right-widget[data-expanded="true"] {
   grid-template-columns: minmax(0, calc(min(350px, 100vw) - 43px)) 43px;
   width: min(350px, 100vw);
+  border-color: transparent !important;
 }
 
 :root[data-desktop-widgets="true"] .right-widget-tab {
@@ -4002,6 +4596,13 @@ body {
   flex: 0 0 43px;
   width: 43px;
   min-height: 68px;
+  border: 1px solid var(--dropdown-border);
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  background: color-mix(in srgb, var(--dropdown-surface) 88%, transparent);
+  box-shadow: var(--dropdown-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.16);
+  backdrop-filter: blur(14px) saturate(1.16);
 }
 
 :root[data-desktop-widgets="true"] .right-widget-panel {
@@ -4010,4 +4611,26 @@ body {
   min-width: 0;
   width: 100%;
   padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--dropdown-active-bg) 72%, var(--dropdown-border));
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  background: color-mix(in srgb, var(--dropdown-bg) 94%, transparent);
+  box-shadow: var(--dropdown-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.16);
+  backdrop-filter: blur(14px) saturate(1.16);
+}
+
+:root[data-desktop-widgets="true"][data-app-appearance="ozdobny"] .right-widget-tab,
+:root[data-desktop-widgets="true"][data-app-appearance="ozdobny"] .right-widget-panel {
+  border-color: var(--glass-border);
+  border-radius: 20px 0 0 20px;
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(1.24);
+  backdrop-filter: blur(20px) saturate(1.24);
+}
+
+:root[data-desktop-widgets="true"][data-app-appearance="ozdobny"] .right-widget-tab {
+  background: var(--glass-control-bg);
+  color: var(--glass-control-text);
 }
