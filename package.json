@@ -1,6 +1,6 @@
 {
   "name": "tiktok-live-electron",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "productName": "Czatbox TT",
   "description": "Electron wrapper for a TikTok live stream with a separate chat pane.",
@@ -66,6 +66,9 @@
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
-    "tiktok-live-connector": "^2.1.1-beta1"
+    "tiktok-live-connector": "2.4.0"
+  },
+  "overrides": {
+    "form-data": "4.0.6"
   }
 }

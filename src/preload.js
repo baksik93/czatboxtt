@@ -12,9 +12,16 @@ const api = {
   getArchiveContent: (archiveId) => ipcRenderer.invoke('shell:get-archive-content', archiveId),
   exportArchive: (archiveId) => ipcRenderer.invoke('shell:export-archive', archiveId),
   deleteArchive: (archiveId) => ipcRenderer.invoke('shell:delete-archive', archiveId),
+  listNotes: () => ipcRenderer.invoke('shell:list-notes'),
+  getNote: (noteId) => ipcRenderer.invoke('shell:get-note', noteId),
+  saveNote: (note) => ipcRenderer.invoke('shell:save-note', note),
+  deleteNote: (noteId) => ipcRenderer.invoke('shell:delete-note', noteId),
   openArchiveFolder: () => ipcRenderer.invoke('shell:open-archive-folder'),
   getSystemSettings: () => ipcRenderer.invoke('shell:get-system-settings'),
   setSystemSettings: (settings) => ipcRenderer.invoke('shell:set-system-settings', settings),
+  setDesktopWidgetsEnabled: (enabled) => ipcRenderer.invoke('shell:set-desktop-widgets-enabled', enabled),
+  setDesktopWidgetsExpanded: (expanded) => ipcRenderer.invoke('shell:set-desktop-widgets-expanded', expanded),
+  setDesktopWidgetsAlwaysOnTop: (enabled) => ipcRenderer.invoke('shell:set-desktop-widgets-always-on-top', enabled),
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on('shell:state', listener);

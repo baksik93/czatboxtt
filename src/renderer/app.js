@@ -31,6 +31,14 @@ const UI_ICONS = {
   chart: '<path d="M5 19V11h3v8M10.5 19V5h3v14M16 19V8h3v11"/><path d="M3.5 19.5h17"/>',
   trophy: '<path d="M8 5h8v4.5a4 4 0 0 1-8 0V5Z"/><path d="M8 7H5v1.5A3.5 3.5 0 0 0 8.5 12M16 7h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13.5V17M8.5 19h7M10 17h4"/>',
   shield: '<path d="M12 3.75 19 6.5v5.25c0 4.1-2.35 7.1-7 8.5-4.65-1.4-7-4.4-7-8.5V6.5l7-2.75Z"/><path d="m8.75 12 2.1 2.1 4.4-4.45"/>',
+  check: '<path d="m5 12.5 4.25 4.25L19 7"/>',
+  swords: '<path d="m5 4 6.5 6.5M4 5l2-2 7.5 7.5-2 2L4 5Z"/><path d="m19 4-6.5 6.5M20 5l-2-2-7.5 7.5 2 2L20 5Z"/><path d="m8.5 13.5-4.75 4.75M5.5 16.5l2 2M15.5 13.5l4.75 4.75M18.5 16.5l-2 2"/>',
+  glove: '<path d="M7.5 12V7.5a1.5 1.5 0 0 1 3 0V11M10.5 10V5.5a1.5 1.5 0 0 1 3 0V10M13.5 10V6.5a1.5 1.5 0 0 1 3 0V11M16.5 11V9a1.5 1.5 0 0 1 3 0v5c0 4-2.4 6.25-6.5 6.25h-1.25C7.5 20.25 5 17.75 5 14v-2a1.5 1.5 0 0 1 2.5-1.1l2 1.85"/>',
+  fog: '<path d="M4 8.5h11M8 12h12M3 15.5h12M7 19h13"/><path d="M16.5 8.5H20M3 12h2"/>',
+  hammer: '<path d="m13.5 5.5 5 5M12 7l3.5-3.5 4 4L16 11l-4-4Z"/><path d="m13.5 9.5-8 9a1.4 1.4 0 0 1-2-2l9-8"/>',
+  snowflake: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="m9.5 5.5 2.5 2 2.5-2M9.5 18.5l2.5-2 2.5 2M5 10.5l3-.5.5-3M19 13.5l-3 .5-.5 3M5 13.5l3 .5.5 3M19 10.5l-3-.5-.5-3"/>',
+  zap: '<path d="M13 2.75 5.5 13h6L11 21.25 18.5 11h-6L13 2.75Z"/>',
+  sparkle: '<path d="M12 3.5c.6 3.1 2.4 4.9 5.5 5.5-3.1.6-4.9 2.4-5.5 5.5-.6-3.1-2.4-4.9-5.5-5.5 3.1-.6 4.9-2.4 5.5-5.5Z"/><path d="M18.5 14.5c.3 1.6 1.2 2.5 2.8 2.8-1.6.3-2.5 1.2-2.8 2.8-.3-1.6-1.2-2.5-2.8-2.8 1.6-.3 2.5-1.2 2.8-2.8Z"/>',
   coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
   folder: '<path d="M3.5 7.5h6l1.7 2H20a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5h5l1.5 2H20"/>',
   refresh: '<path d="M19 8a7.5 7.5 0 1 0 .35 7"/><path d="M19 4.5V8h-3.5"/>',
@@ -50,8 +58,11 @@ const DEFAULT_SYSTEM_SETTINGS = {
 };
 const DEFAULT_GENERAL_SETTINGS = {
   multiplierNotifications: true,
-  statsToolbox: true
+  statsToolbox: true,
+  pinWidgetsToRight: true,
+  desktopWidgetsAlwaysOnTop: true
 };
+const DESKTOP_WIDGET_MODE = new URLSearchParams(window.location.search).get('desktopWidgets') === '1';
 const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
   en: 'en-US',
@@ -79,6 +90,7 @@ const I18N = {
     'nav.chatbox': 'Czatbox',
     'nav.archive': 'Archiwum',
     'nav.settings': 'Ustawienia',
+    'nav.notes': 'Notatki',
     'nav.recommended': 'Polecani',
     'nav.about': 'O programie',
     'creator.label': 'Twórca',
@@ -106,6 +118,25 @@ const I18N = {
     'archive.summary.coins': 'Monety',
     'archive.summary.moderators': 'Moderatorzy',
     'archive.filtersAria': 'Filtry archiwum',
+    'notes.title': 'Notatki',
+    'notes.status': 'Krótkie zapiski z live',
+    'notes.new': 'Nowa',
+    'notes.save': 'Zapisz',
+    'notes.delete': 'Usuń',
+    'notes.edit': 'Edytuj',
+    'notes.searchPlaceholder': 'Szukaj notatki...',
+    'notes.titlePlaceholder': 'Tytuł notatki',
+    'notes.contentPlaceholder': 'Napisz notatkę...',
+    'notes.unsaved': 'Nowa niezapisana notatka',
+    'notes.empty': 'Brak zapisanych notatek.',
+    'notes.noMatches': 'Brak notatek pasujących do wyszukiwania.',
+    'notes.saved': 'Notatka zapisana.',
+    'notes.deleted': 'Notatka usunięta.',
+    'notes.loadFailed': 'Nie udało się wczytać notatek.',
+    'notes.saveFailed': 'Nie udało się zapisać notatki.',
+    'notes.deleteFailed': 'Nie udało się usunąć notatki.',
+    'notes.deleteConfirm': 'Usunąć notatkę „{title}”?',
+    'notes.updatedAt': 'Edytowano: {time}',
     'settings.title': 'Ustawienia',
     'settings.tabs.general': 'Ogólne',
     'settings.tabs.appearance': 'Wygląd',
@@ -114,6 +145,8 @@ const I18N = {
     'settings.general.note': 'Ogólne ustawienia aplikacji.',
     'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
     'settings.general.statsToolbox': 'Przybornik statystyk',
+    'settings.general.pinWidgetsToRight': 'Pokazuj widgety przy prawej krawędzi pulpitu po zminimalizowaniu aplikacji',
+    'settings.general.desktopWidgetsAlwaysOnTop': 'Widgety pulpitu zawsze na wierzchu',
     'settings.appearance.chatStyle': 'Styl czatu:',
     'settings.appearance.theme': 'Motyw:',
     'settings.appearance.appAppearance': 'Wygląd aplikacji:',
@@ -180,12 +213,25 @@ const I18N = {
     'about.news.features.appearances': 'różne wyglądy aplikacji: Domyślny i Ozdobny',
     'about.news.features.delay': 'regulowane opóźnienie wyświetlania wiadomości czatu',
     'about.news.features.stats': 'przybornik statystyk live',
+    'about.news.features.widgets': 'przybornik live został zastąpiony widgetami. Od teraz możesz sprawdzić moderację online na czacie, statystyki i top 5 giftujących osób',
+    'about.news.features.flexibleWidgets': 'wszystkie widgety są elastyczne tj. możesz je ukryć, pokazać, przypiąć do pulpitu gdy aplikacja jest pomniejszona',
+    'about.news.features.archiveCenter': 'poprawione i rozbudowane centrum archiwizacji czatu live, z podziałem na filtry, podsumowaniami ilości zdarzeń, wiadomości na czacie, monetami, moderatorami online podczas sesji',
+    'about.news.features.archiveActions': 'archiwum można eksportować do pliku *.txt, kasować, odświeżać.',
+    'about.news.features.languages': 'język polski, angielski i niemiecki aplikacji',
+    'about.news.fixes.title': 'Poprawki:',
+    'about.news.fixes.box': 'poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"',
+    'about.news.fixes.optimization': 'optymalizacja działania programu',
     'about.news.known.title': 'Znane błędy:',
     'about.news.known.box': 'czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"',
     'about.news.known.multiplier': 'mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku',
     'about.news.next.title': 'Co dalej:',
     'about.news.next.archive': 'Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.',
     'about.news.next.fixes': 'Poprawki pomniejszych błędów',
+    'about.news.next.widgets': 'rozbudowa systemu widgetów',
+    'about.news.next.ttsLanguages': 'dodatkowe języki odczytu czatu TTS',
+    'about.news.next.superFans': 'wyróżnienie super fanów na czacie',
+    'about.news.next.connection': 'optymalizacja połączenia z danym twórcą',
+    'about.news.next.giftSounds': 'powiadomienia dźwiękowe dla większych prezentów',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Skąd pomysł na aplikację?',
     'about.faq.idea.answer': 'Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość dla każdego.',
@@ -216,6 +262,17 @@ const I18N = {
     'moderatorsWidget.empty': 'Brak aktywnych moderatorów w ostatnich 5 minutach.',
     'moderatorsWidget.expand': 'Rozwiń listę aktywnych moderatorów',
     'moderatorsWidget.collapse': 'Zwiń listę aktywnych moderatorów',
+    'battle.stage.battle': 'BITWA TRWA',
+    'battle.stage.multiplier': 'MNOŻNIK X{multiplier}',
+    'battle.stage.mission': 'MISJA BONUSOWA {progress}/{target}',
+    'battle.stage.missionSuccess': 'MISJA WYKONANA — MNOŻNIK X{multiplier}',
+    'battle.stage.booster': 'BOOSTERY W GRZE',
+    'battle.stage.finished': 'KONIEC BITWY',
+    'battle.stage.cancelled': 'BITWA PRZERWANA',
+    'battle.stage.score': '{left} {leftScore} : {rightScore} {right}',
+    'battle.stage.winner': 'Wygrywa: {name}',
+    'battle.stage.missionBy': 'Cel: {names}',
+    'battle.stage.rewards': 'Nagrody: {rewards}',
     'status.connecting': 'Łączę...',
     'status.online': 'Online',
     'status.offline': 'Offline',
@@ -255,6 +312,9 @@ const I18N = {
     'event.repost': '🔁 repostował live',
     'event.share': '↩️ udostępnia live{countText}',
     'battle.multiplier': 'BITWA: ZA CHWILĘ MNOŻNIK X{multiplier}',
+    'battle.effectAlert': '{effect}: {name}',
+    'battle.finished': 'Bitwa zakończona',
+    'battle.cancelled': 'Bitwa została przerwana',
     'battle.authorJoin': 'Budzimy śpiocha, Baksik dołączył do LIVE!'
   },
   en: {
@@ -262,6 +322,7 @@ const I18N = {
     'nav.chatbox': 'Chatbox',
     'nav.archive': 'Archive',
     'nav.settings': 'Settings',
+    'nav.notes': 'Notes',
     'nav.recommended': 'Recommended',
     'nav.about': 'About',
     'creator.label': 'Creator',
@@ -289,6 +350,25 @@ const I18N = {
     'archive.summary.coins': 'Coins',
     'archive.summary.moderators': 'Moderators',
     'archive.filtersAria': 'Archive filters',
+    'notes.title': 'Notes',
+    'notes.status': 'Short live notes',
+    'notes.new': 'New',
+    'notes.save': 'Save',
+    'notes.delete': 'Delete',
+    'notes.edit': 'Edit',
+    'notes.searchPlaceholder': 'Search notes...',
+    'notes.titlePlaceholder': 'Note title',
+    'notes.contentPlaceholder': 'Write a note...',
+    'notes.unsaved': 'New unsaved note',
+    'notes.empty': 'No saved notes.',
+    'notes.noMatches': 'No notes match your search.',
+    'notes.saved': 'Note saved.',
+    'notes.deleted': 'Note deleted.',
+    'notes.loadFailed': 'Could not load notes.',
+    'notes.saveFailed': 'Could not save the note.',
+    'notes.deleteFailed': 'Could not delete the note.',
+    'notes.deleteConfirm': 'Delete note “{title}”?',
+    'notes.updatedAt': 'Edited: {time}',
     'settings.title': 'Settings',
     'settings.tabs.general': 'General',
     'settings.tabs.appearance': 'Appearance',
@@ -297,6 +377,8 @@ const I18N = {
     'settings.general.note': 'General application settings.',
     'settings.general.multiplierNotifications': 'Multiplier notifications',
     'settings.general.statsToolbox': 'Statistics toolbox',
+    'settings.general.pinWidgetsToRight': 'Show widgets at the right edge of the desktop when the app is minimized',
+    'settings.general.desktopWidgetsAlwaysOnTop': 'Keep desktop widgets always on top',
     'settings.appearance.chatStyle': 'Chat style:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'Application appearance:',
@@ -363,12 +445,25 @@ const I18N = {
     'about.news.features.appearances': 'multiple application layouts: Default and Decorative',
     'about.news.features.delay': 'adjustable chat message display delay',
     'about.news.features.stats': 'live statistics toolbox',
+    'about.news.features.widgets': 'the live toolbox has been replaced with widgets. You can now check online moderation, statistics and the top 5 gifters',
+    'about.news.features.flexibleWidgets': 'all widgets are flexible: you can hide them, show them and pin them to the desktop when the app is minimized',
+    'about.news.features.archiveCenter': 'improved and expanded live chat archive center with filters and summaries for events, chat messages, coins and moderators online during the session',
+    'about.news.features.archiveActions': 'archives can be exported to *.txt, deleted and refreshed.',
+    'about.news.features.languages': 'Polish, English and German application languages',
+    'about.news.fixes.title': 'Fixes:',
+    'about.news.fixes.box': 'fixed the coin box message that could show "unknow sends a box" when a box opened in chat',
+    'about.news.fixes.optimization': 'program performance optimization',
     'about.news.known.title': 'Known issues:',
     'about.news.known.box': 'after a coin box opens, the chat may sometimes show the message "unknow sends a box"',
     'about.news.known.multiplier': 'battle multipliers are an experimental feature and may occasionally appear incorrectly during the final minute',
     'about.news.next.title': 'What comes next:',
     'about.news.next.archive': 'Improvements to archived chat reading. To be honest, I am not satisfied with the current version and it needs to be rebuilt.',
     'about.news.next.fixes': 'Fixes for minor issues',
+    'about.news.next.widgets': 'expanding the widget system',
+    'about.news.next.ttsLanguages': 'additional TTS chat reading languages',
+    'about.news.next.superFans': 'highlighting super fans in chat',
+    'about.news.next.connection': 'optimizing the connection to a selected creator',
+    'about.news.next.giftSounds': 'sound notifications for larger gifts',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Where did the idea for the application come from?',
     'about.faq.idea.answer': 'The program was mainly created to keep up with fast chat when messages jump around or appear for one person but not another. I also wanted to make a TikTok tool that makes hosting live streams a little easier. Streamers on other platforms have many plugins for programs such as OBS, while TikTok is fairly limited. There is an application that reads messages aloud, but it is paid, and I wanted everyone to have the same opportunity.',
@@ -399,6 +494,17 @@ const I18N = {
     'moderatorsWidget.empty': 'No active moderators in the last 5 minutes.',
     'moderatorsWidget.expand': 'Expand active moderators',
     'moderatorsWidget.collapse': 'Collapse active moderators',
+    'battle.stage.battle': 'BATTLE IN PROGRESS',
+    'battle.stage.multiplier': 'MULTIPLIER X{multiplier}',
+    'battle.stage.mission': 'BONUS MISSION {progress}/{target}',
+    'battle.stage.missionSuccess': 'MISSION COMPLETE — MULTIPLIER X{multiplier}',
+    'battle.stage.booster': 'BOOSTERS ACTIVE',
+    'battle.stage.finished': 'BATTLE FINISHED',
+    'battle.stage.cancelled': 'BATTLE CANCELLED',
+    'battle.stage.score': '{left} {leftScore} : {rightScore} {right}',
+    'battle.stage.winner': 'Winner: {name}',
+    'battle.stage.missionBy': 'Goal: {names}',
+    'battle.stage.rewards': 'Rewards: {rewards}',
     'status.connecting': 'Connecting...',
     'status.online': 'Online',
     'status.offline': 'Offline',
@@ -438,6 +544,9 @@ const I18N = {
     'event.repost': '🔁 reposted the live',
     'event.share': '↩️ shares the live{countText}',
     'battle.multiplier': 'BATTLE: MULTIPLIER X{multiplier} SOON',
+    'battle.effectAlert': '{effect}: {name}',
+    'battle.finished': 'Battle finished',
+    'battle.cancelled': 'The battle was cancelled',
     'battle.authorJoin': 'Wake up, sleepyhead, Baksik joined the LIVE!'
   },
   de: {
@@ -445,6 +554,7 @@ const I18N = {
     'nav.chatbox': 'Chatbox',
     'nav.archive': 'Archiv',
     'nav.settings': 'Einstellungen',
+    'nav.notes': 'Notizen',
     'nav.recommended': 'Empfohlen',
     'nav.about': 'Über das Programm',
     'creator.label': 'Creator',
@@ -472,6 +582,25 @@ const I18N = {
     'archive.summary.coins': 'Münzen',
     'archive.summary.moderators': 'Moderatoren',
     'archive.filtersAria': 'Archivfilter',
+    'notes.title': 'Notizen',
+    'notes.status': 'Kurze Live-Notizen',
+    'notes.new': 'Neu',
+    'notes.save': 'Speichern',
+    'notes.delete': 'Löschen',
+    'notes.edit': 'Bearbeiten',
+    'notes.searchPlaceholder': 'Notizen suchen...',
+    'notes.titlePlaceholder': 'Notiztitel',
+    'notes.contentPlaceholder': 'Notiz schreiben...',
+    'notes.unsaved': 'Neue ungespeicherte Notiz',
+    'notes.empty': 'Keine gespeicherten Notizen.',
+    'notes.noMatches': 'Keine Notizen entsprechen der Suche.',
+    'notes.saved': 'Notiz gespeichert.',
+    'notes.deleted': 'Notiz gelöscht.',
+    'notes.loadFailed': 'Notizen konnten nicht geladen werden.',
+    'notes.saveFailed': 'Notiz konnte nicht gespeichert werden.',
+    'notes.deleteFailed': 'Notiz konnte nicht gelöscht werden.',
+    'notes.deleteConfirm': 'Notiz „{title}“ löschen?',
+    'notes.updatedAt': 'Bearbeitet: {time}',
     'settings.title': 'Einstellungen',
     'settings.tabs.general': 'Allgemein',
     'settings.tabs.appearance': 'Aussehen',
@@ -480,6 +609,8 @@ const I18N = {
     'settings.general.note': 'Allgemeine Anwendungseinstellungen.',
     'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
     'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
+    'settings.general.pinWidgetsToRight': 'Widgets am rechten Desktoprand anzeigen, wenn die App minimiert ist',
+    'settings.general.desktopWidgetsAlwaysOnTop': 'Desktop-Widgets immer im Vordergrund halten',
     'settings.appearance.chatStyle': 'Chat-Stil:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'App-Aussehen:',
@@ -546,12 +677,25 @@ const I18N = {
     'about.news.features.appearances': 'verschiedene App-Layouts: Standard und Dekorativ',
     'about.news.features.delay': 'einstellbare Verzögerung für Chatnachrichten',
     'about.news.features.stats': 'LIVE-Statistik-Werkzeugleiste',
+    'about.news.features.widgets': 'die Live-Werkzeugleiste wurde durch Widgets ersetzt. Ab jetzt kannst du Online-Moderation, Statistiken und die Top 5 Geschenkgeber sehen',
+    'about.news.features.flexibleWidgets': 'alle Widgets sind flexibel: du kannst sie ausblenden, anzeigen und bei minimierter App am Desktop anheften',
+    'about.news.features.archiveCenter': 'verbessertes und erweitertes Archivzentrum für Live-Chats mit Filtern und Zusammenfassungen zu Ereignissen, Chatnachrichten, Münzen und während der Sitzung aktiven Moderatoren',
+    'about.news.features.archiveActions': 'Archive können als *.txt exportiert, gelöscht und aktualisiert werden.',
+    'about.news.features.languages': 'Polnisch, Englisch und Deutsch als App-Sprachen',
+    'about.news.fixes.title': 'Korrekturen:',
+    'about.news.fixes.box': 'die Nachricht zur Münzbox wurde korrigiert, wenn beim Öffnen im Chat „unknow sendet eine Box“ erscheinen konnte',
+    'about.news.fixes.optimization': 'Optimierung der Programmleistung',
     'about.news.known.title': 'Bekannte Fehler:',
     'about.news.known.box': 'nach dem Öffnen einer Münzbox kann gelegentlich die Nachricht „unknow sendet eine Box“ im Chat erscheinen',
     'about.news.known.multiplier': 'Battle-Multiplikatoren sind eine Testfunktion und können in der letzten Minute gelegentlich fälschlich erscheinen',
     'about.news.next.title': 'Wie geht es weiter:',
     'about.news.next.archive': 'Verbesserungen beim Lesen archivierter Chats. Ehrlich gesagt bin ich mit der aktuellen Version nicht zufrieden und sie muss überarbeitet werden.',
     'about.news.next.fixes': 'Behebung kleinerer Fehler',
+    'about.news.next.widgets': 'Ausbau des Widget-Systems',
+    'about.news.next.ttsLanguages': 'zusätzliche Sprachen für das Vorlesen des Chats per TTS',
+    'about.news.next.superFans': 'Hervorhebung von Superfans im Chat',
+    'about.news.next.connection': 'Optimierung der Verbindung zu einem ausgewählten Creator',
+    'about.news.next.giftSounds': 'Tonbenachrichtigungen für größere Geschenke',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Wie entstand die Idee für die Anwendung?',
     'about.faq.idea.answer': 'Das Programm entstand hauptsächlich, um bei einem schnellen Chat mithalten zu können, wenn Nachrichten springen oder bei einer Person erscheinen und bei einer anderen nicht. Außerdem wollte ich ein TikTok-Werkzeug entwickeln, das das Durchführen von Live-Streams etwas erleichtert. Für Streamer auf anderen Plattformen gibt es viele Plugins für Programme wie OBS, während TikTok recht eingeschränkt ist. Es gibt zwar eine Anwendung, die Nachrichten vorliest, sie ist jedoch kostenpflichtig. Ich wollte allen die gleichen Möglichkeiten geben.',
@@ -582,6 +726,17 @@ const I18N = {
     'moderatorsWidget.empty': 'Keine aktiven Moderatoren in den letzten 5 Minuten.',
     'moderatorsWidget.expand': 'Aktive Moderatoren öffnen',
     'moderatorsWidget.collapse': 'Aktive Moderatoren schließen',
+    'battle.stage.battle': 'BATTLE LÄUFT',
+    'battle.stage.multiplier': 'MULTIPLIKATOR X{multiplier}',
+    'battle.stage.mission': 'BONUSMISSION {progress}/{target}',
+    'battle.stage.missionSuccess': 'MISSION ERFÜLLT — MULTIPLIKATOR X{multiplier}',
+    'battle.stage.booster': 'BOOSTER AKTIV',
+    'battle.stage.finished': 'BATTLE BEENDET',
+    'battle.stage.cancelled': 'BATTLE ABGEBROCHEN',
+    'battle.stage.score': '{left} {leftScore} : {rightScore} {right}',
+    'battle.stage.winner': 'Gewinner: {name}',
+    'battle.stage.missionBy': 'Ziel: {names}',
+    'battle.stage.rewards': 'Belohnungen: {rewards}',
     'status.connecting': 'Verbinde...',
     'status.online': 'Online',
     'status.offline': 'Offline',
@@ -621,6 +776,9 @@ const I18N = {
     'event.repost': '🔁 hat den Live repostet',
     'event.share': '↩️ teilt den Live{countText}',
     'battle.multiplier': 'BATTLE: GLEICH MULTIPLIKATOR X{multiplier}',
+    'battle.effectAlert': '{effect}: {name}',
+    'battle.finished': 'Battle beendet',
+    'battle.cancelled': 'Das Battle wurde abgebrochen',
     'battle.authorJoin': 'Aufwachen, Schlafmütze, Baksik ist dem LIVE beigetreten!'
   }
 };
@@ -656,6 +814,8 @@ const themeInputs = Array.from(document.querySelectorAll('input[name="appTheme"]
 const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="appAppearance"]'));
 const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
 const statsToolboxEl = document.getElementById('statsToolbox');
+const pinWidgetsToRightEl = document.getElementById('pinWidgetsToRight');
+const desktopWidgetsAlwaysOnTopEl = document.getElementById('desktopWidgetsAlwaysOnTop');
 const refreshArchiveButton = document.getElementById('refreshArchive');
 const openArchiveFolderButton = document.getElementById('openArchiveFolder');
 const archiveListEl = document.getElementById('archiveList');
@@ -672,6 +832,15 @@ const archiveSummaryCoinsEl = document.getElementById('archiveSummaryCoins');
 const archiveSummaryModeratorsEl = document.getElementById('archiveSummaryModerators');
 const exportArchiveButton = document.getElementById('exportArchive');
 const deleteArchiveButton = document.getElementById('deleteArchive');
+const notesStatusEl = document.getElementById('notesStatus');
+const newNoteButton = document.getElementById('newNoteButton');
+const saveNoteButton = document.getElementById('saveNoteButton');
+const deleteNoteButton = document.getElementById('deleteNoteButton');
+const notesSearchEl = document.getElementById('notesSearch');
+const notesListEl = document.getElementById('notesList');
+const noteTitleInput = document.getElementById('noteTitleInput');
+const noteContentInput = document.getElementById('noteContentInput');
+const noteMetaEl = document.getElementById('noteMeta');
 const recommendedListEl = document.getElementById('recommendedList');
 const appVersionEl = document.getElementById('appVersion');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
@@ -716,6 +885,7 @@ let appLanguage = systemSettings.language;
 let timeFormat = systemSettings.timeFormat;
 let speechPlaying = false;
 let revealTimer;
+let revealFallbackTimer;
 let syncedCreatorSuggestionsKey = '';
 let battleBannerTimer;
 let activeSection = 'chatbox';
@@ -724,6 +894,9 @@ let activeAboutTab = 'program';
 let selectedArchiveId = '';
 let archiveEntries = [];
 let selectedArchive = null;
+let noteEntries = [];
+let selectedNoteId = '';
+let selectedNote = null;
 let renderKeyCounter = 0;
 let timeFormatterKey = '';
 let timeFormatter = null;
@@ -734,6 +907,10 @@ let recentCreators = loadRecentCreators();
 let lastSubmittedCreator = '';
 let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
+
+if (DESKTOP_WIDGET_MODE) {
+  document.documentElement.dataset.desktopWidgets = 'true';
+}
 
 function getTimeFormatter() {
   const key = `${appLanguage}:${timeFormat}`;
@@ -801,7 +978,9 @@ function normalizeGeneralSettings(value) {
   const next = { ...DEFAULT_GENERAL_SETTINGS, ...(value && typeof value === 'object' ? value : {}) };
   return {
     multiplierNotifications: next.multiplierNotifications !== false,
-    statsToolbox: next.statsToolbox !== false
+    statsToolbox: next.statsToolbox !== false,
+    pinWidgetsToRight: next.pinWidgetsToRight !== false,
+    desktopWidgetsAlwaysOnTop: next.desktopWidgetsAlwaysOnTop !== false
   };
 }
 
@@ -977,6 +1156,7 @@ function applyI18n() {
     ['.sidebar-button[data-section="chatbox"]', 'nav.chatbox'],
     ['.sidebar-button[data-section="archive"]', 'nav.archive'],
     ['.sidebar-button[data-section="settings"]', 'nav.settings'],
+    ['.sidebar-button[data-section="notes"]', 'nav.notes'],
     ['.sidebar-button[data-section="recommended"]', 'nav.recommended'],
     ['.sidebar-button[data-section="about"]', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
@@ -1005,6 +1185,8 @@ function applyI18n() {
     ['.settings-panel[data-settings-panel="general"] .page-note', 'settings.general.note'],
     ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
     ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
+    ['label[for="pinWidgetsToRight"] > span', 'settings.general.pinWidgetsToRight'],
+    ['label[for="desktopWidgetsAlwaysOnTop"] > span', 'settings.general.desktopWidgetsAlwaysOnTop'],
     ['.settings-panel[data-settings-panel="appearance"] > .settings-heading', 'settings.appearance.chatStyle'],
     ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(1) .settings-heading', 'settings.appearance.theme'],
     ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(2) .settings-heading', 'settings.appearance.appAppearance'],
@@ -1047,6 +1229,7 @@ function applyI18n() {
   syncSystemControls();
   renderRecommendedCreators();
   syncRightWidgetDock();
+  renderBattleBannerFromState();
   updateStatus();
   if (!visibleMessages.length && emptyEl) {
     emptyEl.textContent = t('chat.empty');
@@ -1126,6 +1309,26 @@ function applyGeneralSettings() {
   if (statsToolboxEl) {
     statsToolboxEl.checked = generalSettings.statsToolbox;
   }
+  if (pinWidgetsToRightEl) {
+    pinWidgetsToRightEl.checked = generalSettings.pinWidgetsToRight;
+  }
+  if (desktopWidgetsAlwaysOnTopEl) {
+    desktopWidgetsAlwaysOnTopEl.checked = generalSettings.desktopWidgetsAlwaysOnTop;
+  }
+  if (
+    !DESKTOP_WIDGET_MODE
+    && window.tiktokLive
+    && typeof window.tiktokLive.setDesktopWidgetsEnabled === 'function'
+  ) {
+    window.tiktokLive.setDesktopWidgetsEnabled(generalSettings.pinWidgetsToRight);
+  }
+  if (
+    !DESKTOP_WIDGET_MODE
+    && window.tiktokLive
+    && typeof window.tiktokLive.setDesktopWidgetsAlwaysOnTop === 'function'
+  ) {
+    window.tiktokLive.setDesktopWidgetsAlwaysOnTop(generalSettings.desktopWidgetsAlwaysOnTop);
+  }
 
   if (statusStatsEl) {
     statusStatsEl.hidden = !generalSettings.statsToolbox;
@@ -1135,9 +1338,13 @@ function applyGeneralSettings() {
     setOpenRightWidget('');
   }
 
-  if (!generalSettings.multiplierNotifications && battleBanner && battleBanner.dataset.tone === 'battle') {
+  if (!generalSettings.multiplierNotifications) {
     clearTimeout(battleBannerTimer);
-    battleBanner.hidden = true;
+    if (battleBanner) {
+      battleBanner.hidden = true;
+      battleBanner.textContent = '';
+      delete battleBanner.dataset.tone;
+    }
   }
 }
 
@@ -1155,6 +1362,20 @@ function initGeneralSettings() {
   if (statsToolboxEl) {
     statsToolboxEl.addEventListener('change', () => {
       generalSettings.statsToolbox = statsToolboxEl.checked;
+      saveGeneralSettings();
+      applyGeneralSettings();
+    });
+  }
+  if (pinWidgetsToRightEl) {
+    pinWidgetsToRightEl.addEventListener('change', () => {
+      generalSettings.pinWidgetsToRight = pinWidgetsToRightEl.checked;
+      saveGeneralSettings();
+      applyGeneralSettings();
+    });
+  }
+  if (desktopWidgetsAlwaysOnTopEl) {
+    desktopWidgetsAlwaysOnTopEl.addEventListener('change', () => {
+      generalSettings.desktopWidgetsAlwaysOnTop = desktopWidgetsAlwaysOnTopEl.checked;
       saveGeneralSettings();
       applyGeneralSettings();
     });
@@ -1179,6 +1400,13 @@ function setOpenRightWidget(target) {
   rightWidgets.forEach((widget) => {
     widget.dataset.expanded = String(Boolean(target) && widget.dataset.rightWidget === target);
   });
+  if (
+    DESKTOP_WIDGET_MODE
+    && window.tiktokLive
+    && typeof window.tiktokLive.setDesktopWidgetsExpanded === 'function'
+  ) {
+    window.tiktokLive.setDesktopWidgetsExpanded(Boolean(target));
+  }
   syncRightWidgetDock();
 }
 
@@ -1882,6 +2110,10 @@ function renderModeratorsWidget() {
   moderatorsWidgetContent.replaceChildren(list);
 }
 
+function renderBattleBannerFromState() {
+  // Multiplier alerts are handled by onBattleAlert.
+}
+
 function updateStatus() {
   const statusText = getConnectionStatusText();
   const delayText = formatDelaySeconds(chatDelayMs);
@@ -2298,6 +2530,8 @@ function resetStreamStats() {
 }
 
 function resetMessages() {
+  clearTimeout(revealFallbackTimer);
+  revealFallbackTimer = null;
   queue.length = 0;
   visibleMessages.length = 0;
   userAvatars.clear();
@@ -2472,7 +2706,7 @@ function scrollMessagesToEnd() {
 
 function getMessageDisplayText(message) {
   if (!message || !message.textKey) {
-    return message && message.text ? message.text : '';
+    return getMessagePlainText(message);
   }
 
   if (message.textKey === 'event.gift') {
@@ -2507,6 +2741,56 @@ function getMessageDisplayText(message) {
   }
 
   return t(message.textKey);
+}
+
+function getMessagePlainText(message) {
+  if (!message || typeof message !== 'object') {
+    return '';
+  }
+
+  const directText = typeof message.text === 'string' ? message.text.trim() : '';
+  if (directText) {
+    return directText;
+  }
+
+  const archiveText = typeof message.archiveText === 'string' ? message.archiveText.trim() : '';
+  if (!archiveText) {
+    return '';
+  }
+
+  if ((message.kind || 'chat') !== 'chat') {
+    return archiveText;
+  }
+
+  const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
+  const uniqueId = typeof message.uniqueId === 'string' ? message.uniqueId.trim() : '';
+  const escapedAuthor = authorName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapedUniqueId = uniqueId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const patterns = [
+    authorName && uniqueId ? new RegExp(`^${escapedAuthor}\\s*\\(@${escapedUniqueId}\\)\\s*:\\s*`) : null,
+    authorName ? new RegExp(`^${escapedAuthor}\\s*:\\s*`) : null
+  ].filter(Boolean);
+
+  for (const pattern of patterns) {
+    const stripped = archiveText.replace(pattern, '').trim();
+    if (stripped && stripped !== archiveText) {
+      return stripped;
+    }
+  }
+
+  return archiveText;
+}
+
+function hasDisplayableMessageText(message) {
+  if (!message || typeof message !== 'object') {
+    return false;
+  }
+
+  return Boolean(
+    getMessagePlainText(message)
+    || message.textKey
+    || message.archiveText
+  );
 }
 
 function renderMessageElement(message) {
@@ -2637,6 +2921,9 @@ function showMessageNow(message, scrollToEnd = true) {
 }
 
 function revealNextMessage() {
+  clearTimeout(revealFallbackTimer);
+  revealFallbackTimer = null;
+
   if (!queue.length) {
     updateStatus();
     return;
@@ -2648,11 +2935,23 @@ function revealNextMessage() {
     queuedMessagesById.delete(idKey);
   }
   showMessageNow(message, true);
+  scheduleRevealFallback();
 }
 
 function startRevealTimer() {
   clearInterval(revealTimer);
-  revealTimer = setInterval(revealNextMessage, chatDelayMs);
+  const safeDelay = CHAT_DELAY_OPTIONS.includes(Number(chatDelayMs)) ? Number(chatDelayMs) : DEFAULT_CHAT_DELAY_MS;
+  chatDelayMs = safeDelay;
+  revealTimer = setInterval(revealNextMessage, safeDelay);
+}
+
+function scheduleRevealFallback() {
+  if (revealFallbackTimer || !queue.length) {
+    return;
+  }
+
+  const safeDelay = CHAT_DELAY_OPTIONS.includes(Number(chatDelayMs)) ? Number(chatDelayMs) : DEFAULT_CHAT_DELAY_MS;
+  revealFallbackTimer = setTimeout(revealNextMessage, safeDelay);
 }
 
 async function submitCreatorInput() {
@@ -3206,6 +3505,198 @@ async function refreshArchive() {
   }
 }
 
+function setNotesStatus(message, restore = true) {
+  if (!notesStatusEl) {
+    return;
+  }
+
+  notesStatusEl.textContent = message;
+  if (restore) {
+    window.setTimeout(() => {
+      notesStatusEl.textContent = t('notes.status');
+    }, 2400);
+  }
+}
+
+function getFilteredNoteEntries() {
+  const query = notesSearchEl ? notesSearchEl.value.trim().toLowerCase() : '';
+  if (!query) {
+    return noteEntries;
+  }
+
+  return noteEntries.filter((note) => (
+    [note.title, note.updatedAt, note.createdAt]
+      .some((value) => String(value || '').toLowerCase().includes(query))
+  ));
+}
+
+function updateNoteEditorMeta() {
+  if (!noteMetaEl) {
+    return;
+  }
+
+  if (selectedNote && selectedNote.updatedAt) {
+    noteMetaEl.textContent = t('notes.updatedAt', { time: formatTime(selectedNote.updatedAt) });
+  } else {
+    noteMetaEl.textContent = t('notes.unsaved');
+  }
+}
+
+function resetNoteEditor() {
+  selectedNoteId = '';
+  selectedNote = null;
+  if (noteTitleInput) {
+    noteTitleInput.value = '';
+  }
+  if (noteContentInput) {
+    noteContentInput.value = '';
+  }
+  updateNoteEditorMeta();
+  renderNotesList();
+}
+
+function renderNotesList() {
+  if (!notesListEl) {
+    return;
+  }
+
+  const entries = getFilteredNoteEntries();
+  notesListEl.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement('div');
+    empty.className = 'archive-empty';
+    empty.textContent = noteEntries.length ? t('notes.noMatches') : t('notes.empty');
+    notesListEl.appendChild(empty);
+    return;
+  }
+
+  entries.forEach((note) => {
+    const row = document.createElement('article');
+    row.className = 'archive-entry';
+
+    const button = document.createElement('button');
+    button.className = 'archive-row';
+    button.type = 'button';
+    button.dataset.noteId = note.id;
+    button.dataset.active = String(note.id === selectedNoteId);
+
+    const icon = document.createElement('span');
+    icon.className = 'archive-row-icon';
+    icon.appendChild(createUiIcon('message'));
+
+    const content = document.createElement('span');
+    content.className = 'archive-row-content';
+    const title = document.createElement('strong');
+    title.className = 'archive-name';
+    title.textContent = note.title || t('notes.title');
+    const updated = document.createElement('time');
+    updated.className = 'archive-meta';
+    updated.textContent = note.updatedAt ? formatTime(note.updatedAt) : '';
+    content.append(title, updated);
+
+    button.append(icon, content);
+    button.addEventListener('click', () => openNote(note.id));
+    row.appendChild(button);
+    notesListEl.appendChild(row);
+  });
+}
+
+async function refreshNotes() {
+  if (!notesListEl || !window.tiktokLive || typeof window.tiktokLive.listNotes !== 'function') {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.listNotes();
+    noteEntries = result && result.ok && Array.isArray(result.notes) ? result.notes : [];
+    renderNotesList();
+  } catch {
+    notesListEl.textContent = t('notes.loadFailed');
+  }
+}
+
+async function openNote(noteId) {
+  if (!noteId || !window.tiktokLive || typeof window.tiktokLive.getNote !== 'function') {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.getNote(noteId);
+    if (!result || !result.ok || !result.note) {
+      setNotesStatus(t('notes.loadFailed'));
+      return;
+    }
+    selectedNote = result.note;
+    selectedNoteId = selectedNote.id;
+    if (noteTitleInput) {
+      noteTitleInput.value = selectedNote.title || '';
+    }
+    if (noteContentInput) {
+      noteContentInput.value = selectedNote.content || '';
+    }
+    updateNoteEditorMeta();
+    renderNotesList();
+  } catch {
+    setNotesStatus(t('notes.loadFailed'));
+  }
+}
+
+async function saveCurrentNote() {
+  if (!window.tiktokLive || typeof window.tiktokLive.saveNote !== 'function') {
+    return;
+  }
+
+  const title = noteTitleInput ? noteTitleInput.value.trim() : '';
+  const content = noteContentInput ? noteContentInput.value : '';
+  if (!title && !content.trim()) {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.saveNote({
+      id: selectedNoteId,
+      title,
+      content
+    });
+    if (!result || !result.ok) {
+      setNotesStatus(t('notes.saveFailed'));
+      return;
+    }
+    selectedNote = result.note;
+    selectedNoteId = selectedNote.id;
+    noteEntries = Array.isArray(result.notes) ? result.notes : noteEntries;
+    renderNotesList();
+    updateNoteEditorMeta();
+    setNotesStatus(t('notes.saved'));
+  } catch {
+    setNotesStatus(t('notes.saveFailed'));
+  }
+}
+
+async function deleteCurrentNote() {
+  if (!selectedNoteId || !selectedNote || !window.tiktokLive || typeof window.tiktokLive.deleteNote !== 'function') {
+    return;
+  }
+
+  const title = selectedNote.title || t('notes.title');
+  if (!window.confirm(t('notes.deleteConfirm', { title }))) {
+    return;
+  }
+
+  try {
+    const result = await window.tiktokLive.deleteNote(selectedNoteId);
+    if (!result || !result.ok) {
+      setNotesStatus(t('notes.deleteFailed'));
+      return;
+    }
+    noteEntries = Array.isArray(result.notes) ? result.notes : [];
+    resetNoteEditor();
+    setNotesStatus(t('notes.deleted'));
+  } catch {
+    setNotesStatus(t('notes.deleteFailed'));
+  }
+}
+
 function setActiveSection(section) {
   const nextSection = viewPanels.some((panel) => panel.dataset.view === section) ? section : 'chatbox';
   activeSection = nextSection;
@@ -3220,6 +3711,9 @@ function setActiveSection(section) {
 
   if (activeSection === 'archive') {
     refreshArchive();
+  }
+  if (activeSection === 'notes') {
+    refreshNotes();
   }
 
   if (activeSection !== 'chatbox') {
@@ -3243,6 +3737,27 @@ if (openArchiveFolderButton) {
 
 if (archiveSearchEl) {
   archiveSearchEl.addEventListener('input', renderArchiveList);
+}
+
+if (notesSearchEl) {
+  notesSearchEl.addEventListener('input', renderNotesList);
+}
+
+if (newNoteButton) {
+  newNoteButton.addEventListener('click', () => {
+    resetNoteEditor();
+    if (noteTitleInput) {
+      noteTitleInput.focus();
+    }
+  });
+}
+
+if (saveNoteButton) {
+  saveNoteButton.addEventListener('click', saveCurrentNote);
+}
+
+if (deleteNoteButton) {
+  deleteNoteButton.addEventListener('click', deleteCurrentNote);
 }
 
 archiveFilterButtons.forEach((button) => {
@@ -3281,35 +3796,42 @@ window.tiktokLive.onChatReset(() => {
 
 if (typeof window.tiktokLive.onRoomStats === 'function') {
   window.tiktokLive.onRoomStats((stats) => {
-    liveViewerCount = Math.max(0, Number(stats && stats.viewerCount) || 0);
+    const nextViewerCount = Math.max(0, Number(stats && stats.viewerCount) || 0);
+    liveViewerCount = nextViewerCount;
     updateStatus();
   });
 }
 
 window.tiktokLive.onBattleAlert((alert) => {
-  const isMultiplierAlert = alert && (alert.textKey === 'battle.multiplier' || alert.tone === 'battle');
-  if (isMultiplierAlert && !generalSettings.multiplierNotifications) {
+  const isMultiplierAlert = alert && (
+    alert.textKey === 'battle.multiplier'
+    || alert.tone === 'battle'
+  );
+  if (!isMultiplierAlert || !generalSettings.multiplierNotifications || !battleBanner) {
     return;
   }
-
   const text = alert && alert.textKey
-    ? t(alert.textKey, { multiplier: alert.multiplier || '' })
+    ? t(alert.textKey, {
+      multiplier: alert.multiplier || ''
+    })
     : (alert && alert.text ? alert.text : '');
-  if (!text || !battleBanner) {
+  if (!text) {
     return;
   }
 
   clearTimeout(battleBannerTimer);
-  battleBanner.dataset.tone = alert && alert.tone ? alert.tone : 'battle';
-  battleBanner.textContent = alert && alert.uppercase === false ? text : text.toUpperCase();
+  battleBanner.dataset.tone = alert.tone || 'battle';
+  battleBanner.textContent = alert.uppercase === false ? text : text.toUpperCase();
   battleBanner.hidden = false;
   battleBannerTimer = setTimeout(() => {
     battleBanner.hidden = true;
+    battleBanner.textContent = '';
+    delete battleBanner.dataset.tone;
   }, 12000);
 });
 
 window.tiktokLive.onChatMessage((message) => {
-  if (!message || !message.text) {
+  if (!hasDisplayableMessageText(message)) {
     return;
   }
 
@@ -3322,6 +3844,10 @@ window.tiktokLive.onChatMessage((message) => {
   }
 
   trackIncomingMessageStats(message);
+  if (DESKTOP_WIDGET_MODE) {
+    updateStatus();
+    return;
+  }
 
   const messageIdKey = getMessageIdKey(message);
 
@@ -3346,6 +3872,7 @@ window.tiktokLive.onChatMessage((message) => {
     if (messageIdKey) {
       queuedMessagesById.set(messageIdKey, message);
     }
+    scheduleRevealFallback();
     updateStatus();
     return;
   }
@@ -3377,6 +3904,7 @@ initSystemSettings();
 applyI18n();
 initTextToSpeech();
 startRevealTimer();
+setInterval(updateStatus, 5000);
 setActiveSettingsTab(activeSettingsTab);
 setActiveAboutTab(activeAboutTab);
 setActiveSection(activeSection);

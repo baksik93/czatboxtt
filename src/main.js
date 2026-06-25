@@ -1,19 +1,29 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { app, BaseWindow, WebContentsView, dialog, ipcMain, Menu, Tray, session, shell } = require('electron');
+const { app, BaseWindow, BrowserWindow, WebContentsView, dialog, ipcMain, Menu, Tray, screen, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
-const {
-  TikTokLiveConnection,
-  WebcastEvent,
-  ControlEvent,
-  UserOfflineError,
-  SignatureRateLimitError
-} = require('tiktok-live-connector');
+
+[process.stdout, process.stderr].forEach((stream) => {
+  if (stream && typeof stream.on === 'function') {
+    stream.on('error', (error) => {
+      if (!error || error.code !== 'EPIPE') {
+        // Keep background/packaged runs alive even when no console is attached.
+      }
+    });
+  }
+});
+
+let TikTokLiveConnection;
+let WebcastEvent;
+let ControlEvent;
+let UserOfflineError;
+let SignatureRateLimitError;
 
 const LOGIN_URL = 'https://www.tiktok.com/login';
 const PARTITION = 'persist:tiktok-live-session';
 const ARCHIVE_DIR = path.join(app.isPackaged ? app.getPath('userData') : app.getAppPath(), 'archives');
 const SYSTEM_SETTINGS_FILE = path.join(app.getPath('userData'), 'system-settings.json');
+const NOTES_FILE = path.join(app.getPath('userData'), 'notes.json');
 const TRANSMISSION_ARCHIVE_PREFIX = 'transmisja-';
 const AVATAR_DIR = path.join(__dirname, 'pic');
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
@@ -26,6 +36,9 @@ const RECONNECT_BASE_DELAY_MS = 30 * 1000;
 const RECONNECT_MAX_DELAY_MS = 5 * 60 * 1000;
 const OFFLINE_RECONNECT_DELAY_MS = 10 * 60 * 1000;
 const RATE_LIMIT_FALLBACK_DELAY_MS = 60 * 60 * 1000;
+const BATTLE_EFFECT_STAGE_MS = 8000;
+const BATTLE_TASK_NOTICE_MS = 6000;
+const BATTLE_RESULT_BANNER_MS = 12000;
 const START_BACKGROUND_ARG = '--czatbox-background';
 const DEFAULT_SYSTEM_SETTINGS = {
   autoLaunch: false,
@@ -113,15 +126,6 @@ const LIVE_CREATORS = [
   }
 ];
 const DEFAULT_CREATOR_ID = LIVE_CREATORS[0].id;
-const TIKTOK_POLISH_PARAMS = {
-  app_language: 'pl',
-  browser_language: 'pl-PL',
-  webcast_language: 'pl',
-  language: 'pl-PL',
-  locale: 'pl-PL',
-  priority_region: 'PL',
-  region: 'PL'
-};
 
 const REQUIRED_AUTH_COOKIE_NAMES = new Set([
   'sessionid',
@@ -173,6 +177,11 @@ const OAUTH_HOSTS = [
 ];
 
 let mainWindow;
+let desktopWidgetsWindow;
+let desktopWidgetsEnabled = true;
+let desktopWidgetsExpanded = false;
+let desktopWidgetsAlwaysOnTop = true;
+let latestRoomStats = { viewerCount: 0 };
 let shellView;
 let loginView;
 let tiktokSession;
@@ -189,6 +198,17 @@ let reconnectBlockedUntil = 0;
 let battleActive = false;
 let lastBattleAlertKey = '';
 let lastBattleAlertAt = 0;
+let battleTaskTimer;
+let battlePublishTimer;
+let battleResultTimer;
+let battleState = createInitialBattleState();
+const liveUserDirectory = new Map();
+const battleUserDirectory = new Map();
+const battleHostDirectory = new Map();
+const battleSideByUser = new Map();
+const recentBattleEffects = new Map();
+let currentCreatorLiveUserId = '';
+const currentCreatorLiveAliases = new Set();
 let tray;
 let isQuitting = false;
 let systemSettings = loadSystemSettings();
@@ -449,7 +469,12 @@ function resetChatBuffers() {
   recentMessages.length = 0;
   seenMessageKeys.clear();
   likeTotalsByUser.clear();
+  latestRoomStats = { viewerCount: 0 };
+  liveUserDirectory.clear();
+  currentCreatorLiveUserId = '';
+  currentCreatorLiveAliases.clear();
   battleActive = false;
+  resetBattleState({ publish: false });
   clearTimeout(archiveWriteTimer);
   archiveWriteTimer = null;
   archiveFile = '';
@@ -751,7 +776,123 @@ function showMainWindow() {
 
   mainWindow.show();
   mainWindow.focus();
+  hideDesktopWidgets();
   layoutViews();
+}
+
+function positionDesktopWidgets() {
+  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
+    return;
+  }
+  const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  const { x, y, width, height } = display.workArea;
+  const windowWidth = Math.min(420, width);
+  desktopWidgetsWindow.setBounds({
+    x: x + width - windowWidth,
+    y,
+    width: windowWidth,
+    height
+  });
+}
+
+function ensureDesktopWidgetsWindow() {
+  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
+    positionDesktopWidgets();
+    applyDesktopWidgetsAlwaysOnTop();
+    return desktopWidgetsWindow;
+  }
+
+  desktopWidgetsWindow = new BrowserWindow({
+    width: 420,
+    height: 760,
+    show: false,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    alwaysOnTop: desktopWidgetsAlwaysOnTop,
+    hasShadow: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+      devTools: true
+    }
+  });
+  applyDesktopWidgetsAlwaysOnTop();
+  desktopWidgetsWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), {
+    query: { desktopWidgets: '1' }
+  });
+  desktopWidgetsWindow.webContents.on('did-finish-load', () => {
+    desktopWidgetsWindow.webContents.send('shell:state', { ...state });
+    desktopWidgetsWindow.webContents.send('shell:room-stats', latestRoomStats);
+    recentMessages.forEach((message) => {
+      desktopWidgetsWindow.webContents.send('shell:chat-message', message);
+    });
+  });
+  desktopWidgetsWindow.on('closed', () => {
+    desktopWidgetsWindow = null;
+  });
+  positionDesktopWidgets();
+  return desktopWidgetsWindow;
+}
+
+function showDesktopWidgets() {
+  if (!desktopWidgetsEnabled || !mainWindow) {
+    return;
+  }
+  const window = ensureDesktopWidgetsWindow();
+  positionDesktopWidgets();
+  applyDesktopWidgetsAlwaysOnTop();
+  window.showInactive();
+  if (desktopWidgetsAlwaysOnTop && typeof window.moveTop === 'function') {
+    window.moveTop();
+  }
+}
+
+function hideDesktopWidgets() {
+  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
+    desktopWidgetsWindow.hide();
+  }
+}
+
+function setDesktopWidgetsEnabled(enabled) {
+  desktopWidgetsEnabled = Boolean(enabled);
+  if (!desktopWidgetsEnabled) {
+    hideDesktopWidgets();
+  } else if (mainWindow && (!mainWindow.isVisible() || mainWindow.isMinimized())) {
+    showDesktopWidgets();
+  }
+  return desktopWidgetsEnabled;
+}
+
+function setDesktopWidgetsExpanded(expanded) {
+  desktopWidgetsExpanded = Boolean(expanded);
+  positionDesktopWidgets();
+  return desktopWidgetsExpanded;
+}
+
+function applyDesktopWidgetsAlwaysOnTop() {
+  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
+    return;
+  }
+
+  desktopWidgetsWindow.setAlwaysOnTop(
+    desktopWidgetsAlwaysOnTop,
+    desktopWidgetsAlwaysOnTop ? 'screen-saver' : 'normal'
+  );
+}
+
+function setDesktopWidgetsAlwaysOnTop(enabled) {
+  desktopWidgetsAlwaysOnTop = enabled !== false;
+  applyDesktopWidgetsAlwaysOnTop();
+  return desktopWidgetsAlwaysOnTop;
 }
 
 function ensureTray() {
@@ -807,6 +948,7 @@ function hideMainWindowToTray() {
 
   ensureTray();
   mainWindow.hide();
+  showDesktopWidgets();
 }
 
 function syncLoginItemSettings() {
@@ -816,9 +958,7 @@ function syncLoginItemSettings() {
       path: app.getPath('exe'),
       args: systemSettings.runInBackground ? [START_BACKGROUND_ARG] : []
     });
-  } catch (error) {
-    console.error('Login item update failed:', error);
-  }
+  } catch {}
 }
 
 function applySystemSettings() {
@@ -833,6 +973,92 @@ function updateSystemSettings(patch) {
   applySystemSettings();
   publishState();
   return getPublicSystemSettings();
+}
+
+function normalizeNote(value) {
+  const note = value && typeof value === 'object' ? value : {};
+  const now = new Date().toISOString();
+  const id = normalizeMessageText(note.id) || `note-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const title = normalizeMessageText(note.title).slice(0, 120);
+  const content = typeof note.content === 'string' ? note.content.slice(0, 20000) : '';
+  const createdAt = Number.isNaN(new Date(note.createdAt || '').getTime()) ? now : new Date(note.createdAt).toISOString();
+  const updatedAt = Number.isNaN(new Date(note.updatedAt || '').getTime()) ? createdAt : new Date(note.updatedAt).toISOString();
+  const contentTitle = content.split(/\r?\n/).map((line) => line.trim()).find(Boolean);
+
+  return {
+    id,
+    title: title || (contentTitle ? contentTitle.slice(0, 120) : 'Notatka'),
+    content,
+    createdAt,
+    updatedAt
+  };
+}
+
+function readNotesStore() {
+  try {
+    const document = JSON.parse(fs.readFileSync(NOTES_FILE, 'utf8'));
+    const notes = Array.isArray(document && document.notes) ? document.notes : [];
+    return notes.map(normalizeNote).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
+  } catch {
+    return [];
+  }
+}
+
+function writeNotesStore(notes) {
+  fs.mkdirSync(path.dirname(NOTES_FILE), { recursive: true });
+  fs.writeFileSync(NOTES_FILE, `${JSON.stringify({ version: 1, notes }, null, 2)}\n`, 'utf8');
+}
+
+function listNotes() {
+  return readNotesStore().map((note) => ({
+    id: note.id,
+    title: note.title,
+    updatedAt: note.updatedAt,
+    createdAt: note.createdAt
+  }));
+}
+
+function getNote(noteId) {
+  const id = normalizeMessageText(noteId);
+  const note = readNotesStore().find((item) => item.id === id);
+  return note ? { ok: true, note } : { ok: false, error: 'note-not-found' };
+}
+
+function saveNote(patch) {
+  const notes = readNotesStore();
+  const now = new Date().toISOString();
+  const incoming = patch && typeof patch === 'object' ? patch : {};
+  const id = normalizeMessageText(incoming.id);
+  const existingIndex = id ? notes.findIndex((note) => note.id === id) : -1;
+  const existing = existingIndex >= 0 ? notes[existingIndex] : null;
+  const note = normalizeNote({
+    ...(existing || {}),
+    id: existing ? existing.id : id,
+    title: incoming.title,
+    content: typeof incoming.content === 'string' ? incoming.content : '',
+    createdAt: existing ? existing.createdAt : now,
+    updatedAt: now
+  });
+
+  if (existingIndex >= 0) {
+    notes[existingIndex] = note;
+  } else {
+    notes.unshift(note);
+  }
+  const sorted = notes.sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
+  writeNotesStore(sorted);
+  return { ok: true, note, notes: listNotes() };
+}
+
+function deleteNote(noteId) {
+  const id = normalizeMessageText(noteId);
+  const notes = readNotesStore();
+  const nextNotes = notes.filter((note) => note.id !== id);
+  if (nextNotes.length === notes.length) {
+    return { ok: false, error: 'note-not-found' };
+  }
+  writeNotesStore(nextNotes);
+  return { ok: true, notes: listNotes() };
 }
 
 async function createWindow() {
@@ -878,9 +1104,15 @@ async function createWindow() {
   loginView.webContents.loadURL(LOGIN_URL).catch(() => {});
   loginView.webContents.setAudioMuted(true);
 
-  shellView.webContents.on('did-finish-load', () => publishState());
+  shellView.webContents.on('did-finish-load', () => {
+    publishState();
+    publishBattleState();
+  });
 
   mainWindow.on('resize', layoutViews);
+  mainWindow.on('minimize', showDesktopWidgets);
+  mainWindow.on('restore', hideDesktopWidgets);
+  mainWindow.on('show', hideDesktopWidgets);
   mainWindow.on('maximize', layoutViews);
   mainWindow.on('unmaximize', layoutViews);
   mainWindow.on('enter-full-screen', layoutViews);
@@ -898,6 +1130,9 @@ async function createWindow() {
     clearInterval(authPoll);
     clearTimeout(reconnectTimer);
     disconnectLiveConnection();
+    if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
+      desktopWidgetsWindow.destroy();
+    }
     [shellView, loginView].forEach((view) => {
       if (view && !view.webContents.isDestroyed()) {
         view.webContents.close();
@@ -1029,10 +1264,7 @@ function getConnectorOptions() {
   return {
     processInitialData: false,
     fetchRoomInfoOnConnect: true,
-    enableExtendedGiftInfo: true,
-    requestPollingIntervalMs: 1500,
-    webClientParams: TIKTOK_POLISH_PARAMS,
-    wsClientParams: TIKTOK_POLISH_PARAMS,
+    enableExtendedGiftInfo: false,
     webClientOptions: {
       timeout: 15000
     }
@@ -1040,6 +1272,10 @@ function getConnectorOptions() {
 }
 
 function getConnectionErrorMessage(error) {
+  if (error && error.exception && typeof error.exception.message === 'string' && error.exception.message.trim()) {
+    return error.exception.message.trim();
+  }
+
   if (error && typeof error.message === 'string' && error.message.trim()) {
     return error.message.trim();
   }
@@ -1164,6 +1400,7 @@ async function connectLiveChat() {
         return;
       }
 
+      handleBattleGift(data);
       emitBattleMultiplierFromEvent(data);
       const event = formatGiftEvent(data);
       if (event) {
@@ -1214,12 +1451,32 @@ async function connectLiveChat() {
       }
     });
 
+    if (WebcastEvent.LINK_MIC_METHOD) {
+      connection.on(WebcastEvent.LINK_MIC_METHOD, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        handleBattleIdentityMessage(data, creator);
+      });
+    }
+
+    if (WebcastEvent.LINK_STATE) {
+      connection.on(WebcastEvent.LINK_STATE, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        handleBattleLinkState(data);
+      });
+    }
+
     connection.on(WebcastEvent.LINK_MIC_BATTLE, (data) => {
       if (!eventBelongsToActiveConnection(connection, creator)) {
         return;
       }
 
-      battleActive = true;
+      handleBattleMessage(data, creator);
       emitBattleMultiplierFromEvent(data);
     });
 
@@ -1228,7 +1485,7 @@ async function connectLiveChat() {
         return;
       }
 
-      battleActive = true;
+      handleBattleArmies(data, creator);
       emitBattleMultiplierFromEvent(data);
     });
 
@@ -1237,9 +1494,29 @@ async function connectLiveChat() {
         return;
       }
 
-      battleActive = true;
+      handleBattleTask(data);
       emitBattleMultiplierFromEvent(data);
     });
+
+    if (WebcastEvent.BOOST_CARD) {
+      connection.on(WebcastEvent.BOOST_CARD, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        handleBattleBoostCard(data);
+      });
+    }
+
+    if (WebcastEvent.LINK_MIC_BATTLE_PUNISH_FINISH) {
+      connection.on(WebcastEvent.LINK_MIC_BATTLE_PUNISH_FINISH, (data) => {
+        if (!eventBelongsToActiveConnection(connection, creator)) {
+          return;
+        }
+
+        finishBattleState(data, 'finished');
+      });
+    }
 
     connection.on(ControlEvent.CONNECTED, (connectionState) => {
       if (!eventBelongsToActiveConnection(connection, creator)) {
@@ -1251,7 +1528,11 @@ async function connectLiveChat() {
       state.connectionStatus = 'online';
       state.source = `polaczono: room ${connectionState.roomId || '?'}`;
       state.lastMessage = `Polaczono z @${creator.username}`;
+      registerRoomOwner(connectionState.roomInfo || connection.roomInfo, creator);
       publishState();
+      if (typeof connection.fetchAvailableGifts === 'function') {
+        connection.fetchAvailableGifts().catch(() => {});
+      }
     });
 
     connection.on(ControlEvent.DISCONNECTED, () => {
@@ -1264,6 +1545,7 @@ async function connectLiveChat() {
       }
 
       battleActive = false;
+      resetBattleState();
       state.connectionStatus = 'reconnecting';
       state.source = 'rozlaczono';
       reconnectAttemptCount += 1;
@@ -1279,6 +1561,7 @@ async function connectLiveChat() {
       }
 
       battleActive = false;
+      resetBattleState();
       clearTimeout(reconnectTimer);
       reconnectAttemptCount = 0;
       reconnectBlockedUntil = 0;
@@ -1322,6 +1605,7 @@ async function connectLiveChat() {
 
     reconnectAttemptCount = 0;
     reconnectBlockedUntil = 0;
+    registerRoomOwner(connectedState.roomInfo || connection.roomInfo, creator);
     state.connectionStatus = 'online';
     state.source = `polaczono: room ${connectedState.roomId || '?'}`;
     state.lastMessage = `Polaczono z @${creator.username}`;
@@ -1435,9 +1719,33 @@ function scheduleReconnect(delayMs = RECONNECT_BASE_DELAY_MS) {
 
 function formatChatEvent(data) {
   const user = getEventUser(data);
-  const comment = data && data.comment ? data.comment : '';
+  const comment = getChatEventText(data);
 
   return createDisplayEvent(data, 'chat', user, comment, `${user.nickname} (@${user.uniqueId}): ${comment}`);
+}
+
+function getChatEventText(data) {
+  const candidates = [
+    data && data.comment,
+    data && data.content,
+    data && data.text,
+    data && data.message,
+    data && data.msg,
+    data && data.chatMessage,
+    data && data.event && data.event.comment,
+    data && data.event && data.event.content,
+    data && data.event && data.event.text,
+    data && data.common && data.common.describe
+  ];
+
+  for (const value of candidates) {
+    const normalized = normalizeMessageText(value);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return '';
 }
 
 function formatMemberEvent(data) {
@@ -1462,8 +1770,13 @@ function isUnknownIdentityValue(value) {
 }
 
 function formatGiftEvent(data) {
-  const giftType = Number(data && (data.giftType || (data.giftDetails && data.giftDetails.giftType))) || 0;
-  if (giftType === 1 && !Boolean(data && data.repeatEnd)) {
+  const giftType = Number(data && (
+    data.giftType
+    || (data.giftDetails && data.giftDetails.giftType)
+    || (data.gift && data.gift.type)
+  )) || 0;
+  const isComboGift = giftType === 1;
+  if (isComboGift && !Boolean(data && data.repeatEnd)) {
     return null;
   }
 
@@ -1586,10 +1899,191 @@ function getMessageId(data) {
     : data && (data.msgId || data.messageId || data.createTime || data.id);
 }
 
+function getRawUserId(value, fallback = '') {
+  value = value && typeof value === 'object' ? value : {};
+  return normalizeBattleId(
+    value.idStr
+    || value.id
+    || value.userIdStr
+    || value.userId
+    || value.user_id
+    || fallback
+  );
+}
+
+function getRawUserAliases(value = {}, fallbackId = '') {
+  value = value && typeof value === 'object' ? value : {};
+  const ownRoom = value.ownRoom || value.own_room || {};
+  const values = [
+    fallbackId,
+    value.idStr,
+    value.id,
+    value.userIdStr,
+    value.userId,
+    value.user_id,
+    value.roomId,
+    value.roomIdStr,
+    value.room_id,
+    value.anchorId,
+    value.anchorIdStr,
+    value.anchor_id,
+    ...(Array.isArray(value.aliases) ? value.aliases : []),
+    ...(Array.isArray(ownRoom.roomIds) ? ownRoom.roomIds : []),
+    ...(Array.isArray(ownRoom.roomIdsStr) ? ownRoom.roomIdsStr : []),
+    ...(Array.isArray(ownRoom.room_ids) ? ownRoom.room_ids : []),
+    ...(Array.isArray(ownRoom.room_ids_str) ? ownRoom.room_ids_str : [])
+  ];
+  return [...new Set(values.map(normalizeBattleId).filter(Boolean))];
+}
+
+function getRawUserDisplayId(value) {
+  value = value && typeof value === 'object' ? value : {};
+  return normalizeMessageText(
+    value.displayId
+    || value.uniqueId
+    || value.display_id
+    || value.unique_id
+    || value.userName
+    || value.username
+  );
+}
+
+function getRawUserNickname(value) {
+  value = value && typeof value === 'object' ? value : {};
+  return normalizeMessageText(value.nickname || value.nickName || value.name);
+}
+
+function getRawUserAvatar(value) {
+  value = value && typeof value === 'object' ? value : {};
+  const image = value.avatarThumb
+    || value.avatarMedium
+    || value.avatar
+    || value.avatar_thumb
+    || value.avatar_medium;
+  const urls = image && (image.urlList || image.urls || image.url_list);
+  if (Array.isArray(urls) && urls.length) {
+    return String(urls[0]);
+  }
+  return typeof image === 'string' ? image : '';
+}
+
+function getCreatorDisplayName(creator = getCurrentCreator()) {
+  const label = normalizeMessageText(creator && creator.label);
+  if (label) {
+    return label.replace(/\s+\(@[^)]+\)\s*$/, '').trim() || label;
+  }
+  return normalizeMessageText(creator && creator.username) || 'Twórca';
+}
+
+function isCurrentCreatorHandle(displayId) {
+  const expected = normalizeMessageText(getCurrentCreator() && getCurrentCreator().username)
+    .replace(/^@/, '')
+    .toLowerCase();
+  const actual = normalizeMessageText(displayId).replace(/^@/, '').toLowerCase();
+  return Boolean(expected && actual && expected === actual);
+}
+
+function isCurrentCreatorAlias(value) {
+  const id = normalizeBattleId(value);
+  return Boolean(id && (id === currentCreatorLiveUserId || currentCreatorLiveAliases.has(id)));
+}
+
+function markCurrentCreatorAliases(value = {}, fallbackId = '') {
+  getRawUserAliases(value, fallbackId).forEach((id) => currentCreatorLiveAliases.add(id));
+}
+
+function registerLiveUser(value = {}, fallbackId = '', options = {}) {
+  const id = getRawUserId(value, fallbackId);
+  if (!id) {
+    return null;
+  }
+
+  const incomingAliases = getRawUserAliases(value, fallbackId);
+  const existing = incomingAliases
+    .map((alias) => liveUserDirectory.get(alias))
+    .find((entry) => entry && (entry.nickname || entry.displayId || entry.avatar))
+    || liveUserDirectory.get(id)
+    || {};
+  const aliases = [...new Set([
+    ...incomingAliases,
+    ...(Array.isArray(existing.aliases) ? existing.aliases : []),
+    existing.id,
+    id
+  ].map(normalizeBattleId).filter(Boolean))];
+  const displayId = getRawUserDisplayId(value) || existing.displayId || '';
+  const nickname = getRawUserNickname(value) || existing.nickname || displayId || '';
+  const user = {
+    id: existing.id || id,
+    displayId,
+    nickname,
+    avatar: getRawUserAvatar(value) || existing.avatar || '',
+    aliases
+  };
+  aliases.forEach((alias) => liveUserDirectory.set(alias, user));
+  liveUserDirectory.set(user.id, user);
+
+  if (
+    options.currentCreator
+    || isCurrentCreatorHandle(displayId)
+    || aliases.some(isCurrentCreatorAlias)
+  ) {
+    currentCreatorLiveUserId = user.id;
+    aliases.forEach((alias) => currentCreatorLiveAliases.add(alias));
+  }
+  return user;
+}
+
+function registerRoomOwner(roomInfo, creator = getCurrentCreator()) {
+  const root = roomInfo && typeof roomInfo === 'object' ? roomInfo : {};
+  const data = root.data && typeof root.data === 'object' ? root.data : {};
+  const candidates = [
+    root.owner,
+    root.user,
+    root.ownerInfo,
+    data.owner,
+    data.user,
+    data.ownerInfo
+  ].filter((entry) => entry && typeof entry === 'object');
+  let owner = null;
+  for (const candidate of candidates) {
+    const registered = registerLiveUser(candidate, '', { currentCreator: true });
+    if (!registered) {
+      continue;
+    }
+    owner = registered;
+    if (isCurrentCreatorHandle(registered.displayId)) {
+      break;
+    }
+  }
+
+  if (owner && (!owner.nickname || isBattleFallbackName(owner.nickname, owner.id))) {
+    owner.nickname = getCreatorDisplayName(creator);
+    getRawUserAliases(owner, owner.id).forEach((id) => liveUserDirectory.set(id, owner));
+  }
+  if (owner) {
+    currentCreatorLiveUserId = owner.id;
+    markCurrentCreatorAliases(owner, owner.id);
+  }
+  return owner;
+}
+
 function getEventUser(data) {
   const user = data && data.user ? data.user : {};
-  const uniqueId = user.uniqueId || (data && data.uniqueId) || 'unknown';
-  const nickname = user.nickname || (data && data.nickname) || uniqueId;
+  const registered = registerLiveUser(user, data && data.userId);
+  const uniqueId = user.uniqueId
+    || user.displayId
+    || user.unique_id
+    || user.display_id
+    || registered && registered.displayId
+    || user.idStr
+    || user.id
+    || (data && (data.uniqueId || data.displayId || data.userId))
+    || 'unknown';
+  const nickname = user.nickname
+    || user.nickName
+    || registered && registered.nickname
+    || (data && data.nickname)
+    || uniqueId;
   return { uniqueId: String(uniqueId), nickname: String(nickname) };
 }
 
@@ -1677,7 +2171,15 @@ function getTextFromDisplay(displayText) {
 }
 
 function isModeratorEvent(data) {
-  return hasTruthyKey(data, 'isModeratorOfAnchor', 5) || hasModeratorBadge(data && data.user);
+  const user = data && data.user || {};
+  const userAttr = user.userAttr || {};
+  return Boolean(
+    userAttr.isAdmin
+    || userAttr.isSuperAdmin
+    || userAttr.isChannelAdmin
+    || hasTruthyKey(data, 'isModeratorOfAnchor', 5)
+    || hasModeratorBadge(user)
+  );
 }
 
 function hasTruthyKey(value, key, depth) {
@@ -1693,11 +2195,15 @@ function hasTruthyKey(value, key, depth) {
 }
 
 function hasModeratorBadge(user) {
-  if (!user || !Array.isArray(user.badges)) {
+  if (!user) {
     return false;
   }
 
-  return user.badges.some((badge) => hasModeratorText(badge, 4));
+  const badges = [
+    ...(Array.isArray(user.badges) ? user.badges : []),
+    ...(Array.isArray(user.badgeList) ? user.badgeList : [])
+  ];
+  return badges.some((badge) => hasModeratorText(badge, 4));
 }
 
 function hasModeratorText(value, depth) {
@@ -1721,6 +2227,7 @@ function getGiftName(data) {
     data && (
       data.giftName
       || (data.giftDetails && data.giftDetails.giftName)
+      || (data.gift && (data.gift.name || data.gift.describe))
       || (data.extendedGiftInfo && (data.extendedGiftInfo.name || data.extendedGiftInfo.giftName))
       || (data.giftId ? `gift ${data.giftId}` : '')
     )
@@ -1730,7 +2237,11 @@ function getGiftName(data) {
 function getGiftCost(data) {
   return Number(
     data && (
-      (data.giftDetails && data.giftDetails.diamondCount)
+      data.giftCost
+      || (data.giftDetails && data.giftDetails.diamondCount)
+      || (data.giftDetails && (data.giftDetails.diamond_count || data.giftDetails.cost || data.giftDetails.price))
+      || (data.gift && data.gift.diamondCount)
+      || (data.gift && (data.gift.diamond_count || data.gift.cost || data.gift.price))
       || (data.extendedGiftInfo && (
         data.extendedGiftInfo.diamondCount
         || data.extendedGiftInfo.diamond_count
@@ -1745,6 +2256,7 @@ function isBoxLikeGift(data, giftName) {
   return Boolean(
     data && (
       data.giftsInBox
+      || (data.gift && data.gift.isBoxGift)
       || (data.giftDetails && data.giftDetails.isBoxGift)
       || /portal|skrzyn|skrzyni|chest|treasure|box/i.test(giftName)
     )
@@ -1765,20 +2277,29 @@ function getAudienceCount(data) {
 }
 
 function getViewerCount(data) {
+  const direct = Number(data && (data.total || data.totalUser));
+  if (Number.isFinite(direct) && direct >= 0) {
+    return direct;
+  }
   return findNumericByKeys(data, new Set([
+    'total',
     'viewerCount',
     'userCount',
     'totalUser',
     'totalUserCount',
+    'memberCount',
     'onlineUserCount',
     'audienceCount'
   ]), 5);
 }
 
 function sendRoomStats(data) {
-  sendToShell('shell:room-stats', {
-    viewerCount: getViewerCount(data)
-  });
+  const viewerCount = getViewerCount(data);
+  if (!Number.isFinite(viewerCount) || viewerCount < 0) {
+    return;
+  }
+  latestRoomStats = { viewerCount };
+  sendToShell('shell:room-stats', latestRoomStats);
 }
 
 function findNumericByKeys(value, keys, depth) {
@@ -1801,6 +2322,1045 @@ function findNumericByKeys(value, keys, depth) {
   }
 
   return 0;
+}
+
+function createInitialBattleState() {
+  return {
+    active: false,
+    battleId: '',
+    status: 'idle',
+    startedAt: '',
+    endsAt: '',
+    endedAt: '',
+    showResultBanner: false,
+    creatorSideId: '',
+    winnerSideId: '',
+    phase: 'idle',
+    phaseEndsAt: '',
+    sides: [],
+    task: {
+      status: 'idle',
+      progress: 0,
+      target: 0,
+      rewardMultiple: 0,
+      detail: '',
+      actorName: '',
+      missionEndsAt: '',
+      rewardEndsAt: '',
+      noticeEndsAt: '',
+      contributors: []
+    },
+    effects: [],
+    rewards: []
+  };
+}
+
+function resetBattleState(options = {}) {
+  clearTimeout(battleTaskTimer);
+  clearTimeout(battlePublishTimer);
+  clearTimeout(battleResultTimer);
+  battleTaskTimer = null;
+  battlePublishTimer = null;
+  battleResultTimer = null;
+  battleState = createInitialBattleState();
+  battleUserDirectory.clear();
+  battleHostDirectory.clear();
+  battleSideByUser.clear();
+  recentBattleEffects.clear();
+  battleActive = false;
+  if (options.publish !== false) {
+    publishBattleState();
+  }
+}
+
+function publishBattleState(options = {}) {
+  clearTimeout(battlePublishTimer);
+  battlePublishTimer = null;
+}
+
+function getBattlePeriodEnd(config, startKeys = []) {
+  const period = config || {};
+  const startValue = startKeys.map((key) => period[key]).find(Boolean);
+  const startAt = normalizeBattleTimestamp(startValue);
+  const duration = normalizeBattleNumber(period.duration);
+  if (!duration) {
+    return '';
+  }
+  const startMs = startAt ? new Date(startAt).getTime() : Date.now();
+  return new Date(startMs + duration * 1000).toISOString();
+}
+
+function resetBattleTask() {
+  battleState.task = createInitialBattleState().task;
+  if (battleState.active && ['mission', 'mission-success'].includes(battleState.phase)) {
+    battleState.phase = 'battle';
+    battleState.phaseEndsAt = '';
+  }
+}
+
+function scheduleBattleTaskReset(expiresAt) {
+  clearTimeout(battleTaskTimer);
+  battleTaskTimer = null;
+  const endMs = new Date(expiresAt || '').getTime();
+  if (!Number.isFinite(endMs)) {
+    return;
+  }
+  const delay = Math.max(0, endMs - Date.now());
+  battleTaskTimer = setTimeout(() => {
+    if (battleState.task.noticeEndsAt !== expiresAt && battleState.task.missionEndsAt !== expiresAt) {
+      return;
+    }
+    resetBattleTask();
+    publishBattleState();
+  }, delay);
+}
+
+function setTemporaryBattlePhase(phase, duration = BATTLE_EFFECT_STAGE_MS) {
+  battleState.phase = phase;
+  battleState.phaseEndsAt = new Date(Date.now() + duration).toISOString();
+}
+
+function normalizeBattleNumber(value) {
+  if (value === undefined || value === null || value === '') {
+    return 0;
+  }
+
+  const number = Number(String(value).replace(/[^\d.-]/g, ''));
+  return Number.isFinite(number) ? number : 0;
+}
+
+function getLargestBattleNumber(...values) {
+  return Math.max(0, ...values.map(normalizeBattleNumber));
+}
+
+function normalizeBattleId(value) {
+  return value === undefined || value === null ? '' : String(value);
+}
+
+function normalizeBattleTimestamp(value) {
+  const numeric = normalizeBattleNumber(value);
+  if (!numeric) {
+    return '';
+  }
+
+  const milliseconds = numeric < 100000000000 ? numeric * 1000 : numeric;
+  const date = new Date(milliseconds);
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+}
+
+function getBattleSetting(data) {
+  return data && (data.battleSettings || data.battleSetting) || {};
+}
+
+function getBattleId(data) {
+  const setting = getBattleSetting(data);
+  return normalizeBattleId(data && data.battleId || setting.battleId);
+}
+
+function getKeyedBattleEntries(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry, index) => {
+      if (entry && typeof entry === 'object' && 'value' in entry) {
+        return [normalizeBattleId(entry.key || index), entry.value || {}];
+      }
+      return [normalizeBattleId(index), entry || {}];
+    });
+  }
+
+  if (typeof value === 'object') {
+    return Object.entries(value);
+  }
+
+  return [];
+}
+
+function getBattleAvatar(value) {
+  return getRawUserAvatar(value);
+}
+
+function registerBattleUser(userId, value = {}) {
+  const id = getRawUserId(value, userId);
+  if (!id) {
+    return null;
+  }
+
+  const liveUser = registerLiveUser(value, id) || liveUserDirectory.get(id) || {};
+  const existing = battleUserDirectory.get(id) || liveUser;
+  const incomingDisplayId = getRawUserDisplayId(value) || liveUser.displayId || '';
+  const incomingNickname = getRawUserNickname(value) || liveUser.nickname || '';
+  const existingNickname = isBattleFallbackName(existing.nickname, id) ? '' : existing.nickname;
+  const displayId = incomingDisplayId || existing.displayId || '';
+  const nickname = incomingNickname || incomingDisplayId || existingNickname || existing.displayId;
+  const user = {
+    id,
+    displayId,
+    nickname: nickname || displayId || '',
+    avatar: getBattleAvatar(value) || liveUser.avatar || existing.avatar || ''
+  };
+  battleUserDirectory.set(id, user);
+  getRawUserAliases(value, userId).forEach((alias) => battleUserDirectory.set(alias, user));
+  return user;
+}
+
+function getBattleUser(userId) {
+  const id = normalizeBattleId(userId);
+  const known = battleUserDirectory.get(id) || liveUserDirectory.get(id);
+  if (known) {
+    return known;
+  }
+  if (isCurrentCreatorAlias(id)) {
+    return {
+      id,
+      displayId: normalizeMessageText(getCurrentCreator() && getCurrentCreator().username),
+      nickname: getCreatorDisplayName(),
+      avatar: normalizeMessageText(getCurrentCreator() && getCurrentCreator().avatar)
+    };
+  }
+  return {
+    id,
+    displayId: '',
+    nickname: '',
+    avatar: ''
+  };
+}
+
+function isBattleFallbackName(value, userId = '') {
+  const normalized = normalizeMessageText(value).toLowerCase();
+  const id = normalizeBattleId(userId).toLowerCase();
+  return !normalized
+    || normalized === id
+    || /^\d{8,}$/.test(normalized)
+    || /\d{12,}/.test(normalized)
+    || /^(użytkownik|uĹĽytkownik|user)\s+\d{8,}$/.test(normalized)
+    || normalized === `użytkownik ${id}`
+    || normalized === `user ${id}`
+    || normalized === 'nieznany gracz'
+    || normalized === 'nieznany uczestnik'
+    || normalized === 'przeciwnik'
+    || normalized === 'uczestnik bitwy'
+    || /^tw.*rca\s+\d+$/.test(normalized);
+}
+
+function getBattleSideFallbackName(sideId, index = -1) {
+  const id = normalizeBattleId(sideId);
+  if (id && (id === battleState.creatorSideId || isCurrentCreatorAlias(id))) {
+    return getCreatorDisplayName();
+  }
+  if (battleState.creatorSideId) {
+    return 'Przeciwnik';
+  }
+  return index >= 0 ? `Twórca ${index + 1}` : 'Uczestnik bitwy';
+}
+
+function upsertBattleSide(sideId, patch = {}) {
+  const id = normalizeBattleId(sideId || patch.id);
+  if (!id) {
+    return null;
+  }
+
+  let side = battleState.sides.find((item) => item.id === id);
+  if (!side) {
+    const user = battleHostDirectory.get(id) || {};
+    const sideIndex = battleState.sides.length;
+    side = {
+      id,
+      name: !isBattleFallbackName(patch.name, id)
+        ? patch.name
+        : !isBattleFallbackName(user.nickname, id)
+          ? user.nickname
+          : getBattleSideFallbackName(id, sideIndex),
+      displayId: patch.displayId || user.displayId,
+      avatar: patch.avatar || user.avatar,
+      score: 0,
+      result: '',
+      contributors: []
+    };
+    battleState.sides.push(side);
+  }
+  battleSideByUser.set(id, id);
+  if (isCurrentCreatorAlias(id)) {
+    battleState.creatorSideId = id;
+  }
+
+  Object.entries(patch).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      if (key === 'name' && isBattleFallbackName(value, id)) {
+        return;
+      }
+      side[key] = value;
+    }
+  });
+  return side;
+}
+
+function associateBattleSideWithUser(sideId, user, source = {}) {
+  const id = normalizeBattleId(sideId);
+  if (!id || !user) {
+    return;
+  }
+  const aliases = [...new Set([
+    id,
+    user.id,
+    ...(Array.isArray(user.aliases) ? user.aliases : []),
+    ...getRawUserAliases(source)
+  ].map(normalizeBattleId).filter(Boolean))];
+  const identity = {
+    ...user,
+    aliases: [...new Set([
+      ...(Array.isArray(user.aliases) ? user.aliases : []),
+      ...aliases
+    ])]
+  };
+  aliases.forEach((alias) => {
+    battleUserDirectory.set(alias, identity);
+    liveUserDirectory.set(alias, identity);
+    battleSideByUser.set(alias, id);
+  });
+  battleHostDirectory.set(id, identity);
+  if (aliases.some(isCurrentCreatorAlias) || isCurrentCreatorHandle(identity.displayId)) {
+    aliases.forEach((alias) => currentCreatorLiveAliases.add(alias));
+    battleState.creatorSideId = id;
+  }
+}
+
+function prepareBattleState(data, creator, activate = true) {
+  const wasActive = battleState.active;
+  const battleId = getBattleId(data);
+  if (battleId && battleState.battleId && battleState.battleId !== battleId) {
+    battleState = createInitialBattleState();
+    battleUserDirectory.clear();
+    battleHostDirectory.clear();
+    battleSideByUser.clear();
+    recentBattleEffects.clear();
+  }
+
+  if (battleId) {
+    battleState.battleId = battleId;
+  }
+  const setting = getBattleSetting(data);
+  const startedAt = normalizeBattleTimestamp(setting.startTimeMs || setting.startTime);
+  let endsAt = normalizeBattleTimestamp(setting.endTimeMs || setting.endTime);
+  if (!endsAt && startedAt && normalizeBattleNumber(setting.duration) > 0) {
+    endsAt = new Date(new Date(startedAt).getTime() + normalizeBattleNumber(setting.duration) * 1000).toISOString();
+  }
+  battleState.startedAt = startedAt || battleState.startedAt;
+  battleState.endsAt = endsAt || battleState.endsAt;
+
+  getKeyedBattleEntries(data && (data.anchorsInfo || data.anchorInfo)).forEach(([key, wrapper]) => {
+    const value = wrapper && (wrapper.user || wrapper.value && wrapper.value.user || wrapper.value) || wrapper || {};
+    const user = registerBattleUser(value.userId || key, value);
+    if (!user) {
+      return;
+    }
+    const sideId = normalizeBattleId(key || value.roomId || value.userId || user.id);
+    associateBattleSideWithUser(sideId, user, value);
+    upsertBattleSide(sideId, {
+      name: user.nickname,
+      displayId: user.displayId,
+      avatar: user.avatar
+    });
+  });
+
+  const creatorName = String(creator && creator.username || '').replace(/^@/, '').toLowerCase();
+  if (creatorName) {
+    const creatorSide = battleState.sides.find((side) => String(side.displayId || '').replace(/^@/, '').toLowerCase() === creatorName);
+    battleState.creatorSideId = creatorSide ? creatorSide.id : battleState.creatorSideId;
+  }
+
+  if (activate) {
+    clearTimeout(battleResultTimer);
+    battleResultTimer = null;
+    battleActive = true;
+    battleState.active = true;
+    battleState.status = 'active';
+    battleState.showResultBanner = false;
+    if (!wasActive || ['idle', 'finished', 'cancelled'].includes(battleState.phase)) {
+      battleState.phase = battleState.task.status === 'active' ? 'mission' : 'battle';
+      battleState.phaseEndsAt = battleState.task.missionEndsAt || '';
+    }
+    battleState.endedAt = '';
+    battleState.winnerSideId = '';
+  }
+}
+
+function applyBattleArmies(value) {
+  getKeyedBattleEntries(value).forEach(([key, army]) => {
+    army = army || {};
+    const sideId = normalizeBattleId(army.anchorIdStr || army.anchorId || key);
+    if (!sideId) {
+      return;
+    }
+    battleSideByUser.set(sideId, sideId);
+
+    const allContributors = (army.userArmies || army.userArmy || [])
+      .map((entry) => {
+        const user = registerBattleUser(entry.userIdStr || entry.userId, entry);
+        if (!user) {
+          return null;
+        }
+        battleSideByUser.set(user.id, sideId);
+        return {
+          id: user.id,
+          name: user.nickname,
+          displayId: user.displayId,
+          avatar: user.avatar,
+          score: getLargestBattleNumber(entry.score, entry.diamondScore, entry.enigmaScore)
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => right.score - left.score);
+    const contributors = allContributors.slice(0, 5);
+    const contributorScore = allContributors.reduce((total, entry) => total + entry.score, 0);
+
+    const user = battleHostDirectory.get(sideId) || {};
+    upsertBattleSide(sideId, {
+      name: user.nickname,
+      displayId: user.displayId,
+      avatar: user.avatar,
+      score: getLargestBattleNumber(army.hostscore, army.hostScore, army.score, contributorScore),
+      contributors
+    });
+  });
+  reconcileBattlePeople();
+}
+
+function applyBattleTeamArmies(value) {
+  const teams = Array.isArray(value) ? value : [];
+  teams.forEach((team) => {
+    team = team || {};
+    const teamId = normalizeBattleId(team.teamId);
+    const members = Array.isArray(team.teamUser) ? team.teamUser : [];
+    const army = team.userArmies || {};
+    const armySideId = normalizeBattleId(army.anchorIdStr || army.anchorId);
+    const allContributors = (army.userArmies || army.userArmy || [])
+      .map((entry) => {
+        const user = registerBattleUser(entry.userIdStr || entry.userId, entry);
+        if (!user) {
+          return null;
+        }
+        if (armySideId) {
+          battleSideByUser.set(user.id, armySideId);
+        }
+        return {
+          id: user.id,
+          name: user.nickname,
+          displayId: user.displayId,
+          avatar: user.avatar,
+          score: getLargestBattleNumber(entry.score, entry.diamondScore, entry.enigmaScore)
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => right.score - left.score);
+
+    members.forEach((member) => {
+      const sideId = normalizeBattleId(member && (member.userIdStr || member.userId));
+      if (!sideId) {
+        return;
+      }
+      const knownHost = getBattleUser(sideId);
+      if (!battleHostDirectory.has(sideId) && !isBattleFallbackName(knownHost.nickname, sideId)) {
+        associateBattleSideWithUser(sideId, knownHost, member);
+      }
+      const contributors = sideId === armySideId ? allContributors.slice(0, 5) : [];
+      upsertBattleSide(sideId, {
+        teamId,
+        score: getLargestBattleNumber(member.score, member.enigmaScore),
+        contributors
+      });
+    });
+
+    if (!members.length && armySideId) {
+      applyBattleArmies([{ key: armySideId, value: army }]);
+    }
+  });
+  reconcileBattlePeople();
+}
+
+function resolveBattleSideId(actorId, targetIds = [], explicitSideId = '') {
+  const direct = normalizeBattleId(explicitSideId);
+  if (direct && battleState.sides.some((side) => side.id === direct)) {
+    return direct;
+  }
+
+  const actorSideId = battleSideByUser.get(normalizeBattleId(actorId));
+  if (actorSideId) {
+    return actorSideId;
+  }
+
+  return '';
+}
+
+function reconcileBattlePeople() {
+  battleState.sides = battleState.sides.map((side, index) => {
+    const user = battleHostDirectory.get(side.id) || {};
+    if (isCurrentCreatorAlias(side.id) || isCurrentCreatorHandle(user.displayId)) {
+      battleState.creatorSideId = side.id;
+    }
+    const fallbackName = getBattleSideFallbackName(side.id, index);
+    const resolvedName = !isBattleFallbackName(user.nickname, side.id)
+      ? user.nickname
+      : fallbackName;
+    return {
+      ...side,
+      name: !isBattleFallbackName(user.nickname, side.id)
+        ? user.nickname
+        : isBattleFallbackName(side.name, side.id) || side.name === fallbackName
+          ? resolvedName
+          : side.name,
+      displayId: user.displayId || side.displayId,
+      avatar: user.avatar || side.avatar
+    };
+  });
+  battleState.effects = battleState.effects.map((effect) => {
+    const actor = effect.system ? null : getBattleUser(effect.actorId);
+    return {
+      ...effect,
+      actorName: actor && !isBattleFallbackName(actor.nickname, actor.id)
+        ? actor.nickname
+        : effect.actorName,
+      sideId: effect.system
+        ? ''
+        : effect.sideId || resolveBattleSideId(effect.actorId, effect.targetIds)
+    };
+  });
+  battleState.rewards = battleState.rewards.map((reward) => {
+    const user = getBattleUser(reward.userId);
+    return {
+      ...reward,
+      userName: !isBattleFallbackName(user.nickname, user.id) ? user.nickname : reward.userName,
+      sideId: reward.sideId || resolveBattleSideId(reward.userId)
+    };
+  });
+  battleState.task.contributors = (battleState.task.contributors || []).map((entry) => ({
+    ...entry,
+    name: !isBattleFallbackName(getBattleUser(entry.id).nickname, entry.id)
+      ? getBattleUser(entry.id).nickname
+      : entry.name
+  }));
+}
+
+function registerLinkedBattleAliases(userId, roomId) {
+  const userKey = normalizeBattleId(userId);
+  const roomKey = normalizeBattleId(roomId);
+  if (!userKey && !roomKey) {
+    return null;
+  }
+  const user = registerLiveUser({
+    id: userKey,
+    roomId: roomKey
+  }, userKey || roomKey);
+  if (!user) {
+    return null;
+  }
+  const matchingSide = battleState.sides.find((side) => (
+    side.id === userKey
+    || side.id === roomKey
+    || (Array.isArray(user.aliases) && user.aliases.includes(side.id))
+  ));
+  if (matchingSide) {
+    associateBattleSideWithUser(matchingSide.id, user, { roomId: roomKey, userId: userKey });
+  }
+  return user;
+}
+
+function handleBattleLinkState(data) {
+  const states = Array.isArray(data && data.userStates) ? data.userStates : [];
+  let changed = false;
+  states.forEach((entry) => {
+    const player = entry && entry.user || {};
+    const before = getBattleUser(player.roomId || player.userId);
+    const user = registerLinkedBattleAliases(player.userId, player.roomId);
+    if (
+      user
+      && (!before || before.nickname !== user.nickname || before.displayId !== user.displayId)
+    ) {
+      changed = true;
+    }
+  });
+  if (states.length && (battleActive || battleState.active)) {
+    reconcileBattlePeople();
+    publishBattleState();
+  } else if (changed) {
+    reconcileBattlePeople();
+  }
+}
+
+function handleBattleIdentityMessage(data, creator) {
+  const users = Array.isArray(data && data.linkedUsers) ? data.linkedUsers : [];
+  let changed = false;
+  users.forEach((value) => {
+    const id = getRawUserId(value);
+    const before = id ? liveUserDirectory.get(id) : null;
+    const user = registerLiveUser(value);
+    if (!user) {
+      return;
+    }
+    registerBattleUser(user.id, user);
+    const matchingSide = battleState.sides.find((side) => (
+      side.id === user.id
+      || (Array.isArray(user.aliases) && user.aliases.includes(side.id))
+    ));
+    if (matchingSide) {
+      associateBattleSideWithUser(matchingSide.id, user, value);
+    }
+    if (!before || before.nickname !== user.nickname || before.displayId !== user.displayId) {
+      changed = true;
+    }
+  });
+  const linkedAliasUser = registerLinkedBattleAliases(
+    data && data.fromUserId,
+    data && data.fromRoomId
+  );
+
+  if (!currentCreatorLiveUserId) {
+    const creatorHandle = normalizeMessageText(creator && creator.username).replace(/^@/, '').toLowerCase();
+    const creatorUser = users
+      .map((value) => registerLiveUser(value))
+      .find((user) => normalizeMessageText(user && user.displayId).replace(/^@/, '').toLowerCase() === creatorHandle);
+    if (creatorUser) {
+      currentCreatorLiveUserId = creatorUser.id;
+      (creatorUser.aliases || []).forEach((alias) => currentCreatorLiveAliases.add(alias));
+      changed = true;
+    }
+  }
+
+  if ((changed || users.length || linkedAliasUser) && (battleActive || battleState.active)) {
+    reconcileBattlePeople();
+    publishBattleState();
+  }
+}
+
+function applyBattleResults(value) {
+  getKeyedBattleEntries(value).forEach(([key, result]) => {
+    result = result || {};
+    const sideId = normalizeBattleId(result.userId || key);
+    const side = upsertBattleSide(sideId, {
+      score: getLargestBattleNumber(result.score, result.diamondScore, result.enigmaScore)
+    });
+    if (!side) {
+      return;
+    }
+    const resultValue = Number(result.result);
+    side.result = resultValue === 0 ? 'win' : resultValue === 1 ? 'lose' : resultValue === 2 ? 'draw' : side.result;
+    if (side.result === 'win') {
+      battleState.winnerSideId = side.id;
+    }
+  });
+}
+
+function applyBattleTeamResults(value) {
+  const teams = Array.isArray(value) ? value : [];
+  teams.forEach((team) => {
+    const teamId = normalizeBattleId(team && team.teamId);
+    const teamResult = Number(team && team.result);
+    const members = Array.isArray(team && team.teamUser) ? team.teamUser : [];
+    members.forEach((member) => {
+      const sideId = normalizeBattleId(member && (member.userIdStr || member.userId));
+      const side = upsertBattleSide(sideId, {
+        teamId,
+        score: getLargestBattleNumber(member && member.score, member && member.enigmaScore)
+      });
+      if (!side) {
+        return;
+      }
+      side.result = teamResult === 0 ? 'win' : teamResult === 1 ? 'lose' : teamResult === 2 ? 'draw' : side.result;
+      if (side.result === 'win' && !battleState.winnerSideId) {
+        battleState.winnerSideId = side.id;
+      }
+    });
+  });
+}
+
+function handleBattleMessage(data, creator) {
+  const action = Number(data && data.action);
+  const opensBattle = action === 4 || Number(getBattleSetting(data).status) === 1;
+  prepareBattleState(data, creator, opensBattle || battleActive);
+  applyBattleArmies(data && data.armies);
+  applyBattleTeamArmies(data && data.teamArmies);
+  applyBattleResults(data && data.battleResult);
+  applyBattleTeamResults(data && data.teamBattleResult);
+  applyBattleEffectInfos(data, { recordEffects: false });
+
+  if (action === 5 || action === 6 || Number(getBattleSetting(data).status) >= 2) {
+    finishBattleState(data, action === 6 ? 'cancelled' : 'finished');
+    return;
+  }
+
+  publishBattleState();
+}
+
+function handleBattleArmies(data, creator) {
+  prepareBattleState(data, creator, true);
+  applyBattleArmies(data && (data.armies || data.battleItems));
+  applyBattleTeamArmies(data && data.teamArmies);
+
+  const recognizedEffect = applyBattleEffectInfos(data, {
+    recordEffects: Number(data && data.triggerReason) === 5
+  });
+  const actorId = normalizeBattleId(data && data.fromUserId);
+  if (data && data.triggerCriticalStrike && actorId && !recognizedEffect) {
+    addBattleEffect({
+      type: 'critical',
+      actorId,
+      detail: 'critical-strike',
+      sourceKey: data.logId || getMessageId(data)
+    });
+  }
+  if (Number(data && data.triggerReason) === 5 || data && data.triggerCriticalStrike) {
+    setTemporaryBattlePhase('booster');
+  }
+
+  if (Number(data && data.triggerReason) === 2) {
+    finishBattleState(data, 'finished');
+    return;
+  }
+
+  publishBattleState({ throttle: true });
+}
+
+function applyBattleEffectInfos(data, options = {}) {
+  const actorId = normalizeBattleId(data && data.fromUserId);
+  const effectInfos = data && data.effectInfos;
+  const effects = effectInfos && (effectInfos.effectInfoList || effectInfos.effects) || [];
+  let recognizedEffect = false;
+  effects.forEach((effect, index) => {
+    const rawType = `${effect && effect.type || ''} ${effect && effect.effectExtra || ''}`;
+    const type = detectBattleEffectType(rawType);
+    const targetIds = Array.isArray(effect && effect.uidList) ? effect.uidList : [];
+    if (options.recordEffects && type !== 'effect' && (actorId || type === 'freeze')) {
+      recognizedEffect = true;
+      addBattleEffect({
+        type,
+        actorId: type === 'freeze' ? '' : actorId,
+        system: type === 'freeze',
+        targetIds,
+        detail: normalizeMessageText(effect && effect.effectExtra || effect && effect.type || ''),
+        sourceKey: `${data.logId || getMessageId(data) || Date.now()}:${index}`
+      });
+    }
+    updateBattleRewards(type, targetIds);
+  });
+  return recognizedEffect;
+}
+
+function readBattlePrompt(prompt) {
+  const elements = prompt && (prompt.elems || prompt.promptElements) || [];
+  return normalizeMessageText(elements
+    .map((entry) => entry && (entry.value || entry.promptField || entry.promptFieldKey))
+    .filter(Boolean)
+    .join(' '));
+}
+
+function handleBattleTask(data) {
+  prepareBattleState(data, getCurrentCreator(), true);
+  const type = Number(data && (data.taskMessageType ?? data.battleTaskMessageType));
+  const start = data && (data.start || data.taskStart);
+  const update = data && (data.taskUpdate || data.update);
+  const settle = data && (data.taskSettle || data.settle);
+  const reward = data && (data.reward || data.rewardSettle);
+
+  if (type === 0 && start) {
+    const config = start.config || {};
+    const targetConfig = config.targetConfig || {};
+    const rewardConfig = config.rewardConfig || {};
+    const missionEndsAt = getBattlePeriodEnd(targetConfig, ['targetStartTimestamp', 'targetStartTime']);
+    const rewardEndsAt = getBattlePeriodEnd(rewardConfig, ['rewardStartTimestamp', 'rewardStartTime']);
+    battleState.task = {
+      status: 'active',
+      progress: 0,
+      target: normalizeBattleNumber(targetConfig.progressTarget),
+      rewardMultiple: normalizeBattleNumber(rewardConfig.rewardMultiple),
+      detail: readBattlePrompt(targetConfig.staticPrompt || targetConfig.clickPrompt),
+      actorName: '',
+      missionEndsAt,
+      rewardEndsAt,
+      noticeEndsAt: '',
+      contributors: []
+    };
+    battleState.phase = 'mission';
+    battleState.phaseEndsAt = missionEndsAt;
+    scheduleBattleTaskReset(missionEndsAt);
+  } else if (type === 1 && update) {
+    const actor = getBattleUser(update.fromUserId);
+    battleState.task.status = 'active';
+    battleState.task.progress = normalizeBattleNumber(update.progress);
+    battleState.task.actorName = actor.nickname;
+    battleState.task.detail = normalizeMessageText(update.promptKey) || battleState.task.detail;
+    addBattleTaskContributor(update.fromUserId);
+    battleState.phase = 'mission';
+  } else if (type === 2 && settle) {
+    const result = Number(settle.result);
+    battleState.task.status = result === 0 || result === 2 ? 'success' : 'failed';
+    battleState.phase = battleState.task.status === 'success' ? 'mission-success' : 'battle';
+    battleState.task.noticeEndsAt = new Date(Date.now() + BATTLE_TASK_NOTICE_MS).toISOString();
+    battleState.phaseEndsAt = battleState.task.noticeEndsAt;
+    scheduleBattleTaskReset(battleState.task.noticeEndsAt);
+  } else if (type === 3 && reward) {
+    battleState.task.status = Number(reward.status) === 0 ? 'reward' : 'failed';
+    battleState.task.detail = readBattlePrompt(reward.prompt) || battleState.task.detail;
+    battleState.task.noticeEndsAt = new Date(Date.now() + BATTLE_TASK_NOTICE_MS).toISOString();
+    battleState.phase = 'battle';
+    battleState.phaseEndsAt = '';
+    scheduleBattleTaskReset(battleState.task.noticeEndsAt);
+  }
+
+  publishBattleState();
+}
+
+function addBattleTaskContributor(userId) {
+  const id = normalizeBattleId(userId);
+  if (!id) {
+    return false;
+  }
+  const user = getBattleUser(id);
+  const contributors = Array.isArray(battleState.task.contributors) ? battleState.task.contributors : [];
+  const existing = contributors.find((entry) => entry.id === id);
+  if (existing) {
+    const nextName = user.nickname;
+    const changed = existing.name !== nextName;
+    existing.name = nextName;
+    existing.updates += 1;
+    return changed;
+  } else {
+    contributors.push({
+      id,
+      name: user.nickname,
+      updates: 1
+    });
+  }
+  battleState.task.contributors = contributors.slice(-20);
+  return true;
+}
+
+function handleBattleBoostCard(data) {
+  if (!battleActive && !battleState.active) {
+    return;
+  }
+
+  const cards = data && data.cards || [];
+  const detected = cards
+    .map((card) => detectBattleEffectType(card && (card.mCardId || card.cardId || card.taskId)))
+    .find((type) => type !== 'effect');
+  if (detected) {
+    setTemporaryBattlePhase('booster');
+    publishBattleState();
+  }
+}
+
+function handleBattleGift(data) {
+  registerLiveUser(data && data.user, data && data.userId);
+  registerLiveUser(
+    data && data.toUser,
+    data && (data.toUserId || data.toMemberId || data.toMemberIdInt)
+  );
+  if (!battleActive && !battleState.active) {
+    return;
+  }
+
+  let shouldPublish = false;
+  const senderValue = data && data.user || {};
+  const senderId = normalizeBattleId(
+    senderValue.idStr
+    || senderValue.id
+    || senderValue.userIdStr
+    || senderValue.userId
+    || data && data.userId
+  );
+  const sender = registerBattleUser(senderId, senderValue);
+  const receiverValue = data && data.toUser || {};
+  const receiverId = normalizeBattleId(
+    receiverValue.idStr
+    || receiverValue.id
+    || receiverValue.userIdStr
+    || receiverValue.userId
+    || data && (data.toUserId || data.toMemberId || data.toMemberIdInt)
+  );
+  const receiver = registerBattleUser(receiverId, receiverValue);
+  if (sender) {
+    const receiverSideId = receiver ? resolveBattleSideId(receiver.id) : '';
+    if (receiverSideId) {
+      battleSideByUser.set(sender.id, receiverSideId);
+    }
+    if (battleState.task.status === 'active') {
+      shouldPublish = addBattleTaskContributor(sender.id) || shouldPublish;
+    }
+  }
+
+  if (shouldPublish) {
+    reconcileBattlePeople();
+    publishBattleState();
+  }
+}
+
+function detectBattleEffectType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (/^4\b/.test(normalized) || /vault.?glove/.test(normalized)) {
+    return 'glove';
+  }
+  if (/^1\b/.test(normalized) || /critical.?strike/.test(normalized)) {
+    return 'critical';
+  }
+  if (/^2\b/.test(normalized) || /\btop.?2\b/.test(normalized)) {
+    return 'top2';
+  }
+  if (/^3\b/.test(normalized) || /\btop.?3\b/.test(normalized)) {
+    return 'top3';
+  }
+  if (/fog|mist|smoke|mg[łl]a/.test(normalized)) {
+    return 'fog';
+  }
+  if (/glove|r[eę]kawic/.test(normalized)) {
+    return 'glove';
+  }
+  if (/hammer|m[łl]ot/.test(normalized)) {
+    return 'hammer';
+  }
+  if (/freeze|frozen|ice|snow|zamro|l[oó]d/.test(normalized)) {
+    return 'freeze';
+  }
+  if (/shield|tarcza|protect/.test(normalized)) {
+    return 'shield';
+  }
+  if (/boost|power|multiplier|bonus|x[2345]/.test(normalized)) {
+    return 'boost';
+  }
+  return 'effect';
+}
+
+function updateBattleRewards(type, userIds) {
+  if (type === 'freeze') {
+    battleState.rewards = battleState.rewards.filter((reward) => reward.type !== 'freeze');
+    return;
+  }
+  if (!Array.isArray(userIds) || !userIds.length) {
+    return;
+  }
+  const retained = battleState.rewards.filter((reward) => reward.type !== type);
+  const next = userIds
+    .map(normalizeBattleId)
+    .filter(Boolean)
+    .map((userId) => {
+      const user = getBattleUser(userId);
+      return {
+        id: `${type}:${userId}`,
+        type,
+        userId,
+        userName: user.nickname,
+        sideId: resolveBattleSideId(userId),
+        awardedAt: new Date().toISOString()
+      };
+    });
+  battleState.rewards = [...retained, ...next].slice(-30);
+  reconcileBattlePeople();
+}
+
+function addBattleEffect(options = {}) {
+  const system = Boolean(options.system);
+  const actor = system ? { id: '', nickname: '' } : getBattleUser(options.actorId);
+  const targetIds = Array.isArray(options.targetIds) ? options.targetIds.map(normalizeBattleId).filter(Boolean) : [];
+  const targetNames = targetIds.map((id) => getBattleUser(id).nickname);
+  const targetSideIds = [...new Set(targetIds
+    .map((id) => resolveBattleSideId(id))
+    .filter(Boolean))];
+  const type = options.type || 'effect';
+  const multiplier = normalizeMultiplier(options.multiplier);
+  const sideId = system ? '' : resolveBattleSideId(options.actorId, targetIds, options.sideId);
+  const now = Date.now();
+  const signature = `${type}:${sideId}:${actor.id}:${targetIds.join(',')}:${multiplier}:${options.detail || ''}`;
+
+  for (const [key, timestamp] of recentBattleEffects) {
+    if (now - timestamp > 15000) {
+      recentBattleEffects.delete(key);
+    }
+  }
+  if (recentBattleEffects.has(signature) && now - recentBattleEffects.get(signature) < 5000) {
+    return;
+  }
+  recentBattleEffects.set(signature, now);
+
+  const effect = {
+    id: normalizeBattleId(options.sourceKey) || `${now}-${battleState.effects.length}`,
+    timestamp: new Date(now).toISOString(),
+    type,
+    sideId,
+    actorId: actor.id,
+    actorName: !system && options.actorId ? actor.nickname : '',
+    system,
+    targetIds,
+    targetNames,
+    targetSideIds,
+    multiplier,
+    expiresAt: new Date(now + BATTLE_EFFECT_STAGE_MS).toISOString(),
+    detail: normalizeMessageText(options.detail || '')
+  };
+  battleState.effects = [effect, ...battleState.effects].slice(0, 16);
+  setTemporaryBattlePhase('booster');
+
+  if (options.notify !== false && type !== 'effect') {
+    sendBattleEffectAlert(effect);
+  }
+}
+
+function sendBattleEffectAlert(effect) {
+  sendToShell('shell:battle-alert', {
+    tone: 'battle-effect',
+    textKey: 'battle.effectAlert',
+    uppercase: false,
+    effectType: effect.type,
+    actorName: effect.actorName,
+    multiplier: effect.multiplier
+  });
+}
+
+function finishBattleState(data, status = 'finished') {
+  clearTimeout(battleTaskTimer);
+  clearTimeout(battleResultTimer);
+  battleTaskTimer = null;
+  battleResultTimer = null;
+  prepareBattleState(data, getCurrentCreator(), false);
+  applyBattleArmies(data && (data.armies || data.battleItems));
+  applyBattleTeamArmies(data && data.teamArmies);
+  applyBattleResults(data && data.battleResult);
+  applyBattleTeamResults(data && data.teamBattleResult);
+  applyBattleEffectInfos(data, { recordEffects: false });
+  battleState.active = false;
+  battleState.status = status;
+  battleState.phase = status === 'cancelled' ? 'cancelled' : 'finished';
+  battleState.endedAt = new Date().toISOString();
+  battleState.showResultBanner = true;
+  battleState.phaseEndsAt = '';
+  resetBattleTask();
+  battleState.rewards = battleState.rewards.filter((reward) => reward.type !== 'freeze');
+  battleActive = false;
+  lastBattleAlertKey = '';
+  lastBattleAlertAt = 0;
+
+  if (!battleState.winnerSideId && battleState.sides.length) {
+    const ranked = [...battleState.sides].sort((left, right) => right.score - left.score);
+    if (ranked.length === 1 || ranked[0].score > ranked[1].score) {
+      battleState.winnerSideId = ranked[0].id;
+      ranked[0].result = 'win';
+    } else if (ranked.length > 1) {
+      ranked[0].result = 'draw';
+      ranked[1].result = 'draw';
+    }
+  }
+
+  publishBattleState();
+  battleResultTimer = setTimeout(() => {
+    battleResultTimer = null;
+    battleState.showResultBanner = false;
+    publishBattleState();
+  }, BATTLE_RESULT_BANNER_MS);
+  sendToShell('shell:battle-alert', {
+    tone: 'battle-result',
+    textKey: status === 'cancelled' ? 'battle.cancelled' : 'battle.finished',
+    uppercase: false
+  });
 }
 
 function emitBattleMultiplierFromEvent(data) {
@@ -1866,7 +3426,6 @@ function sendBattleAlert(multiplier) {
     return;
   }
 
-  battleActive = true;
   lastBattleAlertKey = key;
   lastBattleAlertAt = now;
   sendToShell('shell:battle-alert', {
@@ -1892,11 +3451,12 @@ function publishState() {
 }
 
 function sendToShell(channel, payload) {
-  if (!shellView || shellView.webContents.isDestroyed()) {
-    return;
+  if (shellView && !shellView.webContents.isDestroyed()) {
+    shellView.webContents.send(channel, payload);
   }
-
-  shellView.webContents.send(channel, payload);
+  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
+    desktopWidgetsWindow.webContents.send(channel, payload);
+  }
 }
 
 function getArchiveLineTimeRange(fullPath, fallbackDate, fallbackStartTime, fallbackEndTime) {
@@ -2269,6 +3829,10 @@ function installIpc() {
   handleShell('shell:get-archive-content', async (archiveId) => getArchiveContent(archiveId));
   handleShell('shell:export-archive', async (archiveId) => exportArchive(archiveId));
   handleShell('shell:delete-archive', async (archiveId) => deleteArchive(archiveId));
+  handleShell('shell:list-notes', async () => ({ ok: true, notes: listNotes() }));
+  handleShell('shell:get-note', async (noteId) => getNote(noteId));
+  handleShell('shell:save-note', async (note) => saveNote(note));
+  handleShell('shell:delete-note', async (noteId) => deleteNote(noteId));
   handleShell('shell:open-archive-folder', async () => {
     ensureArchiveDir();
     const error = await shell.openPath(ARCHIVE_DIR);
@@ -2276,6 +3840,18 @@ function installIpc() {
   });
   handleShell('shell:get-system-settings', async () => ({ ok: true, settings: getPublicSystemSettings() }));
   handleShell('shell:set-system-settings', async (patch) => ({ ok: true, settings: updateSystemSettings(patch) }));
+  handleShell('shell:set-desktop-widgets-enabled', async (enabled) => ({
+    ok: true,
+    enabled: setDesktopWidgetsEnabled(enabled)
+  }));
+  handleShell('shell:set-desktop-widgets-expanded', async (expanded) => ({
+    ok: true,
+    expanded: setDesktopWidgetsExpanded(expanded)
+  }));
+  handleShell('shell:set-desktop-widgets-always-on-top', async (enabled) => ({
+    ok: true,
+    enabled: setDesktopWidgetsAlwaysOnTop(enabled)
+  }));
 
   handleShell('shell:open-in-browser', async () => {
     await shell.openExternal(getCurrentCreator().liveUrl);
@@ -2301,6 +3877,12 @@ function setupAutoUpdates() {
 
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.logger = {
+    info() {},
+    warn() {},
+    error() {},
+    debug() {}
+  };
 
   autoUpdater.on('update-available', (info) => {
     setUpdateMessage(`Pobieram aktualizacje ${info && info.version ? info.version : ''}`.trim());
@@ -2311,13 +3893,11 @@ function setupAutoUpdates() {
   });
 
   autoUpdater.on('error', (error) => {
-    console.error('Auto update error:', error);
+    setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
   });
 
   const checkForUpdates = () => {
-    autoUpdater.checkForUpdatesAndNotify().catch((error) => {
-      console.error('Auto update check failed:', error);
-    });
+    autoUpdater.checkForUpdatesAndNotify().catch(() => {});
   };
 
   setTimeout(checkForUpdates, 15000);
@@ -2374,7 +3954,16 @@ app.setName('Czatbox TT');
 app.setAppUserModelId('pl.czatboxtt.app');
 installIpc();
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  const connector = await import('tiktok-live-connector');
+  ({
+    TikTokLiveConnection,
+    WebcastEvent,
+    ControlEvent,
+    UserOfflineError,
+    SignatureRateLimitError
+  } = connector);
+
   return createWindow().then(() => {
     setupAutoUpdates();
 

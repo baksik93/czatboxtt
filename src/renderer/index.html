@@ -32,6 +32,7 @@
         <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
         <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
         <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
+        <button class="sidebar-button" type="button" data-section="notes">Notatki</button>
         <button class="sidebar-button" type="button" data-section="recommended">Polecani</button>
         <button class="sidebar-button" type="button" data-section="about">O programie</button>
       </aside>
@@ -239,6 +240,14 @@
                 <span>Przybornik statystyk</span>
                 <input class="setting-toggle" type="checkbox" id="statsToolbox">
               </label>
+              <label class="setting-row" for="pinWidgetsToRight">
+                <span>Pokazuj widgety przy prawej krawędzi pulpitu po zminimalizowaniu aplikacji</span>
+                <input class="setting-toggle" type="checkbox" id="pinWidgetsToRight">
+              </label>
+              <label class="setting-row" for="desktopWidgetsAlwaysOnTop">
+                <span>Widgety pulpitu zawsze na wierzchu</span>
+                <input class="setting-toggle" type="checkbox" id="desktopWidgetsAlwaysOnTop">
+              </label>
             </div>
           </section>
           <section class="settings-panel" data-settings-panel="appearance" hidden>
@@ -417,6 +426,44 @@
           </section>
         </section>
 
+        <section class="view-panel notes-view" data-view="notes" hidden>
+          <section class="archive-toolbar">
+            <div>
+              <div class="archive-title" data-i18n="notes.title">Notatki</div>
+              <div class="archive-status" id="notesStatus" data-i18n="notes.status">Krótkie zapiski z live</div>
+            </div>
+            <div class="archive-toolbar-actions">
+              <button class="page-action archive-icon-action" type="button" id="newNoteButton">
+                <span data-ui-icon="message" aria-hidden="true"></span>
+                <span data-i18n="notes.new">Nowa</span>
+              </button>
+              <button class="page-action archive-icon-action" type="button" id="saveNoteButton">
+                <span data-ui-icon="check" aria-hidden="true"></span>
+                <span data-i18n="notes.save">Zapisz</span>
+              </button>
+              <button class="page-action archive-icon-action" type="button" id="deleteNoteButton">
+                <span data-ui-icon="trash" aria-hidden="true"></span>
+                <span data-i18n="notes.delete">Usuń</span>
+              </button>
+            </div>
+          </section>
+          <section class="archive-workspace notes-workspace">
+            <aside class="archive-browser">
+              <label class="archive-search">
+                <span data-ui-icon="search" aria-hidden="true"></span>
+                <input type="search" id="notesSearch" placeholder="Szukaj notatki..." data-i18n-placeholder="notes.searchPlaceholder">
+              </label>
+              <div class="archive-list" id="notesList" aria-live="polite"></div>
+            </aside>
+
+            <section class="archive-detail notes-detail">
+              <input class="note-title-input" id="noteTitleInput" type="text" maxlength="120" placeholder="Tytuł notatki" data-i18n-placeholder="notes.titlePlaceholder">
+              <textarea class="note-content-input" id="noteContentInput" maxlength="20000" placeholder="Napisz notatkę..." data-i18n-placeholder="notes.contentPlaceholder"></textarea>
+              <div class="note-meta" id="noteMeta" data-i18n="notes.unsaved">Nowa niezapisana notatka</div>
+            </section>
+          </section>
+        </section>
+
         <section class="view-panel page-view recommended-view" data-view="recommended" hidden>
           <div class="page-header">
             <div>
@@ -474,29 +521,31 @@
 
               <h3 data-i18n="about.news.features.title">Główne funkcje:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.features.events">wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali</li>
-                <li data-i18n="about.news.features.moderators">wyróżnianie moderatorów czerwonym nickiem</li>
-                <li data-i18n="about.news.features.avatars">losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji</li>
-                <li data-i18n="about.news.features.multiplier">pasek informacji o mnożniku podczas bitwy</li>
-                <li data-i18n="about.news.features.tts">czytanie wiadomości na głos przez TTS</li>
-                <li data-i18n="about.news.features.archive">archiwizowanie czatu całej transmisji do pliku</li>
-                <li data-i18n="about.news.features.styles">różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny</li>
-                <li data-i18n="about.news.features.themes">różne motywy kolorystyczne aplikacji</li>
-                <li data-i18n="about.news.features.appearances">różne wyglądy aplikacji: Domyślny i Ozdobny</li>
-                <li data-i18n="about.news.features.delay">regulowane opóźnienie wyświetlania wiadomości czatu</li>
-                <li data-i18n="about.news.features.stats">przybornik statystyk live</li>
+                <li data-i18n="about.news.features.widgets">przybornik live został zastąpiony widgetami. Od teraz możesz sprawdzić moderację online na czacie, statystyki i top 5 giftujących osób</li>
+                <li data-i18n="about.news.features.flexibleWidgets">wszystkie widgety są elastyczne tj. możesz je ukryć, pokazać, przypiąć do pulpitu gdy aplikacja jest pomniejszona</li>
+                <li data-i18n="about.news.features.archiveCenter">poprawione i rozbudowane centrum archiwizacji czatu live, z podziałem na filtry, podsumowaniami ilości zdarzeń, wiadomości na czacie, monetami, moderatorami online podczas sesji</li>
+                <li data-i18n="about.news.features.archiveActions">archiwum można eksportować do pliku *.txt, kasować, odświeżać.</li>
+                <li data-i18n="about.news.features.languages">język polski, angielski i niemiecki aplikacji</li>
+              </ul>
+
+              <h3 data-i18n="about.news.fixes.title">Poprawki:</h3>
+              <ul class="about-list">
+                <li data-i18n="about.news.fixes.box">poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"</li>
+                <li data-i18n="about.news.fixes.optimization">optymalizacja działania programu</li>
               </ul>
 
               <h3 data-i18n="about.news.known.title">Znane błędy:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.known.box">czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"</li>
                 <li data-i18n="about.news.known.multiplier">mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku</li>
               </ul>
 
               <h3 data-i18n="about.news.next.title">Co dalej:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.next.archive">Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.</li>
-                <li data-i18n="about.news.next.fixes">Poprawki pomniejszych błędów</li>
+                <li data-i18n="about.news.next.widgets">rozbudowa systemu widgetów</li>
+                <li data-i18n="about.news.next.ttsLanguages">dodatkowe języki odczytu czatu TTS</li>
+                <li data-i18n="about.news.next.superFans">wyróżnienie super fanów na czacie</li>
+                <li data-i18n="about.news.next.connection">optymalizacja połączenia z danym twórcą</li>
+                <li data-i18n="about.news.next.giftSounds">powiadomienia dźwiękowe dla większych prezentów</li>
               </ul>
             </section>
           </section>

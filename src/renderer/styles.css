@@ -14,6 +14,46 @@
   --dropdown-shadow: 0 18px 36px rgba(0, 0, 0, 0.42);
 }
 
+:root[data-desktop-widgets="true"],
+:root[data-desktop-widgets="true"] body,
+:root[data-desktop-widgets="true"] .chat-app {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+:root[data-desktop-widgets="true"] body {
+  margin: 0;
+}
+
+:root[data-desktop-widgets="true"] body * {
+  visibility: hidden;
+}
+
+:root[data-desktop-widgets="true"] .right-widget-dock,
+:root[data-desktop-widgets="true"] .right-widget-dock * {
+  visibility: visible;
+}
+
+:root[data-desktop-widgets="true"] .right-widget-dock {
+  top: 50%;
+  right: 0;
+  width: min(410px, 100vw);
+  max-height: calc(100vh - 16px);
+}
+
+:root[data-desktop-widgets="true"] .right-widget {
+  width: 56px;
+  background: rgba(22, 24, 29, 0.96);
+}
+
+:root[data-desktop-widgets="true"] .right-widget[data-expanded="true"] {
+  width: min(410px, 100vw);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -564,6 +604,50 @@ body {
   background: #111214;
 }
 
+.notes-detail {
+  gap: 10px;
+  padding: 12px;
+}
+
+.note-title-input,
+.note-content-input {
+  width: 100%;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dropdown-surface) 92%, transparent);
+  color: var(--dropdown-text);
+  color-scheme: dark;
+  font: inherit;
+  outline: none;
+}
+
+.note-title-input {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.note-content-input {
+  flex: 1;
+  min-height: 320px;
+  padding: 12px;
+  resize: none;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.note-title-input:focus,
+.note-content-input:focus {
+  border-color: #ff4f7b;
+}
+
+.note-meta {
+  color: var(--dropdown-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .archive-filter-empty {
   display: grid;
   min-height: 100%;
@@ -1088,6 +1172,13 @@ body {
   pointer-events: none;
 }
 
+:root[data-widgets-pinned="false"] .right-widget-dock {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  max-height: calc(100% - 8px);
+}
+
 .right-widget-dock[hidden] {
   display: none;
 }
@@ -1583,6 +1674,13 @@ body {
   line-height: 1.1;
   letter-spacing: 0;
   text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.battle-banner[data-tone="battle-stage"] {
+  font-size: 13px;
+  line-height: 1.3;
 }
 
 .battle-banner[data-tone="author"] {
