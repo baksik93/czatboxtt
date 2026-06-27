@@ -1,4 +1,4 @@
-const fs = require('node:fs');
+﻿const fs = require('node:fs');
 const path = require('node:path');
 const { app, BaseWindow, BrowserWindow, WebContentsView, dialog, ipcMain, Menu, Tray, screen, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
@@ -30,28 +30,53 @@ const AVATAR_DIR = path.join(__dirname, 'pic');
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 const AVATAR_EXTENSIONS = new Set(['.gif', '.jpg', '.jpeg', '.png', '.webp']);
 const PROGRAM_AUTHOR_UNIQUE_ID = 'bakus.03';
-const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
+const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy Ĺ›piocha, Baksik doĹ‚Ä…czyĹ‚ do LIVE!';
 const APP_VERSION = app.getVersion();
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
-const RELEASE_NOTES_012 = `Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.
+const RANKING_CACHE_TTL_MS = 60 * 1000;
+const RANKING_VISIBLE_LIMIT = 20;
+const RANKING_REGIONS_BY_LANGUAGE = {
+  pl: {
+    language: 'pl',
+    country: 'Polska',
+    slug: 'poland',
+    apiSlug: 'poland',
+    url: 'https://tik.tools/ranking/poland'
+  },
+  en: {
+    language: 'en',
+    country: 'North America',
+    slug: 'north-america',
+    apiSlug: 'north-america',
+    url: 'https://tik.tools/ranking/united-states-region'
+  },
+  de: {
+    language: 'de',
+    country: 'Deutschland',
+    slug: 'germany',
+    apiSlug: 'germany',
+    url: 'https://tik.tools/ranking/germany-region'
+  }
+};
+const RELEASE_NOTES_012 = `Czatbox TT to aplikacja do obsĹ‚ugi czatu z transmisji TikTok LIVE. Program pozwala Ĺ›ledziÄ‡ wiadomoĹ›ci z wybranego live'a w osobnym, czytelnym oknie. Aplikacja zostaĹ‚a stworzona z myĹ›lÄ… o wygodnym podglÄ…dzie czatu, archiwizacji rozmĂłw oraz dodatkowych zdarzeĹ„ z live'a.
 
-Główne funkcje
-- dodany został notatnik do zapisywania bieżących spraw
-- program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.
-- dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z
-- wyróżnienie super fanów na czacie
+GĹ‚Ăłwne funkcje
+- dodany zostaĹ‚ notatnik do zapisywania bieĹĽÄ…cych spraw
+- program weryfikuje czy istnieje jego nowsza wersja, nastÄ™pnie pobiera jÄ… i informuje o aktualizacji i restarcie.
+- dodany zostaĹ‚ nowy motyw i jego wariacje w rĂłĹĽnych ustawieniach - Enigma-Z
+- wyrĂłĹĽnienie super fanĂłw na czacie
 
 Poprawki
 - poprawione funkcje notatnika
-- poprawione działanie widgetów na pulpicie
+- poprawione dziaĹ‚anie widgetĂłw na pulpicie
 
-Znane błędy
-- mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku
+Znane bĹ‚Ä™dy
+- mnoĹĽnik bitewek to funkcja testowa, i dziaĹ‚a na tak zwanÄ… trytytkÄ™, dlatego czasem w ostatniej minucie siÄ™ buguje i pojawia mimo jego braku
 
 Co dalej
-- dodatkowe języki odczytu czatu TTS
-- optymalizacja połączenia z danym twórcą
-- powiadomienia dźwiękowe dla większych prezentów`;
+- dodatkowe jÄ™zyki odczytu czatu TTS
+- optymalizacja poĹ‚Ä…czenia z danym twĂłrcÄ…
+- powiadomienia dĹşwiÄ™kowe dla wiÄ™kszych prezentĂłw`;
 const RECONNECT_BASE_DELAY_MS = 30 * 1000;
 const RECONNECT_MAX_DELAY_MS = 5 * 60 * 1000;
 const OFFLINE_RECONNECT_DELAY_MS = 10 * 60 * 1000;
@@ -60,6 +85,7 @@ const BATTLE_EFFECT_STAGE_MS = 8000;
 const BATTLE_TASK_NOTICE_MS = 6000;
 const BATTLE_RESULT_BANNER_MS = 12000;
 const START_BACKGROUND_ARG = '--czatbox-background';
+const CHROMIUM_CACHE_DIR = path.join(app.getPath('temp'), 'CzatboxTT', `chromium-cache-${process.pid}`);
 const DEFAULT_SYSTEM_SETTINGS = {
   autoLaunch: false,
   runInBackground: false,
@@ -67,6 +93,63 @@ const DEFAULT_SYSTEM_SETTINGS = {
   language: 'pl',
   timeFormat: 'auto'
 };
+
+function removePathQuietly(targetPath, expectedRoot) {
+  if (!targetPath || !expectedRoot) {
+    return;
+  }
+  const resolvedTarget = path.resolve(targetPath);
+  const resolvedRoot = path.resolve(expectedRoot);
+  if (resolvedTarget !== resolvedRoot && !resolvedTarget.startsWith(`${resolvedRoot}${path.sep}`)) {
+    return;
+  }
+  try {
+    fs.rmSync(resolvedTarget, { recursive: true, force: true });
+  } catch {
+    // Chromium can recreate these caches; a failed cleanup should not block the app.
+  }
+}
+
+function cleanChromiumCacheArtifacts() {
+  const userDataDir = app.getPath('userData');
+  const sessionDir = path.join(userDataDir, 'Partitions', 'tiktok-live-session');
+  const cacheDirs = [
+    path.join(userDataDir, 'Cache'),
+    path.join(userDataDir, 'Code Cache'),
+    path.join(userDataDir, 'GPUCache'),
+    path.join(userDataDir, 'DawnGraphiteCache'),
+    path.join(userDataDir, 'DawnWebGPUCache'),
+    path.join(userDataDir, 'Shared Dictionary'),
+    path.join(sessionDir, 'Cache'),
+    path.join(sessionDir, 'Code Cache'),
+    path.join(sessionDir, 'GPUCache'),
+    path.join(sessionDir, 'DawnGraphiteCache'),
+    path.join(sessionDir, 'DawnWebGPUCache'),
+    path.join(sessionDir, 'Service Worker', 'CacheStorage'),
+    path.join(sessionDir, 'Service Worker', 'Database'),
+    path.join(sessionDir, 'Service Worker', 'ScriptCache'),
+    path.join(sessionDir, 'Shared Dictionary'),
+    path.join(sessionDir, 'VideoDecodeStats')
+  ];
+  const cacheFiles = [
+    path.join(userDataDir, 'DevToolsActivePort'),
+    path.join(userDataDir, 'QuotaManager'),
+    path.join(userDataDir, 'QuotaManager-journal'),
+    path.join(sessionDir, 'QuotaManager'),
+    path.join(sessionDir, 'QuotaManager-journal')
+  ];
+  [...cacheDirs, ...cacheFiles].forEach((targetPath) => removePathQuietly(targetPath, userDataDir));
+}
+
+try {
+  fs.mkdirSync(CHROMIUM_CACHE_DIR, { recursive: true });
+  app.commandLine.appendSwitch('disk-cache-dir', CHROMIUM_CACHE_DIR);
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+} catch {
+  app.commandLine.appendSwitch('disable-http-cache');
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+}
+cleanChromiumCacheArtifacts();
 const SYSTEM_LANGUAGES = new Set(['pl', 'en', 'de']);
 const SYSTEM_TIME_FORMATS = new Set(['auto', '12', '24']);
 const LIVE_CREATORS = [
@@ -75,7 +158,7 @@ const LIVE_CREATORS = [
     label: 'Kama (@teambibii)',
     username: 'teambibii',
     avatar: 'assets/recommended/teambibii.jpg',
-    bio: '🌺 Live codziennie! 🌺\nIg: kama_sarnat',
+    bio: 'đźŚş Live codziennie! đźŚş\nIg: kama_sarnat',
     liveUrl: 'https://www.tiktok.com/@teambibii/live?enter_from_merge=others_homepage&enter_method=others_photo'
   },
   {
@@ -83,7 +166,7 @@ const LIVE_CREATORS = [
     label: 'Wiktoria (@wiktoriaartystycznie)',
     username: 'wiktoriaartystycznie',
     avatar: 'assets/recommended/wiktoriaartystycznie.jpg',
-    bio: 'Live codziennie!🥀',
+    bio: 'Live codziennie!đźĄ€',
     liveUrl: 'https://www.tiktok.com/@wiktoriaartystycznie/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -91,7 +174,7 @@ const LIVE_CREATORS = [
     label: 'Pan z warzywniaka (@panzwarzywniaka)',
     username: 'panzwarzywniaka',
     avatar: 'assets/recommended/panzwarzywniaka.jpg',
-    bio: 'TOP 1 24.12.25/16.01/08.04\n@Polishciuciu 💥💥💥 @🐺Tarocistka Tarrin🐺 @iss142816 @DJ Pedro 🎶🎶 @Beny 🧔🎶 @💙Dawid_Montana🩷🐺💜🦁☠️🐸',
+    bio: 'TOP 1 24.12.25/16.01/08.04\n@Polishciuciu đź’Ąđź’Ąđź’Ą @đźşTarocistka Tarrinđźş @iss142816 @DJ Pedro đźŽ¶đźŽ¶ @Beny đź§”đźŽ¶ @đź’™Dawid_Montanađź©·đźşđź’śđź¦â ď¸Źđź¸',
     liveUrl: 'https://www.tiktok.com/@panzwarzywniaka/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -99,7 +182,7 @@ const LIVE_CREATORS = [
     label: 'Ko Bial (@ko_bial)',
     username: 'ko_bial',
     avatar: 'assets/recommended/ko_bial.jpg',
-    bio: 'Fico-@Lombard🎯 Wokalista',
+    bio: 'Fico-@LombardđźŽŻ Wokalista',
     liveUrl: 'https://www.tiktok.com/@ko_bial/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -113,7 +196,7 @@ const LIVE_CREATORS = [
     label: 'Lovecraft (@lovecraft331)',
     username: 'lovecraft331',
     avatar: 'assets/recommended/lovecraft331.jpg',
-    bio: 'Oddaje Obserwacje 💗💗',
+    bio: 'Oddaje Obserwacje đź’—đź’—',
     liveUrl: 'https://www.tiktok.com/@lovecraft331/live?enter_from_merge=others_homepage&enter_method=others_photo'
   },
   {
@@ -121,7 +204,7 @@ const LIVE_CREATORS = [
     label: 'Chill Serwis (@chill.serwis)',
     username: 'chill.serwis',
     avatar: 'assets/recommended/chill-serwis.jpg',
-    bio: 'Serwisant z wieloletnim doświadczeniem 👊\nIG: chillserwis',
+    bio: 'Serwisant z wieloletnim doĹ›wiadczeniem đź‘Š\nIG: chillserwis',
     liveUrl: 'https://www.tiktok.com/@chill.serwis/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -129,7 +212,7 @@ const LIVE_CREATORS = [
     label: 'Patryk (@patryyyk176)',
     username: 'patryyyk176',
     avatar: 'assets/recommended/patryyyk176.jpg',
-    bio: '🇵🇱 w 🇳🇱\nNie biuro. Budowa 🛠️🏗️\nŻycie i praca w Holandii\nWieczorami 🎮⚽️\n🔴Live na przerwie i wieczorami',
+    bio: 'đź‡µđź‡± w đź‡łđź‡±\nNie biuro. Budowa đź› ď¸ŹđźŹ—ď¸Ź\nĹ»ycie i praca w Holandii\nWieczorami đźŽ®âš˝ď¸Ź\nđź”´Live na przerwie i wieczorami',
     liveUrl: 'https://www.tiktok.com/@patryyyk176/live'
   },
   {
@@ -235,6 +318,7 @@ let tray;
 let isQuitting = false;
 let systemSettings = loadSystemSettings();
 let customCreator = null;
+const rankingCache = new Map();
 
 const recentMessages = [];
 const seenMessageKeys = new Map();
@@ -306,6 +390,10 @@ function publicCreator(creator) {
 function syncCurrentCreatorState(creator = getCurrentCreator()) {
   state.creatorId = creator.id;
   state.currentCreator = publicCreator(creator);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function normalizeCreatorHandle(value) {
@@ -687,7 +775,7 @@ function installLoginStateWatchers(view) {
       return;
     }
 
-    state.lastMessage = `Nie udało się załadować logowania: ${description || url || code}`;
+    state.lastMessage = `Nie udaĹ‚o siÄ™ zaĹ‚adowaÄ‡ logowania: ${description || url || code}`;
     publishState();
   });
 }
@@ -786,7 +874,7 @@ function getTrayLabels() {
   if (language === 'de') {
     return { show: 'Czatbox TT anzeigen', quit: 'Beenden' };
   }
-  return { show: 'Pokaż Czatbox TT', quit: 'Zamknij' };
+  return { show: 'PokaĹĽ Czatbox TT', quit: 'Zamknij' };
 }
 
 function shouldKeepTray() {
@@ -1108,6 +1196,210 @@ function deleteNote(noteId) {
   }
   writeNotesStore(nextNotes);
   return { ok: true, notes: listNotes() };
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCodePoint(Number(code) || 32))
+    .replace(/&#x([a-f0-9]+);/gi, (_match, code) => String.fromCodePoint(Number.parseInt(code, 16) || 32));
+}
+
+function stripHtml(value) {
+  return decodeHtmlEntities(String(value || '')
+    .replace(/<span class="lb-lock-ico"[\s\S]*?<\/span>/g, '')
+    .replace(/<!---->/g, '')
+    .replace(/<[^>]*>/g, ''))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeRankingLanguage(language) {
+  return Object.prototype.hasOwnProperty.call(RANKING_REGIONS_BY_LANGUAGE, language)
+    ? language
+    : DEFAULT_SYSTEM_SETTINGS.language;
+}
+
+function absolutizeTikToolsUrl(url) {
+  if (!url) {
+    return '';
+  }
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  return `https://tik.tools${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+function formatRankingCompactNumber(value) {
+  const number = Number(value) || 0;
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: number >= 100000 ? 1 : 0
+  }).format(number);
+}
+
+function formatRankingUsd(value) {
+  const number = Number(value) || 0;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: number >= 1000 ? 'compact' : 'standard',
+    maximumFractionDigits: number >= 1000 ? 1 : 2
+  }).format(number);
+}
+
+function isMaskedRankingEntry(entry) {
+  const uniqueId = String(entry && (entry.uniqueId || entry.handle || '')).trim();
+  const displayName = String(entry && (entry.displayName || entry.nickname || '')).trim();
+  return Boolean(entry && entry.masked)
+    || /^someone$/i.test(uniqueId)
+    || /^someone$/i.test(displayName);
+}
+
+function parseTikToolsApiRanking(payload) {
+  const current = payload && payload.current && typeof payload.current === 'object'
+    ? payload.current
+    : {};
+  const channels = Array.isArray(current.channels) ? current.channels : [];
+  const totalEntries = Number(current.total_entries) || channels.length;
+  const maskedCount = channels.filter(isMaskedRankingEntry).length;
+
+  const items = channels
+    .filter((entry) => !isMaskedRankingEntry(entry))
+    .map((entry, index) => {
+      const score = Number(entry.score) || 0;
+      const uniqueId = stripHtml(entry.uniqueId);
+      return {
+        rank: Number(entry.rank) || index + 1,
+        uniqueId,
+        displayName: stripHtml(entry.displayName || entry.nickname) || uniqueId,
+        avatar: absolutizeTikToolsUrl(entry.profilePic || entry.avatar),
+        live: Boolean(entry.alive || entry.isLive),
+        diamonds: formatRankingCompactNumber(score),
+        revenue: formatRankingUsd(score * 0.01),
+        earnings: formatRankingUsd(score * 0.005)
+      };
+    })
+    .filter((entry) => entry.uniqueId)
+    .sort((left, right) => left.rank - right.rank)
+    .slice(0, RANKING_VISIBLE_LIMIT);
+
+  return {
+    items,
+    totalEntries,
+    maskedCount,
+    maskedNotice: Boolean(payload && payload.masked) || maskedCount > 0
+  };
+}
+
+function parseTikToolsRanking(html) {
+  const rows = [];
+  const starts = [];
+  const startPattern = /<div class="[^"]*\blb-row\b[^"]*"/g;
+  let startMatch;
+
+  while ((startMatch = startPattern.exec(html))) {
+    starts.push(startMatch.index);
+  }
+
+  starts.forEach((start, index) => {
+    const row = html.slice(start, starts[index + 1] || html.length);
+    const rank = row.match(/class="[^"]*\blb-rank\b[^"]*"[\s\S]*?<span[^>]*>#?(\d+)<\/span>/);
+    const name = row.match(/class="[^"]*\blb-name\b[^"]*"[^>]*>([\s\S]*?)<\/a>/);
+    const uniqueId = row.match(/class="[^"]*\blb-uid\b[^"]*"[^>]*>@([^<]+)/);
+    const avatar = row.match(/<img[^>]+class="[^"]*\blb-avatar\b[^"]*"[^>]+src="([^"]+)"/)
+      || row.match(/<img[^>]+src="([^"]+)"[^>]+class="[^"]*\blb-avatar\b[^"]*"/);
+    const diamonds = row.match(/class="[^"]*\bdiamond-value\b[^"]*"[^>]*>([^<]+)/);
+    const revenue = row.match(/class="[^"]*\brev-val\b[^"]*"[^>]*>([^<]+)/);
+    const earnings = row.match(/class="[^"]*\bearn-val\b[^"]*"[^>]*>([^<]+)/);
+    const handle = stripHtml(uniqueId && uniqueId[1]);
+    const displayName = stripHtml(name && name[1]) || handle;
+
+    if (!rank || !handle || /^someone$/i.test(handle) || /^someone$/i.test(displayName)) {
+      return;
+    }
+
+    rows.push({
+      rank: Number(rank[1]) || rows.length + 1,
+      uniqueId: handle,
+      displayName,
+      avatar: absolutizeTikToolsUrl(avatar && avatar[1]),
+      live: row.includes('live-ring-avatar') || /\bLIVE\b/i.test(row),
+      diamonds: stripHtml(diamonds && diamonds[1]),
+      revenue: stripHtml(revenue && revenue[1]),
+      earnings: stripHtml(earnings && earnings[1])
+    });
+  });
+
+  const totalEntries = starts.length || rows.length;
+  return {
+    items: rows
+      .sort((left, right) => left.rank - right.rank)
+      .slice(0, RANKING_VISIBLE_LIMIT),
+    totalEntries,
+    maskedCount: Math.max(0, totalEntries - rows.length),
+    maskedNotice: html.includes('@someone') || html.includes('>Someone')
+  };
+}
+
+async function getCountryRanking(language) {
+  const normalizedLanguage = normalizeRankingLanguage(language);
+  const region = RANKING_REGIONS_BY_LANGUAGE[normalizedLanguage] || RANKING_REGIONS_BY_LANGUAGE.pl;
+  const cached = rankingCache.get(region.slug);
+  const now = Date.now();
+
+  if (cached && now - cached.fetchedAt < RANKING_CACHE_TTL_MS) {
+    return { ok: true, ...cached.payload, cached: true };
+  }
+
+  let parsed = null;
+  const apiUrl = `https://tik.tools/api/leaderboards/country/${region.apiSlug || region.slug}`;
+  const apiResponse = await fetch(apiUrl, {
+    headers: {
+      'user-agent': 'CzatboxTT/0.1.3',
+      accept: 'application/json'
+    }
+  });
+
+  if (apiResponse.ok) {
+    const apiPayload = await apiResponse.json();
+    parsed = parseTikToolsApiRanking(apiPayload);
+  }
+
+  if (!parsed || !parsed.items.length) {
+    const response = await fetch(region.url, {
+      headers: {
+        'user-agent': 'CzatboxTT/0.1.3',
+        accept: 'text/html,application/xhtml+xml'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`ranking-http-${response.status}`);
+    }
+
+    const html = await response.text();
+    parsed = parseTikToolsRanking(html);
+  }
+
+  const payload = {
+    language: normalizedLanguage,
+    country: region.country,
+    url: region.url,
+    items: parsed.items,
+    totalEntries: parsed.totalEntries,
+    maskedCount: parsed.maskedCount,
+    fetchedAt: now,
+    maskedNotice: parsed.maskedNotice
+  };
+  rankingCache.set(region.slug, { fetchedAt: now, payload });
+  return { ok: true, ...payload, cached: false };
 }
 
 async function createWindow() {
@@ -1768,6 +2060,29 @@ async function selectCreator(creatorInput) {
   return { ok: true, creator: publicCreator(creator) };
 }
 
+async function refreshCurrentChat() {
+  if (state.mode !== 'chat') {
+    return { ok: true, skipped: true };
+  }
+
+  const creator = getCurrentCreator();
+  reconnectAttemptCount = 0;
+  reconnectBlockedUntil = 0;
+  finalizeArchiveSession();
+  disconnectLiveConnection();
+  resetChatBuffers();
+  sendToShell('shell:chat-reset', {
+    creatorId: state.creatorId,
+    reason: 'manual-refresh'
+  });
+  state.connectionStatus = 'connecting';
+  state.source = 'odswiezanie';
+  state.lastMessage = `OdĹ›wieĹĽam czat @${creator.username}`;
+  publishState();
+  await connectLiveChat();
+  return { ok: true, creator: publicCreator(creator) };
+}
+
 function disconnectLiveConnection(options = {}) {
   clearTimeout(reconnectTimer);
   if (!options.keepAttempt) {
@@ -1834,7 +2149,7 @@ function getChatEventText(data) {
 
 function formatMemberEvent(data) {
   const user = getEventUser(data);
-  const text = 'dołączył(a) do LIVE';
+  const text = 'doĹ‚Ä…czyĹ‚(a) do LIVE';
   return createDisplayEvent(data, 'member', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.member.join'
   });
@@ -1869,18 +2184,18 @@ function formatGiftEvent(data) {
   const repeatCount = Math.max(1, Number(data && (data.repeatCount || data.comboCount || data.groupCount)) || 1);
   const giftCost = getGiftCost(data);
   const countText = repeatCount > 1 ? ` x${repeatCount}` : '';
-  const costText = giftCost > 0 ? ` (🪙 ${giftCost * repeatCount})` : '';
+  const costText = giftCost > 0 ? ` (đźŞ™ ${giftCost * repeatCount})` : '';
 
   if (isBoxLikeGift(data, giftName)) {
     if (isUnknownIdentityValue(user.nickname) && isUnknownIdentityValue(user.uniqueId)) {
       return null;
     }
 
-    const boxName = /portal/i.test(giftName) ? 'portal' : 'skrzynię';
+    const boxName = /portal/i.test(giftName) ? 'portal' : 'skrzyniÄ™';
     const boxKey = /portal/i.test(giftName) ? 'portal' : 'chest';
     const audienceCount = getAudienceCount(data);
-    const audienceText = audienceCount > 0 ? ` dla (👥 ${audienceCount})` : '';
-    const text = `wysyła ${boxName}${costText}${audienceText}`;
+    const audienceText = audienceCount > 0 ? ` dla (đź‘Ą ${audienceCount})` : '';
+    const text = `wysyĹ‚a ${boxName}${costText}${audienceText}`;
     return createDisplayEvent(data, 'box', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
       textKey: 'event.box',
       boxKey,
@@ -1889,7 +2204,7 @@ function formatGiftEvent(data) {
     });
   }
 
-  const text = `wysłał(a) prezent: ${giftName}${countText}${costText}`;
+  const text = `wysĹ‚aĹ‚(a) prezent: ${giftName}${countText}${costText}`;
   return createDisplayEvent(data, 'gift', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.gift',
     giftName,
@@ -1912,9 +2227,9 @@ function formatEnvelopeEvent(data) {
   };
   const coinCount = Number(info.diamondCount) || 0;
   const peopleCount = Number(info.peopleCount) || 0;
-  const coinText = coinCount > 0 ? ` (🪙 ${coinCount})` : '';
-  const peopleText = peopleCount > 0 ? ` dla (👥 ${peopleCount})` : '';
-  const text = `wysyła skrzynię${coinText}${peopleText}`;
+  const coinText = coinCount > 0 ? ` (đźŞ™ ${coinCount})` : '';
+  const peopleText = peopleCount > 0 ? ` dla (đź‘Ą ${peopleCount})` : '';
+  const text = `wysyĹ‚a skrzyniÄ™${coinText}${peopleText}`;
   return createDisplayEvent(data, 'box', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.box',
     boxKey: 'chest',
@@ -1930,7 +2245,7 @@ function formatLikeEvent(data) {
   const total = (likeTotalsByUser.get(key) || 0) + likeCount;
   likeTotalsByUser.set(key, total);
 
-  const text = `polubił(a) LIVE (łącznie ${total} polubień)`;
+  const text = `polubiĹ‚(a) LIVE (Ĺ‚Ä…cznie ${total} polubieĹ„)`;
   const event = createDisplayEvent(data, 'like', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.like',
     total
@@ -1948,15 +2263,15 @@ function formatSocialEvent(data, forcedKind) {
   }
 
   if (kind === 'repost') {
-    const text = '🔁 repostował live';
+    const text = 'đź” repostowaĹ‚ live';
     return createDisplayEvent(data, 'repost', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
       textKey: 'event.repost'
     });
   }
 
   const shareCount = getShareAudienceCount(data);
-  const countText = shareCount > 0 ? ` (👥 ${shareCount})` : '';
-  const text = `↩️ udostępnia live${countText}`;
+  const countText = shareCount > 0 ? ` (đź‘Ą ${shareCount})` : '';
+  const text = `â†©ď¸Ź udostÄ™pnia live${countText}`;
   return createDisplayEvent(data, 'share', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.share',
     shareCount
@@ -2042,12 +2357,29 @@ function getRawUserAvatar(value) {
   value = value && typeof value === 'object' ? value : {};
   const image = value.avatarThumb
     || value.avatarMedium
+    || value.avatarLarger
+    || value.profilePicture
+    || value.profilePictureUrl
+    || value.profilePic
+    || value.profilePicUrl
+    || value.picture
     || value.avatar
     || value.avatar_thumb
-    || value.avatar_medium;
+    || value.avatar_medium
+    || value.avatar_larger
+    || value.profile_picture
+    || value.profile_picture_url
+    || value.profile_pic
+    || value.profile_pic_url;
   const urls = image && (image.urlList || image.urls || image.url_list);
   if (Array.isArray(urls) && urls.length) {
     return String(urls[0]);
+  }
+  if (image && typeof image === 'object') {
+    const uri = image.url || image.uri || image.href || image.src;
+    if (typeof uri === 'string' && /^https?:\/\//i.test(uri)) {
+      return uri;
+    }
   }
   return typeof image === 'string' ? image : '';
 }
@@ -2057,7 +2389,7 @@ function getCreatorDisplayName(creator = getCurrentCreator()) {
   if (label) {
     return label.replace(/\s+\(@[^)]+\)\s*$/, '').trim() || label;
   }
-  return normalizeMessageText(creator && creator.username) || 'Twórca';
+  return normalizeMessageText(creator && creator.username) || 'TwĂłrca';
 }
 
 function isCurrentCreatorHandle(displayId) {
@@ -2148,6 +2480,10 @@ function registerRoomOwner(roomInfo, creator = getCurrentCreator()) {
   if (owner) {
     currentCreatorLiveUserId = owner.id;
     markCurrentCreatorAliases(owner, owner.id);
+    if (owner.avatar && !creator.avatar) {
+      creator.avatar = owner.avatar;
+      syncCurrentCreatorState(creator);
+    }
   }
   return owner;
 }
@@ -2226,7 +2562,7 @@ function getShareAudienceCountFromText(data) {
     return 0;
   }
 
-  const match = text.match(/(?:^|[^\d])(\d{1,3})\s*(?:os(?:o|ó)b|osobom|znajom|ludzi|odbior|people|persons?|friends?|recipients?|users?|personen|freunden?)(?:[^\w]|$)/i);
+  const match = text.match(/(?:^|[^\d])(\d{1,3})\s*(?:os(?:o|Ăł)b|osobom|znajom|ludzi|odbior|people|persons?|friends?|recipients?|users?|personen|freunden?)(?:[^\w]|$)/i);
   if (!match) {
     return 0;
   }
@@ -2707,8 +3043,8 @@ function isBattleFallbackName(value, userId = '') {
     || normalized === id
     || /^\d{8,}$/.test(normalized)
     || /\d{12,}/.test(normalized)
-    || /^(użytkownik|uĹĽytkownik|user)\s+\d{8,}$/.test(normalized)
-    || normalized === `użytkownik ${id}`
+    || /^(uĹĽytkownik|uÄąÄ˝ytkownik|user)\s+\d{8,}$/.test(normalized)
+    || normalized === `uĹĽytkownik ${id}`
     || normalized === `user ${id}`
     || normalized === 'nieznany gracz'
     || normalized === 'nieznany uczestnik'
@@ -2725,7 +3061,7 @@ function getBattleSideFallbackName(sideId, index = -1) {
   if (battleState.creatorSideId) {
     return 'Przeciwnik';
   }
-  return index >= 0 ? `Twórca ${index + 1}` : 'Uczestnik bitwy';
+  return index >= 0 ? `TwĂłrca ${index + 1}` : 'Uczestnik bitwy';
 }
 
 function upsertBattleSide(sideId, patch = {}) {
@@ -3382,16 +3718,16 @@ function detectBattleEffectType(value) {
   if (/^3\b/.test(normalized) || /\btop.?3\b/.test(normalized)) {
     return 'top3';
   }
-  if (/fog|mist|smoke|mg[łl]a/.test(normalized)) {
+  if (/fog|mist|smoke|mg[Ĺ‚l]a/.test(normalized)) {
     return 'fog';
   }
-  if (/glove|r[eę]kawic/.test(normalized)) {
+  if (/glove|r[eÄ™]kawic/.test(normalized)) {
     return 'glove';
   }
-  if (/hammer|m[łl]ot/.test(normalized)) {
+  if (/hammer|m[Ĺ‚l]ot/.test(normalized)) {
     return 'hammer';
   }
-  if (/freeze|frozen|ice|snow|zamro|l[oó]d/.test(normalized)) {
+  if (/freeze|frozen|ice|snow|zamro|l[oĂł]d/.test(normalized)) {
     return 'freeze';
   }
   if (/shield|tarcza|protect/.test(normalized)) {
@@ -3605,7 +3941,7 @@ function sendBattleAlert(multiplier) {
     textKey: 'battle.multiplier',
     tone: 'battle',
     uppercase: true,
-    text: `BITWA: ZA CHWILĘ MNOŻNIK X${multiplier}`
+    text: `BITWA: ZA CHWILÄ MNOĹ»NIK X${multiplier}`
   });
 }
 
@@ -3742,7 +4078,7 @@ function inferLegacyArchiveKind(text) {
   if (normalized.includes('udost') || normalized.includes('share')) {
     return 'share';
   }
-  if (normalized.includes('dołączy') || normalized.includes('dolacz') || normalized.includes('joined')) {
+  if (normalized.includes('doĹ‚Ä…czy') || normalized.includes('dolacz') || normalized.includes('joined')) {
     return 'member';
   }
   return 'chat';
@@ -3979,6 +4315,8 @@ function installIpc() {
     return { ok: true };
   });
 
+  handleShell('shell:refresh-chat', async () => refreshCurrentChat());
+
   handleShell('shell:clear-session', async () => {
     finalizeArchiveSession();
     await tiktokSession.clearStorageData();
@@ -4006,6 +4344,7 @@ function installIpc() {
   handleShell('shell:get-note', async (noteId) => getNote(noteId));
   handleShell('shell:save-note', async (note) => saveNote(note));
   handleShell('shell:delete-note', async (noteId) => deleteNote(noteId));
+  handleShell('shell:get-ranking', async (language) => getCountryRanking(language));
   handleShell('shell:open-archive-folder', async () => {
     ensureArchiveDir();
     const error = await shell.openPath(ARCHIVE_DIR);
@@ -4139,8 +4478,8 @@ function showUpdateCompletedDialogIfNeeded() {
 
   dialog.showMessageBox({
     type: 'info',
-    title: 'Aktualizacja ukończona',
-    message: 'Aktualizacja ukończona',
+    title: 'Aktualizacja ukoĹ„czona',
+    message: 'Aktualizacja ukoĹ„czona',
     detail: getReleaseNotesText(),
     buttons: ['OK'],
     defaultId: 0,
@@ -4168,7 +4507,7 @@ function configureAutoUpdates() {
   };
 
   autoUpdater.on('update-available', (info) => {
-    setUpdateMessage(`Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
+    setUpdateMessage(`DostÄ™pna aktualizacja ${info && info.version ? info.version : ''}`.trim());
   });
 
   autoUpdater.on('update-downloaded', async (info) => {
@@ -4182,7 +4521,7 @@ function configureAutoUpdates() {
       type: 'info',
       title: 'Aktualizacja pobrana',
       message: 'Aktualizacja pobrana',
-      detail: 'Program zostanie teraz zamknięty i uruchomiony ponownie, aby dokończyć instalację.',
+      detail: 'Program zostanie teraz zamkniÄ™ty i uruchomiony ponownie, aby dokoĹ„czyÄ‡ instalacjÄ™.',
       buttons: ['OK'],
       defaultId: 0,
       noLink: true
@@ -4191,7 +4530,7 @@ function configureAutoUpdates() {
   });
 
   autoUpdater.on('error', (error) => {
-    setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
+    setUpdateMessage(`BĹ‚Ä…d aktualizacji: ${getConnectionErrorMessage(error)}`);
     if (updateDownloadReject) {
       const reject = updateDownloadReject;
       updateDownloadReject = null;
@@ -4207,14 +4546,14 @@ async function beginUpdateInstall(info) {
   await dialog.showMessageBox({
     type: 'info',
     title: 'Aktualizacja',
-    message: 'Rozpoczynam aktualizację',
-    detail: 'Funkcje programu będą niedostępne do czasu zakończenia aktualizacji i ponownego uruchomienia aplikacji.',
+    message: 'Rozpoczynam aktualizacjÄ™',
+    detail: 'Funkcje programu bÄ™dÄ… niedostÄ™pne do czasu zakoĹ„czenia aktualizacji i ponownego uruchomienia aplikacji.',
     buttons: ['OK'],
     defaultId: 0,
     noLink: true
   }).catch(() => {});
 
-  setUpdateMessage(`Pobieram aktualizację ${info && info.version ? info.version : ''}`.trim());
+  setUpdateMessage(`Pobieram aktualizacjÄ™ ${info && info.version ? info.version : ''}`.trim());
   await new Promise((resolve, reject) => {
     updateDownloadReject = reject;
     autoUpdater.downloadUpdate()
@@ -4235,8 +4574,8 @@ async function promptForUpdate(info) {
   updatePromptVisible = true;
   const result = await dialog.showMessageBox({
     type: 'question',
-    title: 'Dostępna aktualizacja',
-    message: `Dostępna jest aktualizacja ${info.version}`,
+    title: 'DostÄ™pna aktualizacja',
+    message: `DostÄ™pna jest aktualizacja ${info.version}`,
     detail: `${getUpdateNotes(info)}\n\nObecna wersja: ${APP_VERSION}`,
     buttons: ['Aktualizuj teraz', 'Uruchom bez aktualizacji'],
     defaultId: 0,
@@ -4257,8 +4596,8 @@ async function promptForUpdate(info) {
     updateDownloadReject = null;
     await dialog.showMessageBox({
       type: 'error',
-      title: 'Błąd aktualizacji',
-      message: 'Nie udało się pobrać aktualizacji',
+      title: 'BĹ‚Ä…d aktualizacji',
+      message: 'Nie udaĹ‚o siÄ™ pobraÄ‡ aktualizacji',
       detail: getConnectionErrorMessage(error),
       buttons: ['OK'],
       defaultId: 0,
@@ -4357,6 +4696,23 @@ app.setName('Czatbox TT');
 app.setAppUserModelId('pl.czatboxtt.app');
 installIpc();
 
+const singleInstanceLock = app.requestSingleInstanceLock();
+if (!singleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (typeof mainWindow.isMinimized === 'function' && mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      if (typeof mainWindow.focus === 'function') {
+        mainWindow.focus();
+      }
+    }
+  });
+}
+
+if (singleInstanceLock) {
 app.whenReady().then(async () => {
   const updateStarted = await runStartupUpdateCheck();
   if (updateStarted) {
@@ -4381,6 +4737,7 @@ app.whenReady().then(async () => {
     }
   });
 });
+}
 
 app.on('activate', () => {
   if (!mainWindow) {
@@ -4397,3 +4754,4 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+

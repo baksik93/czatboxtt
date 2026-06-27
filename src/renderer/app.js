@@ -17,9 +17,9 @@ const TIME_FORMATS = ['auto', '12', '24'];
 const TOP_GIFTERS_LIMIT = 5;
 const MODERATOR_ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 const ACTIVE_MODERATORS_LIMIT = 20;
-const MAX_RECENT_CREATORS = 10;
+const MAX_RECENT_CREATORS = 20;
 const HEART_ME_GIFT_NAME = 'heart me';
-const RECOMMENDED_EXCLUDED_CREATOR_IDS = new Set(['milusia313', 'szwagierkaqueen', 'krzysztofzdziars9']);
+const RECENT_CREATOR_META_KEY = 'czatbox.recent.creator.meta';
 const UI_ICONS = {
   'chevron-down': '<path d="m7 10 5 5 5-5"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
@@ -59,6 +59,7 @@ const DEFAULT_SYSTEM_SETTINGS = {
 const DEFAULT_GENERAL_SETTINGS = {
   multiplierNotifications: true,
   statsToolbox: true,
+  galleryAvatars: true,
   pinWidgetsToRight: true,
   desktopWidgetsAlwaysOnTop: true
 };
@@ -67,6 +68,16 @@ const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
   en: 'en-US',
   de: 'de-DE'
+};
+const TTS_LANGUAGE_PREFIXES = {
+  pl: /^pl\b/i,
+  en: /^en\b/i,
+  de: /^de\b/i
+};
+const RANKING_COUNTRIES_BY_LANGUAGE = {
+  pl: 'Polska',
+  en: 'North America',
+  de: 'Deutschland'
 };
 const MAX_SPEECH_QUEUE = 8;
 const VULGAR_SPEECH_PATTERNS = [
@@ -91,11 +102,27 @@ const I18N = {
     'nav.archive': 'Archiwum',
     'nav.settings': 'Ustawienia',
     'nav.notes': 'Notatki',
-    'nav.recommended': 'Polecani',
+    'nav.ranking': 'Ranking',
     'nav.about': 'O programie',
     'creator.label': 'Twórca',
-    'creator.recent': 'Ostatnio wpisany',
+    'creator.refresh': 'Odśwież czat',
     'creator.noMatches': 'Brak pasujących twórców',
+    'recentCreators.aria': 'Ostatni twórcy',
+    'recentCreators.online': 'Wybrany',
+    'recentCreators.offline': 'Niewybrany',
+    'ranking.title': 'Ranking',
+    'ranking.note': 'Ranking twórców LIVE dla kraju wybranego według języka aplikacji.',
+    'ranking.refresh': 'Odśwież ranking',
+    'ranking.loading': 'Pobieram ranking...',
+    'ranking.empty': 'Brak jawnych pozycji rankingu do wyświetlenia.',
+    'ranking.error': 'Nie udało się pobrać rankingu.',
+    'ranking.country': 'Kraj: {country}',
+    'ranking.updated': 'Ostatnia aktualizacja: {time}',
+    'ranking.live': 'LIVE',
+    'ranking.offline': 'OFFLINE',
+    'ranking.diamonds': 'Diamenty',
+    'ranking.revenue': 'Przychód',
+    'ranking.earnings': 'Zarobek',
     'filters.chat': 'Czat',
     'filters.like': 'Polubienia',
     'filters.gift': 'Prezenty',
@@ -155,6 +182,7 @@ const I18N = {
     'settings.general.note': 'Ogólne ustawienia aplikacji.',
     'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
     'settings.general.statsToolbox': 'Przybornik statystyk',
+    'settings.general.galleryAvatars': 'Awatary z galerii',
     'settings.general.pinWidgetsToRight': 'Pokazuj widgety przy prawej krawędzi pulpitu po zminimalizowaniu aplikacji',
     'settings.general.desktopWidgetsAlwaysOnTop': 'Widgety pulpitu zawsze na wierzchu',
     'settings.appearance.chatStyle': 'Styl czatu:',
@@ -215,10 +243,12 @@ const I18N = {
     'about.news.version': 'Wersja programu',
     'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
-    'about.news.features.notes': 'dodany został notatnik do zapisywania bieżących spraw',
-    'about.news.features.updates': 'program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.',
-    'about.news.features.enigmaTheme': 'dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z',
-    'about.news.features.superFans': 'wyróżnienie super fanów na czacie',
+    'about.news.features.notes': 'ranking TOP 20 twórców i ich zarobki z rankingu dziennego - podgląd za darmo, bez żadnych opłat, jak w innych aplikacjach',
+    'about.news.features.updates': 'odświeżanie połączenia z danym twórcą np. gdy się przepala, wystarczy dać odśwież by ponownie dołączyć',
+    'about.news.features.enigmaTheme': 'dodatkowe języki odczytu czatu TTS',
+    'about.news.features.superFans': 'lista polecanych i ostatnio oglądanych wyświetla się teraz u góry aplikacji w formie kółeczek, poleca faktycznie osoby, które oglądasz i zapisuje na kolejne sesje',
+    'about.news.features.enigmaMode': 'tryb enigmy, czyli wchodzisz na czyjś czat live do podglądu ale nie widać ciebie na czacie',
+    'about.news.features.avatarToggle': 'włączaj lub wyłączaj awatary dla lepszej przejrzystości',
     'about.news.features.events': 'wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali',
     'about.news.features.moderators': 'wyróżnianie moderatorów czerwonym nickiem',
     'about.news.features.avatars': 'losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji',
@@ -236,18 +266,19 @@ const I18N = {
     'about.news.features.archiveActions': 'archiwum można eksportować do pliku *.txt, kasować, odświeżać.',
     'about.news.features.languages': 'język polski, angielski i niemiecki aplikacji',
     'about.news.fixes.title': 'Poprawki:',
-    'about.news.fixes.notes': 'poprawione funkcje notatnika',
-    'about.news.fixes.desktopWidgets': 'poprawione działanie widgetów na pulpicie',
+    'about.news.fixes.notes': 'poprawiona stabilność łączności z danym twórcą',
+    'about.news.fixes.desktopWidgets': '',
     'about.news.fixes.box': 'poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"',
     'about.news.fixes.optimization': 'optymalizacja działania programu',
     'about.news.known.title': 'Znane błędy:',
     'about.news.known.box': 'czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"',
     'about.news.known.multiplier': 'mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku',
+    'about.news.known.enigmaPerformance': 'Wygląd Motyw: Enigma-Z i wygląd aplikacji: ozdobny zamulają aplikację na słabszych sprzętach, niestety na chwilę obecną nie jestem w stanie tego rozwiązać ponieważ działa to na półprzezroczystych powierzchniach zgodnie z założeniem i wymaga nieco więcej mocy od twojego PC, na te konto masz wiele innych opcji wizualnych aplikacji, które śmigają na słabszych komputerach',
     'about.news.next.title': 'Co dalej:',
     'about.news.next.archive': 'Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.',
     'about.news.next.fixes': 'Poprawki pomniejszych błędów',
     'about.news.next.widgets': 'rozbudowa systemu widgetów',
-    'about.news.next.ttsLanguages': 'dodatkowe języki odczytu czatu TTS',
+    'about.news.next.ttsLanguages': '',
     'about.news.next.superFans': 'wyróżnienie super fanów na czacie',
     'about.news.next.connection': 'optymalizacja połączenia z danym twórcą',
     'about.news.next.giftSounds': 'powiadomienia dźwiękowe dla większych prezentów',
@@ -315,11 +346,6 @@ const I18N = {
     'archive.exported': 'Archiwum wyeksportowano.',
     'archive.exportFailed': 'Nie udało się wyeksportować archiwum.',
     'archive.folderFailed': 'Nie udało się otworzyć folderu archiwów.',
-    'recommended.title': 'Polecani',
-    'recommended.note': 'Twórcy dodani do programu, których możesz szybko wybrać.',
-    'recommended.open': 'Wybierz',
-    'recommended.empty': 'Brak polecanych twórców do wyświetlenia.',
-    'recommended.emptyBio': 'Brak opisu profilu.',
     'topGifters.empty': 'Brak giftów od dołączenia do transmisji.',
     'event.member.join': 'dołączył(a) do LIVE',
     'event.gift': 'wysłał(a) prezent: {giftName}{countText}{costText}',
@@ -342,11 +368,27 @@ const I18N = {
     'nav.archive': 'Archive',
     'nav.settings': 'Settings',
     'nav.notes': 'Notes',
-    'nav.recommended': 'Recommended',
+    'nav.ranking': 'Ranking',
     'nav.about': 'About',
     'creator.label': 'Creator',
-    'creator.recent': 'Recently typed',
+    'creator.refresh': 'Refresh chat',
     'creator.noMatches': 'No matching creators',
+    'recentCreators.aria': 'Recent creators',
+    'recentCreators.online': 'Selected',
+    'recentCreators.offline': 'Not selected',
+    'ranking.title': 'Ranking',
+    'ranking.note': 'LIVE creator ranking for the country selected by the application language.',
+    'ranking.refresh': 'Refresh ranking',
+    'ranking.loading': 'Loading ranking...',
+    'ranking.empty': 'No public ranking entries to display.',
+    'ranking.error': 'Could not load the ranking.',
+    'ranking.country': 'Country: {country}',
+    'ranking.updated': 'Last update: {time}',
+    'ranking.live': 'LIVE',
+    'ranking.offline': 'OFFLINE',
+    'ranking.diamonds': 'Diamonds',
+    'ranking.revenue': 'Revenue',
+    'ranking.earnings': 'Earnings',
     'filters.chat': 'Chat',
     'filters.like': 'Likes',
     'filters.gift': 'Gifts',
@@ -406,6 +448,7 @@ const I18N = {
     'settings.general.note': 'General application settings.',
     'settings.general.multiplierNotifications': 'Multiplier notifications',
     'settings.general.statsToolbox': 'Statistics toolbox',
+    'settings.general.galleryAvatars': 'Gallery avatars',
     'settings.general.pinWidgetsToRight': 'Show widgets at the right edge of the desktop when the app is minimized',
     'settings.general.desktopWidgetsAlwaysOnTop': 'Keep desktop widgets always on top',
     'settings.appearance.chatStyle': 'Chat style:',
@@ -566,11 +609,6 @@ const I18N = {
     'archive.exported': 'Archive exported.',
     'archive.exportFailed': 'Could not export the archive.',
     'archive.folderFailed': 'Could not open the archive folder.',
-    'recommended.title': 'Recommended',
-    'recommended.note': 'Creators added to the program that you can quickly choose.',
-    'recommended.open': 'Choose',
-    'recommended.empty': 'No recommended creators to display.',
-    'recommended.emptyBio': 'No profile description.',
     'topGifters.empty': 'No gifts since joining this stream.',
     'event.member.join': 'joined the LIVE',
     'event.gift': 'sent a gift: {giftName}{countText}{costText}',
@@ -593,11 +631,27 @@ const I18N = {
     'nav.archive': 'Archiv',
     'nav.settings': 'Einstellungen',
     'nav.notes': 'Notizen',
-    'nav.recommended': 'Empfohlen',
+    'nav.ranking': 'Ranking',
     'nav.about': 'Über das Programm',
     'creator.label': 'Creator',
-    'creator.recent': 'Zuletzt eingegeben',
+    'creator.refresh': 'Chat aktualisieren',
     'creator.noMatches': 'Keine passenden Creator',
+    'recentCreators.aria': 'Letzte Creator',
+    'recentCreators.online': 'Ausgewählt',
+    'recentCreators.offline': 'Nicht ausgewählt',
+    'ranking.title': 'Ranking',
+    'ranking.note': 'LIVE-Creator-Ranking für das Land, das anhand der App-Sprache gewählt wird.',
+    'ranking.refresh': 'Ranking aktualisieren',
+    'ranking.loading': 'Ranking wird geladen...',
+    'ranking.empty': 'Keine öffentlichen Ranking-Einträge zum Anzeigen.',
+    'ranking.error': 'Ranking konnte nicht geladen werden.',
+    'ranking.country': 'Land: {country}',
+    'ranking.updated': 'Letzte Aktualisierung: {time}',
+    'ranking.live': 'LIVE',
+    'ranking.offline': 'OFFLINE',
+    'ranking.diamonds': 'Diamanten',
+    'ranking.revenue': 'Umsatz',
+    'ranking.earnings': 'Einnahmen',
     'filters.chat': 'Chat',
     'filters.like': 'Likes',
     'filters.gift': 'Geschenke',
@@ -657,6 +711,7 @@ const I18N = {
     'settings.general.note': 'Allgemeine Anwendungseinstellungen.',
     'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
     'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
+    'settings.general.galleryAvatars': 'Avatare aus der Galerie',
     'settings.general.pinWidgetsToRight': 'Widgets am rechten Desktoprand anzeigen, wenn die App minimiert ist',
     'settings.general.desktopWidgetsAlwaysOnTop': 'Desktop-Widgets immer im Vordergrund halten',
     'settings.appearance.chatStyle': 'Chat-Stil:',
@@ -817,11 +872,6 @@ const I18N = {
     'archive.exported': 'Archiv wurde exportiert.',
     'archive.exportFailed': 'Archiv konnte nicht exportiert werden.',
     'archive.folderFailed': 'Archivordner konnte nicht geöffnet werden.',
-    'recommended.title': 'Empfohlen',
-    'recommended.note': 'Im Programm hinzugefügte Creator, die du schnell auswählen kannst.',
-    'recommended.open': 'Auswählen',
-    'recommended.empty': 'Keine empfohlenen Creator zum Anzeigen.',
-    'recommended.emptyBio': 'Keine Profilbeschreibung.',
     'topGifters.empty': 'Keine Gifts seit dem Beitritt zum Stream.',
     'event.member.join': 'ist dem LIVE beigetreten',
     'event.gift': 'hat ein Geschenk gesendet: {giftName}{countText}{costText}',
@@ -854,8 +904,12 @@ const statusStatsEl = document.getElementById('statusStats');
 const rightWidgets = Array.from(document.querySelectorAll('[data-right-widget]'));
 const rightWidgetButtons = Array.from(document.querySelectorAll('[data-widget-target]'));
 const creatorInput = document.getElementById('creatorInput');
-const creatorToggle = document.getElementById('creatorToggle');
-const creatorSuggestions = document.getElementById('creatorSuggestions');
+const creatorRefreshButton = document.getElementById('creatorRefresh');
+const creatorSuggestions = null;
+const recentCreatorsStrip = document.getElementById('recentCreatorsStrip');
+const recentCreatorsCarousel = document.getElementById('recentCreatorsCarousel');
+const recentCreatorsPrev = document.getElementById('recentCreatorsPrev');
+const recentCreatorsNext = document.getElementById('recentCreatorsNext');
 const messagesEl = document.getElementById('messages');
 const emptyEl = document.getElementById('empty');
 const battleBanner = document.getElementById('battleBanner');
@@ -871,6 +925,7 @@ const themeInputs = Array.from(document.querySelectorAll('input[name="appTheme"]
 const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="appAppearance"]'));
 const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
 const statsToolboxEl = document.getElementById('statsToolbox');
+const galleryAvatarsEl = document.getElementById('galleryAvatars');
 const pinWidgetsToRightEl = document.getElementById('pinWidgetsToRight');
 const desktopWidgetsAlwaysOnTopEl = document.getElementById('desktopWidgetsAlwaysOnTop');
 const refreshArchiveButton = document.getElementById('refreshArchive');
@@ -901,7 +956,8 @@ const noteContentInput = document.getElementById('noteContentInput');
 const notePreviewEl = document.getElementById('notePreview');
 const noteMetaEl = document.getElementById('noteMeta');
 const noteFormatButtons = Array.from(document.querySelectorAll('[data-note-format]'));
-const recommendedListEl = document.getElementById('recommendedList');
+const rankingSummaryEl = document.getElementById('rankingSummary');
+const rankingListEl = document.getElementById('rankingList');
 const appVersionEl = document.getElementById('appVersion');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
 const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
@@ -918,6 +974,8 @@ const systemMinimizeToTrayEl = document.getElementById('systemMinimizeToTray');
 const appLanguageEl = document.getElementById('appLanguage');
 const timeFormatEl = document.getElementById('timeFormat');
 const clearTikTokSessionButton = document.getElementById('clearTikTokSession');
+const firstRunLanguageEl = document.getElementById('firstRunLanguage');
+const firstRunLanguageButtons = Array.from(document.querySelectorAll('[data-first-language]'));
 
 const queue = [];
 const visibleMessages = [];
@@ -958,6 +1016,12 @@ let noteEntries = [];
 let selectedNoteId = '';
 let selectedNote = null;
 let noteEditorMode = 'edit';
+let rankingState = {
+  loading: false,
+  loadedLanguage: '',
+  data: null,
+  error: ''
+};
 let renderKeyCounter = 0;
 let timeFormatterKey = '';
 let timeFormatter = null;
@@ -966,6 +1030,7 @@ let liveViewerCount = 0;
 let desktopWidgetRegionsFrame = 0;
 let chatMessageCount = 0;
 let recentCreators = loadRecentCreators();
+let recentCreatorMeta = loadRecentCreatorMeta();
 let lastSubmittedCreator = '';
 let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
@@ -1087,6 +1152,7 @@ function normalizeGeneralSettings(value) {
   return {
     multiplierNotifications: next.multiplierNotifications !== false,
     statsToolbox: next.statsToolbox !== false,
+    galleryAvatars: next.galleryAvatars !== false,
     pinWidgetsToRight: next.pinWidgetsToRight !== false,
     desktopWidgetsAlwaysOnTop: next.desktopWidgetsAlwaysOnTop !== false
   };
@@ -1194,17 +1260,45 @@ function saveRecentCreators() {
   localStorage.setItem(RECENT_CREATORS_KEY, JSON.stringify(recentCreators.slice(0, MAX_RECENT_CREATORS)));
 }
 
+function loadRecentCreatorMeta() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RECENT_CREATOR_META_KEY) || '{}');
+    return saved && typeof saved === 'object' ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveRecentCreatorMeta() {
+  const entries = Object.entries(recentCreatorMeta)
+    .filter(([handle]) => recentCreators.includes(handle))
+    .slice(0, MAX_RECENT_CREATORS);
+  localStorage.setItem(RECENT_CREATOR_META_KEY, JSON.stringify(Object.fromEntries(entries)));
+}
+
 function rememberCreator(value) {
-  const handle = normalizeCreatorHandle(value);
+  if (value && typeof value === 'object') {
+    cacheRecentCreatorMeta(value);
+    saveRecentCreatorMeta();
+  }
+  const handle = normalizeCreatorHandle(value && typeof value === 'object' ? (value.username || value.id) : value);
   if (!handle) {
     return;
   }
 
-  recentCreators = [
+  const nextRecentCreators = [
     handle,
     ...recentCreators.filter((item) => item !== handle)
   ].slice(0, MAX_RECENT_CREATORS);
+  if (nextRecentCreators.join('|') === recentCreators.join('|')) {
+    renderRecentCreatorsCarousel();
+    return;
+  }
+
+  recentCreators = nextRecentCreators;
   saveRecentCreators();
+  saveRecentCreatorMeta();
+  renderRecentCreatorsCarousel();
   syncCreatorOptions(state.creators);
 }
 
@@ -1268,7 +1362,7 @@ function applyI18n() {
     ['.sidebar-button[data-section="archive"]', 'nav.archive'],
     ['.sidebar-button[data-section="settings"]', 'nav.settings'],
     ['.sidebar-button[data-section="notes"]', 'nav.notes'],
-    ['.sidebar-button[data-section="recommended"]', 'nav.recommended'],
+    ['.sidebar-button[data-section="ranking"]', 'nav.ranking'],
     ['.sidebar-button[data-section="about"]', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
     ['.filter-button[data-filter="like"]', 'filters.like'],
@@ -1286,8 +1380,8 @@ function applyI18n() {
     ['.filter-button[data-archive-filter="member"]', 'filters.member'],
     ['.archive-title', 'archive.title'],
     ['.archive-status', 'archive.status'],
-    ['.view-panel[data-view="recommended"] .page-header h1', 'recommended.title'],
-    ['.view-panel[data-view="recommended"] .page-note', 'recommended.note'],
+    ['.view-panel[data-view="ranking"] .page-header h1', 'ranking.title'],
+    ['.view-panel[data-view="ranking"] .page-note', 'ranking.note'],
     ['.view-panel[data-view="settings"] .page-header h1', 'settings.title'],
     ['.settings-tab[data-settings-tab="general"]', 'settings.tabs.general'],
     ['.settings-tab[data-settings-tab="appearance"]', 'settings.tabs.appearance'],
@@ -1296,6 +1390,7 @@ function applyI18n() {
     ['.settings-panel[data-settings-panel="general"] .page-note', 'settings.general.note'],
     ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
     ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
+    ['label[for="galleryAvatars"] > span', 'settings.general.galleryAvatars'],
     ['label[for="pinWidgetsToRight"] > span', 'settings.general.pinWidgetsToRight'],
     ['label[for="desktopWidgetsAlwaysOnTop"] > span', 'settings.general.desktopWidgetsAlwaysOnTop'],
     ['.settings-panel[data-settings-panel="appearance"] > .settings-heading', 'settings.appearance.chatStyle'],
@@ -1340,7 +1435,8 @@ function applyI18n() {
 
   syncTtsVoices();
   syncSystemControls();
-  renderRecommendedCreators();
+  renderRecentCreatorsCarousel();
+  renderRanking();
   syncRightWidgetDock();
   renderBattleBannerFromState();
   updateStatus();
@@ -1422,6 +1518,9 @@ function applyGeneralSettings() {
   if (statsToolboxEl) {
     statsToolboxEl.checked = generalSettings.statsToolbox;
   }
+  if (galleryAvatarsEl) {
+    galleryAvatarsEl.checked = generalSettings.galleryAvatars;
+  }
   if (pinWidgetsToRightEl) {
     pinWidgetsToRightEl.checked = generalSettings.pinWidgetsToRight;
   }
@@ -1479,6 +1578,15 @@ function initGeneralSettings() {
       generalSettings.statsToolbox = statsToolboxEl.checked;
       saveGeneralSettings();
       applyGeneralSettings();
+    });
+  }
+  if (galleryAvatarsEl) {
+    galleryAvatarsEl.addEventListener('change', () => {
+      generalSettings.galleryAvatars = galleryAvatarsEl.checked;
+      saveGeneralSettings();
+      applyGeneralSettings();
+      userAvatars.clear();
+      renderVisibleMessages();
     });
   }
   if (pinWidgetsToRightEl) {
@@ -1587,7 +1695,13 @@ function applyIncomingSystemSettings(nextSettings, options = {}) {
   const timeFormatChanged = previousTimeFormat !== timeFormat;
 
   if (languageChanged) {
+    ttsSettings.voiceURI = '';
+    saveTtsSettings();
+    stopSpeech();
     applyI18n();
+    if (activeSection === 'ranking') {
+      loadRanking(true);
+    }
   } else {
     updateStatus();
   }
@@ -1682,6 +1796,23 @@ function initSystemSettings() {
   loadSystemSettingsFromShell();
 }
 
+function initFirstRunLanguageChoice() {
+  if (DESKTOP_WIDGET_MODE || !firstRunLanguageEl || localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)) {
+    return;
+  }
+
+  firstRunLanguageEl.hidden = false;
+  firstRunLanguageButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const language = APP_LANGUAGES.includes(button.dataset.firstLanguage)
+        ? button.dataset.firstLanguage
+        : DEFAULT_SYSTEM_SETTINGS.language;
+      firstRunLanguageEl.hidden = true;
+      await updateSystemSettings({ language });
+    });
+  });
+}
+
 function formatDelaySeconds(delayMs) {
   return `${(delayMs / 1000).toFixed(1)}s`;
 }
@@ -1704,8 +1835,9 @@ function stopSpeech() {
 }
 
 function getSelectedVoice() {
+  const preferredLanguage = TTS_LANGUAGE_PREFIXES[appLanguage] || TTS_LANGUAGE_PREFIXES.pl;
   return speechVoices.find((voice) => voice.voiceURI === ttsSettings.voiceURI)
-    || speechVoices.find((voice) => /^pl\b/i.test(voice.lang))
+    || speechVoices.find((voice) => preferredLanguage.test(voice.lang))
     || null;
 }
 
@@ -1720,7 +1852,7 @@ function playNextSpeech() {
     utterance.voice = voice;
     utterance.lang = voice.lang;
   } else {
-    utterance.lang = 'pl-PL';
+    utterance.lang = LANGUAGE_LOCALES[appLanguage] || LANGUAGE_LOCALES.pl;
   }
 
   utterance.rate = clampSpeechRate(ttsSettings.rate);
@@ -1851,12 +1983,13 @@ function syncTtsVoices() {
     return;
   }
 
+  const preferredLanguage = TTS_LANGUAGE_PREFIXES[appLanguage] || TTS_LANGUAGE_PREFIXES.pl;
   speechVoices = window.speechSynthesis.getVoices()
     .slice()
     .sort((a, b) => {
-      const aPolish = /^pl\b/i.test(a.lang) ? 0 : 1;
-      const bPolish = /^pl\b/i.test(b.lang) ? 0 : 1;
-      return aPolish - bPolish || a.name.localeCompare(b.name);
+      const aPreferred = preferredLanguage.test(a.lang) ? 0 : 1;
+      const bPreferred = preferredLanguage.test(b.lang) ? 0 : 1;
+      return aPreferred - bPreferred || a.name.localeCompare(b.name);
     });
 
   const selected = ttsSettings.voiceURI;
@@ -2297,15 +2430,6 @@ function syncCreatorInputValue(force = false) {
   creatorInput.dataset.dirty = 'false';
 }
 
-function getRecommendedCreators() {
-  const creators = Array.isArray(state.creators) ? state.creators : [];
-  return creators.filter((creator) => (
-    creator
-    && creator.id
-    && !RECOMMENDED_EXCLUDED_CREATOR_IDS.has(String(creator.id))
-  ));
-}
-
 function getCreatorDisplayName(creator) {
   const fallback = `@${creator.username || creator.id}`;
   if (typeof creator.label !== 'string') {
@@ -2315,6 +2439,161 @@ function getCreatorDisplayName(creator) {
   return creator.label.replace(/\s*\(@[^)]*\)\s*$/, '').trim() || fallback;
 }
 
+function findCreatorByHandle(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  if (!normalized) {
+    return null;
+  }
+  const creators = Array.isArray(state.creators) ? state.creators : [];
+  return creators.find((creator) => normalizeCreatorHandle(creator.username || creator.id) === normalized)
+    || recentCreatorMeta[normalized]
+    || null;
+}
+
+function getCurrentCreatorHandle() {
+  return normalizeCreatorHandle(getCreatorUsernameFromState());
+}
+
+function getRecentCreatorStatus(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  const current = getCurrentCreatorHandle();
+  return normalized && current === normalized ? 'online' : 'offline';
+}
+
+function getRecentCreatorMeta(creator) {
+  const handle = normalizeCreatorHandle(creator && (creator.username || creator.id));
+  if (!handle) {
+    return null;
+  }
+
+  return {
+    id: creator.id || handle,
+    username: creator.username || handle,
+    label: creator.label || `@${handle}`,
+    avatar: creator.avatar || ''
+  };
+}
+
+function cacheRecentCreatorMeta(creator) {
+  const meta = getRecentCreatorMeta(creator);
+  if (!meta) {
+    return;
+  }
+
+  const handle = normalizeCreatorHandle(meta.username || meta.id);
+  if (!handle) {
+    return;
+  }
+
+  recentCreatorMeta[handle] = meta;
+}
+
+function getCreatorInitial(handle, creator) {
+  const source = creator ? getCreatorDisplayName(creator) : handle;
+  const clean = String(source || '').replace(/^@/, '').trim();
+  return (clean[0] || '?').toUpperCase();
+}
+
+async function selectRecentCreator(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  if (!normalized || !creatorInput) {
+    return;
+  }
+
+  creatorInput.value = `@${normalized}`;
+  creatorInput.dataset.dirty = 'true';
+  await submitCreatorInput();
+}
+
+function updateRecentCreatorsNav() {
+  if (!recentCreatorsCarousel || !recentCreatorsPrev || !recentCreatorsNext) {
+    return;
+  }
+
+  const overflow = recentCreatorsCarousel.scrollWidth > recentCreatorsCarousel.clientWidth + 4;
+  recentCreatorsPrev.hidden = !overflow;
+  recentCreatorsNext.hidden = !overflow;
+  if (!overflow) {
+    return;
+  }
+
+  recentCreatorsPrev.disabled = recentCreatorsCarousel.scrollLeft <= 2;
+  recentCreatorsNext.disabled = recentCreatorsCarousel.scrollLeft + recentCreatorsCarousel.clientWidth >= recentCreatorsCarousel.scrollWidth - 2;
+}
+
+function scrollRecentCreators(direction) {
+  if (!recentCreatorsCarousel) {
+    return;
+  }
+
+  const amount = Math.max(160, Math.floor(recentCreatorsCarousel.clientWidth * 0.75));
+  recentCreatorsCarousel.scrollBy({
+    left: amount * direction,
+    behavior: 'smooth'
+  });
+  window.setTimeout(updateRecentCreatorsNav, 180);
+}
+
+function renderRecentCreatorsCarousel() {
+  if (!recentCreatorsStrip || !recentCreatorsCarousel) {
+    return;
+  }
+
+  const creators = recentCreators
+    .map(normalizeCreatorHandle)
+    .filter(Boolean)
+    .slice(0, MAX_RECENT_CREATORS);
+
+  recentCreatorsStrip.hidden = creators.length === 0;
+  if (!creators.length) {
+    recentCreatorsCarousel.replaceChildren();
+    updateRecentCreatorsNav();
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  creators.forEach((handle) => {
+    const creator = findCreatorByHandle(handle);
+    const status = getRecentCreatorStatus(handle);
+    const label = creator ? getCreatorDisplayName(creator) : handle;
+    const button = document.createElement('button');
+    button.className = 'recent-creator-card';
+    button.type = 'button';
+    button.dataset.status = status;
+    button.dataset.active = String(getCurrentCreatorHandle() === handle);
+    button.title = `@${handle} • ${t(`recentCreators.${status}`)}`;
+    button.setAttribute('aria-label', button.title);
+    button.addEventListener('click', () => selectRecentCreator(handle));
+
+    const avatar = document.createElement('span');
+    avatar.className = 'recent-creator-avatar';
+    if (creator && creator.avatar) {
+      const image = document.createElement('img');
+      image.src = creator.avatar;
+      image.alt = '';
+      image.decoding = 'async';
+      image.loading = 'lazy';
+      image.addEventListener('error', () => {
+        image.remove();
+        avatar.textContent = getCreatorInitial(handle, creator);
+      }, { once: true });
+      avatar.appendChild(image);
+    } else {
+      avatar.textContent = getCreatorInitial(handle, creator);
+    }
+
+    const name = document.createElement('span');
+    name.className = 'recent-creator-name';
+    name.textContent = label.replace(/^@/, '');
+
+    button.append(avatar, name);
+    fragment.appendChild(button);
+  });
+
+  recentCreatorsCarousel.replaceChildren(fragment);
+  window.requestAnimationFrame(updateRecentCreatorsNav);
+}
+
 function setCreatorSuggestionsExpanded(isExpanded) {
   if (!creatorInput || !creatorSuggestions) {
     return;
@@ -2322,9 +2601,6 @@ function setCreatorSuggestionsExpanded(isExpanded) {
 
   creatorSuggestions.hidden = !isExpanded;
   creatorInput.setAttribute('aria-expanded', String(isExpanded));
-  if (creatorToggle) {
-    creatorToggle.setAttribute('aria-expanded', String(isExpanded));
-  }
   if (!isExpanded) {
     activeCreatorSuggestionIndex = -1;
     creatorInput.removeAttribute('aria-activedescendant');
@@ -2460,47 +2736,33 @@ function chooseCreatorSuggestion(handle) {
 
 function syncCreatorOptions(creators) {
   if (!creatorSuggestions) {
+    renderRecentCreatorsCarousel();
     return;
   }
 
   const list = Array.isArray(creators) ? creators : [];
   const nextKey = [
-    ...list.map((creator) => `${creator.id}:${creator.username || ''}:${creator.label || ''}`),
-    ...recentCreators.map((creator) => `recent:${creator}`)
+    ...list.map((creator) => `${creator.id}:${creator.username || ''}:${creator.label || ''}:${creator.avatar || ''}`)
   ].join('|');
   if (nextKey === syncedCreatorSuggestionsKey) {
+    renderRecentCreatorsCarousel();
     return;
   }
 
   syncedCreatorSuggestionsKey = nextKey;
-  const knownByHandle = new Map();
   const items = [];
 
   list.forEach((creator) => {
     const handle = normalizeCreatorHandle(creator.username || creator.id);
-    if (!handle || knownByHandle.has(handle)) {
+    if (!handle) {
       return;
     }
 
-    knownByHandle.set(handle, creator);
+    cacheRecentCreatorMeta(creator);
   });
+  saveRecentCreatorMeta();
 
   const seenHandles = new Set();
-  recentCreators.forEach((creator) => {
-    const handle = normalizeCreatorHandle(creator);
-    if (!handle || seenHandles.has(handle)) {
-      return;
-    }
-
-    const knownCreator = knownByHandle.get(handle);
-    seenHandles.add(handle);
-    items.push({
-      handle,
-      label: knownCreator ? getCreatorDisplayName(knownCreator) : `@${handle}`,
-      detail: `${t('creator.recent')} · @${handle}`
-    });
-  });
-
   list.forEach((creator) => {
     const handle = normalizeCreatorHandle(creator.username || creator.id);
     if (!handle || seenHandles.has(handle)) {
@@ -2517,78 +2779,165 @@ function syncCreatorOptions(creators) {
 
   creatorSuggestionItems = items;
   renderCreatorSuggestions();
+  renderRecentCreatorsCarousel();
 }
 
-function renderRecommendedCreators() {
-  if (!recommendedListEl) {
+function createRankingRefreshButton() {
+  const button = document.createElement('button');
+  button.className = 'page-action ranking-refresh-action';
+  button.type = 'button';
+  button.append(createUiIcon('refresh'));
+  const label = document.createElement('span');
+  label.textContent = t('ranking.refresh');
+  button.appendChild(label);
+  button.addEventListener('click', () => loadRanking(true));
+  return button;
+}
+
+function renderRanking() {
+  if (!rankingSummaryEl || !rankingListEl) {
     return;
   }
 
-  const creators = getRecommendedCreators();
-  if (!creators.length) {
+  if (rankingState.loading) {
+    rankingSummaryEl.textContent = t('ranking.loading');
+    rankingListEl.replaceChildren();
+    return;
+  }
+
+  if (rankingState.error) {
+    rankingSummaryEl.textContent = t('ranking.error');
+    const error = document.createElement('div');
+    error.className = 'ranking-empty';
+    error.textContent = rankingState.error;
+    rankingListEl.replaceChildren(error);
+    return;
+  }
+
+  const data = rankingState.data;
+  if (!data) {
+    const summary = document.createElement('div');
+    summary.className = 'ranking-summary-card';
+    const country = document.createElement('strong');
+    country.textContent = t('ranking.country', {
+      country: RANKING_COUNTRIES_BY_LANGUAGE[appLanguage] || RANKING_COUNTRIES_BY_LANGUAGE.pl
+    });
+    summary.append(country, createRankingRefreshButton());
+    rankingSummaryEl.replaceChildren(summary);
+    rankingListEl.replaceChildren();
+    return;
+  }
+
+  const summary = document.createElement('div');
+  summary.className = 'ranking-summary-card';
+  const country = document.createElement('strong');
+  country.textContent = t('ranking.country', { country: data.country || RANKING_COUNTRIES_BY_LANGUAGE[appLanguage] || '' });
+  const updated = document.createElement('span');
+  updated.textContent = t('ranking.updated', { time: data.fetchedAt ? formatTime(data.fetchedAt) : '-' });
+  summary.append(country, updated, createRankingRefreshButton());
+  rankingSummaryEl.replaceChildren(summary);
+
+  const items = Array.isArray(data.items) ? data.items : [];
+  if (!items.length) {
     const empty = document.createElement('div');
-    empty.className = 'recommended-empty';
-    empty.textContent = t('recommended.empty');
-    recommendedListEl.replaceChildren(empty);
+    empty.className = 'ranking-empty';
+    empty.textContent = t('ranking.empty');
+    rankingListEl.replaceChildren(empty);
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  creators.forEach((creator) => {
-    const button = document.createElement('button');
-    button.className = 'recommended-card';
-    button.type = 'button';
-    button.dataset.creatorId = creator.id;
-    button.dataset.active = String(creator.id === state.creatorId);
+  items.forEach((entry) => {
+    const card = document.createElement('article');
+    card.className = 'ranking-card';
 
-    if (creator.avatar) {
-      const avatar = document.createElement('img');
-      avatar.className = 'recommended-avatar';
-      avatar.src = creator.avatar;
-      avatar.alt = '';
-      avatar.decoding = 'async';
-      avatar.loading = 'lazy';
-      button.appendChild(avatar);
+    const rank = document.createElement('span');
+    rank.className = 'ranking-rank';
+    rank.textContent = `#${entry.rank || ''}`;
+
+    const avatar = document.createElement('img');
+    avatar.className = 'ranking-avatar';
+    avatar.alt = '';
+    avatar.loading = 'lazy';
+    avatar.decoding = 'async';
+    avatar.src = entry.avatar || './assets/czatbox-icon.png';
+
+    const identity = document.createElement('div');
+    identity.className = 'ranking-identity';
+    const name = document.createElement('strong');
+    name.textContent = entry.displayName || `@${entry.uniqueId}`;
+    identity.appendChild(name);
+    if (entry.uniqueId) {
+      const handle = document.createElement('span');
+      handle.textContent = `@${entry.uniqueId}`;
+      identity.appendChild(handle);
     }
 
-    const content = document.createElement('span');
-    content.className = 'recommended-card-content';
+    const status = document.createElement('span');
+    status.className = 'ranking-status';
+    status.dataset.live = String(Boolean(entry.live));
+    status.textContent = entry.live ? t('ranking.live') : t('ranking.offline');
 
-    const name = document.createElement('strong');
-    name.textContent = getCreatorDisplayName(creator);
-
-    const username = document.createElement('small');
-    username.textContent = `@${creator.username || creator.id}`;
-
-    const bio = document.createElement('span');
-    bio.className = 'recommended-bio';
-    bio.textContent = typeof creator.bio === 'string' && creator.bio.trim()
-      ? creator.bio.trim()
-      : t('recommended.emptyBio');
-
-    const action = document.createElement('span');
-    action.className = 'recommended-action';
-    action.textContent = t('recommended.open');
-
-    content.append(name, username, bio);
-    button.append(content, action);
-    button.addEventListener('click', () => {
-      if (state.creatorId !== creator.id) {
-        resetMessages();
-        if (creatorInput) {
-          creatorInput.value = `@${creator.username || creator.id}`;
-          creatorInput.dataset.dirty = 'false';
-        }
-        rememberCreator(creator.username || creator.id);
-        window.tiktokLive.setCreator(creator.username || creator.id);
+    const stats = document.createElement('div');
+    stats.className = 'ranking-stats';
+    [
+      ['ranking.diamonds', entry.diamonds],
+      ['ranking.revenue', entry.revenue],
+      ['ranking.earnings', entry.earnings]
+    ].forEach(([labelKey, value]) => {
+      if (!value) {
+        return;
       }
-      setActiveSection('chatbox');
+      const item = document.createElement('span');
+      item.textContent = `${t(labelKey)}: ${value}`;
+      stats.appendChild(item);
     });
 
-    fragment.appendChild(button);
+    card.append(rank, avatar, identity, status, stats);
+    fragment.appendChild(card);
   });
 
-  recommendedListEl.replaceChildren(fragment);
+  rankingListEl.replaceChildren(fragment);
+}
+
+async function loadRanking(force = false) {
+  if (!window.tiktokLive || typeof window.tiktokLive.getRanking !== 'function') {
+    return;
+  }
+
+  if (!force && rankingState.data && rankingState.loadedLanguage === appLanguage) {
+    renderRanking();
+    return;
+  }
+
+  rankingState = {
+    ...rankingState,
+    loading: true,
+    error: ''
+  };
+  renderRanking();
+
+  try {
+    const result = await window.tiktokLive.getRanking(appLanguage);
+    if (!result || !result.ok) {
+      throw new Error(result && result.error ? result.error : 'ranking-error');
+    }
+    rankingState = {
+      loading: false,
+      loadedLanguage: appLanguage,
+      data: result,
+      error: ''
+    };
+  } catch (error) {
+    rankingState = {
+      loading: false,
+      loadedLanguage: appLanguage,
+      data: null,
+      error: error && error.message ? error.message : t('ranking.error')
+    };
+  }
+
+  renderRanking();
 }
 
 function syncAvatarImages(images) {
@@ -2625,7 +2974,15 @@ function assignAvatarForJoin(message) {
 
 function getAvatarForMessage(message) {
   const key = getAvatarKey(message);
-  if (!key || !avatarImages.length) {
+  if (!key) {
+    return '';
+  }
+
+  if (!generalSettings.galleryAvatars) {
+    return '';
+  }
+
+  if (!avatarImages.length) {
     return '';
   }
 
@@ -2946,9 +3303,13 @@ function renderMessageElement(message) {
     body.className = 'message-body';
     body.textContent = getMessageDisplayText(message);
 
+    const line = document.createElement('span');
+    line.className = 'message-line';
+    line.appendChild(body);
+
     const text = document.createElement('div');
     text.className = 'message-text';
-    text.append(meta, body);
+    text.append(meta, line);
 
     if (avatarSrc) {
       const avatar = document.createElement('img');
@@ -2957,6 +3318,9 @@ function renderMessageElement(message) {
       avatar.alt = '';
       avatar.decoding = 'async';
       avatar.loading = 'lazy';
+      avatar.addEventListener('error', () => {
+        avatar.remove();
+      }, { once: true });
       content.append(avatar, text);
     } else {
       content.appendChild(text);
@@ -3084,7 +3448,9 @@ async function submitCreatorInput() {
     return;
   }
 
-  if (handle === lastSubmittedCreator && handle === normalizeCreatorHandle(getCreatorUsernameFromState())) {
+  const currentHandle = normalizeCreatorHandle(getCreatorUsernameFromState());
+  const connectionIsActiveOrPending = ['online', 'connecting', 'reconnecting'].includes(state.connectionStatus);
+  if (handle === lastSubmittedCreator && handle === currentHandle && connectionIsActiveOrPending) {
     creatorInput.value = `@${handle}`;
     creatorInput.dataset.dirty = 'false';
     return;
@@ -3098,7 +3464,7 @@ async function submitCreatorInput() {
   try {
     const result = await window.tiktokLive.setCreator(handle);
     if (result && result.ok) {
-      rememberCreator(result.creator && result.creator.username ? result.creator.username : handle);
+      rememberCreator(result.creator || handle);
       if (result.creator && result.creator.username) {
         creatorInput.value = `@${result.creator.username}`;
       }
@@ -3116,11 +3482,18 @@ window.tiktokLive.onState((nextState) => {
   if (state.systemSettings) {
     applyIncomingSystemSettings(state.systemSettings);
   }
+  if (state.creatorId && state.creatorId !== previousCreatorId) {
+    rememberCreator(state.currentCreator || getCreatorUsernameFromState());
+  }
+  if (state.currentCreator && state.currentCreator.username) {
+    cacheRecentCreatorMeta(state.currentCreator);
+    saveRecentCreatorMeta();
+    renderRecentCreatorsCarousel();
+  }
   syncCreatorOptions(state.creators);
   syncAvatarImages(state.avatarImages);
   syncAppVersion();
   syncCreatorInputValue();
-  renderRecommendedCreators();
   if (previousCreatorId && state.creatorId !== previousCreatorId) {
     resetMessages();
   } else if (isOfflineConnectionState(state) && (!wasOffline || queue.length || visibleMessages.length || renderedMessageElements.size)) {
@@ -3133,34 +3506,21 @@ if (creatorInput) {
   creatorInput.dataset.dirty = 'false';
 
   creatorInput.addEventListener('focus', () => {
-    openCreatorSuggestions();
+    closeCreatorSuggestions();
   });
 
   creatorInput.addEventListener('input', () => {
     creatorInput.dataset.dirty = 'true';
     activeCreatorSuggestionIndex = -1;
-    openCreatorSuggestions();
+    closeCreatorSuggestions();
   });
 
   creatorInput.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      if (creatorSuggestions && creatorSuggestions.hidden) {
-        openCreatorSuggestions();
-      }
-      setActiveCreatorSuggestion(activeCreatorSuggestionIndex + 1);
       return;
     }
 
     if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      if (creatorSuggestions && creatorSuggestions.hidden) {
-        openCreatorSuggestions();
-      }
-      const buttons = creatorSuggestions
-        ? Array.from(creatorSuggestions.querySelectorAll('.creator-suggestion'))
-        : [];
-      setActiveCreatorSuggestion(activeCreatorSuggestionIndex < 0 ? buttons.length - 1 : activeCreatorSuggestionIndex - 1);
       return;
     }
 
@@ -3172,12 +3532,6 @@ if (creatorInput) {
 
     if (event.key === 'Enter') {
       event.preventDefault();
-      const suggestions = getFilteredCreatorSuggestions();
-      if (creatorSuggestions && !creatorSuggestions.hidden && activeCreatorSuggestionIndex >= 0 && suggestions[activeCreatorSuggestionIndex]) {
-        chooseCreatorSuggestion(suggestions[activeCreatorSuggestionIndex].handle);
-        return;
-      }
-
       closeCreatorSuggestions();
       submitCreatorInput();
     }
@@ -3196,10 +3550,6 @@ if (creatorInput) {
         return;
       }
 
-      if (creatorToggle && activeElement === creatorToggle) {
-        return;
-      }
-
       if (creatorInput.dataset.dirty === 'true') {
         submitCreatorInput();
       }
@@ -3208,27 +3558,20 @@ if (creatorInput) {
   });
 }
 
-if (creatorToggle) {
-  creatorToggle.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-  });
-
-  creatorToggle.addEventListener('click', () => {
-    if (!creatorSuggestions) {
-      return;
-    }
-
-    if (creatorSuggestions.hidden) {
-      openCreatorSuggestions();
-      if (creatorInput) {
-        creatorInput.focus();
-      }
-      return;
-    }
-
-    closeCreatorSuggestions();
-  });
+if (recentCreatorsCarousel) {
+  recentCreatorsCarousel.addEventListener('scroll', updateRecentCreatorsNav, { passive: true });
 }
+
+[recentCreatorsPrev, recentCreatorsNext].forEach((button) => {
+  if (!button) {
+    return;
+  }
+  button.addEventListener('click', () => {
+    scrollRecentCreators(Number(button.dataset.direction) || 1);
+  });
+});
+
+window.addEventListener('resize', updateRecentCreatorsNav);
 
 document.addEventListener('pointerdown', (event) => {
   const target = event.target;
@@ -4048,6 +4391,9 @@ function setActiveSection(section) {
   if (activeSection === 'notes') {
     refreshNotes();
   }
+  if (activeSection === 'ranking') {
+    loadRanking(false);
+  }
 
   if (activeSection !== 'chatbox') {
     stopSpeech();
@@ -4062,6 +4408,21 @@ sidebarButtons.forEach((button) => {
 
 if (refreshArchiveButton) {
   refreshArchiveButton.addEventListener('click', refreshArchive);
+}
+
+if (creatorRefreshButton) {
+  creatorRefreshButton.addEventListener('click', async () => {
+    creatorRefreshButton.disabled = true;
+    try {
+      if (window.tiktokLive && typeof window.tiktokLive.refreshChat === 'function') {
+        await window.tiktokLive.refreshChat();
+      } else if (window.tiktokLive && typeof window.tiktokLive.reload === 'function') {
+        await window.tiktokLive.reload();
+      }
+    } finally {
+      creatorRefreshButton.disabled = false;
+    }
+  });
 }
 
 if (openArchiveFolderButton) {
@@ -4253,6 +4614,7 @@ initAppearanceSettings();
 initGeneralSettings();
 initSystemSettings();
 applyI18n();
+initFirstRunLanguageChoice();
 initTextToSpeech();
 startRevealTimer();
 setInterval(updateStatus, 5000);

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pl">
   <head>
     <meta charset="UTF-8">
@@ -13,18 +13,22 @@
           <img class="app-icon" src="./assets/czatbox-icon.png" alt="" aria-hidden="true" draggable="false">
           <div class="brand-copy">
             <div class="title">Czatbox TT</div>
-            <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
+            <div class="tagline">ĹšledĹş i zarzÄ…dzaj czatem live w czasie rzeczywistym.</div>
           </div>
         </div>
+        <section class="recent-creators-strip" id="recentCreatorsStrip" aria-label="Ostatni twĂłrcy" data-i18n-aria-label="recentCreators.aria" hidden>
+          <button class="recent-creators-nav" id="recentCreatorsPrev" type="button" data-direction="-1" aria-label="Poprzedni twĂłrcy" hidden>â€ą</button>
+          <div class="recent-creators-carousel" id="recentCreatorsCarousel"></div>
+          <button class="recent-creators-nav" id="recentCreatorsNext" type="button" data-direction="1" aria-label="NastÄ™pni twĂłrcy" hidden>â€ş</button>
+        </section>
         <div class="creator-picker creator-combobox">
-          <label for="creatorInput">Twórca</label>
+          <label for="creatorInput">TwĂłrca</label>
           <span class="creator-input-wrap">
-            <input id="creatorInput" type="text" aria-label="Twórca LIVE" autocomplete="off" spellcheck="false" placeholder="@tworca lub link LIVE" aria-autocomplete="list" aria-expanded="false" aria-controls="creatorSuggestions">
-            <button class="creator-toggle" id="creatorToggle" type="button" aria-label="Pokaż listę twórców" aria-expanded="false">
-              <span class="ui-icon-slot" data-ui-icon="chevron-down" aria-hidden="true"></span>
-            </button>
-            <span class="creator-suggestions" id="creatorSuggestions" role="listbox" hidden></span>
+            <input id="creatorInput" type="text" aria-label="TwĂłrca LIVE" autocomplete="off" spellcheck="false" placeholder="@tworca lub link LIVE">
           </span>
+          <button class="creator-refresh" id="creatorRefresh" type="button" title="OdĹ›wieĹĽ czat" aria-label="OdĹ›wieĹĽ czat" data-i18n-title="creator.refresh" data-i18n-aria-label="creator.refresh">
+            <span class="ui-icon-slot" data-ui-icon="refresh" aria-hidden="true"></span>
+          </button>
         </div>
       </header>
 
@@ -33,7 +37,7 @@
         <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
         <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
         <button class="sidebar-button" type="button" data-section="notes">Notatki</button>
-        <button class="sidebar-button" type="button" data-section="recommended">Polecani</button>
+        <button class="sidebar-button" type="button" data-section="ranking">Ranking</button>
         <button class="sidebar-button" type="button" data-section="about">O programie</button>
       </aside>
 
@@ -46,13 +50,13 @@
               <button class="filter-button" type="button" data-filter="gift" data-active="true">Prezenty</button>
               <button class="filter-button" type="button" data-filter="box" data-active="true">Skrzyneczki</button>
               <button class="filter-button" type="button" data-filter="repost" data-active="true">Reposty</button>
-              <button class="filter-button" type="button" data-filter="share" data-active="true">Udostępnienia</button>
-              <button class="filter-button" type="button" data-filter="member" data-active="true">Dołączenia</button>
+              <button class="filter-button" type="button" data-filter="share" data-active="true">UdostÄ™pnienia</button>
+              <button class="filter-button" type="button" data-filter="member" data-active="true">DoĹ‚Ä…czenia</button>
             </div>
             <div class="status" id="status">
               <span class="status-segment status-connection" id="statusConnection" data-tone="connecting">
                 <span class="status-dot" aria-hidden="true"></span>
-                <span class="status-text">Łączę...</span>
+                <span class="status-text">ĹÄ…czÄ™...</span>
               </span>
               <span class="status-segment" id="statusDelay">
                 <span class="ui-icon-slot" data-ui-icon="clock" aria-hidden="true"></span>
@@ -71,7 +75,7 @@
             <div class="empty" id="empty">Po zalogowaniu pojawia sie tutaj spowolniony czat LIVE.</div>
           </section>
 
-          <aside class="right-widget-dock" id="statusStats" aria-label="Narzędzia LIVE" data-i18n-aria-label="statsWidget.dock">
+          <aside class="right-widget-dock" id="statusStats" aria-label="NarzÄ™dzia LIVE" data-i18n-aria-label="statsWidget.dock">
             <section class="right-widget" data-right-widget="stats" data-expanded="false">
               <div class="right-widget-panel stats-widget-panel" id="statsWidgetPanel">
                 <h2 data-i18n="statsWidget.title">Statystyki LIVE</h2>
@@ -82,7 +86,7 @@
                 </div>
                 <div class="stats-widget-row">
                   <span class="stats-widget-icon" data-ui-icon="message" aria-hidden="true"></span>
-                  <span class="stats-widget-label" data-i18n="statsWidget.messages">Wysłane wiadomości</span>
+                  <span class="stats-widget-label" data-i18n="statsWidget.messages">WysĹ‚ane wiadomoĹ›ci</span>
                   <strong id="statusMessages">0</strong>
                 </div>
                 <div class="stats-widget-row">
@@ -104,7 +108,7 @@
 
             <section class="right-widget" data-right-widget="top" data-expanded="false">
               <div class="right-widget-panel top-gifters-panel" id="topGiftersPanel">
-                <h2 data-i18n="topGifters.title">Top giftujący</h2>
+                <h2 data-i18n="topGifters.title">Top giftujÄ…cy</h2>
                 <div id="topGiftersContent"></div>
               </div>
               <button class="right-widget-tab" type="button" id="topGiftersButton" data-widget-target="top" aria-expanded="false" aria-controls="topGiftersPanel">
@@ -135,11 +139,11 @@
             <div class="archive-toolbar-actions">
               <button class="page-action archive-icon-action" type="button" id="openArchiveFolder">
                 <span data-ui-icon="folder" aria-hidden="true"></span>
-                <span data-i18n="archive.openFolder">Otwórz folder</span>
+                <span data-i18n="archive.openFolder">OtwĂłrz folder</span>
               </button>
               <button class="page-action archive-icon-action" type="button" id="refreshArchive">
                 <span data-ui-icon="refresh" aria-hidden="true"></span>
-                <span data-i18n="archive.refresh">Odśwież</span>
+                <span data-i18n="archive.refresh">OdĹ›wieĹĽ</span>
               </button>
             </div>
           </section>
@@ -147,7 +151,7 @@
             <aside class="archive-browser">
               <label class="archive-search">
                 <span data-ui-icon="search" aria-hidden="true"></span>
-                <input type="search" id="archiveSearch" placeholder="Szukaj twórcy lub daty..." data-i18n-placeholder="archive.searchPlaceholder">
+                <input type="search" id="archiveSearch" placeholder="Szukaj twĂłrcy lub daty..." data-i18n-placeholder="archive.searchPlaceholder">
               </label>
               <div class="archive-list" id="archiveList" aria-live="polite"></div>
             </aside>
@@ -155,7 +159,7 @@
             <section class="archive-detail">
               <div class="archive-detail-empty" id="archiveDetailEmpty">
                 <span class="archive-detail-empty-icon" data-ui-icon="archive" aria-hidden="true"></span>
-                <strong data-i18n="archive.selectTitle">Wybierz transmisję</strong>
+                <strong data-i18n="archive.selectTitle">Wybierz transmisjÄ™</strong>
                 <span data-i18n="archive.selectDescription">Po lewej znajdziesz wszystkie zapisane czaty.</span>
               </div>
 
@@ -175,7 +179,7 @@
                     </button>
                     <button class="page-action archive-icon-action archive-delete-action" type="button" id="deleteArchive">
                       <span data-ui-icon="trash" aria-hidden="true"></span>
-                      <span data-i18n="archive.delete">Usuń</span>
+                      <span data-i18n="archive.delete">UsuĹ„</span>
                     </button>
                   </div>
                 </header>
@@ -189,7 +193,7 @@
                   <article>
                     <span data-ui-icon="chat" aria-hidden="true"></span>
                     <strong id="archiveSummaryChat">0</strong>
-                    <small data-i18n="archive.summary.messages">Wiadomości</small>
+                    <small data-i18n="archive.summary.messages">WiadomoĹ›ci</small>
                   </article>
                   <article>
                     <span data-ui-icon="coin" aria-hidden="true"></span>
@@ -209,8 +213,8 @@
                   <button class="filter-button" type="button" data-archive-filter="gift" data-active="true">Prezenty</button>
                   <button class="filter-button" type="button" data-archive-filter="box" data-active="true">Skrzyneczki</button>
                   <button class="filter-button" type="button" data-archive-filter="repost" data-active="true">Reposty</button>
-                  <button class="filter-button" type="button" data-archive-filter="share" data-active="true">Udostępnienia</button>
-                  <button class="filter-button" type="button" data-archive-filter="member" data-active="true">Dołączenia</button>
+                  <button class="filter-button" type="button" data-archive-filter="share" data-active="true">UdostÄ™pnienia</button>
+                  <button class="filter-button" type="button" data-archive-filter="member" data-active="true">DoĹ‚Ä…czenia</button>
                 </section>
 
                 <section class="archive-messages messages" id="archiveMessages" aria-live="polite"></section>
@@ -223,25 +227,29 @@
           <div class="page-header">
             <h1>Ustawienia</h1>
           </div>
-          <div class="settings-tabs" role="tablist" aria-label="Kategorie ustawień">
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true">Ogólne</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">Wygląd</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="accessibility">Dostępność</button>
+          <div class="settings-tabs" role="tablist" aria-label="Kategorie ustawieĹ„">
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true">OgĂłlne</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">WyglÄ…d</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="accessibility">DostÄ™pnoĹ›Ä‡</button>
             <button class="settings-tab" type="button" role="tab" data-settings-tab="system">System</button>
           </div>
           <section class="settings-panel" data-settings-panel="general">
-            <p class="page-note">Ogólne ustawienia aplikacji.</p>
+            <p class="page-note">OgĂłlne ustawienia aplikacji.</p>
             <div class="settings-list">
               <label class="setting-row" for="multiplierNotifications">
-                <span>Powiadomienia o mnożnikach</span>
+                <span>Powiadomienia o mnoĹĽnikach</span>
                 <input class="setting-toggle" type="checkbox" id="multiplierNotifications">
               </label>
               <label class="setting-row" for="statsToolbox">
                 <span>Przybornik statystyk</span>
                 <input class="setting-toggle" type="checkbox" id="statsToolbox">
               </label>
+              <label class="setting-row" for="galleryAvatars">
+                <span>Awatary z galerii</span>
+                <input class="setting-toggle" type="checkbox" id="galleryAvatars">
+              </label>
               <label class="setting-row" for="pinWidgetsToRight">
-                <span>Pokazuj widgety przy prawej krawędzi pulpitu po zminimalizowaniu aplikacji</span>
+                <span>Pokazuj widgety przy prawej krawÄ™dzi pulpitu po zminimalizowaniu aplikacji</span>
                 <input class="setting-toggle" type="checkbox" id="pinWidgetsToRight">
               </label>
               <label class="setting-row" for="desktopWidgetsAlwaysOnTop">
@@ -257,14 +265,14 @@
                 <input type="radio" id="chatStyleCompact" name="chatStyle" value="compact">
                 <span>
                   <strong>Kompaktowy</strong>
-                  <small>Standardowy styl pojawiających się wiadomości TikTok.</small>
+                  <small>Standardowy styl pojawiajÄ…cych siÄ™ wiadomoĹ›ci TikTok.</small>
                 </span>
               </label>
               <label class="setting-choice" for="chatStyleSpacious">
                 <input type="radio" id="chatStyleSpacious" name="chatStyle" value="spacious">
                 <span>
                   <strong>Przestrzenny</strong>
-                  <small>Bardziej przejrzysty układ wiadomości.</small>
+                  <small>Bardziej przejrzysty ukĹ‚ad wiadomoĹ›ci.</small>
                 </span>
               </label>
               <label class="setting-choice" for="chatStyleTestowy">
@@ -281,7 +289,7 @@
                 <label class="setting-choice" for="themeRoseBlack">
                   <input type="radio" id="themeRoseBlack" name="appTheme" value="rose-black">
                   <span>
-                    <strong>Rose Black (Domyślny)</strong>
+                    <strong>Rose Black (DomyĹ›lny)</strong>
                     <small>Standardowe kolory aplikacji.</small>
                   </span>
                 </label>
@@ -289,14 +297,14 @@
                   <input type="radio" id="themeWhiteTitanium" name="appTheme" value="white-titanium">
                   <span>
                     <strong>White Titanium</strong>
-                    <small>Jasny wygląd aplikacji, w odcieniach białego tytanu.</small>
+                    <small>Jasny wyglÄ…d aplikacji, w odcieniach biaĹ‚ego tytanu.</small>
                   </span>
                 </label>
                 <label class="setting-choice" for="themeChillSerwis">
                   <input type="radio" id="themeChillSerwis" name="appTheme" value="chill-serwis">
                   <span>
                     <strong>Chill Serwis</strong>
-                    <small>Najbardziej wyczillowany motyw aplikacji dla hanysów i hanysek.</small>
+                    <small>Najbardziej wyczillowany motyw aplikacji dla hanysĂłw i hanysek.</small>
                   </span>
                 </label>
                 <label class="setting-choice" for="themeRoseGoldGlass">
@@ -310,36 +318,36 @@
                   <input type="radio" id="themeLazarskieRejony" name="appTheme" value="lazarskie-rejony">
                   <span>
                     <strong>Enigma-Z</strong>
-                    <small>Półprzezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.</small>
+                    <small>PĂłĹ‚przezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.</small>
                   </span>
                 </label>
               </div>
             </section>
             <section class="setting-section">
-              <h2 class="settings-heading">Wygląd aplikacji:</h2>
+              <h2 class="settings-heading">WyglÄ…d aplikacji:</h2>
               <div class="settings-list choice-list">
                 <label class="setting-choice" for="appAppearanceStandard">
                   <input type="radio" id="appAppearanceStandard" name="appAppearance" value="standard">
                   <span>
-                    <strong>Domyślny</strong>
-                    <small>Obecny układ headera, lewego sidebara, okien i buttonów.</small>
+                    <strong>DomyĹ›lny</strong>
+                    <small>Obecny ukĹ‚ad headera, lewego sidebara, okien i buttonĂłw.</small>
                   </span>
                 </label>
                 <label class="setting-choice" for="appAppearanceDecorative">
                   <input type="radio" id="appAppearanceDecorative" name="appAppearance" value="ozdobny">
                   <span>
                     <strong>Ozdobny</strong>
-                    <small>Elegancki, nowoczesny układ aplikacji.</small>
+                    <small>Elegancki, nowoczesny ukĹ‚ad aplikacji.</small>
                   </span>
                 </label>
               </div>
             </section>
           </section>
           <section class="settings-panel" data-settings-panel="accessibility" hidden>
-            <h2 class="settings-heading">Wiadomości TTS:</h2>
+            <h2 class="settings-heading">WiadomoĹ›ci TTS:</h2>
             <div class="settings-list">
               <label class="setting-row" for="ttsEnabled">
-                <span>Czytaj czat na głos</span>
+                <span>Czytaj czat na gĹ‚os</span>
                 <input class="setting-toggle" type="checkbox" id="ttsEnabled">
               </label>
               <label class="setting-row" for="ttsSkipVulgarNicknames">
@@ -347,15 +355,15 @@
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarNicknames">
               </label>
               <label class="setting-row" for="ttsSkipVulgarMessages">
-                <span>Pomijaj wulgarne wiadomości</span>
+                <span>Pomijaj wulgarne wiadomoĹ›ci</span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarMessages">
               </label>
               <label class="setting-row" for="ttsSkipSpamMessages">
-                <span>Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)</span>
+                <span>Pomijaj spamowe wiadomoĹ›ci (obs za obs, ob, oddam obs itd.)</span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipSpamMessages">
               </label>
               <label class="setting-row" for="ttsVoice">
-                <span>Głos</span>
+                <span>GĹ‚os</span>
                 <select class="setting-select" id="ttsVoice"></select>
               </label>
               <label class="setting-row" for="ttsRate">
@@ -367,7 +375,7 @@
               </label>
             </div>
             <section class="setting-section chat-delay-section">
-                <h2 class="settings-heading">Opóźnienie czatu:</h2>
+                <h2 class="settings-heading">OpĂłĹşnienie czatu:</h2>
                 <label class="setting-row setting-row-stacked chat-delay-control" for="chatDelay">
                   <span class="setting-range">
                     <input type="range" id="chatDelay" min="0" max="6" step="1" value="4" list="chatDelaySteps">
@@ -402,15 +410,15 @@
                 <input class="setting-toggle" type="checkbox" id="systemAutoLaunch">
               </label>
               <label class="setting-row" for="systemRunInBackground">
-                <span data-i18n="settings.system.runInBackground">Uruchom program w tle by nie przeszkadzał</span>
+                <span data-i18n="settings.system.runInBackground">Uruchom program w tle by nie przeszkadzaĹ‚</span>
                 <input class="setting-toggle" type="checkbox" id="systemRunInBackground">
               </label>
               <label class="setting-row" for="systemMinimizeToTray">
-                <span data-i18n="settings.system.minimizeToTray">Minimalizuj Czatbox TT do zasobnika systemowego po kliknięciu X</span>
+                <span data-i18n="settings.system.minimizeToTray">Minimalizuj Czatbox TT do zasobnika systemowego po klikniÄ™ciu X</span>
                 <input class="setting-toggle" type="checkbox" id="systemMinimizeToTray">
               </label>
               <label class="setting-row" for="appLanguage">
-                <span data-i18n="settings.system.language">Wybierz język aplikacji</span>
+                <span data-i18n="settings.system.language">Wybierz jÄ™zyk aplikacji</span>
                 <select class="setting-select" id="appLanguage">
                   <option value="pl" data-i18n="settings.system.language.pl">Polski</option>
                   <option value="en" data-i18n="settings.system.language.en">Angielski</option>
@@ -426,8 +434,8 @@
                 </select>
               </label>
               <div class="setting-row">
-                <span data-i18n="settings.system.clearSessionDescription">Problem z logowaniem lub sesją TikTok</span>
-                <button class="page-action" type="button" id="clearTikTokSession" data-i18n="settings.system.clearSession">Wyczyść sesję TikTok</button>
+                <span data-i18n="settings.system.clearSessionDescription">Problem z logowaniem lub sesjÄ… TikTok</span>
+                <button class="page-action" type="button" id="clearTikTokSession" data-i18n="settings.system.clearSession">WyczyĹ›Ä‡ sesjÄ™ TikTok</button>
               </div>
             </div>
           </section>
@@ -437,7 +445,7 @@
           <section class="archive-toolbar">
             <div>
               <div class="archive-title" data-i18n="notes.title">Notatki</div>
-              <div class="archive-status" id="notesStatus" data-i18n="notes.status">Twój notes na zapiski</div>
+              <div class="archive-status" id="notesStatus" data-i18n="notes.status">TwĂłj notes na zapiski</div>
             </div>
             <div class="archive-toolbar-actions">
               <button class="page-action archive-icon-action" type="button" id="newNoteButton">
@@ -454,7 +462,7 @@
               </button>
               <button class="page-action archive-icon-action" type="button" id="deleteNoteButton">
                 <span data-ui-icon="trash" aria-hidden="true"></span>
-                <span data-i18n="notes.delete">Usuń</span>
+                <span data-i18n="notes.delete">UsuĹ„</span>
               </button>
             </div>
           </section>
@@ -468,104 +476,106 @@
             </aside>
 
             <section class="archive-detail notes-detail">
-              <input class="note-title-input" id="noteTitleInput" type="text" maxlength="120" placeholder="Tytuł notatki" data-i18n-placeholder="notes.titlePlaceholder">
+              <input class="note-title-input" id="noteTitleInput" type="text" maxlength="120" placeholder="TytuĹ‚ notatki" data-i18n-placeholder="notes.titlePlaceholder">
               <div class="note-format-toolbar" aria-label="Formatowanie notatki" data-i18n-aria-label="notes.formatToolbar">
                 <button class="note-format-button" type="button" data-note-format="bold" title="Pogrubienie" data-i18n-title="notes.format.bold" aria-label="Pogrubienie" data-i18n-aria-label="notes.format.bold"><strong>B</strong></button>
                 <button class="note-format-button" type="button" data-note-format="italic" title="Kursywa" data-i18n-title="notes.format.italic" aria-label="Kursywa" data-i18n-aria-label="notes.format.italic"><em>I</em></button>
-                <button class="note-format-button" type="button" data-note-format="underline" title="Podkreślenie" data-i18n-title="notes.format.underline" aria-label="Podkreślenie" data-i18n-aria-label="notes.format.underline"><span class="note-format-underline">U</span></button>
-                <button class="note-format-button" type="button" data-note-format="strike" title="Przekreślenie" data-i18n-title="notes.format.strike" aria-label="Przekreślenie" data-i18n-aria-label="notes.format.strike"><span class="note-format-strike">S</span></button>
+                <button class="note-format-button" type="button" data-note-format="underline" title="PodkreĹ›lenie" data-i18n-title="notes.format.underline" aria-label="PodkreĹ›lenie" data-i18n-aria-label="notes.format.underline"><span class="note-format-underline">U</span></button>
+                <button class="note-format-button" type="button" data-note-format="strike" title="PrzekreĹ›lenie" data-i18n-title="notes.format.strike" aria-label="PrzekreĹ›lenie" data-i18n-aria-label="notes.format.strike"><span class="note-format-strike">S</span></button>
                 <button class="note-format-button" type="button" data-note-format="code" title="Kod" data-i18n-title="notes.format.code" aria-label="Kod" data-i18n-aria-label="notes.format.code"><code>&lt;/&gt;</code></button>
                 <button class="note-format-button" type="button" data-note-format="codeblock" title="Blok kodu" data-i18n-title="notes.format.codeblock" aria-label="Blok kodu" data-i18n-aria-label="notes.format.codeblock"><code>{ }</code></button>
-                <button class="note-format-button" type="button" data-note-format="quote" title="Cytat" data-i18n-title="notes.format.quote" aria-label="Cytat" data-i18n-aria-label="notes.format.quote">“”</button>
-                <button class="note-format-button" type="button" data-note-format="list" title="Lista" data-i18n-title="notes.format.list" aria-label="Lista" data-i18n-aria-label="notes.format.list">•</button>
+                <button class="note-format-button" type="button" data-note-format="quote" title="Cytat" data-i18n-title="notes.format.quote" aria-label="Cytat" data-i18n-aria-label="notes.format.quote">â€śâ€ť</button>
+                <button class="note-format-button" type="button" data-note-format="list" title="Lista" data-i18n-title="notes.format.list" aria-label="Lista" data-i18n-aria-label="notes.format.list">â€˘</button>
               </div>
-              <textarea class="note-content-input" id="noteContentInput" maxlength="20000" placeholder="Napisz notatkę..." data-i18n-placeholder="notes.contentPlaceholder"></textarea>
+              <textarea class="note-content-input" id="noteContentInput" maxlength="20000" placeholder="Napisz notatkÄ™..." data-i18n-placeholder="notes.contentPlaceholder"></textarea>
               <article class="note-preview" id="notePreview" hidden></article>
               <div class="note-meta" id="noteMeta" data-i18n="notes.unsaved">Nowa niezapisana notatka</div>
             </section>
           </section>
         </section>
 
-        <section class="view-panel page-view recommended-view" data-view="recommended" hidden>
+        <section class="view-panel page-view ranking-view" data-view="ranking" hidden>
           <div class="page-header">
             <div>
-              <h1 data-i18n="recommended.title">Polecani</h1>
-              <p class="page-note" data-i18n="recommended.note">Twórcy dodani do programu, których możesz szybko wybrać.</p>
+              <h1 data-i18n="ranking.title">Ranking</h1>
+              <p class="page-note" id="rankingNote" data-i18n="ranking.note">Ranking twĂłrcĂłw LIVE dla kraju wybranego wedĹ‚ug jÄ™zyka aplikacji.</p>
             </div>
           </div>
-          <section class="recommended-list" id="recommendedList" aria-live="polite"></section>
+          <section class="ranking-summary" id="rankingSummary" aria-live="polite"></section>
+          <section class="ranking-list" id="rankingList" aria-live="polite"></section>
         </section>
 
         <section class="view-panel page-view" data-view="about" hidden>
           <div class="page-header">
             <h1>O programie</h1>
           </div>
-          <div class="settings-tabs about-tabs" role="tablist" aria-label="Zakładki o programie" data-i18n-aria-label="about.tabs.aria">
+          <div class="settings-tabs about-tabs" role="tablist" aria-label="ZakĹ‚adki o programie" data-i18n-aria-label="about.tabs.aria">
             <button class="settings-tab" type="button" role="tab" data-about-tab="program" data-active="true" aria-selected="true" aria-controls="aboutProgramPanel">O programie</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="news" aria-selected="false" aria-controls="aboutNewsPanel">Co nowego?</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="faq" aria-selected="false" aria-controls="aboutFaqPanel">FAQ</button>
           </div>
           <article class="about-content about-panel" id="aboutProgramPanel" role="tabpanel" data-about-panel="program">
             <p>
-              Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić
-              wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą
-              o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.
+              Czatbox TT to aplikacja do obsĹ‚ugi czatu z transmisji TikTok LIVE. Program pozwala Ĺ›ledziÄ‡
+              wiadomoĹ›ci z wybranego liveâ€™a w osobnym, czytelnym oknie. Aplikacja zostaĹ‚a stworzona z myĹ›lÄ…
+              o wygodnym podglÄ…dzie czatu, archiwizacji rozmĂłw oraz dodatkowych zdarzeĹ„ z liveâ€™a.
             </p>
             <p>
-              Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w
-              uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować
-              typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.
+              Program po zalogowaniu do TikToka pobiera czat z wybranego twĂłrcy LIVE i wyĹ›wietla go w
+              uporzÄ…dkowanej formie. UĹĽytkownik moĹĽe przeĹ‚Ä…czaÄ‡ siÄ™ miÄ™dzy obsĹ‚ugiwanymi twĂłrcami, filtrowaÄ‡
+              typy zdarzeĹ„ oraz dostosowaÄ‡ wyglÄ…d aplikacji do wĹ‚asnych preferencji.
             </p>
 
             <section class="about-section">
-              <h2>Jak działa program:</h2>
+              <h2>Jak dziaĹ‚a program:</h2>
               <p>
-                Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta,
-                aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany
-                w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.
+                Po uruchomieniu aplikacji uĹĽytkownik loguje siÄ™ do TikToka. Gdy sesja zostanie wykryta,
+                aplikacja przeĹ‚Ä…cza siÄ™ do widoku czatu i Ĺ‚Ä…czy siÄ™ z wybranym liveâ€™em. Czat jest pobierany
+                w tle i wyĹ›wietlany w aplikacji jako osobna lista zdarzeĹ„.
               </p>
               <p>
-                Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić
-                przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia,
-                mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu,
-                motyw lub opóźnienie.
+                WiadomoĹ›ci czatu mogÄ… byÄ‡ pokazywane z ustawionym opĂłĹşnieniem, aby Ĺ‚atwiej byĹ‚o je Ĺ›ledziÄ‡
+                przy aktywnych transmisjach. PozostaĹ‚e zdarzenia, takie jak prezenty, doĹ‚Ä…czenia czy polubienia,
+                mogÄ… pojawiaÄ‡ siÄ™ na bieĹĽÄ…co. UĹĽytkownik moĹĽe w kaĹĽdej chwili zmieniÄ‡ filtr, styl czatu,
+                motyw lub opĂłĹşnienie.
               </p>
               <p>
-                Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po
-                zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do
-                wcześniejszych rozmów.
+                Podczas dziaĹ‚ania programu wszystkie zdarzenia z transmisji sÄ… zapisywane do archiwum. Po
+                zakoĹ„czeniu lub zmianie transmisji archiwum moĹĽna otworzyÄ‡ w zakĹ‚adce Archiwum i wrĂłciÄ‡ do
+                wczeĹ›niejszych rozmĂłw.
               </p>
             </section>
           </article>
           <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
             <section class="about-section">
               <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
-              <p data-i18n="about.news.intro">Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.</p>
+              <p data-i18n="about.news.intro">Czatbox TT to aplikacja do obsĹ‚ugi czatu z transmisji TikTok LIVE. Program pozwala Ĺ›ledziÄ‡ wiadomoĹ›ci z wybranego live'a w osobnym, czytelnym oknie. Aplikacja zostaĹ‚a stworzona z myĹ›lÄ… o wygodnym podglÄ…dzie czatu, archiwizacji rozmĂłw oraz dodatkowych zdarzeĹ„ z live'a.</p>
 
-              <h3 data-i18n="about.news.features.title">Główne funkcje:</h3>
+              <h3 data-i18n="about.news.features.title">GĹ‚Ăłwne funkcje:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.features.notes">dodany został notatnik do zapisywania bieżących spraw</li>
-                <li data-i18n="about.news.features.updates">program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.</li>
-                <li data-i18n="about.news.features.enigmaTheme">dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z</li>
-                <li data-i18n="about.news.features.superFans">wyróżnienie super fanów na czacie</li>
+                <li data-i18n="about.news.features.notes">dodany zostaĹ‚ notatnik do zapisywania bieĹĽÄ…cych spraw</li>
+                <li data-i18n="about.news.features.updates">program weryfikuje czy istnieje jego nowsza wersja, nastÄ™pnie pobiera jÄ… i informuje o aktualizacji i restarcie.</li>
+                <li data-i18n="about.news.features.enigmaTheme">dodany zostaĹ‚ nowy motyw i jego wariacje w rĂłĹĽnych ustawieniach - Enigma-Z</li>
+                <li data-i18n="about.news.features.superFans">wyrĂłĹĽnienie super fanĂłw na czacie</li>
+                <li data-i18n="about.news.features.enigmaMode">tryb enigmy</li>
+                <li data-i18n="about.news.features.avatarToggle">awatary</li>
               </ul>
 
               <h3 data-i18n="about.news.fixes.title">Poprawki:</h3>
               <ul class="about-list">
                 <li data-i18n="about.news.fixes.notes">poprawione funkcje notatnika</li>
-                <li data-i18n="about.news.fixes.desktopWidgets">poprawione działanie widgetów na pulpicie</li>
               </ul>
 
-              <h3 data-i18n="about.news.known.title">Znane błędy:</h3>
+              <h3 data-i18n="about.news.known.title">Znane bĹ‚Ä™dy:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.known.multiplier">mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku</li>
+                <li data-i18n="about.news.known.multiplier">mnoĹĽnik bitewek to funkcja testowa, i dziaĹ‚a na tak zwanÄ… trytytkÄ™, dlatego czasem w ostatniej minucie siÄ™ buguje i pojawia mimo jego braku</li>
+                <li data-i18n="about.news.known.enigmaPerformance">wydajnosc Enigma-Z</li>
               </ul>
 
               <h3 data-i18n="about.news.next.title">Co dalej:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.next.ttsLanguages">dodatkowe języki odczytu czatu TTS</li>
-                <li data-i18n="about.news.next.connection">optymalizacja połączenia z danym twórcą</li>
-                <li data-i18n="about.news.next.giftSounds">powiadomienia dźwiękowe dla większych prezentów</li>
+                <li data-i18n="about.news.next.connection">optymalizacja poĹ‚Ä…czenia z danym twĂłrcÄ…</li>
+                <li data-i18n="about.news.next.giftSounds">powiadomienia dĹşwiÄ™kowe dla wiÄ™kszych prezentĂłw</li>
               </ul>
             </section>
           </section>
@@ -573,54 +583,54 @@
             <section class="about-section about-faq">
               <h2 data-i18n="about.faq.title">FAQ</h2>
 
-              <h3 data-i18n="about.faq.idea.question">Skąd pomysł na aplikację?</h3>
+              <h3 data-i18n="about.faq.idea.question">SkÄ…d pomysĹ‚ na aplikacjÄ™?</h3>
               <p data-i18n="about.faq.idea.answer">
-                Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują
-                lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie
-                do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest
-                dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna
-                aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość
-                dla każdego.
+                WĹ‚aĹ›ciwie program powstaĹ‚ po to by nadÄ…ĹĽyÄ‡ za czatem gdy szybko leci i wiadomoĹ›ci przeskakujÄ…
+                lub siÄ™ nie pojawiajÄ… u jednej osoby, a u drugiej juĹĽ tak. Dodatkowo chciaĹ‚em stworzyÄ‡ narzÄ™dzie
+                do tiktok, ktĂłre nieco uĹ‚atwi prowadzenie live. Dla osĂłb streamujÄ…cych na innych platformach jest
+                duĹĽo wtyczek do programĂłw typu OBS, natomiast tik tok jest doĹ›Ä‡ ubogi. Jest co prawda jedna
+                aplikacja, ktĂłra czyta wiadomoĹ›ci ale trzeba za niÄ… zapĹ‚aciÄ‡, a ja chciaĹ‚em daÄ‡ rĂłwnÄ… moĹĽliwoĹ›Ä‡
+                dla kaĹĽdego.
               </p>
 
-              <h3 data-i18n="about.faq.systems.question">Czy powstanie wersja na inne systemy niż Windows?</h3>
+              <h3 data-i18n="about.faq.systems.question">Czy powstanie wersja na inne systemy niĹĽ Windows?</h3>
               <p data-i18n="about.faq.systems.answer">
-                Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego
+                Obecnie planujÄ™ rozwijaÄ‡ tylko tÄ… wersjÄ™. Program powstaĹ‚ pod windowsa, poniewaĹĽ uĹĽywam tego
                 systemu.
               </p>
 
               <h3 data-i18n="about.faq.mobile.question">Co z iOS, android itd.?</h3>
               <p data-i18n="about.faq.mobile.answer">
-                Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować
-                coś pod coś, z czym nie mam doczynienia.
+                Szczerze? Nie wiem... to bardzo odlegĹ‚y temat, nie posiadam iMac, wiÄ™c ciÄ™ĹĽko byĹ‚oby mi zbudowaÄ‡
+                coĹ› pod coĹ›, z czym nie mam doczynienia.
               </p>
 
-              <h3 data-i18n="about.faq.appearance.question">Wygląd programu, czy będą aktualizacje?</h3>
+              <h3 data-i18n="about.faq.appearance.question">WyglÄ…d programu, czy bÄ™dÄ… aktualizacje?</h3>
               <p data-i18n="about.faq.appearance.answer">
-                Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na
-                kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie,
+                MyĹ›lÄ™, ĹĽe coĹ› z czasem siÄ™ pojawi, obecnie mamy trzy opcje modyfikowania wyglÄ…du, z podziaĹ‚em na
+                kilka sekwencji. Jest to doĹ›Ä‡ sporo i kaĹĽdy znajdzie coĹ› dla siebie. Pobawcie siÄ™ i potestujcie,
                 wybierzcie to co wam odpowiada najlepiej.
               </p>
 
-              <h3 data-i18n="about.faq.support.question">Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?</h3>
+              <h3 data-i18n="about.faq.support.question">Czy mogÄ™ ciebie jakoĹ› wesprzeÄ‡ finansowo w rozwoju projektu?</h3>
               <p data-i18n="about.faq.support.answer">
-                Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun,
-                wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na
-                już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.
+                Jak mam byÄ‡ szczery kilka osĂłb juĹĽ proponowaĹ‚o ale... Na chwilÄ™ obecnÄ… grzebie sobie w tym for fun,
+                wolnÄ… chwilÄ… na czilku, jeĹĽeli w grÄ™ weszĹ‚y by pieniÄ…ĹĽki, czuĹ‚bym presjÄ™ robienia wszystkiego na
+                juĹĽ. ByÄ‡ moĹĽe pojawi siÄ™ w przyszĹ‚oĹ›ci opcja dobrowolnej dotacji ale... PoĹĽyjemy, zobaczymy.
               </p>
 
-              <h3 data-i18n="about.faq.features.question">Mam pomysł na nowe funkcje!</h3>
+              <h3 data-i18n="about.faq.features.question">Mam pomysĹ‚ na nowe funkcje!</h3>
               <p data-i18n="about.faq.features.answer">
                 I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na
                 discord pw (inavoxy).
               </p>
 
-              <h3 data-i18n="about.faq.future.question">Czy planuję rozwijać projekt dalej?</h3>
+              <h3 data-i18n="about.faq.future.question">Czy planujÄ™ rozwijaÄ‡ projekt dalej?</h3>
               <p data-i18n="about.faq.future.answer">
-                Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy
-                aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego
-                projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję
-                również każdemu za obecne pomysły, zainteresowanie i słowa wsparcia.
+                OczywiĹ›cie, ĹĽe tak. Wszelkie pomysĹ‚y bÄ™dÄ™ zapisywaÄ‡ w drugiej zakĹ‚adce, podobnie jak opisy
+                aktualizacji. Nie mniej jednak chciaĹ‚em podziÄ™kowaÄ‡ dla Kamy, bez ktĂłrej nie siadĹ‚bym do tego
+                projektu. To jej paplanie do czatu i jego aktywnoĹ›Ä‡ zmobilizowaĹ‚y mnie do dziaĹ‚ania. DziÄ™kujÄ™
+                rĂłwnieĹĽ kaĹĽdemu za obecne pomysĹ‚y, zainteresowanie i sĹ‚owa wsparcia.
               </p>
             </section>
           </section>
@@ -628,6 +638,19 @@
       </section>
     </main>
 
+    <section class="first-run-language" id="firstRunLanguage" role="dialog" aria-modal="true" aria-labelledby="firstRunLanguageTitle" hidden>
+      <div class="first-run-language-card">
+        <h1 id="firstRunLanguageTitle">Wybierz jÄ™zyk aplikacji</h1>
+        <p>Wybierz jÄ™zyk, ktĂłrego chcesz uĹĽywaÄ‡ w Czatbox TT. MoĹĽesz go pĂłĹşniej zmieniÄ‡ w ustawieniach.</p>
+        <div class="first-run-language-actions">
+          <button type="button" class="page-action" data-first-language="pl">Polski</button>
+          <button type="button" class="page-action" data-first-language="en">English</button>
+          <button type="button" class="page-action" data-first-language="de">Deutsch</button>
+        </div>
+      </div>
+    </section>
+
     <script src="./app.js"></script>
   </body>
 </html>
+
