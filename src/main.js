@@ -1362,7 +1362,7 @@ async function getCountryRanking(language) {
   const apiUrl = `https://tik.tools/api/leaderboards/country/${region.apiSlug || region.slug}`;
   const apiResponse = await fetch(apiUrl, {
     headers: {
-      'user-agent': 'CzatboxTT/0.1.3',
+      'user-agent': 'CzatboxTT/0.1.4',
       accept: 'application/json'
     }
   });
@@ -1375,7 +1375,7 @@ async function getCountryRanking(language) {
   if (!parsed || !parsed.items.length) {
     const response = await fetch(region.url, {
       headers: {
-        'user-agent': 'CzatboxTT/0.1.3',
+        'user-agent': 'CzatboxTT/0.1.4',
         accept: 'text/html,application/xhtml+xml'
       }
     });
@@ -4416,6 +4416,22 @@ function isVersionNewer(candidate, current) {
 }
 
 function getReleaseNotesText() {
+  const candidates = [
+    path.join(app.getAppPath(), `release-notes-${APP_VERSION}.md`),
+    path.join(app.getAppPath(), 'RELEASE_NOTES.md')
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) {
+        const text = fs.readFileSync(candidate, 'utf8').trim();
+        if (text) {
+          return text;
+        }
+      }
+    } catch {
+      // Fall back below.
+    }
+  }
   return RELEASE_NOTES_012;
 }
 
@@ -4441,10 +4457,11 @@ function getUpdateNotes(info) {
   return getReleaseNotesText();
 }
 
-function markUpdateCompleted(version) {
+function markUpdateCompleted(version, notes = '') {
   try {
     fs.writeFileSync(UPDATE_COMPLETED_FILE, JSON.stringify({
       version: version || '',
+      notes: String(notes || '').trim(),
       completedAt: new Date().toISOString()
     }), 'utf8');
   } catch (error) {
@@ -4480,7 +4497,7 @@ function showUpdateCompletedDialogIfNeeded() {
     type: 'info',
     title: 'Aktualizacja ukoĹ„czona',
     message: 'Aktualizacja ukoĹ„czona',
-    detail: getReleaseNotesText(),
+    detail: marker.notes || getReleaseNotesText(),
     buttons: ['OK'],
     defaultId: 0,
     noLink: true
@@ -4516,7 +4533,7 @@ function configureAutoUpdates() {
       return;
     }
 
-    markUpdateCompleted(info && info.version ? info.version : '');
+    markUpdateCompleted(info && info.version ? info.version : '', getUpdateNotes(info));
     await dialog.showMessageBox({
       type: 'info',
       title: 'Aktualizacja pobrana',
@@ -4526,7 +4543,7 @@ function configureAutoUpdates() {
       defaultId: 0,
       noLink: true
     }).catch(() => {});
-    autoUpdater.quitAndInstall(false, true);
+    autoUpdater.quitAndInstall(true, true);
   });
 
   autoUpdater.on('error', (error) => {

@@ -165,10 +165,13 @@ body {
   background: color-mix(in srgb, var(--dropdown-bg) 72%, transparent);
   color: var(--dropdown-text);
   font: inherit;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
   font-weight: 900;
   line-height: 1;
+  text-align: center;
   cursor: pointer;
+  z-index: 2;
 }
 
 .recent-creators-nav[hidden] {

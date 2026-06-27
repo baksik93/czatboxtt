@@ -1,4 +1,14 @@
-﻿# Czatbox TT 0.1.3
+﻿# Czatbox TT 0.1.4
+
+## Poprawki
+
+- poprawione zastępowanie poprzedniej wersji po pobraniu aktualizacji
+- poprawione okno „Aktualizacja ukończona”, aby pokazywało opis bieżącej wersji
+
+## Informacja
+
+- wersja 0.1.4 jest hotfixem mechanizmu aktualizacji po wydaniu 0.1.3
+# Czatbox TT 0.1.3
 
 ## Główne funkcje
 
@@ -78,4 +88,5 @@ Czatbox TT to aplikacja do obsĹ‚ugi czatu z transmisji TikTok LIVE. Program p
 
 - Poprawki nad odczytem archiwizowanych czatĂłw. BÄ™dÄ…c szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.
 - Poprawki pomniejszych bĹ‚Ä™dĂłw
+
 
