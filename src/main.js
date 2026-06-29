@@ -1,6 +1,6 @@
 ﻿const fs = require('node:fs');
 const path = require('node:path');
-const { app, BaseWindow, BrowserWindow, WebContentsView, dialog, ipcMain, Menu, Tray, screen, session, shell } = require('electron');
+const { app, BaseWindow, WebContentsView, dialog, ipcMain, Menu, Tray, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 [process.stdout, process.stderr].forEach((stream) => {
@@ -30,7 +30,9 @@ const AVATAR_DIR = path.join(__dirname, 'pic');
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 const AVATAR_EXTENSIONS = new Set(['.gif', '.jpg', '.jpeg', '.png', '.webp']);
 const PROGRAM_AUTHOR_UNIQUE_ID = 'bakus.03';
-const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy Ĺ›piocha, Baksik doĹ‚Ä…czyĹ‚ do LIVE!';
+const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
+const HONDA_UNIQUE_ID = 'grzegorzpawemisiu';
+const HONDA_JOIN_TEXT = 'Honda wjechała na rejony.';
 const APP_VERSION = app.getVersion();
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const RANKING_CACHE_TTL_MS = 60 * 1000;
@@ -58,25 +60,25 @@ const RANKING_REGIONS_BY_LANGUAGE = {
     url: 'https://tik.tools/ranking/germany-region'
   }
 };
-const RELEASE_NOTES_012 = `Czatbox TT to aplikacja do obsĹ‚ugi czatu z transmisji TikTok LIVE. Program pozwala Ĺ›ledziÄ‡ wiadomoĹ›ci z wybranego live'a w osobnym, czytelnym oknie. Aplikacja zostaĹ‚a stworzona z myĹ›lÄ… o wygodnym podglÄ…dzie czatu, archiwizacji rozmĂłw oraz dodatkowych zdarzeĹ„ z live'a.
+const RELEASE_NOTES_012 = `Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.
 
-GĹ‚Ăłwne funkcje
-- dodany zostaĹ‚ notatnik do zapisywania bieĹĽÄ…cych spraw
-- program weryfikuje czy istnieje jego nowsza wersja, nastÄ™pnie pobiera jÄ… i informuje o aktualizacji i restarcie.
-- dodany zostaĹ‚ nowy motyw i jego wariacje w rĂłĹĽnych ustawieniach - Enigma-Z
-- wyrĂłĹĽnienie super fanĂłw na czacie
+Główne funkcje
+- dodany został notatnik do zapisywania bieżących spraw
+- program weryfikuje czy istnieje jego nowsza wersja, następnie pobiera ją i informuje o aktualizacji i restarcie.
+- dodany został nowy motyw i jego wariacje w różnych ustawieniach - Enigma-Z
+- wyróżnienie super fanów na czacie
 
 Poprawki
 - poprawione funkcje notatnika
-- poprawione dziaĹ‚anie widgetĂłw na pulpicie
+- poprawione działanie widgetów na pulpicie
 
-Znane bĹ‚Ä™dy
-- mnoĹĽnik bitewek to funkcja testowa, i dziaĹ‚a na tak zwanÄ… trytytkÄ™, dlatego czasem w ostatniej minucie siÄ™ buguje i pojawia mimo jego braku
+Znane błędy
+- mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku
 
 Co dalej
 - dodatkowe jÄ™zyki odczytu czatu TTS
-- optymalizacja poĹ‚Ä…czenia z danym twĂłrcÄ…
-- powiadomienia dĹşwiÄ™kowe dla wiÄ™kszych prezentĂłw`;
+- optymalizacja połączenia z danym twórcą
+- powiadomienia dźwiękowe dla większych prezentów`;
 const RECONNECT_BASE_DELAY_MS = 30 * 1000;
 const RECONNECT_MAX_DELAY_MS = 5 * 60 * 1000;
 const OFFLINE_RECONNECT_DELAY_MS = 10 * 60 * 1000;
@@ -158,7 +160,7 @@ const LIVE_CREATORS = [
     label: 'Kama (@teambibii)',
     username: 'teambibii',
     avatar: 'assets/recommended/teambibii.jpg',
-    bio: 'đźŚş Live codziennie! đźŚş\nIg: kama_sarnat',
+    bio: '🌺 Live codziennie! 🌺\nIg: kama_sarnat',
     liveUrl: 'https://www.tiktok.com/@teambibii/live?enter_from_merge=others_homepage&enter_method=others_photo'
   },
   {
@@ -166,7 +168,7 @@ const LIVE_CREATORS = [
     label: 'Wiktoria (@wiktoriaartystycznie)',
     username: 'wiktoriaartystycznie',
     avatar: 'assets/recommended/wiktoriaartystycznie.jpg',
-    bio: 'Live codziennie!đźĄ€',
+    bio: 'Live codziennie!🥀',
     liveUrl: 'https://www.tiktok.com/@wiktoriaartystycznie/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -174,7 +176,7 @@ const LIVE_CREATORS = [
     label: 'Pan z warzywniaka (@panzwarzywniaka)',
     username: 'panzwarzywniaka',
     avatar: 'assets/recommended/panzwarzywniaka.jpg',
-    bio: 'TOP 1 24.12.25/16.01/08.04\n@Polishciuciu đź’Ąđź’Ąđź’Ą @đźşTarocistka Tarrinđźş @iss142816 @DJ Pedro đźŽ¶đźŽ¶ @Beny đź§”đźŽ¶ @đź’™Dawid_Montanađź©·đźşđź’śđź¦â ď¸Źđź¸',
+    bio: 'TOP 1 24.12.25/16.01/08.04',
     liveUrl: 'https://www.tiktok.com/@panzwarzywniaka/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -182,7 +184,7 @@ const LIVE_CREATORS = [
     label: 'Ko Bial (@ko_bial)',
     username: 'ko_bial',
     avatar: 'assets/recommended/ko_bial.jpg',
-    bio: 'Fico-@LombardđźŽŻ Wokalista',
+    bio: 'Fico-@Lombard🎯 Wokalista',
     liveUrl: 'https://www.tiktok.com/@ko_bial/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -196,7 +198,7 @@ const LIVE_CREATORS = [
     label: 'Lovecraft (@lovecraft331)',
     username: 'lovecraft331',
     avatar: 'assets/recommended/lovecraft331.jpg',
-    bio: 'Oddaje Obserwacje đź’—đź’—',
+    bio: 'Oddaje Obserwacje 💗💗',
     liveUrl: 'https://www.tiktok.com/@lovecraft331/live?enter_from_merge=others_homepage&enter_method=others_photo'
   },
   {
@@ -204,7 +206,7 @@ const LIVE_CREATORS = [
     label: 'Chill Serwis (@chill.serwis)',
     username: 'chill.serwis',
     avatar: 'assets/recommended/chill-serwis.jpg',
-    bio: 'Serwisant z wieloletnim doĹ›wiadczeniem đź‘Š\nIG: chillserwis',
+    bio: 'Serwisant z wieloletnim doświadczeniem 👊\nIG: chillserwis',
     liveUrl: 'https://www.tiktok.com/@chill.serwis/live?enter_from_merge=homepage_hot&enter_method=live_entrance_hover_list'
   },
   {
@@ -212,7 +214,7 @@ const LIVE_CREATORS = [
     label: 'Patryk (@patryyyk176)',
     username: 'patryyyk176',
     avatar: 'assets/recommended/patryyyk176.jpg',
-    bio: 'đź‡µđź‡± w đź‡łđź‡±\nNie biuro. Budowa đź› ď¸ŹđźŹ—ď¸Ź\nĹ»ycie i praca w Holandii\nWieczorami đźŽ®âš˝ď¸Ź\nđź”´Live na przerwie i wieczorami',
+    bio: '🇵🇱 w 🇳🇱\nNie biuro. Budowa 🛠️🏗️\nŻycie i praca w Holandii\nWieczorami 🎮⚽️\n🔴Live na przerwie i wieczorami',
     liveUrl: 'https://www.tiktok.com/@patryyyk176/live'
   },
   {
@@ -280,11 +282,6 @@ const OAUTH_HOSTS = [
 ];
 
 let mainWindow;
-let desktopWidgetsWindow;
-let desktopWidgetsEnabled = true;
-let desktopWidgetsExpanded = false;
-let desktopWidgetsAlwaysOnTop = true;
-const DESKTOP_WIDGETS_WINDOW_WIDTH = 360;
 let latestRoomStats = { viewerCount: 0 };
 let shellView;
 let loginView;
@@ -627,6 +624,7 @@ function archiveChatMessage(message) {
     'boxKey',
     'audienceCount',
     'total',
+    'likeCount',
     'shareCount'
   ].forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(message, key)) {
@@ -775,7 +773,7 @@ function installLoginStateWatchers(view) {
       return;
     }
 
-    state.lastMessage = `Nie udaĹ‚o siÄ™ zaĹ‚adowaÄ‡ logowania: ${description || url || code}`;
+    state.lastMessage = `Nie udało się załadować logowania: ${description || url || code}`;
     publishState();
   });
 }
@@ -874,7 +872,7 @@ function getTrayLabels() {
   if (language === 'de') {
     return { show: 'Czatbox TT anzeigen', quit: 'Beenden' };
   }
-  return { show: 'PokaĹĽ Czatbox TT', quit: 'Zamknij' };
+  return { show: 'Pokaż Czatbox TT', quit: 'Zamknij' };
 }
 
 function shouldKeepTray() {
@@ -888,148 +886,7 @@ function showMainWindow() {
 
   mainWindow.show();
   mainWindow.focus();
-  hideDesktopWidgets();
   layoutViews();
-}
-
-function positionDesktopWidgets() {
-  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
-    return;
-  }
-  const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-  const { x, y, width, height } = display.workArea;
-  const windowWidth = Math.min(DESKTOP_WIDGETS_WINDOW_WIDTH, width);
-  desktopWidgetsWindow.setBounds({
-    x: x + width - windowWidth,
-    y,
-    width: windowWidth,
-    height
-  });
-}
-
-function ensureDesktopWidgetsWindow() {
-  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
-    positionDesktopWidgets();
-    applyDesktopWidgetsAlwaysOnTop();
-    return desktopWidgetsWindow;
-  }
-
-  desktopWidgetsWindow = new BrowserWindow({
-    width: DESKTOP_WIDGETS_WINDOW_WIDTH,
-    height: 760,
-    show: false,
-    frame: false,
-    transparent: true,
-    resizable: false,
-    movable: false,
-    minimizable: false,
-    maximizable: false,
-    fullscreenable: false,
-    skipTaskbar: true,
-    alwaysOnTop: desktopWidgetsAlwaysOnTop,
-    hasShadow: false,
-    backgroundColor: '#00000000',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-      sandbox: false,
-      devTools: true
-    }
-  });
-  applyDesktopWidgetsAlwaysOnTop();
-  desktopWidgetsWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), {
-    query: { desktopWidgets: '1' }
-  });
-  desktopWidgetsWindow.webContents.on('did-finish-load', () => {
-    desktopWidgetsWindow.webContents.send('shell:state', { ...state });
-    desktopWidgetsWindow.webContents.send('shell:room-stats', latestRoomStats);
-    recentMessages.forEach((message) => {
-      desktopWidgetsWindow.webContents.send('shell:chat-message', message);
-    });
-  });
-  desktopWidgetsWindow.on('closed', () => {
-    desktopWidgetsWindow = null;
-  });
-  positionDesktopWidgets();
-  return desktopWidgetsWindow;
-}
-
-function showDesktopWidgets() {
-  if (!desktopWidgetsEnabled || !mainWindow) {
-    return;
-  }
-  const window = ensureDesktopWidgetsWindow();
-  positionDesktopWidgets();
-  applyDesktopWidgetsAlwaysOnTop();
-  window.showInactive();
-  if (desktopWidgetsAlwaysOnTop && typeof window.moveTop === 'function') {
-    window.moveTop();
-  }
-}
-
-function hideDesktopWidgets() {
-  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
-    desktopWidgetsWindow.hide();
-  }
-}
-
-function setDesktopWidgetsEnabled(enabled) {
-  desktopWidgetsEnabled = Boolean(enabled);
-  if (!desktopWidgetsEnabled) {
-    hideDesktopWidgets();
-  } else if (mainWindow && (!mainWindow.isVisible() || mainWindow.isMinimized())) {
-    showDesktopWidgets();
-  }
-  return desktopWidgetsEnabled;
-}
-
-function setDesktopWidgetsExpanded(expanded) {
-  desktopWidgetsExpanded = Boolean(expanded);
-  positionDesktopWidgets();
-  return desktopWidgetsExpanded;
-}
-
-function applyDesktopWidgetsAlwaysOnTop() {
-  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
-    return;
-  }
-
-  desktopWidgetsWindow.setAlwaysOnTop(
-    desktopWidgetsAlwaysOnTop,
-    desktopWidgetsAlwaysOnTop ? 'screen-saver' : 'normal'
-  );
-}
-
-function setDesktopWidgetsInteractiveRegions(regions) {
-  if (!desktopWidgetsWindow || desktopWidgetsWindow.isDestroyed()) {
-    return [];
-  }
-
-  desktopWidgetsWindow.setIgnoreMouseEvents(false);
-  if (typeof desktopWidgetsWindow.setShape !== 'function') {
-    return [];
-  }
-
-  const safeRegions = Array.isArray(regions)
-    ? regions
-      .map((region) => ({
-        x: Math.max(0, Math.floor(Number(region && region.x) || 0)),
-        y: Math.max(0, Math.floor(Number(region && region.y) || 0)),
-        width: Math.max(1, Math.ceil(Number(region && region.width) || 0)),
-        height: Math.max(1, Math.ceil(Number(region && region.height) || 0))
-      }))
-      .filter((region) => region.width > 0 && region.height > 0)
-    : [];
-
-  desktopWidgetsWindow.setShape(safeRegions.length ? safeRegions : [{ x: 0, y: 0, width: 1, height: 1 }]);
-  return safeRegions;
-}
-
-function setDesktopWidgetsAlwaysOnTop(enabled) {
-  desktopWidgetsAlwaysOnTop = enabled !== false;
-  applyDesktopWidgetsAlwaysOnTop();
-  return desktopWidgetsAlwaysOnTop;
 }
 
 function ensureTray() {
@@ -1085,7 +942,6 @@ function hideMainWindowToTray() {
 
   ensureTray();
   mainWindow.hide();
-  showDesktopWidgets();
 }
 
 function syncLoginItemSettings() {
@@ -1360,32 +1216,45 @@ async function getCountryRanking(language) {
 
   let parsed = null;
   const apiUrl = `https://tik.tools/api/leaderboards/country/${region.apiSlug || region.slug}`;
-  const apiResponse = await fetch(apiUrl, {
-    headers: {
-      'user-agent': 'CzatboxTT/0.1.4',
-      accept: 'application/json'
-    }
-  });
-
-  if (apiResponse.ok) {
-    const apiPayload = await apiResponse.json();
-    parsed = parseTikToolsApiRanking(apiPayload);
-  }
-
-  if (!parsed || !parsed.items.length) {
-    const response = await fetch(region.url, {
+  try {
+    const apiResponse = await fetch(apiUrl, {
       headers: {
-        'user-agent': 'CzatboxTT/0.1.4',
-        accept: 'text/html,application/xhtml+xml'
+        'user-agent': `CzatboxTT/${APP_VERSION}`,
+        accept: 'application/json',
+        'accept-language': 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7'
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`ranking-http-${response.status}`);
+    if (apiResponse.ok) {
+      const apiPayload = await apiResponse.json();
+      parsed = parseTikToolsApiRanking(apiPayload);
     }
+  } catch {
+    parsed = null;
+  }
 
-    const html = await response.text();
-    parsed = parseTikToolsRanking(html);
+  if (!parsed || !parsed.items.length) {
+    try {
+      const response = await fetch(region.url, {
+        headers: {
+        'user-agent': `CzatboxTT/${APP_VERSION}`,
+          accept: 'text/html,application/xhtml+xml',
+          'accept-language': 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`ranking-http-${response.status}`);
+      }
+
+      const html = await response.text();
+      parsed = parseTikToolsRanking(html);
+    } catch (error) {
+      if (cached && cached.payload) {
+        return { ok: true, ...cached.payload, cached: true, stale: true };
+      }
+      throw error;
+    }
   }
 
   const payload = {
@@ -1451,9 +1320,6 @@ async function createWindow() {
   });
 
   mainWindow.on('resize', layoutViews);
-  mainWindow.on('minimize', showDesktopWidgets);
-  mainWindow.on('restore', hideDesktopWidgets);
-  mainWindow.on('show', hideDesktopWidgets);
   mainWindow.on('maximize', layoutViews);
   mainWindow.on('unmaximize', layoutViews);
   mainWindow.on('enter-full-screen', layoutViews);
@@ -1471,9 +1337,6 @@ async function createWindow() {
     clearInterval(authPoll);
     clearTimeout(reconnectTimer);
     disconnectLiveConnection();
-    if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
-      desktopWidgetsWindow.destroy();
-    }
     [shellView, loginView].forEach((view) => {
       if (view && !view.webContents.isDestroyed()) {
         view.webContents.close();
@@ -1736,6 +1599,9 @@ async function connectLiveChat() {
       archiveChatMessage(event);
       if (isProgramAuthorEvent(event)) {
         sendProgramAuthorJoinAlert();
+      }
+      if (isHondaJoinEvent(event)) {
+        sendHondaJoinAlert();
       }
     });
 
@@ -2077,7 +1943,7 @@ async function refreshCurrentChat() {
   });
   state.connectionStatus = 'connecting';
   state.source = 'odswiezanie';
-  state.lastMessage = `OdĹ›wieĹĽam czat @${creator.username}`;
+  state.lastMessage = `Odświeżam czat @${creator.username}`;
   publishState();
   await connectLiveChat();
   return { ok: true, creator: publicCreator(creator) };
@@ -2149,7 +2015,7 @@ function getChatEventText(data) {
 
 function formatMemberEvent(data) {
   const user = getEventUser(data);
-  const text = 'doĹ‚Ä…czyĹ‚(a) do LIVE';
+  const text = 'dołączył(a) do LIVE';
   return createDisplayEvent(data, 'member', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.member.join'
   });
@@ -2157,6 +2023,10 @@ function formatMemberEvent(data) {
 
 function isProgramAuthorEvent(event) {
   return normalizeUniqueId(event && event.uniqueId) === PROGRAM_AUTHOR_UNIQUE_ID;
+}
+
+function isHondaJoinEvent(event) {
+  return normalizeUniqueId(event && event.uniqueId) === HONDA_UNIQUE_ID;
 }
 
 function normalizeUniqueId(value) {
@@ -2184,18 +2054,18 @@ function formatGiftEvent(data) {
   const repeatCount = Math.max(1, Number(data && (data.repeatCount || data.comboCount || data.groupCount)) || 1);
   const giftCost = getGiftCost(data);
   const countText = repeatCount > 1 ? ` x${repeatCount}` : '';
-  const costText = giftCost > 0 ? ` (đźŞ™ ${giftCost * repeatCount})` : '';
+  const costText = giftCost > 0 ? ` (🪙 ${giftCost * repeatCount})` : '';
 
   if (isBoxLikeGift(data, giftName)) {
     if (isUnknownIdentityValue(user.nickname) && isUnknownIdentityValue(user.uniqueId)) {
       return null;
     }
 
-    const boxName = /portal/i.test(giftName) ? 'portal' : 'skrzyniÄ™';
+    const boxName = /portal/i.test(giftName) ? 'portal' : 'skrzynię';
     const boxKey = /portal/i.test(giftName) ? 'portal' : 'chest';
     const audienceCount = getAudienceCount(data);
-    const audienceText = audienceCount > 0 ? ` dla (đź‘Ą ${audienceCount})` : '';
-    const text = `wysyĹ‚a ${boxName}${costText}${audienceText}`;
+    const audienceText = audienceCount > 0 ? ` dla (👥 ${audienceCount})` : '';
+    const text = `wysyła ${boxName}${costText}${audienceText}`;
     return createDisplayEvent(data, 'box', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
       textKey: 'event.box',
       boxKey,
@@ -2204,7 +2074,7 @@ function formatGiftEvent(data) {
     });
   }
 
-  const text = `wysĹ‚aĹ‚(a) prezent: ${giftName}${countText}${costText}`;
+  const text = `wysłał(a) prezent: ${giftName}${countText}${costText}`;
   return createDisplayEvent(data, 'gift', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.gift',
     giftName,
@@ -2227,9 +2097,9 @@ function formatEnvelopeEvent(data) {
   };
   const coinCount = Number(info.diamondCount) || 0;
   const peopleCount = Number(info.peopleCount) || 0;
-  const coinText = coinCount > 0 ? ` (đźŞ™ ${coinCount})` : '';
-  const peopleText = peopleCount > 0 ? ` dla (đź‘Ą ${peopleCount})` : '';
-  const text = `wysyĹ‚a skrzyniÄ™${coinText}${peopleText}`;
+  const coinText = coinCount > 0 ? ` (🪙 ${coinCount})` : '';
+  const peopleText = peopleCount > 0 ? ` dla (👥 ${peopleCount})` : '';
+  const text = `wysyła skrzynię${coinText}${peopleText}`;
   return createDisplayEvent(data, 'box', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.box',
     boxKey: 'chest',
@@ -2240,19 +2110,55 @@ function formatEnvelopeEvent(data) {
 
 function formatLikeEvent(data) {
   const user = getEventUser(data);
-  const likeCount = Math.max(1, Number(data && data.likeCount) || 1);
+  const likeCount = getLikeEventCount(data);
   const key = `${state.creatorId}:${user.uniqueId}`;
   const total = (likeTotalsByUser.get(key) || 0) + likeCount;
   likeTotalsByUser.set(key, total);
 
-  const text = `polubiĹ‚(a) LIVE (Ĺ‚Ä…cznie ${total} polubieĹ„)`;
+  const text = `polubił(a) LIVE (łącznie ${total} polubień)`;
   const event = createDisplayEvent(data, 'like', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.like',
+    likeCount,
     total
   });
   event.id = `like:${key}`;
   event.upsert = true;
   return event;
+}
+
+function getLikeEventCount(data) {
+  const value = data && typeof data === 'object' ? data : {};
+  const directKeys = [
+    'likeCount',
+    'like_count',
+    'likeCnt',
+    'like_cnt',
+    'tapCount',
+    'tap_count',
+    'tapCnt',
+    'tap_cnt',
+    'count'
+  ];
+
+  for (const key of directKeys) {
+    const count = Number(value[key]);
+    if (Number.isFinite(count) && count > 0) {
+      return Math.max(1, Math.floor(count));
+    }
+  }
+
+  const nestedCount = findNumericByKeys(value, new Set([
+    'likeCount',
+    'like_count',
+    'likeCnt',
+    'like_cnt',
+    'tapCount',
+    'tap_count',
+    'tapCnt',
+    'tap_cnt'
+  ]), 4);
+
+  return Math.max(1, Math.floor(nestedCount || 1));
 }
 
 function formatSocialEvent(data, forcedKind) {
@@ -2263,15 +2169,15 @@ function formatSocialEvent(data, forcedKind) {
   }
 
   if (kind === 'repost') {
-    const text = 'đź” repostowaĹ‚ live';
+    const text = '🔁 repostował live';
     return createDisplayEvent(data, 'repost', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
       textKey: 'event.repost'
     });
   }
 
   const shareCount = getShareAudienceCount(data);
-  const countText = shareCount > 0 ? ` (đź‘Ą ${shareCount})` : '';
-  const text = `â†©ď¸Ź udostÄ™pnia live${countText}`;
+  const countText = shareCount > 0 ? ` (👥 ${shareCount})` : '';
+  const text = `↩️ udostępnia live${countText}`;
   return createDisplayEvent(data, 'share', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.share',
     shareCount
@@ -2389,7 +2295,7 @@ function getCreatorDisplayName(creator = getCurrentCreator()) {
   if (label) {
     return label.replace(/\s+\(@[^)]+\)\s*$/, '').trim() || label;
   }
-  return normalizeMessageText(creator && creator.username) || 'TwĂłrca';
+  return normalizeMessageText(creator && creator.username) || 'Twórca';
 }
 
 function isCurrentCreatorHandle(displayId) {
@@ -2562,7 +2468,7 @@ function getShareAudienceCountFromText(data) {
     return 0;
   }
 
-  const match = text.match(/(?:^|[^\d])(\d{1,3})\s*(?:os(?:o|Ăł)b|osobom|znajom|ludzi|odbior|people|persons?|friends?|recipients?|users?|personen|freunden?)(?:[^\w]|$)/i);
+  const match = text.match(/(?:^|[^\d])(\d{1,3})\s*(?:os(?:o|ó)b|osobom|znajom|ludzi|odbior|people|persons?|friends?|recipients?|users?|personen|freunden?)(?:[^\w]|$)/i);
   if (!match) {
     return 0;
   }
@@ -3043,8 +2949,8 @@ function isBattleFallbackName(value, userId = '') {
     || normalized === id
     || /^\d{8,}$/.test(normalized)
     || /\d{12,}/.test(normalized)
-    || /^(uĹĽytkownik|uÄąÄ˝ytkownik|user)\s+\d{8,}$/.test(normalized)
-    || normalized === `uĹĽytkownik ${id}`
+    || /^(użytkownik|user)\s+\d{8,}$/.test(normalized)
+    || normalized === `użytkownik ${id}`
     || normalized === `user ${id}`
     || normalized === 'nieznany gracz'
     || normalized === 'nieznany uczestnik'
@@ -3061,7 +2967,7 @@ function getBattleSideFallbackName(sideId, index = -1) {
   if (battleState.creatorSideId) {
     return 'Przeciwnik';
   }
-  return index >= 0 ? `TwĂłrca ${index + 1}` : 'Uczestnik bitwy';
+  return index >= 0 ? `Twórca ${index + 1}` : 'Uczestnik bitwy';
 }
 
 function upsertBattleSide(sideId, patch = {}) {
@@ -3718,16 +3624,16 @@ function detectBattleEffectType(value) {
   if (/^3\b/.test(normalized) || /\btop.?3\b/.test(normalized)) {
     return 'top3';
   }
-  if (/fog|mist|smoke|mg[Ĺ‚l]a/.test(normalized)) {
+  if (/fog|mist|smoke|mg[łl]a/.test(normalized)) {
     return 'fog';
   }
   if (/glove|r[eÄ™]kawic/.test(normalized)) {
     return 'glove';
   }
-  if (/hammer|m[Ĺ‚l]ot/.test(normalized)) {
+  if (/hammer|m[łl]ot/.test(normalized)) {
     return 'hammer';
   }
-  if (/freeze|frozen|ice|snow|zamro|l[oĂł]d/.test(normalized)) {
+  if (/freeze|frozen|ice|snow|zamro|l[oó]d/.test(normalized)) {
     return 'freeze';
   }
   if (/shield|tarcza|protect/.test(normalized)) {
@@ -3941,7 +3847,7 @@ function sendBattleAlert(multiplier) {
     textKey: 'battle.multiplier',
     tone: 'battle',
     uppercase: true,
-    text: `BITWA: ZA CHWILÄ MNOĹ»NIK X${multiplier}`
+    text: `BITWA: ZA CHWILĘ MNOŻNIK X${multiplier}`
   });
 }
 
@@ -3954,6 +3860,14 @@ function sendProgramAuthorJoinAlert() {
   });
 }
 
+function sendHondaJoinAlert() {
+  sendToShell('shell:battle-alert', {
+    tone: 'honda',
+    uppercase: false,
+    text: HONDA_JOIN_TEXT
+  });
+}
+
 function publishState() {
   sendToShell('shell:state', { ...state });
 }
@@ -3961,9 +3875,6 @@ function publishState() {
 function sendToShell(channel, payload) {
   if (shellView && !shellView.webContents.isDestroyed()) {
     shellView.webContents.send(channel, payload);
-  }
-  if (desktopWidgetsWindow && !desktopWidgetsWindow.isDestroyed()) {
-    desktopWidgetsWindow.webContents.send(channel, payload);
   }
 }
 
@@ -4078,7 +3989,7 @@ function inferLegacyArchiveKind(text) {
   if (normalized.includes('udost') || normalized.includes('share')) {
     return 'share';
   }
-  if (normalized.includes('doĹ‚Ä…czy') || normalized.includes('dolacz') || normalized.includes('joined')) {
+  if (normalized.includes('dołączy') || normalized.includes('dolacz') || normalized.includes('joined')) {
     return 'member';
   }
   return 'chat';
@@ -4352,22 +4263,6 @@ function installIpc() {
   });
   handleShell('shell:get-system-settings', async () => ({ ok: true, settings: getPublicSystemSettings() }));
   handleShell('shell:set-system-settings', async (patch) => ({ ok: true, settings: updateSystemSettings(patch) }));
-  handleShell('shell:set-desktop-widgets-enabled', async (enabled) => ({
-    ok: true,
-    enabled: setDesktopWidgetsEnabled(enabled)
-  }));
-  handleShell('shell:set-desktop-widgets-expanded', async (expanded) => ({
-    ok: true,
-    expanded: setDesktopWidgetsExpanded(expanded)
-  }));
-  handleShell('shell:set-desktop-widgets-always-on-top', async (enabled) => ({
-    ok: true,
-    enabled: setDesktopWidgetsAlwaysOnTop(enabled)
-  }));
-  handleShell('shell:set-desktop-widgets-interactive-regions', async (regions) => ({
-    ok: true,
-    regions: setDesktopWidgetsInteractiveRegions(regions)
-  }));
 
   handleShell('shell:open-in-browser', async () => {
     await shell.openExternal(getCurrentCreator().liveUrl);
@@ -4495,8 +4390,8 @@ function showUpdateCompletedDialogIfNeeded() {
 
   dialog.showMessageBox({
     type: 'info',
-    title: 'Aktualizacja ukoĹ„czona',
-    message: 'Aktualizacja ukoĹ„czona',
+    title: 'Aktualizacja ukończona',
+    message: 'Aktualizacja ukończona',
     detail: marker.notes || getReleaseNotesText(),
     buttons: ['OK'],
     defaultId: 0,
@@ -4524,7 +4419,7 @@ function configureAutoUpdates() {
   };
 
   autoUpdater.on('update-available', (info) => {
-    setUpdateMessage(`DostÄ™pna aktualizacja ${info && info.version ? info.version : ''}`.trim());
+    setUpdateMessage(`Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
   });
 
   autoUpdater.on('update-downloaded', async (info) => {
@@ -4538,7 +4433,7 @@ function configureAutoUpdates() {
       type: 'info',
       title: 'Aktualizacja pobrana',
       message: 'Aktualizacja pobrana',
-      detail: 'Program zostanie teraz zamkniÄ™ty i uruchomiony ponownie, aby dokoĹ„czyÄ‡ instalacjÄ™.',
+      detail: 'Program zostanie teraz zamknięty i uruchomiony ponownie, aby dokończyć instalację.',
       buttons: ['OK'],
       defaultId: 0,
       noLink: true
@@ -4547,7 +4442,7 @@ function configureAutoUpdates() {
   });
 
   autoUpdater.on('error', (error) => {
-    setUpdateMessage(`BĹ‚Ä…d aktualizacji: ${getConnectionErrorMessage(error)}`);
+    setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
     if (updateDownloadReject) {
       const reject = updateDownloadReject;
       updateDownloadReject = null;
@@ -4563,14 +4458,14 @@ async function beginUpdateInstall(info) {
   await dialog.showMessageBox({
     type: 'info',
     title: 'Aktualizacja',
-    message: 'Rozpoczynam aktualizacjÄ™',
-    detail: 'Funkcje programu bÄ™dÄ… niedostÄ™pne do czasu zakoĹ„czenia aktualizacji i ponownego uruchomienia aplikacji.',
+    message: 'Rozpoczynam aktualizację',
+    detail: 'Funkcje programu będą niedostępne do czasu zakończenia aktualizacji i ponownego uruchomienia aplikacji.',
     buttons: ['OK'],
     defaultId: 0,
     noLink: true
   }).catch(() => {});
 
-  setUpdateMessage(`Pobieram aktualizacjÄ™ ${info && info.version ? info.version : ''}`.trim());
+  setUpdateMessage(`Pobieram aktualizację ${info && info.version ? info.version : ''}`.trim());
   await new Promise((resolve, reject) => {
     updateDownloadReject = reject;
     autoUpdater.downloadUpdate()
@@ -4591,8 +4486,8 @@ async function promptForUpdate(info) {
   updatePromptVisible = true;
   const result = await dialog.showMessageBox({
     type: 'question',
-    title: 'DostÄ™pna aktualizacja',
-    message: `DostÄ™pna jest aktualizacja ${info.version}`,
+    title: 'Dostępna aktualizacja',
+    message: `Dostępna jest aktualizacja ${info.version}`,
     detail: `${getUpdateNotes(info)}\n\nObecna wersja: ${APP_VERSION}`,
     buttons: ['Aktualizuj teraz', 'Uruchom bez aktualizacji'],
     defaultId: 0,
@@ -4613,8 +4508,8 @@ async function promptForUpdate(info) {
     updateDownloadReject = null;
     await dialog.showMessageBox({
       type: 'error',
-      title: 'BĹ‚Ä…d aktualizacji',
-      message: 'Nie udaĹ‚o siÄ™ pobraÄ‡ aktualizacji',
+      title: 'Błąd aktualizacji',
+      message: 'Nie udało się pobrać aktualizacji',
       detail: getConnectionErrorMessage(error),
       buttons: ['OK'],
       defaultId: 0,

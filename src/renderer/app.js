@@ -7,19 +7,60 @@ const APP_LANGUAGE_SETTINGS_KEY = 'czatbox.app.language';
 const TIME_FORMAT_SETTINGS_KEY = 'czatbox.time.format';
 const GENERAL_SETTINGS_KEY = 'czatbox.general.settings';
 const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
+const ACHIEVEMENTS_KEY = 'czatbox.achievements';
+const REDEEMED_FEATURES_KEY = 'czatbox.redeemed.features';
 const DEFAULT_CHAT_DELAY_MS = 1800;
 const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
 const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
 const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony'];
-const APP_APPEARANCES = ['standard', 'ozdobny'];
+const APP_APPEARANCES = ['standard', 'ozdobny', 'retro-kb2'];
 const APP_LANGUAGES = ['pl', 'en', 'de'];
 const TIME_FORMATS = ['auto', '12', '24'];
 const TOP_GIFTERS_LIMIT = 5;
+const TOP_TAPPERS_LIMIT = 5;
 const MODERATOR_ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 const ACTIVE_MODERATORS_LIMIT = 20;
 const MAX_RECENT_CREATORS = 20;
 const HEART_ME_GIFT_NAME = 'heart me';
 const RECENT_CREATOR_META_KEY = 'czatbox.recent.creator.meta';
+const HONDA_CHAT_UNIQUE_ID = 'grzegorzpawemisiu';
+const HONDA_ON_CHAT_TEXT = 'Honda jest na czacie.';
+const HONDA_ONLINE_CHECK_INTERVAL_MS = 10 * 1000;
+const HONDA_ONLINE_ALERT_COOLDOWN_MS = 60 * 1000;
+const HONDA_REDEEM_CODE = '10FDBF47H0NDA250';
+const KAMA_CREATOR_HANDLE = 'teambibii';
+const ACHIEVEMENT_DEFINITIONS = [
+  {
+    id: 'first-login',
+    icon: '🪄',
+    titleKey: 'achievements.firstLogin.title',
+    descriptionKey: 'achievements.firstLogin.description'
+  },
+  {
+    id: 'kama-10-connections',
+    icon: '🏠',
+    titleKey: 'achievements.kamaConnections.title',
+    descriptionKey: 'achievements.kamaConnections.description'
+  },
+  {
+    id: 'ten-creators',
+    icon: '🚀',
+    titleKey: 'achievements.tenCreators.title',
+    descriptionKey: 'achievements.tenCreators.description'
+  },
+  {
+    id: 'first-note',
+    icon: '📝',
+    titleKey: 'achievements.firstNote.title',
+    descriptionKey: 'achievements.firstNote.description'
+  },
+  {
+    id: 'retro-kb2',
+    icon: '💾',
+    titleKey: 'achievements.retroKb2.title',
+    descriptionKey: 'achievements.retroKb2.description'
+  }
+];
 const UI_ICONS = {
   'chevron-down': '<path d="m7 10 5 5 5-5"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
@@ -59,11 +100,8 @@ const DEFAULT_SYSTEM_SETTINGS = {
 const DEFAULT_GENERAL_SETTINGS = {
   multiplierNotifications: true,
   statsToolbox: true,
-  galleryAvatars: true,
-  pinWidgetsToRight: true,
-  desktopWidgetsAlwaysOnTop: true
+  galleryAvatars: true
 };
-const DESKTOP_WIDGET_MODE = new URLSearchParams(window.location.search).get('desktopWidgets') === '1';
 const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
   en: 'en-US',
@@ -102,6 +140,7 @@ const I18N = {
     'nav.archive': 'Archiwum',
     'nav.settings': 'Ustawienia',
     'nav.notes': 'Notatki',
+    'nav.achievements': 'Osiągnięcia',
     'nav.ranking': 'Ranking',
     'nav.about': 'O programie',
     'creator.label': 'Twórca',
@@ -121,6 +160,20 @@ const I18N = {
     'ranking.live': 'LIVE',
     'ranking.offline': 'OFFLINE',
     'ranking.diamonds': 'Diamenty',
+    'achievements.title': 'Osiągnięcia',
+    'achievements.note': 'Odblokowane osiągnięcia za aktywność w programie.',
+    'achievements.emptyTitle': 'Brak odblokowanych osiągnięć.',
+    'achievements.emptyDescription': 'Osiągnięcia pojawią się tutaj dopiero po ich zdobyciu.',
+    'achievements.firstLogin.title': 'Uroczyście oświadczam, że knuję coś niedobrego!',
+    'achievements.firstLogin.description': 'Zaloguj się po raz pierwszy w programie.',
+    'achievements.kamaConnections.title': 'Nie ma to jak w domu...',
+    'achievements.kamaConnections.description': 'Połącz się z Kamą 10 razy.',
+    'achievements.tenCreators.title': 'Dopiero się rozkręcam!',
+    'achievements.tenCreators.description': 'Połącz się z 10 różnymi twórcami.',
+    'achievements.firstNote.title': 'Pisać muszę, bo się uduszę!',
+    'achievements.firstNote.description': 'Napisz swoją pierwszą notatkę.',
+    'achievements.retroKb2.title': 'Retrospekcja',
+    'achievements.retroKb2.description': 'Zmień aplikację na wersję lite.',
     'ranking.revenue': 'Przychód',
     'ranking.earnings': 'Zarobek',
     'filters.chat': 'Czat',
@@ -179,12 +232,11 @@ const I18N = {
     'settings.tabs.appearance': 'Wygląd',
     'settings.tabs.accessibility': 'Dostępność',
     'settings.tabs.system': 'System',
+    'settings.tabs.redeem': 'Zrealizuj kod',
     'settings.general.note': 'Ogólne ustawienia aplikacji.',
     'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
     'settings.general.statsToolbox': 'Przybornik statystyk',
     'settings.general.galleryAvatars': 'Awatary z galerii',
-    'settings.general.pinWidgetsToRight': 'Pokazuj widgety przy prawej krawędzi pulpitu po zminimalizowaniu aplikacji',
-    'settings.general.desktopWidgetsAlwaysOnTop': 'Widgety pulpitu zawsze na wierzchu',
     'settings.appearance.chatStyle': 'Styl czatu:',
     'settings.appearance.theme': 'Motyw:',
     'settings.appearance.appAppearance': 'Wygląd aplikacji:',
@@ -205,6 +257,8 @@ const I18N = {
     'settings.appAppearance.default.description': 'Obecny układ headera, lewego sidebara, okien i buttonów.',
     'settings.appAppearance.decorative.name': 'Ozdobny',
     'settings.appAppearance.decorative.description': 'Elegancki, nowoczesny układ aplikacji.',
+    'settings.appAppearance.retroKb2.name': 'Retro KB2',
+    'settings.appAppearance.retroKb2.description': 'Lekki, archaiczny układ inspirowany starym blogowym K2: nagłówek i linki zamiast przycisków.',
     'settings.accessibility.tts': 'Wiadomości TTS:',
     'settings.accessibility.readAloud': 'Czytaj czat na głos',
     'settings.accessibility.skipVulgarNicknames': 'Pomijaj wulgarne nicki',
@@ -215,6 +269,13 @@ const I18N = {
     'settings.accessibility.rate': 'Tempo',
     'settings.accessibility.delay': 'Opóźnienie czatu:',
     'settings.system.note': 'Informacje i ustawienia systemowe.',
+    'settings.redeem.note': 'Wprowadź kod, aby odblokować dodatkowe funkcje.',
+    'settings.redeem.codeLabel': 'Kod aktywacyjny',
+    'settings.redeem.button': 'Aktywuj',
+    'settings.redeem.waiting': 'Podaj kod aktywacyjny.',
+    'settings.redeem.unlocked': 'Kod przyjęty. Niebieskie powiadomienie Hondy jest aktywne.',
+    'settings.redeem.invalid': 'Nieprawidłowy kod.',
+    'settings.redeem.alreadyUsed': 'Ten kod został już wcześniej zrealizowany.',
     'settings.system.autoLaunch': 'Automatycznie otwieraj Czatbox TT po uruchomieniu komputera',
     'settings.system.runInBackground': 'Uruchom program w tle by nie przeszkadzał',
     'settings.system.minimizeToTray': 'Minimalizuj Czatbox TT do zasobnika systemowego po kliknięciu X',
@@ -243,12 +304,11 @@ const I18N = {
     'about.news.version': 'Wersja programu',
     'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
-    'about.news.features.notes': 'ranking TOP 20 twórców i ich zarobki z rankingu dziennego - podgląd za darmo, bez żadnych opłat, jak w innych aplikacjach',
-    'about.news.features.updates': 'odświeżanie połączenia z danym twórcą np. gdy się przepala, wystarczy dać odśwież by ponownie dołączyć',
-    'about.news.features.enigmaTheme': 'dodatkowe języki odczytu czatu TTS',
-    'about.news.features.superFans': 'lista polecanych i ostatnio oglądanych wyświetla się teraz u góry aplikacji w formie kółeczek, poleca faktycznie osoby, które oglądasz i zapisuje na kolejne sesje',
-    'about.news.features.enigmaMode': 'tryb enigmy, czyli wchodzisz na czyjś czat live do podglądu ale nie widać ciebie na czacie',
-    'about.news.features.avatarToggle': 'włączaj lub wyłączaj awatary dla lepszej przejrzystości',
+    'about.news.features.achievements': 'dodano system osiągnięć, są widoczne w zakładce „Osiągnięcia”',
+    'about.news.features.redeemCode': 'dodano zakładkę „Zrealizuj kod” w ustawieniach',
+    'about.news.features.retroKb2': 'wygląd aplikacji: Retro KB2, który jest odciążoną wersją programu tzw. Lite',
+    'about.news.features.desktopWidgetsRemoved': 'Usunięcie opcji widgetów na pulpicie i przypinania ich na wierzchu. Ta mechanika była mocno bugogenna i obciążała dodatkowo aplikacje, w połączeniu z cięższymi motywami spadała jakość używania mojego programu przez konsumentów ze słabszymi sprzętami. Nie to było moim celem, zależy mi na jakości, dlatego w obecnej wersji funkcja ta zostaje zawieszona.',
+    'about.news.features.topTappers': 'dodany został nowy widget rankingu taperów.',
     'about.news.features.events': 'wyświetlanie wiadomości z czatu TikTok LIVE, z obsługą filtrów wiadomości, polubień, prezentów, dołączeń, repostów, udostępnień, skrzyneczek i portali',
     'about.news.features.moderators': 'wyróżnianie moderatorów czerwonym nickiem',
     'about.news.features.avatars': 'losowe avatary użytkowników z lokalnej puli grafik programu, by pobierać jak najmniej pakietów i nie spowalniać internetu podczas transmisji',
@@ -257,22 +317,21 @@ const I18N = {
     'about.news.features.archive': 'archiwizowanie czatu całej transmisji do pliku',
     'about.news.features.styles': 'różne style czatu: Kompaktowy, Przestrzenny, Nowoczesny',
     'about.news.features.themes': 'różne motywy kolorystyczne aplikacji',
-    'about.news.features.appearances': 'różne wyglądy aplikacji: Domyślny i Ozdobny',
+    'about.news.features.appearances': 'różne wyglądy aplikacji: Domyślny, Ozdobny i Retro KB2',
     'about.news.features.delay': 'regulowane opóźnienie wyświetlania wiadomości czatu',
     'about.news.features.stats': 'przybornik statystyk live',
     'about.news.features.widgets': 'przybornik live został zastąpiony widgetami. Od teraz możesz sprawdzić moderację online na czacie, statystyki i top 5 giftujących osób',
-    'about.news.features.flexibleWidgets': 'wszystkie widgety są elastyczne tj. możesz je ukryć, pokazać, przypiąć do pulpitu gdy aplikacja jest pomniejszona',
+    'about.news.features.flexibleWidgets': 'wszystkie widgety w aplikacji są elastyczne tj. możesz je ukryć i pokazać według potrzeb',
     'about.news.features.archiveCenter': 'poprawione i rozbudowane centrum archiwizacji czatu live, z podziałem na filtry, podsumowaniami ilości zdarzeń, wiadomości na czacie, monetami, moderatorami online podczas sesji',
     'about.news.features.archiveActions': 'archiwum można eksportować do pliku *.txt, kasować, odświeżać.',
     'about.news.features.languages': 'język polski, angielski i niemiecki aplikacji',
     'about.news.fixes.title': 'Poprawki:',
-    'about.news.fixes.notes': 'poprawiona stabilność łączności z danym twórcą',
-    'about.news.fixes.desktopWidgets': '',
+    'about.news.fixes.recentCreators': 'poprawiono działanie ostatnich twórców i przywrócono ich poprawne wyświetlanie poza Retro KB2',
     'about.news.fixes.box': 'poprawiony został komunikat o wysłanej skrzyneczce gdy pękała na czacie "unknow wysyła skrzyneczkę"',
     'about.news.fixes.optimization': 'optymalizacja działania programu',
     'about.news.known.title': 'Znane błędy:',
     'about.news.known.box': 'czasem po wysłaniu skrzyneczki gdy pęka pojawia się wiadomość na czacie "unknow wysyła skrzyneczkę"',
-    'about.news.known.multiplier': 'mnożnik bitewek to funkcja testowa, i działa na tak zwaną trytytkę, dlatego czasem w ostatniej minucie się buguje i pojawia mimo jego braku',
+    'about.news.known.multiplier': 'mnożnik bitewek nadal pozostaje funkcją testową i może czasem błędnie pojawić się pod koniec bitwy',
     'about.news.known.enigmaPerformance': 'Wygląd Motyw: Enigma-Z i wygląd aplikacji: ozdobny zamulają aplikację na słabszych sprzętach, niestety na chwilę obecną nie jestem w stanie tego rozwiązać ponieważ działa to na półprzezroczystych powierzchniach zgodnie z założeniem i wymaga nieco więcej mocy od twojego PC, na te konto masz wiele innych opcji wizualnych aplikacji, które śmigają na słabszych komputerach',
     'about.news.next.title': 'Co dalej:',
     'about.news.next.archive': 'Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.',
@@ -280,7 +339,10 @@ const I18N = {
     'about.news.next.widgets': 'rozbudowa systemu widgetów',
     'about.news.next.ttsLanguages': '',
     'about.news.next.superFans': 'wyróżnienie super fanów na czacie',
-    'about.news.next.connection': 'optymalizacja połączenia z danym twórcą',
+    'about.news.next.achievements': 'rozbudowa systemu osiągnięć',
+    'about.news.next.redeemCodes': 'dodanie kolejnych kodów aktywacyjnych',
+    'about.news.next.specialNotifications': 'dalsze porządkowanie funkcji specjalnych i powiadomień',
+    'about.news.next.connection': 'optymalizacja stabilności połączenia z twórcą',
     'about.news.next.giftSounds': 'powiadomienia dźwiękowe dla większych prezentów',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Skąd pomysł na aplikację?',
@@ -308,6 +370,10 @@ const I18N = {
     'topGifters.title': 'Top giftujący',
     'topGifters.expand': 'Rozwiń top giftujących',
     'topGifters.collapse': 'Zwiń top giftujących',
+    'topTappers.title': 'Top tapnięć',
+    'topTappers.empty': 'Brak polubień LIVE od dołączenia do transmisji.',
+    'topTappers.expand': 'Rozwiń top tapnięć',
+    'topTappers.collapse': 'Zwiń top tapnięć',
     'moderatorsWidget.title': 'Aktywni moderatorzy',
     'moderatorsWidget.empty': 'Brak aktywnych moderatorów w ostatnich 5 minutach.',
     'moderatorsWidget.expand': 'Rozwiń listę aktywnych moderatorów',
@@ -368,6 +434,7 @@ const I18N = {
     'nav.archive': 'Archive',
     'nav.settings': 'Settings',
     'nav.notes': 'Notes',
+    'nav.achievements': 'Achievements',
     'nav.ranking': 'Ranking',
     'nav.about': 'About',
     'creator.label': 'Creator',
@@ -387,6 +454,20 @@ const I18N = {
     'ranking.live': 'LIVE',
     'ranking.offline': 'OFFLINE',
     'ranking.diamonds': 'Diamonds',
+    'achievements.title': 'Achievements',
+    'achievements.note': 'Unlocked achievements for activity in the app.',
+    'achievements.emptyTitle': 'No unlocked achievements yet.',
+    'achievements.emptyDescription': 'Achievements will appear here only after you earn them.',
+    'achievements.firstLogin.title': 'I solemnly swear that I am up to no good!',
+    'achievements.firstLogin.description': 'Log in for the first time in the program.',
+    'achievements.kamaConnections.title': 'There is no place like home...',
+    'achievements.kamaConnections.description': 'Connect to Kama 10 times.',
+    'achievements.tenCreators.title': 'I am just getting started!',
+    'achievements.tenCreators.description': 'Connect to 10 different creators.',
+    'achievements.firstNote.title': 'I must write or I will burst!',
+    'achievements.firstNote.description': 'Write your first note.',
+    'achievements.retroKb2.title': 'Retrospection',
+    'achievements.retroKb2.description': 'Switch the app to the Lite version.',
     'ranking.revenue': 'Revenue',
     'ranking.earnings': 'Earnings',
     'filters.chat': 'Chat',
@@ -445,12 +526,11 @@ const I18N = {
     'settings.tabs.appearance': 'Appearance',
     'settings.tabs.accessibility': 'Accessibility',
     'settings.tabs.system': 'System',
+    'settings.tabs.redeem': 'Redeem code',
     'settings.general.note': 'General application settings.',
     'settings.general.multiplierNotifications': 'Multiplier notifications',
     'settings.general.statsToolbox': 'Statistics toolbox',
     'settings.general.galleryAvatars': 'Gallery avatars',
-    'settings.general.pinWidgetsToRight': 'Show widgets at the right edge of the desktop when the app is minimized',
-    'settings.general.desktopWidgetsAlwaysOnTop': 'Keep desktop widgets always on top',
     'settings.appearance.chatStyle': 'Chat style:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'Application appearance:',
@@ -471,6 +551,8 @@ const I18N = {
     'settings.appAppearance.default.description': 'Current header, sidebar, panel and button layout.',
     'settings.appAppearance.decorative.name': 'Decorative',
     'settings.appAppearance.decorative.description': 'Elegant, modern application layout.',
+    'settings.appAppearance.retroKb2.name': 'Retro KB2',
+    'settings.appAppearance.retroKb2.description': 'Lightweight old-blog layout inspired by K2: header and links instead of buttons.',
     'settings.accessibility.tts': 'Message TTS:',
     'settings.accessibility.readAloud': 'Read chat aloud',
     'settings.accessibility.skipVulgarNicknames': 'Skip vulgar nicknames',
@@ -481,6 +563,13 @@ const I18N = {
     'settings.accessibility.rate': 'Rate',
     'settings.accessibility.delay': 'Chat delay:',
     'settings.system.note': 'System information and settings.',
+    'settings.redeem.note': 'Enter a code to unlock extra features.',
+    'settings.redeem.codeLabel': 'Activation code',
+    'settings.redeem.button': 'Activate',
+    'settings.redeem.waiting': 'Enter an activation code.',
+    'settings.redeem.unlocked': 'Code accepted. Honda blue notification is active.',
+    'settings.redeem.invalid': 'Invalid code.',
+    'settings.redeem.alreadyUsed': 'This code has already been redeemed.',
     'settings.system.autoLaunch': 'Automatically open Czatbox TT when the computer starts',
     'settings.system.runInBackground': 'Start the program in the background so it does not get in the way',
     'settings.system.minimizeToTray': 'Minimize Czatbox TT to the system tray after clicking X',
@@ -509,10 +598,11 @@ const I18N = {
     'about.news.version': 'Program version',
     'about.news.intro': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.news.features.title': 'Main features:',
-    'about.news.features.notes': 'a notes module was added for saving current live matters',
-    'about.news.features.updates': 'the program checks whether a newer version exists, then downloads it and informs about the update and restart.',
-    'about.news.features.enigmaTheme': 'a new theme and its variants were added in different settings - Enigma-Z',
-    'about.news.features.superFans': 'super fans are highlighted in chat',
+    'about.news.features.achievements': 'added an achievements system, available in the “Achievements” tab',
+    'about.news.features.redeemCode': 'added the “Redeem code” tab in settings',
+    'about.news.features.retroKb2': 'application appearance: Retro KB2, a lighter Lite version of the program',
+    'about.news.features.desktopWidgetsRemoved': 'removed desktop widget pinning and always-on-top desktop widgets. This mechanism was highly bug-prone and added extra load to the application. Combined with heavier themes, it reduced the quality of use for people on weaker computers. That was not the goal, quality matters, so this feature is suspended in the current version.',
+    'about.news.features.topTappers': 'added a new top tappers ranking widget.',
     'about.news.features.events': 'displaying TikTok LIVE chat messages with filters for messages, likes, gifts, joins, reposts, shares, boxes and portals',
     'about.news.features.moderators': 'highlighting moderators with a red nickname',
     'about.news.features.avatars': 'random user avatars from the local application image pool to reduce network usage during streams',
@@ -521,29 +611,31 @@ const I18N = {
     'about.news.features.archive': 'archiving the entire stream chat to a file',
     'about.news.features.styles': 'multiple chat styles: Compact, Spacious and Modern',
     'about.news.features.themes': 'multiple application color themes',
-    'about.news.features.appearances': 'multiple application layouts: Default and Decorative',
+    'about.news.features.appearances': 'multiple application layouts: Default, Decorative and Retro KB2',
     'about.news.features.delay': 'adjustable chat message display delay',
     'about.news.features.stats': 'live statistics toolbox',
     'about.news.features.widgets': 'the live toolbox has been replaced with widgets. You can now check online moderation, statistics and the top 5 gifters',
-    'about.news.features.flexibleWidgets': 'all widgets are flexible: you can hide them, show them and pin them to the desktop when the app is minimized',
+    'about.news.features.flexibleWidgets': 'all in-app widgets are flexible: you can hide and show them as needed',
     'about.news.features.archiveCenter': 'improved and expanded live chat archive center with filters and summaries for events, chat messages, coins and moderators online during the session',
     'about.news.features.archiveActions': 'archives can be exported to *.txt, deleted and refreshed.',
     'about.news.features.languages': 'Polish, English and German application languages',
     'about.news.fixes.title': 'Fixes:',
-    'about.news.fixes.notes': 'notes module functions were improved',
-    'about.news.fixes.desktopWidgets': 'desktop widget behavior was improved',
+    'about.news.fixes.recentCreators': 'fixed recent creators and restored their correct display outside Retro KB2',
     'about.news.fixes.box': 'fixed the coin box message that could show "unknow sends a box" when a box opened in chat',
     'about.news.fixes.optimization': 'program performance optimization',
     'about.news.known.title': 'Known issues:',
     'about.news.known.box': 'after a coin box opens, the chat may sometimes show the message "unknow sends a box"',
-    'about.news.known.multiplier': 'battle multipliers are an experimental feature and may occasionally appear incorrectly during the final minute',
+    'about.news.known.multiplier': 'battle multipliers remain experimental and may sometimes appear incorrectly near the end of a battle',
     'about.news.next.title': 'What comes next:',
     'about.news.next.archive': 'Improvements to archived chat reading. To be honest, I am not satisfied with the current version and it needs to be rebuilt.',
     'about.news.next.fixes': 'Fixes for minor issues',
     'about.news.next.widgets': 'expanding the widget system',
     'about.news.next.ttsLanguages': 'additional TTS chat reading languages',
     'about.news.next.superFans': 'highlighting super fans in chat',
-    'about.news.next.connection': 'optimizing the connection to a selected creator',
+    'about.news.next.achievements': 'expanding the achievements system',
+    'about.news.next.redeemCodes': 'adding more activation codes',
+    'about.news.next.specialNotifications': 'further cleanup of special features and notifications',
+    'about.news.next.connection': 'optimizing creator connection stability',
     'about.news.next.giftSounds': 'sound notifications for larger gifts',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Where did the idea for the application come from?',
@@ -571,6 +663,10 @@ const I18N = {
     'topGifters.title': 'Top gifters',
     'topGifters.expand': 'Expand top gifters',
     'topGifters.collapse': 'Collapse top gifters',
+    'topTappers.title': 'Top taps',
+    'topTappers.empty': 'No LIVE likes since joining this stream.',
+    'topTappers.expand': 'Expand top taps',
+    'topTappers.collapse': 'Collapse top taps',
     'moderatorsWidget.title': 'Active moderators',
     'moderatorsWidget.empty': 'No active moderators in the last 5 minutes.',
     'moderatorsWidget.expand': 'Expand active moderators',
@@ -631,6 +727,7 @@ const I18N = {
     'nav.archive': 'Archiv',
     'nav.settings': 'Einstellungen',
     'nav.notes': 'Notizen',
+    'nav.achievements': 'Erfolge',
     'nav.ranking': 'Ranking',
     'nav.about': 'Über das Programm',
     'creator.label': 'Creator',
@@ -650,6 +747,20 @@ const I18N = {
     'ranking.live': 'LIVE',
     'ranking.offline': 'OFFLINE',
     'ranking.diamonds': 'Diamanten',
+    'achievements.title': 'Erfolge',
+    'achievements.note': 'Freigeschaltete Erfolge für Aktivität in der App.',
+    'achievements.emptyTitle': 'Noch keine Erfolge freigeschaltet.',
+    'achievements.emptyDescription': 'Erfolge erscheinen hier erst, nachdem du sie freigeschaltet hast.',
+    'achievements.firstLogin.title': 'Ich schwöre feierlich, dass ich etwas im Schilde führe!',
+    'achievements.firstLogin.description': 'Melde dich zum ersten Mal im Programm an.',
+    'achievements.kamaConnections.title': 'Zu Hause ist es doch am schönsten...',
+    'achievements.kamaConnections.description': 'Verbinde dich 10 Mal mit Kama.',
+    'achievements.tenCreators.title': 'Ich komme gerade erst in Fahrt!',
+    'achievements.tenCreators.description': 'Verbinde dich mit 10 verschiedenen Creatorn.',
+    'achievements.firstNote.title': 'Ich muss schreiben, sonst platze ich!',
+    'achievements.firstNote.description': 'Schreibe deine erste Notiz.',
+    'achievements.retroKb2.title': 'Retrospektion',
+    'achievements.retroKb2.description': 'Schalte die App auf die Lite-Version um.',
     'ranking.revenue': 'Umsatz',
     'ranking.earnings': 'Einnahmen',
     'filters.chat': 'Chat',
@@ -708,12 +819,11 @@ const I18N = {
     'settings.tabs.appearance': 'Aussehen',
     'settings.tabs.accessibility': 'Barrierefreiheit',
     'settings.tabs.system': 'System',
+    'settings.tabs.redeem': 'Code einlösen',
     'settings.general.note': 'Allgemeine Anwendungseinstellungen.',
     'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
     'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
     'settings.general.galleryAvatars': 'Avatare aus der Galerie',
-    'settings.general.pinWidgetsToRight': 'Widgets am rechten Desktoprand anzeigen, wenn die App minimiert ist',
-    'settings.general.desktopWidgetsAlwaysOnTop': 'Desktop-Widgets immer im Vordergrund halten',
     'settings.appearance.chatStyle': 'Chat-Stil:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'App-Aussehen:',
@@ -734,6 +844,8 @@ const I18N = {
     'settings.appAppearance.default.description': 'Aktuelles Layout von Header, Sidebar, Fenstern und Buttons.',
     'settings.appAppearance.decorative.name': 'Dekorativ',
     'settings.appAppearance.decorative.description': 'Elegantes, modernes App-Layout.',
+    'settings.appAppearance.retroKb2.name': 'Retro KB2',
+    'settings.appAppearance.retroKb2.description': 'Leichtes altes Blog-Layout inspiriert von K2: Header und Links statt Buttons.',
     'settings.accessibility.tts': 'Nachrichten-TTS:',
     'settings.accessibility.readAloud': 'Chat laut vorlesen',
     'settings.accessibility.skipVulgarNicknames': 'Vulgäre Nicknames überspringen',
@@ -744,6 +856,13 @@ const I18N = {
     'settings.accessibility.rate': 'Tempo',
     'settings.accessibility.delay': 'Chat-Verzögerung:',
     'settings.system.note': 'Systeminformationen und Einstellungen.',
+    'settings.redeem.note': 'Gib einen Code ein, um zusätzliche Funktionen freizuschalten.',
+    'settings.redeem.codeLabel': 'Aktivierungscode',
+    'settings.redeem.button': 'Aktivieren',
+    'settings.redeem.waiting': 'Gib einen Aktivierungscode ein.',
+    'settings.redeem.unlocked': 'Code akzeptiert. Die blaue Honda-Benachrichtigung ist aktiv.',
+    'settings.redeem.invalid': 'Ungültiger Code.',
+    'settings.redeem.alreadyUsed': 'Dieser Code wurde bereits eingelöst.',
     'settings.system.autoLaunch': 'Czatbox TT automatisch beim Computerstart öffnen',
     'settings.system.runInBackground': 'Programm im Hintergrund starten, damit es nicht stört',
     'settings.system.minimizeToTray': 'Czatbox TT beim Klick auf X in den Infobereich minimieren',
@@ -772,10 +891,11 @@ const I18N = {
     'about.news.version': 'Programmversion',
     'about.news.intro': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.news.features.title': 'Hauptfunktionen:',
-    'about.news.features.notes': 'ein Notizmodul zum Speichern laufender Live-Themen wurde hinzugefügt',
-    'about.news.features.updates': 'das Programm prüft, ob eine neuere Version verfügbar ist, lädt sie herunter und informiert über Update und Neustart.',
-    'about.news.features.enigmaTheme': 'ein neues Theme und seine Varianten wurden in verschiedenen Einstellungen hinzugefügt - Enigma-Z',
-    'about.news.features.superFans': 'Superfans werden im Chat hervorgehoben',
+    'about.news.features.achievements': 'ein Erfolgssystem wurde hinzugefügt, sichtbar im Tab „Erfolge“',
+    'about.news.features.redeemCode': 'der Tab „Code einlösen“ wurde in den Einstellungen hinzugefügt',
+    'about.news.features.retroKb2': 'App-Aussehen: Retro KB2, eine entlastete Lite-Version des Programms',
+    'about.news.features.desktopWidgetsRemoved': 'Desktop-Widgets und das Anheften über anderen Fenstern wurden entfernt. Diese Mechanik war stark fehleranfällig und belastete die App zusätzlich. In Kombination mit schwereren Themes sank die Nutzungsqualität auf schwächeren Computern. Das war nicht das Ziel; Qualität ist wichtiger, deshalb wird diese Funktion in der aktuellen Version ausgesetzt.',
+    'about.news.features.topTappers': 'ein neues Widget für das Ranking der Tapper wurde hinzugefügt.',
     'about.news.features.events': 'Anzeige von TikTok-LIVE-Chatnachrichten mit Filtern für Nachrichten, Likes, Geschenke, Beitritte, Reposts, Teilen, Boxen und Portale',
     'about.news.features.moderators': 'Moderatoren werden mit einem roten Nickname hervorgehoben',
     'about.news.features.avatars': 'zufällige Benutzeravatare aus dem lokalen Bilderpool der App, um während des Streams möglichst wenig Daten zu laden',
@@ -784,29 +904,31 @@ const I18N = {
     'about.news.features.archive': 'Archivierung des gesamten Stream-Chats in einer Datei',
     'about.news.features.styles': 'verschiedene Chat-Stile: Kompakt, Geräumig und Modern',
     'about.news.features.themes': 'verschiedene Farbthemen der Anwendung',
-    'about.news.features.appearances': 'verschiedene App-Layouts: Standard und Dekorativ',
+    'about.news.features.appearances': 'verschiedene App-Layouts: Standard, Dekorativ und Retro KB2',
     'about.news.features.delay': 'einstellbare Verzögerung für Chatnachrichten',
     'about.news.features.stats': 'LIVE-Statistik-Werkzeugleiste',
     'about.news.features.widgets': 'die Live-Werkzeugleiste wurde durch Widgets ersetzt. Ab jetzt kannst du Online-Moderation, Statistiken und die Top 5 Geschenkgeber sehen',
-    'about.news.features.flexibleWidgets': 'alle Widgets sind flexibel: du kannst sie ausblenden, anzeigen und bei minimierter App am Desktop anheften',
+    'about.news.features.flexibleWidgets': 'alle Widgets in der App sind flexibel: du kannst sie nach Bedarf ausblenden und anzeigen',
     'about.news.features.archiveCenter': 'verbessertes und erweitertes Archivzentrum für Live-Chats mit Filtern und Zusammenfassungen zu Ereignissen, Chatnachrichten, Münzen und während der Sitzung aktiven Moderatoren',
     'about.news.features.archiveActions': 'Archive können als *.txt exportiert, gelöscht und aktualisiert werden.',
     'about.news.features.languages': 'Polnisch, Englisch und Deutsch als App-Sprachen',
     'about.news.fixes.title': 'Korrekturen:',
-    'about.news.fixes.notes': 'Funktionen des Notizmoduls wurden verbessert',
-    'about.news.fixes.desktopWidgets': 'das Verhalten der Desktop-Widgets wurde verbessert',
+    'about.news.fixes.recentCreators': 'die letzten Creator wurden korrigiert und ihre richtige Anzeige außerhalb von Retro KB2 wiederhergestellt',
     'about.news.fixes.box': 'die Nachricht zur Münzbox wurde korrigiert, wenn beim Öffnen im Chat „unknow sendet eine Box“ erscheinen konnte',
     'about.news.fixes.optimization': 'Optimierung der Programmleistung',
     'about.news.known.title': 'Bekannte Fehler:',
     'about.news.known.box': 'nach dem Öffnen einer Münzbox kann gelegentlich die Nachricht „unknow sendet eine Box“ im Chat erscheinen',
-    'about.news.known.multiplier': 'Battle-Multiplikatoren sind eine Testfunktion und können in der letzten Minute gelegentlich fälschlich erscheinen',
+    'about.news.known.multiplier': 'Battle-Multiplikatoren bleiben eine Testfunktion und können gegen Ende eines Battles gelegentlich fälschlich erscheinen',
     'about.news.next.title': 'Wie geht es weiter:',
     'about.news.next.archive': 'Verbesserungen beim Lesen archivierter Chats. Ehrlich gesagt bin ich mit der aktuellen Version nicht zufrieden und sie muss überarbeitet werden.',
     'about.news.next.fixes': 'Behebung kleinerer Fehler',
     'about.news.next.widgets': 'Ausbau des Widget-Systems',
     'about.news.next.ttsLanguages': 'zusätzliche Sprachen für das Vorlesen des Chats per TTS',
     'about.news.next.superFans': 'Hervorhebung von Superfans im Chat',
-    'about.news.next.connection': 'Optimierung der Verbindung zu einem ausgewählten Creator',
+    'about.news.next.achievements': 'Ausbau des Erfolgssystems',
+    'about.news.next.redeemCodes': 'Hinzufügen weiterer Aktivierungscodes',
+    'about.news.next.specialNotifications': 'weitere Bereinigung von Sonderfunktionen und Benachrichtigungen',
+    'about.news.next.connection': 'Optimierung der Verbindungsstabilität zum Creator',
     'about.news.next.giftSounds': 'Tonbenachrichtigungen für größere Geschenke',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Wie entstand die Idee für die Anwendung?',
@@ -834,6 +956,10 @@ const I18N = {
     'topGifters.title': 'Top-Geschenkgeber',
     'topGifters.expand': 'Top-Geschenkgeber öffnen',
     'topGifters.collapse': 'Top-Geschenkgeber schließen',
+    'topTappers.title': 'Top-Taps',
+    'topTappers.empty': 'Keine LIVE-Likes seit dem Beitritt zum Stream.',
+    'topTappers.expand': 'Top-Taps öffnen',
+    'topTappers.collapse': 'Top-Taps schließen',
     'moderatorsWidget.title': 'Aktive Moderatoren',
     'moderatorsWidget.empty': 'Keine aktiven Moderatoren in den letzten 5 Minuten.',
     'moderatorsWidget.expand': 'Aktive Moderatoren öffnen',
@@ -896,6 +1022,7 @@ const statusDelayEl = document.getElementById('statusDelay');
 const statusQueueEl = document.getElementById('statusQueue');
 const statusViewersEl = document.getElementById('statusViewers');
 const topGiftersContent = document.getElementById('topGiftersContent');
+const topTappersContent = document.getElementById('topTappersContent');
 const moderatorsWidgetContent = document.getElementById('moderatorsWidgetContent');
 const statusMessagesEl = document.getElementById('statusMessages');
 const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
@@ -905,7 +1032,7 @@ const rightWidgets = Array.from(document.querySelectorAll('[data-right-widget]')
 const rightWidgetButtons = Array.from(document.querySelectorAll('[data-widget-target]'));
 const creatorInput = document.getElementById('creatorInput');
 const creatorRefreshButton = document.getElementById('creatorRefresh');
-const creatorSuggestions = null;
+const creatorSuggestions = document.getElementById('creatorSuggestions');
 const recentCreatorsStrip = document.getElementById('recentCreatorsStrip');
 const recentCreatorsCarousel = document.getElementById('recentCreatorsCarousel');
 const recentCreatorsPrev = document.getElementById('recentCreatorsPrev');
@@ -926,8 +1053,6 @@ const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="ap
 const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
 const statsToolboxEl = document.getElementById('statsToolbox');
 const galleryAvatarsEl = document.getElementById('galleryAvatars');
-const pinWidgetsToRightEl = document.getElementById('pinWidgetsToRight');
-const desktopWidgetsAlwaysOnTopEl = document.getElementById('desktopWidgetsAlwaysOnTop');
 const refreshArchiveButton = document.getElementById('refreshArchive');
 const openArchiveFolderButton = document.getElementById('openArchiveFolder');
 const archiveListEl = document.getElementById('archiveList');
@@ -958,6 +1083,10 @@ const noteMetaEl = document.getElementById('noteMeta');
 const noteFormatButtons = Array.from(document.querySelectorAll('[data-note-format]'));
 const rankingSummaryEl = document.getElementById('rankingSummary');
 const rankingListEl = document.getElementById('rankingList');
+const achievementsListEl = document.getElementById('achievementsList');
+const redeemCodeInput = document.getElementById('redeemCodeInput');
+const redeemCodeButton = document.getElementById('redeemCodeButton');
+const redeemCodeStatus = document.getElementById('redeemCodeStatus');
 const appVersionEl = document.getElementById('appVersion');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
 const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
@@ -984,6 +1113,7 @@ const renderedMessageElements = new Map();
 const queuedMessagesById = new Map();
 const visibleMessagesById = new Map();
 const giftTotalsByUser = new Map();
+const tapTotalsByUser = new Map();
 const activeChatUsers = new Map();
 const activeModerators = new Map();
 const speechQueue = [];
@@ -1027,63 +1157,16 @@ let timeFormatterKey = '';
 let timeFormatter = null;
 let pendingScrollToEnd = false;
 let liveViewerCount = 0;
-let desktopWidgetRegionsFrame = 0;
+let appearanceBroadcastChannel = null;
 let chatMessageCount = 0;
 let recentCreators = loadRecentCreators();
 let recentCreatorMeta = loadRecentCreatorMeta();
 let lastSubmittedCreator = '';
 let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
-
-if (DESKTOP_WIDGET_MODE) {
-  document.documentElement.dataset.desktopWidgets = 'true';
-}
-
-function updateDesktopWidgetInteractiveRegions() {
-  if (
-    !DESKTOP_WIDGET_MODE
-    || !window.tiktokLive
-    || typeof window.tiktokLive.setDesktopWidgetsInteractiveRegions !== 'function'
-  ) {
-    return;
-  }
-
-  const regions = Array.from(document.querySelectorAll('.right-widget'))
-    .filter((widget) => {
-      const style = window.getComputedStyle(widget);
-      return style.display !== 'none' && style.visibility !== 'hidden';
-    })
-    .map((widget) => {
-      const rect = widget.getBoundingClientRect();
-      return {
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height
-      };
-    })
-    .filter((region) => region.width > 0 && region.height > 0);
-
-  window.tiktokLive.setDesktopWidgetsInteractiveRegions(regions).catch(() => {});
-}
-
-function scheduleDesktopWidgetInteractiveRegions() {
-  if (!DESKTOP_WIDGET_MODE) {
-    return;
-  }
-
-  window.cancelAnimationFrame(desktopWidgetRegionsFrame);
-  desktopWidgetRegionsFrame = window.requestAnimationFrame(updateDesktopWidgetInteractiveRegions);
-}
-
-function initDesktopWidgetInteractiveRegions() {
-  if (!DESKTOP_WIDGET_MODE) {
-    return;
-  }
-
-  scheduleDesktopWidgetInteractiveRegions();
-  window.addEventListener('resize', scheduleDesktopWidgetInteractiveRegions);
-}
+let achievementsState = loadAchievementsState();
+let redeemedFeatures = loadRedeemedFeatures();
+let lastHondaOnlineAlertAt = 0;
 
 function getTimeFormatter() {
   const key = `${appLanguage}:${timeFormat}`;
@@ -1152,9 +1235,7 @@ function normalizeGeneralSettings(value) {
   return {
     multiplierNotifications: next.multiplierNotifications !== false,
     statsToolbox: next.statsToolbox !== false,
-    galleryAvatars: next.galleryAvatars !== false,
-    pinWidgetsToRight: next.pinWidgetsToRight !== false,
-    desktopWidgetsAlwaysOnTop: next.desktopWidgetsAlwaysOnTop !== false
+    galleryAvatars: next.galleryAvatars !== false
   };
 }
 
@@ -1209,6 +1290,302 @@ function loadAppAppearance() {
 
 function saveAppAppearance() {
   localStorage.setItem(APP_APPEARANCE_SETTINGS_KEY, appAppearance);
+}
+
+function createDefaultAchievementsState() {
+  return {
+    unlocked: {},
+    creatorConnections: {},
+    uniqueCreators: []
+  };
+}
+
+function normalizeAchievementsState(value) {
+  const fallback = createDefaultAchievementsState();
+  if (!value || typeof value !== 'object') {
+    return fallback;
+  }
+
+  const unlocked = value.unlocked && typeof value.unlocked === 'object' ? value.unlocked : {};
+  const creatorConnections = value.creatorConnections && typeof value.creatorConnections === 'object'
+    ? value.creatorConnections
+    : {};
+  const uniqueCreators = Array.isArray(value.uniqueCreators) ? value.uniqueCreators : [];
+
+  return {
+    unlocked: Object.fromEntries(
+      Object.entries(unlocked)
+        .filter(([id, unlockedAt]) => ACHIEVEMENT_DEFINITIONS.some((achievement) => achievement.id === id) && typeof unlockedAt === 'string')
+    ),
+    creatorConnections: Object.fromEntries(
+      Object.entries(creatorConnections)
+        .map(([handle, count]) => [normalizeCreatorHandle(handle), Math.max(0, Number(count) || 0)])
+        .filter(([handle]) => Boolean(handle))
+    ),
+    uniqueCreators: Array.from(new Set(uniqueCreators.map(normalizeCreatorHandle).filter(Boolean)))
+  };
+}
+
+function loadAchievementsState() {
+  try {
+    return normalizeAchievementsState(JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY) || '{}'));
+  } catch {
+    return createDefaultAchievementsState();
+  }
+}
+
+function saveAchievementsState() {
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievementsState));
+}
+
+function loadRedeemedFeatures() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REDEEMED_FEATURES_KEY) || '{}');
+    const codes = Array.isArray(saved.codes)
+      ? Array.from(new Set(saved.codes.map(normalizeRedeemCode).filter(Boolean)))
+      : [];
+    if (saved.hondaAlerts && !codes.includes(HONDA_REDEEM_CODE)) {
+      codes.push(HONDA_REDEEM_CODE);
+    }
+    return {
+      hondaAlerts: Boolean(saved.hondaAlerts) || codes.includes(HONDA_REDEEM_CODE),
+      codes
+    };
+  } catch {
+    return {
+      hondaAlerts: false,
+      codes: []
+    };
+  }
+}
+
+function saveRedeemedFeatures() {
+  localStorage.setItem(REDEEMED_FEATURES_KEY, JSON.stringify(redeemedFeatures));
+}
+
+function normalizeRedeemCode(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function formatRedeemCode(value) {
+  return normalizeRedeemCode(value).slice(0, 16).replace(/(.{4})(?=.)/g, '$1 ');
+}
+
+function isHondaAlertsUnlocked() {
+  return Boolean(redeemedFeatures.hondaAlerts);
+}
+
+function setRedeemCodeStatus(message, tone = 'idle') {
+  if (!redeemCodeStatus) {
+    return;
+  }
+
+  redeemCodeStatus.textContent = message;
+  redeemCodeStatus.dataset.tone = tone;
+}
+
+function syncRedeemCodeUi() {
+  if (redeemCodeInput) {
+    redeemCodeInput.disabled = false;
+  }
+  if (redeemCodeButton) {
+    redeemCodeButton.disabled = false;
+  }
+  setRedeemCodeStatus(t('settings.redeem.waiting'), 'idle');
+}
+
+function redeemEnteredCode() {
+  if (!redeemCodeInput) {
+    return;
+  }
+
+  const normalized = normalizeRedeemCode(redeemCodeInput.value);
+  if ((redeemedFeatures.codes || []).includes(normalized)) {
+    redeemCodeInput.value = '';
+    setRedeemCodeStatus(t('settings.redeem.alreadyUsed'), 'success');
+    return;
+  }
+
+  if (normalized !== HONDA_REDEEM_CODE) {
+    setRedeemCodeStatus(t('settings.redeem.invalid'), 'error');
+    return;
+  }
+
+  redeemedFeatures.hondaAlerts = true;
+  redeemedFeatures.codes = Array.from(new Set([...(redeemedFeatures.codes || []), normalized]));
+  saveRedeemedFeatures();
+  redeemCodeInput.value = '';
+  setRedeemCodeStatus(t('settings.redeem.unlocked'), 'success');
+}
+
+function initRedeemCodeSettings() {
+  syncRedeemCodeUi();
+
+  if (redeemCodeInput) {
+    redeemCodeInput.addEventListener('input', () => {
+      const selectionAtEnd = redeemCodeInput.selectionStart === redeemCodeInput.value.length;
+      redeemCodeInput.value = formatRedeemCode(redeemCodeInput.value);
+      if (selectionAtEnd) {
+        redeemCodeInput.setSelectionRange(redeemCodeInput.value.length, redeemCodeInput.value.length);
+      }
+      if (!redeemCodeInput.value) {
+        syncRedeemCodeUi();
+      }
+    });
+    redeemCodeInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        redeemEnteredCode();
+      }
+    });
+  }
+
+  if (redeemCodeButton) {
+    redeemCodeButton.addEventListener('click', redeemEnteredCode);
+  }
+}
+
+function unlockAchievement(id) {
+  if (!ACHIEVEMENT_DEFINITIONS.some((achievement) => achievement.id === id) || achievementsState.unlocked[id]) {
+    return false;
+  }
+
+  achievementsState.unlocked[id] = new Date().toISOString();
+  saveAchievementsState();
+  renderAchievements();
+  return true;
+}
+
+function renderAchievements() {
+  if (!achievementsListEl) {
+    return;
+  }
+
+  achievementsListEl.replaceChildren();
+
+  const fragment = document.createDocumentFragment();
+  ACHIEVEMENT_DEFINITIONS.forEach((achievement) => {
+    const unlocked = Boolean(achievementsState.unlocked[achievement.id]);
+    const card = document.createElement('article');
+    card.className = 'achievement-card';
+    card.dataset.unlocked = String(unlocked);
+    if (!unlocked) {
+      card.setAttribute('aria-label', 'Zablokowane osiągnięcie');
+    }
+
+    const image = document.createElement('span');
+    image.className = 'achievement-image';
+    image.textContent = achievement.icon;
+    image.setAttribute('aria-hidden', 'true');
+
+    const copy = document.createElement('span');
+    copy.className = 'achievement-copy';
+
+    const title = document.createElement('strong');
+    title.className = 'achievement-title';
+    title.textContent = t(achievement.titleKey);
+
+    const description = document.createElement('span');
+    description.className = 'achievement-description';
+    description.textContent = t(achievement.descriptionKey);
+
+    copy.append(title, description);
+    card.append(image, copy);
+    fragment.appendChild(card);
+  });
+
+  achievementsListEl.appendChild(fragment);
+}
+
+function trackLoggedInAchievement(nextState) {
+  if (nextState && nextState.loggedIn) {
+    unlockAchievement('first-login');
+  }
+}
+
+function trackCreatorConnectionAchievement(nextState, options = {}) {
+  if (!nextState || !isOnlineConnectionState(nextState)) {
+    return;
+  }
+  if (!options.countConnection) {
+    return;
+  }
+
+  const handle = normalizeCreatorHandle(
+    nextState.currentCreator && nextState.currentCreator.username
+      ? nextState.currentCreator.username
+      : getCreatorUsernameFromState()
+  );
+  if (!handle) {
+    return;
+  }
+
+  achievementsState.creatorConnections[handle] = (Number(achievementsState.creatorConnections[handle]) || 0) + 1;
+  if (!achievementsState.uniqueCreators.includes(handle)) {
+    achievementsState.uniqueCreators.push(handle);
+  }
+
+  if (handle === KAMA_CREATOR_HANDLE && achievementsState.creatorConnections[handle] >= 10) {
+    unlockAchievement('kama-10-connections');
+  }
+  if (achievementsState.uniqueCreators.length >= 10) {
+    unlockAchievement('ten-creators');
+  }
+
+  saveAchievementsState();
+  renderAchievements();
+}
+
+function syncAppearanceFromValues(nextValues = {}) {
+  const nextChatStyle = CHAT_STYLES.includes(nextValues.chatStyle) ? nextValues.chatStyle : chatStyle;
+  const nextTheme = APP_THEMES.includes(nextValues.appTheme) ? nextValues.appTheme : appTheme;
+  const nextAppearance = APP_APPEARANCES.includes(nextValues.appAppearance) ? nextValues.appAppearance : appAppearance;
+  const chatStyleChanged = nextChatStyle !== chatStyle;
+  const appearanceChanged = nextAppearance !== appAppearance;
+  const changed = chatStyleChanged || nextTheme !== appTheme || nextAppearance !== appAppearance;
+
+  if (!changed) {
+    return;
+  }
+
+  chatStyle = nextChatStyle;
+  appTheme = nextTheme;
+  appAppearance = nextAppearance;
+  applyAppearanceSettings();
+
+  if (chatStyleChanged) {
+    renderVisibleMessages();
+  }
+
+  if (appearanceChanged) {
+    if (appAppearance === 'retro-kb2') {
+      unlockAchievement('retro-kb2');
+    }
+    closeCreatorSuggestions();
+  }
+}
+
+function syncAppearanceFromStorage() {
+  syncAppearanceFromValues({
+    chatStyle: loadChatStyle(),
+    appTheme: loadAppTheme(),
+    appAppearance: loadAppAppearance()
+  });
+}
+
+function broadcastAppearanceSettings() {
+  if (appearanceBroadcastChannel) {
+    appearanceBroadcastChannel.postMessage({ chatStyle, appTheme, appAppearance });
+  }
+}
+
+function getEffectiveChatStyle() {
+  return appAppearance === 'retro-kb2' ? 'compact' : chatStyle;
+}
+
+function isRetroKb2Appearance() {
+  return appAppearance === 'retro-kb2'
+    || document.documentElement.dataset.appAppearance === 'retro-kb2';
 }
 
 function normalizeCreatorHandle(value) {
@@ -1360,9 +1737,10 @@ function applyI18n() {
     ['.creator-picker > label', 'creator.label'],
     ['.sidebar-button[data-section="chatbox"]', 'nav.chatbox'],
     ['.sidebar-button[data-section="archive"]', 'nav.archive'],
-    ['.sidebar-button[data-section="settings"]', 'nav.settings'],
     ['.sidebar-button[data-section="notes"]', 'nav.notes'],
+    ['.sidebar-button[data-section="achievements"]', 'nav.achievements'],
     ['.sidebar-button[data-section="ranking"]', 'nav.ranking'],
+    ['.sidebar-button[data-section="settings"]', 'nav.settings'],
     ['.sidebar-button[data-section="about"]', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
     ['.filter-button[data-filter="like"]', 'filters.like'],
@@ -1382,20 +1760,23 @@ function applyI18n() {
     ['.archive-status', 'archive.status'],
     ['.view-panel[data-view="ranking"] .page-header h1', 'ranking.title'],
     ['.view-panel[data-view="ranking"] .page-note', 'ranking.note'],
+    ['.view-panel[data-view="achievements"] .page-header h1', 'achievements.title'],
+    ['.view-panel[data-view="achievements"] .page-note', 'achievements.note'],
+    ['.achievements-empty strong', 'achievements.emptyTitle'],
+    ['.achievements-empty span:not(.achievements-empty-icon)', 'achievements.emptyDescription'],
     ['.view-panel[data-view="settings"] .page-header h1', 'settings.title'],
     ['.settings-tab[data-settings-tab="general"]', 'settings.tabs.general'],
     ['.settings-tab[data-settings-tab="appearance"]', 'settings.tabs.appearance'],
     ['.settings-tab[data-settings-tab="accessibility"]', 'settings.tabs.accessibility'],
     ['.settings-tab[data-settings-tab="system"]', 'settings.tabs.system'],
+    ['.settings-tab[data-settings-tab="redeem"]', 'settings.tabs.redeem'],
     ['.settings-panel[data-settings-panel="general"] .page-note', 'settings.general.note'],
     ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
     ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
     ['label[for="galleryAvatars"] > span', 'settings.general.galleryAvatars'],
-    ['label[for="pinWidgetsToRight"] > span', 'settings.general.pinWidgetsToRight'],
-    ['label[for="desktopWidgetsAlwaysOnTop"] > span', 'settings.general.desktopWidgetsAlwaysOnTop'],
-    ['.settings-panel[data-settings-panel="appearance"] > .settings-heading', 'settings.appearance.chatStyle'],
-    ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(1) .settings-heading', 'settings.appearance.theme'],
-    ['.settings-panel[data-settings-panel="appearance"] .setting-section:nth-of-type(2) .settings-heading', 'settings.appearance.appAppearance'],
+    ['.appearance-chat-style-section .settings-heading', 'settings.appearance.chatStyle'],
+    ['.appearance-theme-section .settings-heading', 'settings.appearance.theme'],
+    ['.appearance-app-section .settings-heading', 'settings.appearance.appAppearance'],
     ['#chatStyleCompact + span strong', 'settings.chatStyle.compact.name'],
     ['#chatStyleCompact + span small', 'settings.chatStyle.compact.description'],
     ['#chatStyleSpacious + span strong', 'settings.chatStyle.spacious.name'],
@@ -1413,6 +1794,8 @@ function applyI18n() {
     ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
     ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
     ['#appAppearanceDecorative + span small', 'settings.appAppearance.decorative.description'],
+    ['#appAppearanceRetroKb2 + span strong', 'settings.appAppearance.retroKb2.name'],
+    ['#appAppearanceRetroKb2 + span small', 'settings.appAppearance.retroKb2.description'],
     ['.settings-panel[data-settings-panel="accessibility"] > .settings-heading', 'settings.accessibility.tts'],
     ['label[for="ttsEnabled"] > span', 'settings.accessibility.readAloud'],
     ['label[for="ttsSkipVulgarNicknames"] > span', 'settings.accessibility.skipVulgarNicknames'],
@@ -1421,6 +1804,8 @@ function applyI18n() {
     ['label[for="ttsVoice"] > span', 'settings.accessibility.voice'],
     ['label[for="ttsRate"] > span', 'settings.accessibility.rate'],
     ['.chat-delay-section .settings-heading', 'settings.accessibility.delay'],
+    ['.settings-panel[data-settings-panel="redeem"] .page-note', 'settings.redeem.note'],
+    ['label[for="redeemCodeInput"] > span:first-child', 'settings.redeem.codeLabel'],
     ['.view-panel[data-view="about"] .page-header h1', 'about.title'],
     ['.settings-tab[data-about-tab="program"]', 'about.tabs.program'],
     ['.settings-tab[data-about-tab="news"]', 'about.tabs.news'],
@@ -1435,7 +1820,9 @@ function applyI18n() {
 
   syncTtsVoices();
   syncSystemControls();
+  syncRedeemCodeUi();
   renderRecentCreatorsCarousel();
+  renderAchievements();
   renderRanking();
   syncRightWidgetDock();
   renderBattleBannerFromState();
@@ -1452,12 +1839,13 @@ function applyI18n() {
 }
 
 function applyAppearanceSettings() {
-  document.documentElement.dataset.chatStyle = chatStyle;
-  document.documentElement.dataset.theme = appTheme;
+  const effectiveChatStyle = getEffectiveChatStyle();
+  document.documentElement.dataset.chatStyle = effectiveChatStyle;
+  document.documentElement.dataset.theme = appAppearance === 'retro-kb2' ? 'retro-kb2' : appTheme;
   document.documentElement.dataset.appAppearance = appAppearance;
 
   chatStyleInputs.forEach((input) => {
-    input.checked = input.value === chatStyle;
+    input.checked = input.value === effectiveChatStyle;
   });
 
   themeInputs.forEach((input) => {
@@ -1472,6 +1860,19 @@ function applyAppearanceSettings() {
 function initAppearanceSettings() {
   applyAppearanceSettings();
 
+  window.addEventListener('storage', (event) => {
+    if ([CHAT_STYLE_SETTINGS_KEY, APP_THEME_SETTINGS_KEY, APP_APPEARANCE_SETTINGS_KEY].includes(event.key)) {
+      syncAppearanceFromStorage();
+    }
+  });
+
+  if (typeof BroadcastChannel === 'function') {
+    appearanceBroadcastChannel = new BroadcastChannel('czatbox.appearance');
+    appearanceBroadcastChannel.addEventListener('message', (event) => {
+      syncAppearanceFromValues(event.data || {});
+    });
+  }
+
   chatStyleInputs.forEach((input) => {
     input.addEventListener('change', () => {
       if (!input.checked) {
@@ -1481,6 +1882,7 @@ function initAppearanceSettings() {
       chatStyle = CHAT_STYLES.includes(input.value) ? input.value : 'compact';
       saveChatStyle();
       applyAppearanceSettings();
+      broadcastAppearanceSettings();
       renderVisibleMessages();
     });
   });
@@ -1494,6 +1896,7 @@ function initAppearanceSettings() {
       appTheme = APP_THEMES.includes(input.value) ? input.value : 'rose-black';
       saveAppTheme();
       applyAppearanceSettings();
+      broadcastAppearanceSettings();
     });
   });
 
@@ -1506,6 +1909,7 @@ function initAppearanceSettings() {
       appAppearance = APP_APPEARANCES.includes(input.value) ? input.value : 'standard';
       saveAppAppearance();
       applyAppearanceSettings();
+      broadcastAppearanceSettings();
     });
   });
 }
@@ -1520,26 +1924,6 @@ function applyGeneralSettings() {
   }
   if (galleryAvatarsEl) {
     galleryAvatarsEl.checked = generalSettings.galleryAvatars;
-  }
-  if (pinWidgetsToRightEl) {
-    pinWidgetsToRightEl.checked = generalSettings.pinWidgetsToRight;
-  }
-  if (desktopWidgetsAlwaysOnTopEl) {
-    desktopWidgetsAlwaysOnTopEl.checked = generalSettings.desktopWidgetsAlwaysOnTop;
-  }
-  if (
-    !DESKTOP_WIDGET_MODE
-    && window.tiktokLive
-    && typeof window.tiktokLive.setDesktopWidgetsEnabled === 'function'
-  ) {
-    window.tiktokLive.setDesktopWidgetsEnabled(generalSettings.pinWidgetsToRight);
-  }
-  if (
-    !DESKTOP_WIDGET_MODE
-    && window.tiktokLive
-    && typeof window.tiktokLive.setDesktopWidgetsAlwaysOnTop === 'function'
-  ) {
-    window.tiktokLive.setDesktopWidgetsAlwaysOnTop(generalSettings.desktopWidgetsAlwaysOnTop);
   }
 
   if (statusStatsEl) {
@@ -1558,8 +1942,6 @@ function applyGeneralSettings() {
       delete battleBanner.dataset.tone;
     }
   }
-
-  scheduleDesktopWidgetInteractiveRegions();
 }
 
 function initGeneralSettings() {
@@ -1589,20 +1971,6 @@ function initGeneralSettings() {
       renderVisibleMessages();
     });
   }
-  if (pinWidgetsToRightEl) {
-    pinWidgetsToRightEl.addEventListener('change', () => {
-      generalSettings.pinWidgetsToRight = pinWidgetsToRightEl.checked;
-      saveGeneralSettings();
-      applyGeneralSettings();
-    });
-  }
-  if (desktopWidgetsAlwaysOnTopEl) {
-    desktopWidgetsAlwaysOnTopEl.addEventListener('change', () => {
-      generalSettings.desktopWidgetsAlwaysOnTop = desktopWidgetsAlwaysOnTopEl.checked;
-      saveGeneralSettings();
-      applyGeneralSettings();
-    });
-  }
 
   rightWidgetButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -1611,6 +1979,8 @@ function initGeneralSettings() {
       const shouldOpen = Boolean(widget && widget.dataset.expanded !== 'true');
       if (target === 'top' && shouldOpen) {
         renderTopGiftersPanel();
+      } else if (target === 'taps' && shouldOpen) {
+        renderTopTappersPanel();
       } else if (target === 'moderators' && shouldOpen) {
         renderModeratorsWidget();
       }
@@ -1623,15 +1993,7 @@ function setOpenRightWidget(target) {
   rightWidgets.forEach((widget) => {
     widget.dataset.expanded = String(Boolean(target) && widget.dataset.rightWidget === target);
   });
-  if (
-    DESKTOP_WIDGET_MODE
-    && window.tiktokLive
-    && typeof window.tiktokLive.setDesktopWidgetsExpanded === 'function'
-  ) {
-    window.tiktokLive.setDesktopWidgetsExpanded(Boolean(target));
-  }
   syncRightWidgetDock();
-  scheduleDesktopWidgetInteractiveRegions();
 }
 
 function syncRightWidgetDock() {
@@ -1641,9 +2003,11 @@ function syncRightWidgetDock() {
     const expanded = Boolean(widget && widget.dataset.expanded === 'true');
     const keyPrefix = target === 'top'
       ? 'topGifters'
-      : target === 'moderators'
-        ? 'moderatorsWidget'
-        : 'statsWidget';
+      : target === 'taps'
+        ? 'topTappers'
+        : target === 'moderators'
+          ? 'moderatorsWidget'
+          : 'statsWidget';
     button.setAttribute('aria-expanded', String(expanded));
     button.setAttribute('aria-label', t(`${keyPrefix}.${expanded ? 'collapse' : 'expand'}`));
     button.title = t(`${keyPrefix}.${expanded ? 'collapse' : 'expand'}`);
@@ -1797,7 +2161,7 @@ function initSystemSettings() {
 }
 
 function initFirstRunLanguageChoice() {
-  if (DESKTOP_WIDGET_MODE || !firstRunLanguageEl || localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)) {
+  if (!firstRunLanguageEl || localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)) {
     return;
   }
 
@@ -2250,6 +2614,13 @@ function getTopGifters() {
     .slice(0, TOP_GIFTERS_LIMIT);
 }
 
+function getTopTappers() {
+  return Array.from(tapTotalsByUser.values())
+    .filter((entry) => entry.taps > 0)
+    .sort((left, right) => right.taps - left.taps || left.name.localeCompare(right.name))
+    .slice(0, TOP_TAPPERS_LIMIT);
+}
+
 function getHeartMeGiftStats() {
   let active = 0;
   let inactive = 0;
@@ -2303,6 +2674,57 @@ function renderTopGiftersPanel() {
   });
 
   topGiftersContent.replaceChildren(list);
+}
+
+function renderTopTappersPanel() {
+  if (!topTappersContent) {
+    return;
+  }
+
+  backfillTapStatsFromVisibleMessages();
+
+  const topTappers = getTopTappers();
+  if (!topTappers.length) {
+    const empty = document.createElement('div');
+    empty.className = 'top-gifters-empty top-tappers-empty';
+    empty.textContent = t('topTappers.empty');
+    topTappersContent.replaceChildren(empty);
+    return;
+  }
+
+  const list = document.createElement('ol');
+  list.className = 'top-gifters-list top-tappers-list';
+  topTappers.forEach((entry, index) => {
+    const item = document.createElement('li');
+    item.className = 'stats-widget-row top-tapper-row';
+
+    const rank = document.createElement('span');
+    rank.className = 'stats-widget-icon top-gifter-rank top-tapper-rank';
+    rank.textContent = String(index + 1);
+
+    const name = document.createElement('span');
+    name.className = 'stats-widget-label top-gifter-name top-tapper-name';
+    name.textContent = entry.name;
+
+    const taps = document.createElement('strong');
+    taps.className = 'top-gifter-coins top-tapper-count';
+    taps.append(createUiIcon('heart'), document.createTextNode(formatCounter(entry.taps)));
+
+    item.append(rank, name, taps);
+    list.appendChild(item);
+  });
+
+  topTappersContent.replaceChildren(list);
+}
+
+function backfillTapStatsFromVisibleMessages() {
+  visibleMessages.forEach((message) => {
+    const kind = message && (message.kind || 'chat');
+    const total = Number(message && message.total);
+    if (kind === 'like' && Number.isFinite(total) && total > 0) {
+      trackTapStats(message);
+    }
+  });
 }
 
 function getActiveModerators() {
@@ -2381,6 +2803,10 @@ function updateStatus() {
     const topWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'top');
     if (topWidget && topWidget.dataset.expanded === 'true') {
       renderTopGiftersPanel();
+    }
+    const tapsWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'taps');
+    if (tapsWidget && tapsWidget.dataset.expanded === 'true') {
+      renderTopTappersPanel();
     }
     const moderatorsWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'moderators');
     if (moderatorsWidget && moderatorsWidget.dataset.expanded === 'true') {
@@ -2622,15 +3048,95 @@ function getCreatorSuggestionQuery() {
 
 function getFilteredCreatorSuggestions() {
   const query = getCreatorSuggestionQuery();
+  const sourceItems = isRetroKb2Appearance()
+    ? getRetroCreatorSuggestionItemsSafe()
+    : creatorSuggestionItems;
   if (!query) {
-    return creatorSuggestionItems;
+    return sourceItems;
   }
 
-  return creatorSuggestionItems.filter((item) => (
+  return sourceItems.filter((item) => (
     item.handle.includes(query)
     || item.label.toLowerCase().includes(query)
     || item.detail.toLowerCase().includes(query)
   ));
+}
+
+function getRetroCreatorSuggestionItems() {
+  const items = [];
+  const seenHandles = new Set();
+
+  recentCreators.forEach((recentHandle) => {
+    const handle = normalizeCreatorHandle(recentHandle);
+    if (!handle || seenHandles.has(handle)) {
+      return;
+    }
+
+    const creator = findCreatorByHandle(handle);
+    seenHandles.add(handle);
+    items.push({
+      handle,
+      label: creator ? getCreatorDisplayName(creator) : `@${handle}`,
+      detail: `Ostatnio użyty • @${handle}`
+    });
+  });
+
+  creatorSuggestionItems.forEach((item) => {
+    const handle = normalizeCreatorHandle(item.handle);
+    if (!handle || seenHandles.has(handle)) {
+      return;
+    }
+
+    seenHandles.add(handle);
+    items.push(item);
+  });
+
+  return items.slice(0, MAX_RECENT_CREATORS);
+}
+
+function getRetroCreatorSuggestionItemsSafe() {
+  const items = [];
+  const seenHandles = new Set();
+
+  const pushItem = (handle, label, detail) => {
+    const normalized = normalizeCreatorHandle(handle);
+    if (!normalized || seenHandles.has(normalized)) {
+      return;
+    }
+
+    seenHandles.add(normalized);
+    items.push({
+      handle: normalized,
+      label: label || `@${normalized}`,
+      detail: detail || `@${normalized}`
+    });
+  };
+
+  const currentHandle = normalizeCreatorHandle(getCurrentCreatorHandle());
+  if (currentHandle) {
+    const creator = findCreatorByHandle(currentHandle);
+    pushItem(
+      currentHandle,
+      creator ? getCreatorDisplayName(creator) : `@${currentHandle}`,
+      `Aktualny - @${currentHandle}`
+    );
+  }
+
+  recentCreators.forEach((recentHandle) => {
+    const handle = normalizeCreatorHandle(recentHandle);
+    const creator = findCreatorByHandle(handle);
+    pushItem(
+      handle,
+      creator ? getCreatorDisplayName(creator) : `@${handle}`,
+      `Ostatnio użyty - @${handle}`
+    );
+  });
+
+  creatorSuggestionItems.forEach((item) => {
+    pushItem(item.handle, item.label, item.detail);
+  });
+
+  return items.slice(0, MAX_RECENT_CREATORS);
 }
 
 function setActiveCreatorSuggestion(index) {
@@ -2995,8 +3501,10 @@ function getAvatarForMessage(message) {
 
 function resetStreamStats() {
   giftTotalsByUser.clear();
+  tapTotalsByUser.clear();
   activeChatUsers.clear();
   activeModerators.clear();
+  lastHondaOnlineAlertAt = 0;
   liveViewerCount = 0;
   chatMessageCount = 0;
   setOpenRightWidget('');
@@ -3035,6 +3543,10 @@ function getStatsUserKey(message) {
   const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
   const key = (uniqueId || authorName).toLowerCase();
   return isUnknownUserValue(key) ? '' : key;
+}
+
+function normalizeChatUserId(value) {
+  return String(value || '').trim().replace(/^@/, '').toLowerCase();
 }
 
 function getGiftStatsKey(message) {
@@ -3076,6 +3588,34 @@ function trackGiftStats(message) {
   giftTotalsByUser.set(key, current);
 }
 
+function trackTapStats(message) {
+  const kind = message && (message.kind || 'chat');
+  if (kind !== 'like') {
+    return;
+  }
+
+  const key = getStatsUserKey(message);
+  if (!key) {
+    return;
+  }
+
+  const incomingTotal = Number(message.total);
+  const incomingCount = Number(message.likeCount);
+  const current = tapTotalsByUser.get(key) || {
+    name: message.authorName || message.uniqueId || key,
+    taps: 0
+  };
+  current.name = message.authorName || current.name;
+
+  if (Number.isFinite(incomingTotal) && incomingTotal > 0) {
+    current.taps = Math.max(current.taps, Math.floor(incomingTotal));
+  } else {
+    current.taps += Math.max(1, Math.floor(Number.isFinite(incomingCount) ? incomingCount : 1));
+  }
+
+  tapTotalsByUser.set(key, current);
+}
+
 function trackActiveUserStats(message) {
   const key = getStatsUserKey(message);
   if (!key) {
@@ -3084,9 +3624,11 @@ function trackActiveUserStats(message) {
 
   const current = activeChatUsers.get(key) || {
     name: message.authorName || message.uniqueId || key,
+    uniqueId: message.uniqueId || '',
     hasSentHeartMeGift: false
   };
   current.name = message.authorName || current.name;
+  current.uniqueId = message.uniqueId || current.uniqueId;
   current.hasSentHeartMeGift = current.hasSentHeartMeGift || isHeartMeGift(message);
   activeChatUsers.set(key, current);
 }
@@ -3119,6 +3661,7 @@ function trackIncomingMessageStats(message) {
 
   trackActiveUserStats(message);
   trackModeratorStats(message);
+  trackTapStats(message);
 
   if (message.upsert) {
     return;
@@ -3132,6 +3675,58 @@ function trackIncomingMessageStats(message) {
   if (kind === 'gift' || kind === 'box') {
     trackGiftStats(message);
   }
+}
+
+function hasHondaOnCurrentChat() {
+  const targetId = normalizeChatUserId(HONDA_CHAT_UNIQUE_ID);
+  if (!targetId) {
+    return false;
+  }
+
+  if (activeChatUsers.has(targetId)) {
+    return true;
+  }
+
+  for (const entry of activeChatUsers.values()) {
+    if (
+      normalizeChatUserId(entry && entry.uniqueId) === targetId
+      || normalizeChatUserId(entry && entry.name) === targetId
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function showHondaOnlineNotice() {
+  if (!battleBanner) {
+    return;
+  }
+
+  clearTimeout(battleBannerTimer);
+  battleBanner.dataset.tone = 'honda';
+  battleBanner.textContent = HONDA_ON_CHAT_TEXT;
+  battleBanner.hidden = false;
+  battleBannerTimer = setTimeout(() => {
+    battleBanner.hidden = true;
+    battleBanner.textContent = '';
+    delete battleBanner.dataset.tone;
+  }, 12000);
+}
+
+function checkHondaOnlinePresence() {
+  if (!isHondaAlertsUnlocked() || !isOnlineConnectionState(state) || !hasHondaOnCurrentChat()) {
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastHondaOnlineAlertAt < HONDA_ONLINE_ALERT_COOLDOWN_MS) {
+    return;
+  }
+
+  lastHondaOnlineAlertAt = now;
+  showHondaOnlineNotice();
 }
 
 function isMessageVisible(message) {
@@ -3478,7 +4073,12 @@ async function submitCreatorInput() {
 window.tiktokLive.onState((nextState) => {
   const previousCreatorId = state.creatorId;
   const wasOffline = isOfflineConnectionState(state);
+  const wasOnline = isOnlineConnectionState(state);
   state = nextState;
+  trackLoggedInAchievement(state);
+  trackCreatorConnectionAchievement(state, {
+    countConnection: !wasOnline || state.creatorId !== previousCreatorId
+  });
   if (state.systemSettings) {
     applyIncomingSystemSettings(state.systemSettings);
   }
@@ -3506,21 +4106,57 @@ if (creatorInput) {
   creatorInput.dataset.dirty = 'false';
 
   creatorInput.addEventListener('focus', () => {
+    if (isRetroKb2Appearance()) {
+      openCreatorSuggestions();
+      return;
+    }
+
     closeCreatorSuggestions();
+  });
+
+  creatorInput.addEventListener('click', () => {
+    if (isRetroKb2Appearance()) {
+      openCreatorSuggestions();
+    }
+  });
+
+  creatorInput.addEventListener('pointerdown', () => {
+    if (isRetroKb2Appearance()) {
+      window.setTimeout(openCreatorSuggestions, 0);
+    }
   });
 
   creatorInput.addEventListener('input', () => {
     creatorInput.dataset.dirty = 'true';
     activeCreatorSuggestionIndex = -1;
+    if (isRetroKb2Appearance()) {
+      openCreatorSuggestions();
+      return;
+    }
+
     closeCreatorSuggestions();
   });
 
   creatorInput.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') {
+      if (isRetroKb2Appearance()) {
+        event.preventDefault();
+        if (!creatorSuggestions || creatorSuggestions.hidden) {
+          openCreatorSuggestions();
+        }
+        setActiveCreatorSuggestion(activeCreatorSuggestionIndex + 1);
+      }
       return;
     }
 
     if (event.key === 'ArrowUp') {
+      if (isRetroKb2Appearance()) {
+        event.preventDefault();
+        if (!creatorSuggestions || creatorSuggestions.hidden) {
+          openCreatorSuggestions();
+        }
+        setActiveCreatorSuggestion(activeCreatorSuggestionIndex - 1);
+      }
       return;
     }
 
@@ -4344,6 +4980,7 @@ async function saveCurrentNote() {
     updateNoteEditorMeta();
     setNoteEditorMode('read');
     setNotesStatus(t('notes.saved'));
+    unlockAchievement('first-note');
   } catch {
     setNotesStatus(t('notes.saveFailed'));
   }
@@ -4518,7 +5155,15 @@ window.tiktokLive.onBattleAlert((alert) => {
     alert.textKey === 'battle.multiplier'
     || alert.tone === 'battle'
   );
-  if (!isMultiplierAlert || !generalSettings.multiplierNotifications || !battleBanner) {
+  const isSpecialJoinAlert = alert && (
+    alert.textKey === 'battle.authorJoin'
+    || alert.tone === 'author'
+    || alert.tone === 'honda'
+  );
+  if (alert && alert.tone === 'honda' && !isHondaAlertsUnlocked()) {
+    return;
+  }
+  if ((!isMultiplierAlert && !isSpecialJoinAlert) || (isMultiplierAlert && !generalSettings.multiplierNotifications) || !battleBanner) {
     return;
   }
   const text = alert && alert.textKey
@@ -4555,11 +5200,6 @@ window.tiktokLive.onChatMessage((message) => {
   }
 
   trackIncomingMessageStats(message);
-  if (DESKTOP_WIDGET_MODE) {
-    updateStatus();
-    return;
-  }
-
   const messageIdKey = getMessageIdKey(message);
 
   if (message.upsert && messageIdKey) {
@@ -4609,15 +5249,19 @@ window.addEventListener('keydown', (event) => {
 });
 
 hydrateUiIcons();
-initDesktopWidgetInteractiveRegions();
 initAppearanceSettings();
+if (appAppearance === 'retro-kb2') {
+  unlockAchievement('retro-kb2');
+}
 initGeneralSettings();
+initRedeemCodeSettings();
 initSystemSettings();
 applyI18n();
 initFirstRunLanguageChoice();
 initTextToSpeech();
 startRevealTimer();
 setInterval(updateStatus, 5000);
+setInterval(checkHondaOnlinePresence, HONDA_ONLINE_CHECK_INTERVAL_MS);
 setActiveSettingsTab(activeSettingsTab);
 setActiveAboutTab(activeAboutTab);
 setActiveSection(activeSection);

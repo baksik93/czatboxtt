@@ -45,7 +45,12 @@ jobs:
           $tag = $env:GITHUB_REF_NAME
           $title = $tag.TrimStart('v')
 
-          $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
+          $notesPath = "release-notes-$title.md"
+          if (Test-Path $notesPath) {
+            $body = Get-Content -Path $notesPath -Raw -Encoding UTF8
+          } else {
+            $body = Get-Content -Path RELEASE_NOTES.md -Raw -Encoding UTF8
+          }
 
           try {
             gh release view $tag *> $null
