@@ -1,18 +1,26 @@
 const TTS_SETTINGS_KEY = 'czatbox.tts.settings';
 const CHAT_DELAY_SETTINGS_KEY = 'czatbox.chat.delay';
 const CHAT_STYLE_SETTINGS_KEY = 'czatbox.chat.style';
+const CHAT_FILTER_SETTINGS_KEY = 'czatbox.chat.filters';
+const ARCHIVE_FILTER_SETTINGS_KEY = 'czatbox.archive.filters';
 const APP_THEME_SETTINGS_KEY = 'czatbox.app.theme';
 const APP_APPEARANCE_SETTINGS_KEY = 'czatbox.app.appearance';
 const APP_LANGUAGE_SETTINGS_KEY = 'czatbox.app.language';
 const TIME_FORMAT_SETTINGS_KEY = 'czatbox.time.format';
 const GENERAL_SETTINGS_KEY = 'czatbox.general.settings';
 const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
+const CZESTER_MEMORY_KEY = 'czatbox.czester.memory';
 const ACHIEVEMENTS_KEY = 'czatbox.achievements';
 const REDEEMED_FEATURES_KEY = 'czatbox.redeemed.features';
+const COINS_REFERRAL_CODE = 'ZD3TKFBV';
+const COINS_REFERRAL_URL = 'https://www.tiktok.com/coin?rc=ZD3TKFBV';
+const COINS_PROMO_INTERVAL_MS = 30 * 60 * 1000;
 const DEFAULT_CHAT_DELAY_MS = 1800;
 const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
 const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
-const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony'];
+const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice'];
+const MAX_VISIBLE_MESSAGES = 800;
+const DEFAULT_EVENT_FILTERS = ['chat', 'like', 'gift', 'box', 'repost', 'share', 'member'];
 const APP_APPEARANCES = ['standard', 'ozdobny', 'retro-kb2'];
 const APP_LANGUAGES = ['pl', 'en', 'de'];
 const TIME_FORMATS = ['auto', '12', '24'];
@@ -28,6 +36,24 @@ const HONDA_ON_CHAT_TEXT = 'Honda jest na czacie.';
 const HONDA_ONLINE_CHECK_INTERVAL_MS = 10 * 1000;
 const HONDA_ONLINE_ALERT_COOLDOWN_MS = 60 * 1000;
 const HONDA_REDEEM_CODE = '10FDBF47H0NDA250';
+const OLLAMA_REDEEM_CODE = '19BM9ARV9IN1K4M4';
+const BOXES_REDEEM_CODE = '1THU3GS6TO7OL6S2';
+const MIAMI_VICE_REDEEM_CODE = 'LEAVEME0ALONE173';
+const OLLAMA_PROMPT_DECLINED_KEY = 'czatbox.czester.ollamaPromptDeclined';
+const CZESTER_AVATAR_SRC = './assets/czester-avatar.svg';
+const CZESTER_USER_AVATAR_KEY = 'czatbox.czester.userAvatar';
+const CZESTER_SPAM_WINDOW_MS = 5 * 1000;
+const CZESTER_SPAM_MIN_REPEAT = 3;
+const CZESTER_SPAM_ALERT_COOLDOWN_MS = 30 * 1000;
+const CZESTER_CREATOR_RECENCY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const CZESTER_LIVE_ANALYSIS_INTERVAL_MS = 60 * 1000;
+const CZESTER_LIVE_ANALYSIS_WINDOW_MS = 60 * 1000;
+const CZESTER_QUESTIONS_WINDOW_MS = 5 * 60 * 1000;
+const CZESTER_LIVE_ANALYSIS_MIN_MESSAGES = 8;
+const CZESTER_LIVE_ANALYSIS_MAX_BUFFER = 600;
+const CZESTER_ARCHIVE_INDEX_BATCH_LIMIT = 10;
+const BOXES_ARCHIVE_REFRESH_DEBOUNCE_MS = 2500;
+const CZESTER_VIEWER_PROFILE_LIMIT = 500;
 const KAMA_CREATOR_HANDLE = 'teambibii';
 const ACHIEVEMENT_DEFINITIONS = [
   {
@@ -63,10 +89,15 @@ const ACHIEVEMENT_DEFINITIONS = [
 ];
 const UI_ICONS = {
   'chevron-down': '<path d="m7 10 5 5 5-5"/>',
+  lock: '<rect x="5.5" y="10" width="13" height="9.5" rx="2"/><path d="M8.5 10V7.75a3.5 3.5 0 0 1 7 0V10"/><path d="M12 14v2"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   inbox: '<path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5Z"/><path d="M3.5 14h4l1.5 2h6l1.5-2h4"/>',
+  chest: '<path d="M4.5 9.25h15v9.5h-15z"/><path d="M3.75 7.25h16.5v3.25H3.75z"/><path d="M7 7.25V5.8A2.05 2.05 0 0 1 9.05 3.75h5.9A2.05 2.05 0 0 1 17 5.8v1.45"/><path d="M12 7.25v11.5"/><path d="M8 13h8"/><circle cx="12" cy="13" r="1.65"/>',
   users: '<circle cx="9" cy="9" r="3"/><path d="M3.75 19c.55-3.15 2.3-5 5.25-5s4.7 1.85 5.25 5"/><path d="M15.5 6.75a3 3 0 0 1 0 5.5M15.75 14.25c2.45.3 3.9 1.9 4.4 4.75"/>',
   message: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  questions: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M9.25 9.25a2.5 2.5 0 1 1 3.85 2.1c-.65.4-1.1.8-1.1 1.65"/><path d="M12 15.35h.01"/>',
+  'questions-list': '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9h4.25M8 12h3"/><path d="M15.1 8.35a1.55 1.55 0 1 1 2.25 1.38c-.42.28-.72.55-.72 1.12"/><path d="M16.62 13.1h.01"/>',
+  'moderators-list': '<path d="M9.5 4.25 16 6.8v4.1c0 3.55-2.18 6.22-6.5 7.35C5.18 17.12 3 14.45 3 10.9V6.8l6.5-2.55Z"/><path d="m6.65 11 1.75 1.72 3.65-3.72"/><path d="M17.5 8.5h3.25M17.5 12h3.25M15.75 15.5h5"/>',
   heart: '<path d="M12 19.25 5.35 13A4.65 4.65 0 0 1 12 6.55 4.65 4.65 0 0 1 18.65 13L12 19.25Z"/>',
   'heart-off': '<path d="m4 4 16 16"/><path d="M9.3 6.05A4.65 4.65 0 0 1 12 7.2 4.65 4.65 0 0 1 18.65 13l-1.15 1.1M14.5 16.9 12 19.25 5.35 13A4.65 4.65 0 0 1 7 5.4"/>',
   chart: '<path d="M5 19V11h3v8M10.5 19V5h3v14M16 19V8h3v11"/><path d="M3.5 19.5h17"/>',
@@ -77,6 +108,7 @@ const UI_ICONS = {
   glove: '<path d="M7.5 12V7.5a1.5 1.5 0 0 1 3 0V11M10.5 10V5.5a1.5 1.5 0 0 1 3 0V10M13.5 10V6.5a1.5 1.5 0 0 1 3 0V11M16.5 11V9a1.5 1.5 0 0 1 3 0v5c0 4-2.4 6.25-6.5 6.25h-1.25C7.5 20.25 5 17.75 5 14v-2a1.5 1.5 0 0 1 2.5-1.1l2 1.85"/>',
   fog: '<path d="M4 8.5h11M8 12h12M3 15.5h12M7 19h13"/><path d="M16.5 8.5H20M3 12h2"/>',
   hammer: '<path d="m13.5 5.5 5 5M12 7l3.5-3.5 4 4L16 11l-4-4Z"/><path d="m13.5 9.5-8 9a1.4 1.4 0 0 1-2-2l9-8"/>',
+  crown: '<path d="M4.75 17.5h14.5l-1.1-8.3-4 3.4L12 5.5l-2.15 7.1-4-3.4-1.1 8.3Z"/><path d="M6.25 20h11.5"/>',
   snowflake: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="m9.5 5.5 2.5 2 2.5-2M9.5 18.5l2.5-2 2.5 2M5 10.5l3-.5.5-3M19 13.5l-3 .5-.5 3M5 13.5l3 .5.5 3M19 10.5l-3-.5-.5-3"/>',
   zap: '<path d="M13 2.75 5.5 13h6L11 21.25 18.5 11h-6L13 2.75Z"/>',
   sparkle: '<path d="M12 3.5c.6 3.1 2.4 4.9 5.5 5.5-3.1.6-4.9 2.4-5.5 5.5-.6-3.1-2.4-4.9-5.5-5.5 3.1-.6 4.9-2.4 5.5-5.5Z"/><path d="M18.5 14.5c.3 1.6 1.2 2.5 2.8 2.8-1.6.3-2.5 1.2-2.8 2.8-.3-1.6-1.2-2.5-2.8-2.8 1.6-.3 2.5-1.2 2.8-2.8Z"/>',
@@ -112,11 +144,6 @@ const TTS_LANGUAGE_PREFIXES = {
   en: /^en\b/i,
   de: /^de\b/i
 };
-const RANKING_COUNTRIES_BY_LANGUAGE = {
-  pl: 'Polska',
-  en: 'North America',
-  de: 'Deutschland'
-};
 const MAX_SPEECH_QUEUE = 8;
 const VULGAR_SPEECH_PATTERNS = [
   /\b(?:kurw\w*|chuj\w*|huj\w*|jeb\w*|pierd\w*|wypierd\w*|spierd\w*|skurw\w*|zjeb\w*)\b/u,
@@ -141,7 +168,9 @@ const I18N = {
     'nav.settings': 'Ustawienia',
     'nav.notes': 'Notatki',
     'nav.achievements': 'Osiągnięcia',
-    'nav.ranking': 'Ranking',
+    'nav.coins': 'Monetki',
+    'nav.boxes': 'Skrzyneczki',
+    'nav.czester': 'Asystent Czester',
     'nav.about': 'O programie',
     'creator.label': 'Twórca',
     'creator.refresh': 'Odśwież czat',
@@ -149,17 +178,6 @@ const I18N = {
     'recentCreators.aria': 'Ostatni twórcy',
     'recentCreators.online': 'Wybrany',
     'recentCreators.offline': 'Niewybrany',
-    'ranking.title': 'Ranking',
-    'ranking.note': 'Ranking twórców LIVE dla kraju wybranego według języka aplikacji.',
-    'ranking.refresh': 'Odśwież ranking',
-    'ranking.loading': 'Pobieram ranking...',
-    'ranking.empty': 'Brak jawnych pozycji rankingu do wyświetlenia.',
-    'ranking.error': 'Nie udało się pobrać rankingu.',
-    'ranking.country': 'Kraj: {country}',
-    'ranking.updated': 'Ostatnia aktualizacja: {time}',
-    'ranking.live': 'LIVE',
-    'ranking.offline': 'OFFLINE',
-    'ranking.diamonds': 'Diamenty',
     'achievements.title': 'Osiągnięcia',
     'achievements.note': 'Odblokowane osiągnięcia za aktywność w programie.',
     'achievements.emptyTitle': 'Brak odblokowanych osiągnięć.',
@@ -174,8 +192,70 @@ const I18N = {
     'achievements.firstNote.description': 'Napisz swoją pierwszą notatkę.',
     'achievements.retroKb2.title': 'Retrospekcja',
     'achievements.retroKb2.description': 'Zmień aplikację na wersję lite.',
-    'ranking.revenue': 'Przychód',
-    'ranking.earnings': 'Zarobek',
+    'coins.title': 'Monetki',
+    'coins.note': 'Wesprzyj rozwój programu, kupując monetki TikTok z rabatem.',
+    'coins.cardTitle': 'Wsparcie przez monetki TikTok',
+    'coins.description': 'Możesz wesprzeć autora programu, kupując monetki na stronie TikToka z 25% rabatem przez kod ZD3TKFBV.',
+    'coins.codeLabel': 'Kod rabatowy:',
+    'coins.link': 'Przejdź do TikToka',
+    'coins.chatPromo': 'Wesprzyj autora Czatbox TT: kup monetki TikTok z 25% rabatem kodem ZD3TKFBV albo przejdź bezpośrednio:',
+    'boxes.title': 'Skrzyneczki',
+    'boxes.note': 'Archiwum skrzyneczek zapisanych z transmisji LIVE.',
+    'boxes.liveTitle': 'Skrzyneczki z transmisji',
+    'boxes.liveDescription': 'Wybierz transmisję z listy, aby zobaczyć wykryte skrzyneczki.',
+    'boxes.refresh': 'Odśwież',
+    'boxes.searchPlaceholder': 'Szukaj twórcy lub daty...',
+    'boxes.noSessions': 'Brak zapisanych transmisji ze skrzyneczkami.',
+    'boxes.noMatches': 'Brak transmisji pasujących do wyszukiwania.',
+    'boxes.loading': 'Wczytywanie skrzyneczek...',
+    'boxes.loadFailed': 'Nie udało się wczytać skrzyneczek.',
+    'boxes.sessionCount': '{count} skrzyneczek',
+    'boxes.summary.count': 'Skrzyneczki',
+    'boxes.summary.coins': 'Monetki',
+    'boxes.summary.people': 'Miejsca',
+    'boxes.emptyTitle': 'Wybierz transmisję.',
+    'boxes.emptyDescription': 'Po lewej znajdziesz transmisje, w których wykryto skrzyneczki.',
+    'boxes.sender': 'Od:',
+    'boxes.coins': 'Monetki:',
+    'boxes.people': 'Miejsca:',
+    'boxes.type.chest': 'Skrzyneczka',
+    'boxes.type.portal': 'Portal',
+    'settings.redeem.unlockedBoxes': 'Kod przyjęty. Zakładka Skrzyneczki jest aktywna.',
+    'settings.redeem.unlockedMiamiVice': 'Kod przyjęty. Motyw Miami Vice jest aktywny w ustawieniach wyglądu.',
+    'czester.title': 'Asystent Czester',
+    'czester.note.before': 'Dzień dobry! Jestem Czester i spróbuję rozwiązać twój problem z tik tok. Pamiętaj, że dopiero ',
+    'czester.note.learning': 'uczę się',
+    'czester.note.after': ' i mogę jeszcze wiele nie rozumieć...',
+    'czester.welcome': 'Dzień dobry! Jestem Czester i spróbuję rozwiązać twój problem z tik tok. Pamiętaj, że dopiero uczę się i mogę jeszcze wiele nie rozumieć...',
+    'czester.userLabel': 'Ty',
+    'czester.botLabel': 'Czester',
+    'czester.open': 'Otwórz Czestera',
+    'czester.close': 'Zamknij Czestera',
+    'czester.questionsButton': 'Pokaż pytania z ostatnich 5 minut',
+    'czester.questions.none': 'Nie widzę pytań z ostatnich 5 minut.',
+    'czester.moderatorsButton': 'Pokaż aktywnych moderatorów',
+    'czester.moderators.none': 'Brak aktywnych moderatorów w ostatnich 5 minutach.',
+    'czester.moderators.title': 'Aktywni moderatorzy:',
+    'czester.notice.creatorFavorite': 'Podsunąłem wyżej twórcę @{creator}, bo często do niego wracasz.',
+    'czester.notice.spam': 'Wykryłem możliwy spam: {author} wysłał(a) tę samą wiadomość {count} razy w 5 sekund.',
+    'czester.notice.superfanJoin': 'Dołącza superfan {name}.',
+    'czester.notice.connection': 'Zapamiętałem to połączenie. Im częściej wracasz do twórcy, tym wyżej będzie na liście.',
+    'czester.ai.title': 'Lokalny mózg Czestera',
+    'czester.ai.checking': 'Sprawdzam pakiet lokalny...',
+    'czester.ai.ready': 'Gotowe lokalnie: {model}',
+    'czester.ai.noModel': 'Ollama działa, brakuje modelu Czestera.',
+    'czester.ai.noOllama': 'Pakiet lokalny nie jest jeszcze zainstalowany.',
+    'czester.ai.install': 'Zainstaluj pakiet AI',
+    'czester.ai.installing': 'Instaluję...',
+    'czester.ai.installerStarted': 'Instalator Ollama został uruchomiony. Po zakończeniu kliknij ponownie, żeby pobrać model.',
+    'czester.ai.error': 'Nie udało się przygotować lokalnego pakietu AI.',
+    'czester.ollama.prompt': 'Odblokowano lokalny mózg Czestera. Ollama to lokalny silnik AI działający na twoim komputerze. W programie pozwala Czesterowi lepiej analizować czat, pytania, spam i kontekst live bez wysyłania rozmów do zewnętrznego czatu. Chcesz pobrać i zainstalować Ollamę lokalnie?',
+    'czester.ollama.accept': 'Pobierz i zainstaluj',
+    'czester.ollama.decline': 'Nie teraz',
+    'czester.ollama.declined': 'Jasne. Przypomnę o tym przy kolejnym uruchomieniu programu, dopóki Ollama nie będzie gotowa.',
+    'czester.ollama.installing': 'Przygotowuję instalację Ollamy. Jeśli pojawi się instalator, dokończ go normalnie w systemie.',
+    'czester.ollama.ready': 'Ollama jest gotowa. Czester może korzystać z lokalnego modelu.',
+    'czester.ollama.error': 'Nie udało się przygotować Ollamy. Spróbuj ponownie później.',
     'filters.chat': 'Czat',
     'filters.like': 'Polubienia',
     'filters.gift': 'Prezenty',
@@ -253,6 +333,9 @@ const I18N = {
     'settings.theme.roseGlass.description': 'Nieco bardziej kobiecy, delikatny motyw.',
     'settings.theme.lazarskieRejony.name': 'Enigma-Z',
     'settings.theme.lazarskieRejony.description': 'Półprzezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.',
+    'settings.theme.miamiVice.name': 'Miami Vice',
+    'settings.theme.miamiVice.description': 'Pastelowe odcienie Miami inspirowane klimatem GTA Vice City.',
+    'settings.theme.locked': 'Zablokowany',
     'settings.appAppearance.default.name': 'Domyślny',
     'settings.appAppearance.default.description': 'Obecny układ headera, lewego sidebara, okien i buttonów.',
     'settings.appAppearance.decorative.name': 'Ozdobny',
@@ -274,6 +357,7 @@ const I18N = {
     'settings.redeem.button': 'Aktywuj',
     'settings.redeem.waiting': 'Podaj kod aktywacyjny.',
     'settings.redeem.unlocked': 'Kod przyjęty. Niebieskie powiadomienie Hondy jest aktywne.',
+    'settings.redeem.unlockedOllama': 'Kod przyjęty. Odblokowano propozycję lokalnej Ollamy dla Czestera.',
     'settings.redeem.invalid': 'Nieprawidłowy kod.',
     'settings.redeem.alreadyUsed': 'Ten kod został już wcześniej zrealizowany.',
     'settings.system.autoLaunch': 'Automatycznie otwieraj Czatbox TT po uruchomieniu komputera',
@@ -302,6 +386,19 @@ const I18N = {
     'about.program.how.p2': 'Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia, mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu, motyw lub opóźnienie.',
     'about.program.how.p3': 'Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do wcześniejszych rozmów.',
     'about.news.version': 'Wersja programu',
+    'about.news.versionSuffix': 'AI',
+    'about.news.statement.title': 'Oświadczenie:',
+    'about.news.statement.p1': `Moi drodzy, obecna aktualizacja jest naprawdę potężna, że tak pozwolę sobie to ująć. Dotychczas wdrażałem wszystko to co miało większy lub mniejszy sens ale o co mnie prosiliście. Na wstępie zacznę od tego, że z kilku funkcji zrezygnowałem i już tłumaczę się bez bicia dlaczego? Pomysłem na program była chęć pomocy rozwoju wszystkim twórcom, i tym większym i tym mniejszym ale przede wszystkim ułatwienie moderacji w ich pracy, przy aktywniejszej społeczności, niestety pewne funkcje sprawiły, że program zamiast służyć i wspierać, stał się narzędziem do szpiegowania innych, ich zarobków i rankingów. Dla mnie to nie do pomyślenia, że coś co tworzę ma szkodzić, a nie pomagać, bo nigdy to nie było moją intencją, w tym też momencie od tej aktualizacji program faktycznie będzie pokazywać tylko statystyki twórcy, z którym jesteśmy połączeni, a wszelkie rankingi, czy przebiegi bitewek u przeciwnika zostają wycofane.`,
+    'about.news.statement.p2': `Czy to już wszystko? Oczywiście, że nie. Nie mam w zwyczaju czegoś zabierać ale nie zostawić nic w zamian. Chociaż to modne w gamedevie i u twórców różnej maści aplikacji ja raz jeszcze podkreślę, że jestem jak wy, zwykłym użytkownikiem, moderatorem, odbiorcą twórców jak inni odbiorcy. W związku z tym, mówiąc szczerze... Dostaniemy coś, czego bałem się wdrażać, ze względu na drewniane komputery, wciąż funkcjonujące u wielu ludzi na starszych wersjach Windowsa jak 10 czy słabszym połączeniu internetowym ale... Jak to kilku testerów stwierdziło, tacy ludzie to mniejszość, a program powinien się rozwijać.`,
+    'about.news.statement.p3': `Po namyśle jednak podjąłem tą decyzję i wszczepiłem w program AI, które pozwoli lepiej kontrolować czat i statystyki dla twórcy i moderacji. I od teraz daje nam możliwość lepszej personalizacji i przepływu informacji na czacie live. Jak działa program w połączeniu z AI? Po wprowadzeniu specjalnego kodu w ustawieniach → Zrealizuj kod odblokowuje nam się opcja AI. Wtedy program automatycznie zacznie pobierać Ollamę która zajmuje ponad 1 GB, a następnie ją zaktualizuje o kolejną podobną wartość GB. Tak wiem, dla ludzi z drewnianym internetem może to być problematyczne jednak jest to opcja dodatkowa, a sam program nadal może działać bez tego, jednak gdy zdecydujecie się na aktywację Czester ulegnie on diametralnym zmianom, i będzie wam służył z lepszą wygodą operacyjną. Jeżeli jesteście ciekawi zmian zapraszam do wprowadzenia kodu AI: 19BM 9ARV 9IN1 K4M4.`,
+    'about.news.changes.title': 'Zmiany:',
+    'about.news.changes.removeRanking': 'Usunięto ranking z funkcjonalności programu',
+    'about.news.changes.ai': 'Wdrożono funkcjonalność AI',
+    'about.news.changes.codes': 'Dodano nowe funkcje, które mają wspomóc live wzrastające. Można aktywować je kodem. Wystarczy się do mnie odezwać w prywatnej wiadomości.',
+    'about.news.changes.multiplier': 'Poprawiono mnożnik bitewek, aczkolwiek nadal jest to funkcja do wytestowania.',
+    'about.news.changes.optimization': 'Ogromna optymalizacja programu. Właściwie obciążenie zmniejszyło się o kilkanaście procent.',
+    'about.news.changes.viceCity': 'Dodano nowy motyw do odblokowania - Vice City. Motyw jest dedykowany dla osób, które program testowały i miałem tego świadomość. To właściwie podziękowanie dla testerów za wsparcie i dobre słowo.',
+    'about.news.next.ai': 'Dodatkowe funkcje AI w programie.',
     'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
     'about.news.features.achievements': 'dodano system osiągnięć, są widoczne w zakładce „Osiągnięcia”',
@@ -426,7 +523,30 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Bitwa zakończona',
     'battle.cancelled': 'Bitwa została przerwana',
-    'battle.authorJoin': 'Budzimy śpiocha, Baksik dołączył do LIVE!'
+    'battle.authorJoin': 'Budzimy śpiocha, Baksik dołączył do LIVE!',
+    'czester.notice.multiplier': 'Uwaga, zaraz w bitwie będzie mnożnik x{multiplier}.',
+    'czester.notice.creatorFreeze': 'Twórca został zamrożony.',
+    'czester.battle.start': 'Rozpoczęła się walka: {fighters}.',
+    'czester.battle.score': 'Aktualny wynik bitwy: {score}.',
+    'czester.battle.finished': 'Walka zakończona: {score}.',
+    'czester.battle.cancelled': 'Bitwa została przerwana.',
+    'czester.battle.missionStart': 'Wpadła misja bitewna: {detail} Cel: {target}. Nagroda: mnożnik x{multiplier}.',
+    'czester.battle.missionProgress': '{actor} ruszył(a) cel misji: {progress}/{target}.',
+    'czester.battle.missionSuccess': 'Misja bitewna wykonana. Wchodzi nagroda: mnożnik x{multiplier}.',
+    'czester.battle.missionFailed': 'Misja bitewna nie została wykonana.',
+    'czester.battle.missionReward': 'Nagroda z misji została rozliczona.',
+    'czester.battle.effect': 'Efekt w bitwie: {effect}{actor}{targets}.',
+    'czester.battle.booster': 'W bitwie pojawił się booster: {effect}.',
+    'battle.effect.freeze': 'Zamrożenie',
+    'battle.effect.glove': 'Rękawice',
+    'battle.effect.fog': 'Mgła',
+    'battle.effect.hammer': 'Młot',
+    'battle.effect.shield': 'Tarcza',
+    'battle.effect.critical': 'Krytyczny strzał',
+    'battle.effect.top2': 'Top 2',
+    'battle.effect.top3': 'Top 3',
+    'battle.effect.boost': 'Boost',
+    'battle.effect.effect': 'Efekt'
   },
   en: {
     'app.tagline': 'Track and manage live chat in real time.',
@@ -435,7 +555,9 @@ const I18N = {
     'nav.settings': 'Settings',
     'nav.notes': 'Notes',
     'nav.achievements': 'Achievements',
-    'nav.ranking': 'Ranking',
+    'nav.coins': 'Coins',
+    'nav.boxes': 'Boxes',
+    'nav.czester': 'Assistant Czester',
     'nav.about': 'About',
     'creator.label': 'Creator',
     'creator.refresh': 'Refresh chat',
@@ -443,17 +565,6 @@ const I18N = {
     'recentCreators.aria': 'Recent creators',
     'recentCreators.online': 'Selected',
     'recentCreators.offline': 'Not selected',
-    'ranking.title': 'Ranking',
-    'ranking.note': 'LIVE creator ranking for the country selected by the application language.',
-    'ranking.refresh': 'Refresh ranking',
-    'ranking.loading': 'Loading ranking...',
-    'ranking.empty': 'No public ranking entries to display.',
-    'ranking.error': 'Could not load the ranking.',
-    'ranking.country': 'Country: {country}',
-    'ranking.updated': 'Last update: {time}',
-    'ranking.live': 'LIVE',
-    'ranking.offline': 'OFFLINE',
-    'ranking.diamonds': 'Diamonds',
     'achievements.title': 'Achievements',
     'achievements.note': 'Unlocked achievements for activity in the app.',
     'achievements.emptyTitle': 'No unlocked achievements yet.',
@@ -468,8 +579,70 @@ const I18N = {
     'achievements.firstNote.description': 'Write your first note.',
     'achievements.retroKb2.title': 'Retrospection',
     'achievements.retroKb2.description': 'Switch the app to the Lite version.',
-    'ranking.revenue': 'Revenue',
-    'ranking.earnings': 'Earnings',
+    'coins.title': 'Coins',
+    'coins.note': 'Support the app by buying TikTok coins with a discount.',
+    'coins.cardTitle': 'Support through TikTok coins',
+    'coins.description': 'You can support the app author by buying TikTok coins on TikTok with a 25% discount using code ZD3TKFBV.',
+    'coins.codeLabel': 'Discount code:',
+    'coins.link': 'Open TikTok',
+    'coins.chatPromo': 'Support the Czatbox TT author: buy TikTok coins with a 25% discount using code ZD3TKFBV or open directly:',
+    'boxes.title': 'Boxes',
+    'boxes.note': 'Archive of boxes saved from LIVE sessions.',
+    'boxes.liveTitle': 'Boxes from session',
+    'boxes.liveDescription': 'Select a session from the list to see detected boxes.',
+    'boxes.refresh': 'Refresh',
+    'boxes.searchPlaceholder': 'Search creator or date...',
+    'boxes.noSessions': 'No saved sessions with boxes.',
+    'boxes.noMatches': 'No sessions match the search.',
+    'boxes.loading': 'Loading boxes...',
+    'boxes.loadFailed': 'Could not load boxes.',
+    'boxes.sessionCount': '{count} boxes',
+    'boxes.summary.count': 'Boxes',
+    'boxes.summary.coins': 'Coins',
+    'boxes.summary.people': 'Slots',
+    'boxes.emptyTitle': 'Select a session.',
+    'boxes.emptyDescription': 'On the left you will find sessions where boxes were detected.',
+    'boxes.sender': 'From:',
+    'boxes.coins': 'Coins:',
+    'boxes.people': 'Slots:',
+    'boxes.type.chest': 'Box',
+    'boxes.type.portal': 'Portal',
+    'settings.redeem.unlockedBoxes': 'Code accepted. The Boxes tab is active.',
+    'settings.redeem.unlockedMiamiVice': 'Code accepted. The Miami Vice theme is active in appearance settings.',
+    'czester.title': 'Assistant Czester',
+    'czester.note.before': 'Good day! I am Czester and I will try to solve your TikTok problem. Remember that I am still ',
+    'czester.note.learning': 'learning',
+    'czester.note.after': ' and may still misunderstand a lot...',
+    'czester.welcome': 'Good day! I am Czester and I will try to solve your TikTok problem. Remember that I am still learning and may still misunderstand a lot...',
+    'czester.userLabel': 'You',
+    'czester.botLabel': 'Czester',
+    'czester.open': 'Open Czester',
+    'czester.close': 'Close Czester',
+    'czester.questionsButton': 'Show questions from last 5 minutes',
+    'czester.questions.none': 'I do not see questions from the last 5 minutes.',
+    'czester.moderatorsButton': 'Show active moderators',
+    'czester.moderators.none': 'No active moderators in the last 5 minutes.',
+    'czester.moderators.title': 'Active moderators:',
+    'czester.notice.creatorFavorite': 'I moved @{creator} higher because you often return to this creator.',
+    'czester.notice.spam': 'Possible spam detected: {author} sent the same message {count} times in 5 seconds.',
+    'czester.notice.superfanJoin': 'Superfan {name} joined.',
+    'czester.notice.connection': 'I saved this connection. The more often you return to a creator, the higher they will appear.',
+    'czester.ai.title': 'Czester local brain',
+    'czester.ai.checking': 'Checking local package...',
+    'czester.ai.ready': 'Ready locally: {model}',
+    'czester.ai.noModel': 'Ollama is running, Czester model is missing.',
+    'czester.ai.noOllama': 'Local package is not installed yet.',
+    'czester.ai.install': 'Install AI package',
+    'czester.ai.installing': 'Installing...',
+    'czester.ai.installerStarted': 'Ollama installer has started. After it finishes, click again to download the model.',
+    'czester.ai.error': 'Could not prepare the local AI package.',
+    'czester.ollama.prompt': 'Czester local brain has been unlocked. Ollama is a local AI engine running on your computer. In this app it lets Czester analyze chat, questions, spam and LIVE context better without sending conversations to an external chat. Do you want to download and install Ollama locally?',
+    'czester.ollama.accept': 'Download and install',
+    'czester.ollama.decline': 'Not now',
+    'czester.ollama.declined': 'Sure. I will remind you on the next app launch until Ollama is ready.',
+    'czester.ollama.installing': 'Preparing the Ollama installation. If an installer appears, finish it normally in the system.',
+    'czester.ollama.ready': 'Ollama is ready. Czester can use the local model.',
+    'czester.ollama.error': 'Could not prepare Ollama. Try again later.',
     'filters.chat': 'Chat',
     'filters.like': 'Likes',
     'filters.gift': 'Gifts',
@@ -547,6 +720,9 @@ const I18N = {
     'settings.theme.roseGlass.description': 'A slightly softer, delicate theme.',
     'settings.theme.lazarskieRejony.name': 'Enigma-Z',
     'settings.theme.lazarskieRejony.description': 'A translucent dark grey-blue style with neon accents.',
+    'settings.theme.miamiVice.name': 'Miami Vice',
+    'settings.theme.miamiVice.description': 'Pastel Miami tones inspired by GTA Vice City.',
+    'settings.theme.locked': 'Locked',
     'settings.appAppearance.default.name': 'Default',
     'settings.appAppearance.default.description': 'Current header, sidebar, panel and button layout.',
     'settings.appAppearance.decorative.name': 'Decorative',
@@ -568,6 +744,7 @@ const I18N = {
     'settings.redeem.button': 'Activate',
     'settings.redeem.waiting': 'Enter an activation code.',
     'settings.redeem.unlocked': 'Code accepted. Honda blue notification is active.',
+    'settings.redeem.unlockedOllama': 'Code accepted. Czester local Ollama prompt has been unlocked.',
     'settings.redeem.invalid': 'Invalid code.',
     'settings.redeem.alreadyUsed': 'This code has already been redeemed.',
     'settings.system.autoLaunch': 'Automatically open Czatbox TT when the computer starts',
@@ -596,6 +773,19 @@ const I18N = {
     'about.program.how.p2': 'Chat messages can be shown with a configured delay, making them easier to follow during active streams. Other events, such as gifts, joins and likes, can appear live. You can change the filter, chat style, theme or delay at any time.',
     'about.program.how.p3': 'While the program is running, all stream events are saved to the archive. After ending or changing a stream, you can open the archive tab and return to earlier conversations.',
     'about.news.version': 'Program version',
+    'about.news.versionSuffix': 'AI',
+    'about.news.statement.title': 'Statement:',
+    'about.news.statement.p1': `This update is a major one. Until now I have been adding features that made more or less sense, but were requested by users. I want to start by saying that I have removed some features, and I want to explain why. The idea behind this program was to help creators grow, both larger and smaller ones, and above all to make moderation easier when the community is active. Unfortunately, some features made the program feel less like support and more like a tool for spying on other creators, their income and rankings. That was never my intention. From this update onward, the program will show only the statistics of the creator you are connected to, while rankings and opponent battle tracking are being withdrawn.`,
+    'about.news.statement.p2': `Is that all? No. I do not like taking something away without leaving something useful in return. I am a regular user, moderator and viewer like many others. After thinking it through, I decided to add something I had been afraid to introduce because many people still use weaker computers, older Windows versions such as Windows 10, or slower internet connections. Still, several testers made a fair point: the program should keep developing.`,
+    'about.news.statement.p3': `After considering it, I embedded AI into the program. It can help control chat and creator/moderation statistics better, and it gives more personalization and better information flow during LIVE chat. How does it work? After entering a special code in Settings → Redeem code, the AI option unlocks. The program can then download Ollama, which takes over 1 GB, and then update it by a similar amount. This is optional. The program can still work without it, but after activation Czester changes significantly and becomes more useful operationally. If you want to try it, enter the AI code: 19BM 9ARV 9IN1 K4M4.`,
+    'about.news.changes.title': 'Changes:',
+    'about.news.changes.removeRanking': 'Removed ranking from the program functionality',
+    'about.news.changes.ai': 'Added AI functionality',
+    'about.news.changes.codes': 'Added new features intended to support growing LIVE streams. They can be activated with codes. Contact me privately to get them.',
+    'about.news.changes.multiplier': 'Improved the battle multiplier, although it still needs testing.',
+    'about.news.changes.optimization': 'Major application optimization. The load has been reduced by over a dozen percent.',
+    'about.news.changes.viceCity': 'Added a new unlockable theme - Vice City. The theme is dedicated to testers as a thank-you for support and good feedback.',
+    'about.news.next.ai': 'Additional AI features in the program.',
     'about.news.intro': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.news.features.title': 'Main features:',
     'about.news.features.achievements': 'added an achievements system, available in the “Achievements” tab',
@@ -719,7 +909,30 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle finished',
     'battle.cancelled': 'The battle was cancelled',
-    'battle.authorJoin': 'Wake up, sleepyhead, Baksik joined the LIVE!'
+    'battle.authorJoin': 'Wake up, sleepyhead, Baksik joined the LIVE!',
+    'czester.notice.multiplier': 'Heads up, battle multiplier x{multiplier} is coming.',
+    'czester.notice.creatorFreeze': 'The creator has been frozen.',
+    'czester.battle.start': 'Battle started: {fighters}.',
+    'czester.battle.score': 'Current battle score: {score}.',
+    'czester.battle.finished': 'Battle finished: {score}.',
+    'czester.battle.cancelled': 'The battle was cancelled.',
+    'czester.battle.missionStart': 'Battle mission started: {detail} Goal: {target}. Reward: multiplier x{multiplier}.',
+    'czester.battle.missionProgress': '{actor} progressed the mission: {progress}/{target}.',
+    'czester.battle.missionSuccess': 'Battle mission completed. Reward incoming: multiplier x{multiplier}.',
+    'czester.battle.missionFailed': 'The battle mission was not completed.',
+    'czester.battle.missionReward': 'The mission reward has been settled.',
+    'czester.battle.effect': 'Battle effect: {effect}{actor}{targets}.',
+    'czester.battle.booster': 'Battle booster appeared: {effect}.',
+    'battle.effect.freeze': 'Freeze',
+    'battle.effect.glove': 'Gloves',
+    'battle.effect.fog': 'Fog',
+    'battle.effect.hammer': 'Hammer',
+    'battle.effect.shield': 'Shield',
+    'battle.effect.critical': 'Critical strike',
+    'battle.effect.top2': 'Top 2',
+    'battle.effect.top3': 'Top 3',
+    'battle.effect.boost': 'Boost',
+    'battle.effect.effect': 'Effect'
   },
   de: {
     'app.tagline': 'Live-Chat in Echtzeit verfolgen und verwalten.',
@@ -728,7 +941,9 @@ const I18N = {
     'nav.settings': 'Einstellungen',
     'nav.notes': 'Notizen',
     'nav.achievements': 'Erfolge',
-    'nav.ranking': 'Ranking',
+    'nav.coins': 'Münzen',
+    'nav.boxes': 'Boxen',
+    'nav.czester': 'Assistent Czester',
     'nav.about': 'Über das Programm',
     'creator.label': 'Creator',
     'creator.refresh': 'Chat aktualisieren',
@@ -736,17 +951,6 @@ const I18N = {
     'recentCreators.aria': 'Letzte Creator',
     'recentCreators.online': 'Ausgewählt',
     'recentCreators.offline': 'Nicht ausgewählt',
-    'ranking.title': 'Ranking',
-    'ranking.note': 'LIVE-Creator-Ranking für das Land, das anhand der App-Sprache gewählt wird.',
-    'ranking.refresh': 'Ranking aktualisieren',
-    'ranking.loading': 'Ranking wird geladen...',
-    'ranking.empty': 'Keine öffentlichen Ranking-Einträge zum Anzeigen.',
-    'ranking.error': 'Ranking konnte nicht geladen werden.',
-    'ranking.country': 'Land: {country}',
-    'ranking.updated': 'Letzte Aktualisierung: {time}',
-    'ranking.live': 'LIVE',
-    'ranking.offline': 'OFFLINE',
-    'ranking.diamonds': 'Diamanten',
     'achievements.title': 'Erfolge',
     'achievements.note': 'Freigeschaltete Erfolge für Aktivität in der App.',
     'achievements.emptyTitle': 'Noch keine Erfolge freigeschaltet.',
@@ -761,8 +965,70 @@ const I18N = {
     'achievements.firstNote.description': 'Schreibe deine erste Notiz.',
     'achievements.retroKb2.title': 'Retrospektion',
     'achievements.retroKb2.description': 'Schalte die App auf die Lite-Version um.',
-    'ranking.revenue': 'Umsatz',
-    'ranking.earnings': 'Einnahmen',
+    'coins.title': 'Münzen',
+    'coins.note': 'Unterstütze die App, indem du TikTok-Münzen mit Rabatt kaufst.',
+    'coins.cardTitle': 'Unterstützung über TikTok-Münzen',
+    'coins.description': 'Du kannst den Autor der App unterstützen, indem du TikTok-Münzen mit 25% Rabatt über den Code ZD3TKFBV kaufst.',
+    'coins.codeLabel': 'Rabattcode:',
+    'coins.link': 'TikTok öffnen',
+    'coins.chatPromo': 'Unterstütze den Autor von Czatbox TT: Kaufe TikTok-Münzen mit 25% Rabatt über den Code ZD3TKFBV oder öffne direkt:',
+    'boxes.title': 'Boxen',
+    'boxes.note': 'Archiv der aus LIVE-Sitzungen gespeicherten Boxen.',
+    'boxes.liveTitle': 'Boxen aus der Sitzung',
+    'boxes.liveDescription': 'Wähle links eine Sitzung aus, um erkannte Boxen zu sehen.',
+    'boxes.refresh': 'Aktualisieren',
+    'boxes.searchPlaceholder': 'Creator oder Datum suchen...',
+    'boxes.noSessions': 'Keine gespeicherten Sitzungen mit Boxen.',
+    'boxes.noMatches': 'Keine passenden Sitzungen gefunden.',
+    'boxes.loading': 'Boxen werden geladen...',
+    'boxes.loadFailed': 'Boxen konnten nicht geladen werden.',
+    'boxes.sessionCount': '{count} Boxen',
+    'boxes.summary.count': 'Boxen',
+    'boxes.summary.coins': 'Münzen',
+    'boxes.summary.people': 'Plätze',
+    'boxes.emptyTitle': 'Sitzung auswählen.',
+    'boxes.emptyDescription': 'Links findest du Sitzungen, in denen Boxen erkannt wurden.',
+    'boxes.sender': 'Von:',
+    'boxes.coins': 'Münzen:',
+    'boxes.people': 'Plätze:',
+    'boxes.type.chest': 'Box',
+    'boxes.type.portal': 'Portal',
+    'settings.redeem.unlockedBoxes': 'Code angenommen. Der Boxen-Tab ist aktiv.',
+    'settings.redeem.unlockedMiamiVice': 'Code akzeptiert. Das Miami-Vice-Theme ist in den Darstellungseinstellungen aktiv.',
+    'czester.title': 'Assistent Czester',
+    'czester.note.before': 'Guten Tag! Ich bin Czester und versuche, dein TikTok-Problem zu lösen. Denk daran, dass ich noch ',
+    'czester.note.learning': 'lerne',
+    'czester.note.after': ' und vieles noch falsch verstehen kann...',
+    'czester.welcome': 'Guten Tag! Ich bin Czester und versuche, dein TikTok-Problem zu lösen. Denk daran, dass ich noch lerne und vieles noch falsch verstehen kann...',
+    'czester.userLabel': 'Du',
+    'czester.botLabel': 'Czester',
+    'czester.open': 'Czester öffnen',
+    'czester.close': 'Czester schließen',
+    'czester.questionsButton': 'Fragen der letzten 5 Minuten zeigen',
+    'czester.questions.none': 'Ich sehe keine Fragen aus den letzten 5 Minuten.',
+    'czester.moderatorsButton': 'Aktive Moderatoren zeigen',
+    'czester.moderators.none': 'Keine aktiven Moderatoren in den letzten 5 Minuten.',
+    'czester.moderators.title': 'Aktive Moderatoren:',
+    'czester.notice.creatorFavorite': 'Ich habe @{creator} höher gesetzt, weil du oft zu diesem Creator zurückkehrst.',
+    'czester.notice.spam': 'Möglicher Spam erkannt: {author} hat dieselbe Nachricht {count} Mal in 5 Sekunden gesendet.',
+    'czester.notice.superfanJoin': 'Superfan {name} tritt bei.',
+    'czester.notice.connection': 'Ich habe diese Verbindung gespeichert. Je öfter du zu einem Creator zurückkehrst, desto höher erscheint er.',
+    'czester.ai.title': 'Lokales Gehirn von Czester',
+    'czester.ai.checking': 'Lokales Paket wird geprüft...',
+    'czester.ai.ready': 'Lokal bereit: {model}',
+    'czester.ai.noModel': 'Ollama läuft, aber das Czester-Modell fehlt.',
+    'czester.ai.noOllama': 'Das lokale Paket ist noch nicht installiert.',
+    'czester.ai.install': 'AI-Paket installieren',
+    'czester.ai.installing': 'Installation läuft...',
+    'czester.ai.installerStarted': 'Der Ollama-Installer wurde gestartet. Klicke nach der Installation erneut, um das Modell zu laden.',
+    'czester.ai.error': 'Das lokale AI-Paket konnte nicht vorbereitet werden.',
+    'czester.ollama.prompt': 'Das lokale Gehirn von Czester wurde freigeschaltet. Ollama ist eine lokale AI-Engine, die auf deinem Computer läuft. Im Programm kann Czester damit Chat, Fragen, Spam und LIVE-Kontext besser analysieren, ohne Gespräche an einen externen Chat zu senden. Möchtest du Ollama lokal herunterladen und installieren?',
+    'czester.ollama.accept': 'Herunterladen und installieren',
+    'czester.ollama.decline': 'Nicht jetzt',
+    'czester.ollama.declined': 'Okay. Ich erinnere dich beim nächsten Programmstart daran, bis Ollama bereit ist.',
+    'czester.ollama.installing': 'Ich bereite die Ollama-Installation vor. Wenn ein Installer erscheint, schließe ihn normal im System ab.',
+    'czester.ollama.ready': 'Ollama ist bereit. Czester kann das lokale Modell nutzen.',
+    'czester.ollama.error': 'Ollama konnte nicht vorbereitet werden. Versuche es später erneut.',
     'filters.chat': 'Chat',
     'filters.like': 'Likes',
     'filters.gift': 'Geschenke',
@@ -840,6 +1106,9 @@ const I18N = {
     'settings.theme.roseGlass.description': 'Ein etwas weicheres, dezentes Theme.',
     'settings.theme.lazarskieRejony.name': 'Enigma-Z',
     'settings.theme.lazarskieRejony.description': 'Halbtransparentes dunkelgrau-blaues Design mit Neon-Akzenten.',
+    'settings.theme.miamiVice.name': 'Miami Vice',
+    'settings.theme.miamiVice.description': 'Pastellige Miami-Farben, inspiriert von GTA Vice City.',
+    'settings.theme.locked': 'Gesperrt',
     'settings.appAppearance.default.name': 'Standard',
     'settings.appAppearance.default.description': 'Aktuelles Layout von Header, Sidebar, Fenstern und Buttons.',
     'settings.appAppearance.decorative.name': 'Dekorativ',
@@ -861,6 +1130,7 @@ const I18N = {
     'settings.redeem.button': 'Aktivieren',
     'settings.redeem.waiting': 'Gib einen Aktivierungscode ein.',
     'settings.redeem.unlocked': 'Code akzeptiert. Die blaue Honda-Benachrichtigung ist aktiv.',
+    'settings.redeem.unlockedOllama': 'Code akzeptiert. Der lokale Ollama-Hinweis für Czester wurde freigeschaltet.',
     'settings.redeem.invalid': 'Ungültiger Code.',
     'settings.redeem.alreadyUsed': 'Dieser Code wurde bereits eingelöst.',
     'settings.system.autoLaunch': 'Czatbox TT automatisch beim Computerstart öffnen',
@@ -889,6 +1159,19 @@ const I18N = {
     'about.program.how.p2': 'Chatnachrichten können mit einer festgelegten Verzögerung angezeigt werden, damit sie bei aktiven Streams leichter zu verfolgen sind. Andere Ereignisse wie Geschenke, Beitritte oder Likes können live erscheinen. Filter, Chat-Stil, Theme und Verzögerung können jederzeit geändert werden.',
     'about.program.how.p3': 'Während das Programm läuft, werden alle Stream-Ereignisse im Archiv gespeichert. Nach dem Ende oder Wechsel eines Streams kannst du das Archiv öffnen und zu früheren Gesprächen zurückkehren.',
     'about.news.version': 'Programmversion',
+    'about.news.versionSuffix': 'AI',
+    'about.news.statement.title': 'Erklärung:',
+    'about.news.statement.p1': `Dieses Update ist wirklich groß. Bisher habe ich vieles umgesetzt, was mehr oder weniger sinnvoll war, aber von euch gewünscht wurde. Zuerst möchte ich erklären, warum ich einige Funktionen entfernt habe. Die Idee hinter dem Programm war, Creatorn beim Wachstum zu helfen, größeren wie kleineren, und vor allem Moderation bei aktiven Communities zu erleichtern. Leider haben manche Funktionen das Programm weniger zu einem Werkzeug der Unterstützung und mehr zu einem Werkzeug zum Ausspähen anderer Creator, ihrer Einnahmen und Rankings gemacht. Das war nie meine Absicht. Ab diesem Update zeigt das Programm deshalb nur noch Statistiken des Creators, mit dem man verbunden ist. Rankings und Battle-Verläufe von Gegnern werden zurückgezogen.`,
+    'about.news.statement.p2': `Ist das alles? Nein. Ich nehme ungern etwas weg, ohne etwas Sinnvolles zurückzugeben. Ich bin wie ihr ein normaler Nutzer, Moderator und Zuschauer. Nach längerer Überlegung habe ich mich entschieden, etwas einzubauen, vor dem ich mich wegen schwächerer Computer, älterer Windows-Versionen wie Windows 10 und langsamerer Internetverbindungen lange gedrückt habe. Einige Tester hatten aber recht: Das Programm sollte sich weiterentwickeln.`,
+    'about.news.statement.p3': `Nach dieser Entscheidung habe ich AI in das Programm eingebaut. Sie soll helfen, Chat und Statistiken für Creator und Moderation besser zu kontrollieren, und ermöglicht mehr Personalisierung sowie besseren Informationsfluss im LIVE-Chat. Wie funktioniert das? Nach Eingabe eines speziellen Codes unter Einstellungen → Code einlösen wird die AI-Option freigeschaltet. Danach kann das Programm Ollama herunterladen, das über 1 GB benötigt, und anschließend eine Aktualisierung in ähnlicher Größe durchführen. Diese Funktion ist optional. Das Programm funktioniert weiterhin ohne sie, aber nach der Aktivierung verändert sich Czester deutlich und wird operativ nützlicher. Wenn du es testen möchtest, gib den AI-Code ein: 19BM 9ARV 9IN1 K4M4.`,
+    'about.news.changes.title': 'Änderungen:',
+    'about.news.changes.removeRanking': 'Ranking wurde aus der Programmlogik entfernt',
+    'about.news.changes.ai': 'AI-Funktionalität wurde integriert',
+    'about.news.changes.codes': 'Neue Funktionen zur Unterstützung wachsender LIVE-Streams wurden hinzugefügt. Sie können per Code aktiviert werden. Kontaktiere mich privat, um sie zu erhalten.',
+    'about.news.changes.multiplier': 'Der Battle-Multiplikator wurde verbessert, bleibt aber weiterhin eine Testfunktion.',
+    'about.news.changes.optimization': 'Große Optimierung des Programms. Die Belastung wurde um über ein Dutzend Prozent reduziert.',
+    'about.news.changes.viceCity': 'Ein neues freischaltbares Theme wurde hinzugefügt - Vice City. Es ist als Dankeschön für Tester gedacht.',
+    'about.news.next.ai': 'Weitere AI-Funktionen im Programm.',
     'about.news.intro': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.news.features.title': 'Hauptfunktionen:',
     'about.news.features.achievements': 'ein Erfolgssystem wurde hinzugefügt, sichtbar im Tab „Erfolge“',
@@ -1012,7 +1295,30 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle beendet',
     'battle.cancelled': 'Das Battle wurde abgebrochen',
-    'battle.authorJoin': 'Aufwachen, Schlafmütze, Baksik ist dem LIVE beigetreten!'
+    'battle.authorJoin': 'Aufwachen, Schlafmütze, Baksik ist dem LIVE beigetreten!',
+    'czester.notice.multiplier': 'Achtung, gleich kommt im Battle Multiplikator x{multiplier}.',
+    'czester.notice.creatorFreeze': 'Der Creator wurde eingefroren.',
+    'czester.battle.start': 'Battle gestartet: {fighters}.',
+    'czester.battle.score': 'Aktueller Battle-Stand: {score}.',
+    'czester.battle.finished': 'Battle beendet: {score}.',
+    'czester.battle.cancelled': 'Das Battle wurde abgebrochen.',
+    'czester.battle.missionStart': 'Battle-Mission gestartet: {detail} Ziel: {target}. Belohnung: Multiplikator x{multiplier}.',
+    'czester.battle.missionProgress': '{actor} hat die Mission vorangebracht: {progress}/{target}.',
+    'czester.battle.missionSuccess': 'Battle-Mission abgeschlossen. Belohnung kommt: Multiplikator x{multiplier}.',
+    'czester.battle.missionFailed': 'Die Battle-Mission wurde nicht abgeschlossen.',
+    'czester.battle.missionReward': 'Die Missionsbelohnung wurde verrechnet.',
+    'czester.battle.effect': 'Battle-Effekt: {effect}{actor}{targets}.',
+    'czester.battle.booster': 'Battle-Booster erschienen: {effect}.',
+    'battle.effect.freeze': 'Freeze',
+    'battle.effect.glove': 'Handschuhe',
+    'battle.effect.fog': 'Nebel',
+    'battle.effect.hammer': 'Hammer',
+    'battle.effect.shield': 'Schild',
+    'battle.effect.critical': 'Kritischer Treffer',
+    'battle.effect.top2': 'Top 2',
+    'battle.effect.top3': 'Top 3',
+    'battle.effect.boost': 'Boost',
+    'battle.effect.effect': 'Effekt'
   }
 };
 
@@ -1023,12 +1329,12 @@ const statusQueueEl = document.getElementById('statusQueue');
 const statusViewersEl = document.getElementById('statusViewers');
 const topGiftersContent = document.getElementById('topGiftersContent');
 const topTappersContent = document.getElementById('topTappersContent');
-const moderatorsWidgetContent = document.getElementById('moderatorsWidgetContent');
 const statusMessagesEl = document.getElementById('statusMessages');
 const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
 const statusMemberHeartsExpiredEl = document.getElementById('statusMemberHeartsExpired');
 const statusStatsEl = document.getElementById('statusStats');
 const rightWidgets = Array.from(document.querySelectorAll('[data-right-widget]'));
+const rightWidgetsByName = new Map(rightWidgets.map((widget) => [widget.dataset.rightWidget, widget]));
 const rightWidgetButtons = Array.from(document.querySelectorAll('[data-widget-target]'));
 const creatorInput = document.getElementById('creatorInput');
 const creatorRefreshButton = document.getElementById('creatorRefresh');
@@ -1039,7 +1345,11 @@ const recentCreatorsPrev = document.getElementById('recentCreatorsPrev');
 const recentCreatorsNext = document.getElementById('recentCreatorsNext');
 const messagesEl = document.getElementById('messages');
 const emptyEl = document.getElementById('empty');
+const chatViewEl = document.querySelector('.chat-view');
 const battleBanner = document.getElementById('battleBanner');
+const battleScorebarEl = document.getElementById('battleScorebar');
+const battleScorebarTrackEl = document.getElementById('battleScorebarTrack');
+const battleScoreTimeEl = document.getElementById('battleScoreTime');
 const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
 const sidebarButtons = Array.from(document.querySelectorAll('[data-section]'));
 const viewPanels = Array.from(document.querySelectorAll('[data-view]'));
@@ -1081,9 +1391,28 @@ const noteContentInput = document.getElementById('noteContentInput');
 const notePreviewEl = document.getElementById('notePreview');
 const noteMetaEl = document.getElementById('noteMeta');
 const noteFormatButtons = Array.from(document.querySelectorAll('[data-note-format]'));
-const rankingSummaryEl = document.getElementById('rankingSummary');
-const rankingListEl = document.getElementById('rankingList');
+const czesterPanelEl = document.getElementById('czesterPanel');
+const czesterLauncherEl = document.getElementById('czesterLauncher');
+const czesterCloseEl = document.getElementById('czesterClose');
+const czesterTitleStatusEl = document.getElementById('czesterTitleStatus');
+const czesterMessagesEl = document.getElementById('czesterMessages');
+const czesterQuestionsButtonEl = document.getElementById('czesterQuestionsButton');
+const czesterModeratorsButtonEl = document.getElementById('czesterModeratorsButton');
+const czesterAiPanelEl = document.getElementById('czesterAiPanel');
+const czesterAiStatusEl = document.getElementById('czesterAiStatus');
+const czesterAiInstallEl = document.getElementById('czesterAiInstall');
 const achievementsListEl = document.getElementById('achievementsList');
+const boxesArchiveListEl = document.getElementById('boxesArchiveList');
+const boxesArchiveSearchEl = document.getElementById('boxesArchiveSearch');
+const boxesSessionEl = document.getElementById('boxesSession');
+const boxesSessionTitleEl = document.getElementById('boxesSessionTitle');
+const boxesSessionMetaEl = document.getElementById('boxesSessionMeta');
+const refreshBoxesArchiveButton = document.getElementById('refreshBoxesArchive');
+const boxesListEl = document.getElementById('boxesList');
+const boxesEmptyEl = document.getElementById('boxesEmpty');
+const boxesSummaryCountEl = document.getElementById('boxesSummaryCount');
+const boxesSummaryCoinsEl = document.getElementById('boxesSummaryCoins');
+const boxesSummaryPeopleEl = document.getElementById('boxesSummaryPeople');
 const redeemCodeInput = document.getElementById('redeemCodeInput');
 const redeemCodeButton = document.getElementById('redeemCodeButton');
 const redeemCodeStatus = document.getElementById('redeemCodeStatus');
@@ -1114,11 +1443,18 @@ const queuedMessagesById = new Map();
 const visibleMessagesById = new Map();
 const giftTotalsByUser = new Map();
 const tapTotalsByUser = new Map();
+const liveBoxes = [];
+const boxesArchiveContentCache = new Map();
+let boxesArchiveEntries = [];
+let selectedBoxesArchiveId = '';
+let selectedBoxesArchive = null;
+let boxesArchiveLoading = false;
+let boxesArchiveRefreshTimer = null;
 const activeChatUsers = new Map();
 const activeModerators = new Map();
 const speechQueue = [];
-const activeFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
-const activeArchiveFilters = new Set(['chat', 'like', 'gift', 'box', 'repost', 'share', 'member']);
+const activeFilters = new Set(loadEventFilters(CHAT_FILTER_SETTINGS_KEY));
+const activeArchiveFilters = new Set(loadEventFilters(ARCHIVE_FILTER_SETTINGS_KEY));
 let state = {};
 let avatarImages = [];
 let speechVoices = [];
@@ -1136,6 +1472,8 @@ let revealTimer;
 let revealFallbackTimer;
 let syncedCreatorSuggestionsKey = '';
 let battleBannerTimer;
+let coinsPromoTimer = null;
+let coinsPromoCreatorKey = '';
 let activeSection = 'chatbox';
 let activeSettingsTab = 'general';
 let activeAboutTab = 'program';
@@ -1146,12 +1484,11 @@ let noteEntries = [];
 let selectedNoteId = '';
 let selectedNote = null;
 let noteEditorMode = 'edit';
-let rankingState = {
-  loading: false,
-  loadedLanguage: '',
-  data: null,
-  error: ''
-};
+let czesterMessages = [];
+let czesterTypingTimer = null;
+let czesterUserAvatar = '';
+let czesterAiBusy = false;
+let czesterOllamaPromptShownThisSession = false;
 let renderKeyCounter = 0;
 let timeFormatterKey = '';
 let timeFormatter = null;
@@ -1161,12 +1498,28 @@ let appearanceBroadcastChannel = null;
 let chatMessageCount = 0;
 let recentCreators = loadRecentCreators();
 let recentCreatorMeta = loadRecentCreatorMeta();
+let czesterMemory = loadCzesterMemory();
+let czesterSpamBuckets = new Map();
+let czesterSpamAlerts = new Map();
+let czesterBattleNoticeAlerts = new Map();
+let czesterLiveAnalysisMessages = [];
+let czesterLiveAnalysisTimer = null;
+let czesterLastAnalysisAt = 0;
+let czesterLastAnalysisMessageCount = 0;
+let czesterLiveEndedSummarySent = false;
+let czesterMemorySaveTimer = null;
+let czesterCurrentLiveSessionKey = '';
+let czesterArchiveIndexBusy = false;
+let chatFreezeTimer = null;
 let lastSubmittedCreator = '';
 let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
 let achievementsState = loadAchievementsState();
 let redeemedFeatures = loadRedeemedFeatures();
 let lastHondaOnlineAlertAt = 0;
+let battleScorebarState = null;
+let battleScorebarTimer = null;
+let battleScorebarHideTimer = null;
 
 function getTimeFormatter() {
   const key = `${appLanguage}:${timeFormat}`;
@@ -1274,9 +1627,67 @@ function saveChatStyle() {
   localStorage.setItem(CHAT_STYLE_SETTINGS_KEY, chatStyle);
 }
 
+function normalizeEventFilters(value, fallbackToDefault = false) {
+  const source = Array.isArray(value) ? value : [];
+  const filtered = source.filter((filter) => DEFAULT_EVENT_FILTERS.includes(filter));
+  if (filtered.length || !fallbackToDefault) {
+    return Array.from(new Set(filtered));
+  }
+
+  return [...DEFAULT_EVENT_FILTERS];
+}
+
+function loadEventFilters(key) {
+  const saved = localStorage.getItem(key);
+  if (saved === null) {
+    return [...DEFAULT_EVENT_FILTERS];
+  }
+
+  try {
+    return normalizeEventFilters(JSON.parse(saved));
+  } catch {
+    return [...DEFAULT_EVENT_FILTERS];
+  }
+}
+
+function saveEventFilters(key, filters) {
+  localStorage.setItem(key, JSON.stringify(normalizeEventFilters(Array.from(filters || []))));
+}
+
+function loadStoredRedeemCodes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REDEEMED_FEATURES_KEY) || '{}');
+    const codes = Array.isArray(saved.codes)
+      ? Array.from(new Set(saved.codes.map(normalizeRedeemCode).filter(Boolean)))
+      : [];
+    if (saved.hondaAlerts && !codes.includes(HONDA_REDEEM_CODE)) {
+      codes.push(HONDA_REDEEM_CODE);
+    }
+    if (saved.ollamaPrompt && !codes.includes(OLLAMA_REDEEM_CODE)) {
+      codes.push(OLLAMA_REDEEM_CODE);
+    }
+    if (saved.boxesPanel && !codes.includes(BOXES_REDEEM_CODE)) {
+      codes.push(BOXES_REDEEM_CODE);
+    }
+    if (saved.miamiViceTheme && !codes.includes(MIAMI_VICE_REDEEM_CODE)) {
+      codes.push(MIAMI_VICE_REDEEM_CODE);
+    }
+    return codes;
+  } catch {
+    return [];
+  }
+}
+
+function isAppThemeUnlocked(theme) {
+  if (theme === 'miami-vice') {
+    return loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+  }
+  return true;
+}
+
 function loadAppTheme() {
   const saved = localStorage.getItem(APP_THEME_SETTINGS_KEY);
-  return APP_THEMES.includes(saved) ? saved : 'rose-black';
+  return APP_THEMES.includes(saved) && isAppThemeUnlocked(saved) ? saved : 'rose-black';
 }
 
 function saveAppTheme() {
@@ -1341,19 +1752,20 @@ function saveAchievementsState() {
 function loadRedeemedFeatures() {
   try {
     const saved = JSON.parse(localStorage.getItem(REDEEMED_FEATURES_KEY) || '{}');
-    const codes = Array.isArray(saved.codes)
-      ? Array.from(new Set(saved.codes.map(normalizeRedeemCode).filter(Boolean)))
-      : [];
-    if (saved.hondaAlerts && !codes.includes(HONDA_REDEEM_CODE)) {
-      codes.push(HONDA_REDEEM_CODE);
-    }
+    const codes = loadStoredRedeemCodes();
     return {
       hondaAlerts: Boolean(saved.hondaAlerts) || codes.includes(HONDA_REDEEM_CODE),
+      ollamaPrompt: Boolean(saved.ollamaPrompt) || codes.includes(OLLAMA_REDEEM_CODE),
+      boxesPanel: Boolean(saved.boxesPanel) || codes.includes(BOXES_REDEEM_CODE),
+      miamiViceTheme: Boolean(saved.miamiViceTheme) || codes.includes(MIAMI_VICE_REDEEM_CODE),
       codes
     };
   } catch {
     return {
       hondaAlerts: false,
+      ollamaPrompt: false,
+      boxesPanel: false,
+      miamiViceTheme: false,
       codes: []
     };
   }
@@ -1373,6 +1785,65 @@ function formatRedeemCode(value) {
 
 function isHondaAlertsUnlocked() {
   return Boolean(redeemedFeatures.hondaAlerts);
+}
+
+function isOllamaPromptUnlocked() {
+  return Boolean(redeemedFeatures.ollamaPrompt);
+}
+
+function isBoxesPanelUnlocked() {
+  return Boolean(redeemedFeatures.boxesPanel);
+}
+
+function isMiamiViceThemeUnlocked() {
+  return Boolean(redeemedFeatures.miamiViceTheme) || loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+}
+
+function syncLockedThemeChoice(inputId, unlocked) {
+  const input = document.getElementById(inputId);
+  const choice = input ? input.closest('.setting-choice') : null;
+
+  if (choice) {
+    choice.hidden = false;
+    choice.dataset.locked = String(!unlocked);
+    choice.classList.toggle('theme-choice-locked', !unlocked);
+    const lockBadge = choice.querySelector('.theme-lock-badge');
+    if (lockBadge) {
+      lockBadge.hidden = unlocked;
+    }
+  }
+  if (input) {
+    input.disabled = !unlocked;
+  }
+}
+
+function syncRedeemedFeatureNavigation() {
+  const boxesButton = sidebarButtons.find((button) => button.dataset.section === 'boxes');
+  const boxesPanel = viewPanels.find((panel) => panel.dataset.view === 'boxes');
+  const unlocked = isBoxesPanelUnlocked();
+  const miamiUnlocked = isMiamiViceThemeUnlocked();
+
+  if (boxesButton) {
+    boxesButton.hidden = !unlocked;
+  }
+  if (boxesPanel && !unlocked) {
+    boxesPanel.hidden = true;
+  }
+  if (!unlocked && activeSection === 'boxes') {
+    setActiveSection('chatbox');
+  }
+
+  syncLockedThemeChoice('themeMiamiVice', miamiUnlocked);
+  if (!miamiUnlocked && appTheme === 'miami-vice') {
+    appTheme = 'rose-black';
+    saveAppTheme();
+    if (typeof applyAppearanceSettings === 'function') {
+      applyAppearanceSettings();
+    }
+    if (typeof broadcastAppearanceSettings === 'function') {
+      broadcastAppearanceSettings();
+    }
+  }
 }
 
 function setRedeemCodeStatus(message, tone = 'idle') {
@@ -1403,19 +1874,51 @@ function redeemEnteredCode() {
   if ((redeemedFeatures.codes || []).includes(normalized)) {
     redeemCodeInput.value = '';
     setRedeemCodeStatus(t('settings.redeem.alreadyUsed'), 'success');
+    syncRedeemedFeatureNavigation();
+    if (normalized === OLLAMA_REDEEM_CODE) {
+      maybeShowCzesterOllamaPrompt({ force: true });
+    }
     return;
   }
 
-  if (normalized !== HONDA_REDEEM_CODE) {
+  if (normalized !== HONDA_REDEEM_CODE
+    && normalized !== OLLAMA_REDEEM_CODE
+    && normalized !== BOXES_REDEEM_CODE
+    && normalized !== MIAMI_VICE_REDEEM_CODE) {
     setRedeemCodeStatus(t('settings.redeem.invalid'), 'error');
     return;
   }
 
-  redeemedFeatures.hondaAlerts = true;
+  if (normalized === HONDA_REDEEM_CODE) {
+    redeemedFeatures.hondaAlerts = true;
+  }
+  if (normalized === OLLAMA_REDEEM_CODE) {
+    redeemedFeatures.ollamaPrompt = true;
+  }
+  if (normalized === BOXES_REDEEM_CODE) {
+    redeemedFeatures.boxesPanel = true;
+  }
+  if (normalized === MIAMI_VICE_REDEEM_CODE) {
+    redeemedFeatures.miamiViceTheme = true;
+  }
   redeemedFeatures.codes = Array.from(new Set([...(redeemedFeatures.codes || []), normalized]));
   saveRedeemedFeatures();
   redeemCodeInput.value = '';
-  setRedeemCodeStatus(t('settings.redeem.unlocked'), 'success');
+  setRedeemCodeStatus(
+    normalized === OLLAMA_REDEEM_CODE
+      ? t('settings.redeem.unlockedOllama')
+      : normalized === BOXES_REDEEM_CODE
+        ? t('settings.redeem.unlockedBoxes')
+        : normalized === MIAMI_VICE_REDEEM_CODE
+          ? t('settings.redeem.unlockedMiamiVice')
+          : t('settings.redeem.unlocked'),
+    'success'
+  );
+  syncRedeemedFeatureNavigation();
+  renderBoxesPanel();
+  if (normalized === OLLAMA_REDEEM_CODE) {
+    maybeShowCzesterOllamaPrompt({ force: true });
+  }
 }
 
 function initRedeemCodeSettings() {
@@ -1538,7 +2041,9 @@ function trackCreatorConnectionAchievement(nextState, options = {}) {
 
 function syncAppearanceFromValues(nextValues = {}) {
   const nextChatStyle = CHAT_STYLES.includes(nextValues.chatStyle) ? nextValues.chatStyle : chatStyle;
-  const nextTheme = APP_THEMES.includes(nextValues.appTheme) ? nextValues.appTheme : appTheme;
+  const nextTheme = APP_THEMES.includes(nextValues.appTheme) && isAppThemeUnlocked(nextValues.appTheme)
+    ? nextValues.appTheme
+    : appTheme;
   const nextAppearance = APP_APPEARANCES.includes(nextValues.appAppearance) ? nextValues.appAppearance : appAppearance;
   const chatStyleChanged = nextChatStyle !== chatStyle;
   const appearanceChanged = nextAppearance !== appAppearance;
@@ -1622,6 +2127,44 @@ function normalizeCreatorHandle(value) {
     .toLowerCase();
 }
 
+function normalizeCreatorComparableName(value) {
+  return String(value || '')
+    .trim()
+    .replace(/^@+/, '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function getCurrentCreatorComparableNames() {
+  const handle = getCurrentCreatorHandle();
+  const creator = (state && state.currentCreator) || {};
+  const stored = handle && recentCreatorMeta ? recentCreatorMeta[handle] : null;
+  const matched = handle ? findCreatorByHandle(handle) : null;
+  return [...new Set([
+    creator.id,
+    creator.username,
+    creator.label,
+    creator.label && String(creator.label).replace(/\s*\(@[^)]*\)\s*$/, ''),
+    getCreatorUsernameFromState(),
+    handle,
+    stored && stored.id,
+    stored && stored.username,
+    stored && stored.label,
+    stored && stored.label && String(stored.label).replace(/\s*\(@[^)]*\)\s*$/, ''),
+    matched && matched.id,
+    matched && matched.username,
+    matched && matched.label,
+    matched && matched.label && String(matched.label).replace(/\s*\(@[^)]*\)\s*$/, '')
+  ].map(normalizeCreatorComparableName).filter(Boolean))];
+}
+
+function isCurrentCreatorName(value) {
+  const actual = normalizeCreatorComparableName(value);
+  return Boolean(actual && getCurrentCreatorComparableNames().includes(actual));
+}
+
 function loadRecentCreators() {
   try {
     const saved = JSON.parse(localStorage.getItem(RECENT_CREATORS_KEY) || '[]');
@@ -1653,6 +2196,1274 @@ function saveRecentCreatorMeta() {
   localStorage.setItem(RECENT_CREATOR_META_KEY, JSON.stringify(Object.fromEntries(entries)));
 }
 
+function normalizeCzesterMemory(value) {
+  const creatorUsage = value && value.creatorUsage && typeof value.creatorUsage === 'object'
+    ? value.creatorUsage
+    : {};
+  const viewerProfiles = value && value.viewerProfiles && typeof value.viewerProfiles === 'object'
+    ? value.viewerProfiles
+    : {};
+  const notifications = Array.isArray(value && value.notifications) ? value.notifications : [];
+  const indexedArchives = Array.isArray(value && value.indexedArchives) ? value.indexedArchives : [];
+
+  return {
+    creatorUsage: Object.fromEntries(
+      Object.entries(creatorUsage)
+        .map(([handle, entry]) => {
+          const normalizedHandle = normalizeCreatorHandle(handle);
+          if (!normalizedHandle) {
+            return null;
+          }
+          const data = entry && typeof entry === 'object' ? entry : {};
+          return [normalizedHandle, {
+            count: Math.max(0, Number(data.count) || 0),
+            lastConnectedAt: typeof data.lastConnectedAt === 'string' ? data.lastConnectedAt : '',
+            successfulConnections: Math.max(0, Number(data.successfulConnections) || 0)
+          }];
+        })
+        .filter(Boolean)
+    ),
+    viewerProfiles: Object.fromEntries(
+      Object.entries(viewerProfiles)
+        .map(([key, entry]) => {
+          const normalizedKey = String(key || '').trim().toLowerCase();
+          if (!normalizedKey) {
+            return null;
+          }
+          const data = entry && typeof entry === 'object' ? entry : {};
+          return [normalizedKey, {
+            name: String(data.name || normalizedKey),
+            uniqueId: String(data.uniqueId || ''),
+            firstSeenAt: typeof data.firstSeenAt === 'string' ? data.firstSeenAt : '',
+            lastSeenAt: typeof data.lastSeenAt === 'string' ? data.lastSeenAt : '',
+            seenSessions: Math.max(0, Number(data.seenSessions) || 0),
+            lastCreator: String(data.lastCreator || ''),
+            lastSessionKey: String(data.lastSessionKey || ''),
+            chatCount: Math.max(0, Number(data.chatCount) || 0),
+            joinCount: Math.max(0, Number(data.joinCount) || 0),
+            giftCoins: Math.max(0, Number(data.giftCoins) || 0),
+            tapCount: Math.max(0, Number(data.tapCount) || 0),
+            spamCount: Math.max(0, Number(data.spamCount) || 0),
+            positiveCount: Math.max(0, Number(data.positiveCount) || 0),
+            problematicCount: Math.max(0, Number(data.problematicCount) || 0),
+            helperCount: Math.max(0, Number(data.helperCount) || 0)
+          }];
+        })
+        .filter(Boolean)
+        .slice(-CZESTER_VIEWER_PROFILE_LIMIT)
+    ),
+    notifications: notifications
+      .filter((item) => item && typeof item === 'object')
+      .slice(-50),
+    indexedArchives: indexedArchives
+      .map((item) => String(item || '').trim())
+      .filter(Boolean)
+      .slice(-1000)
+  };
+}
+
+function loadCzesterMemory() {
+  try {
+    return normalizeCzesterMemory(JSON.parse(localStorage.getItem(CZESTER_MEMORY_KEY) || '{}'));
+  } catch {
+    return normalizeCzesterMemory({});
+  }
+}
+
+function saveCzesterMemory() {
+  localStorage.setItem(CZESTER_MEMORY_KEY, JSON.stringify(normalizeCzesterMemory(czesterMemory)));
+}
+
+function scheduleCzesterMemorySave() {
+  if (czesterMemorySaveTimer) {
+    return;
+  }
+  czesterMemorySaveTimer = setTimeout(() => {
+    czesterMemorySaveTimer = null;
+    saveCzesterMemory();
+  }, 5000);
+}
+
+function getCreatorUsageScore(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  const entry = normalized ? czesterMemory.creatorUsage[normalized] : null;
+  if (!entry) {
+    return 0;
+  }
+
+  const countScore = Math.min(200, Math.max(0, Number(entry.count) || 0) * 20);
+  const successfulScore = Math.min(100, Math.max(0, Number(entry.successfulConnections) || 0) * 10);
+  const lastConnectedAt = Date.parse(entry.lastConnectedAt || '');
+  const recencyScore = Number.isFinite(lastConnectedAt)
+    ? Math.max(0, 100 - ((Date.now() - lastConnectedAt) / CZESTER_CREATOR_RECENCY_WINDOW_MS) * 100)
+    : 0;
+  return countScore + successfulScore + recencyScore;
+}
+
+function getOrderedRecentCreators() {
+  return recentCreators
+    .map(normalizeCreatorHandle)
+    .filter(Boolean)
+    .sort((left, right) => {
+      const scoreDiff = getCreatorUsageScore(right) - getCreatorUsageScore(left);
+      if (Math.abs(scoreDiff) > 0.001) {
+        return scoreDiff;
+      }
+      return recentCreators.indexOf(left) - recentCreators.indexOf(right);
+    })
+    .slice(0, MAX_RECENT_CREATORS);
+}
+
+function recordCzesterCreatorConnection(handle, options = {}) {
+  const normalized = normalizeCreatorHandle(handle);
+  if (!normalized) {
+    return;
+  }
+
+  const current = czesterMemory.creatorUsage[normalized] || {
+    count: 0,
+    lastConnectedAt: '',
+    successfulConnections: 0
+  };
+  current.count = Math.max(0, Number(current.count) || 0) + 1;
+  current.lastConnectedAt = new Date().toISOString();
+  if (options.successful) {
+    current.successfulConnections = Math.max(0, Number(current.successfulConnections) || 0) + 1;
+  }
+  czesterMemory.creatorUsage[normalized] = current;
+  saveCzesterMemory();
+}
+
+function rememberCzesterNotice(type, payload = {}) {
+  czesterMemory.notifications.push({
+    type,
+    payload,
+    createdAt: new Date().toISOString()
+  });
+  czesterMemory.notifications = czesterMemory.notifications.slice(-50);
+  saveCzesterMemory();
+}
+
+function wasCzesterNoticeRecentlyShown(type, key, cooldownMs) {
+  const now = Date.now();
+  return czesterMemory.notifications.some((item) => {
+    if (!item || item.type !== type) {
+      return false;
+    }
+    const createdAt = Date.parse(item.createdAt || '');
+    if (!Number.isFinite(createdAt) || now - createdAt > cooldownMs) {
+      return false;
+    }
+    const payload = item.payload && typeof item.payload === 'object' ? item.payload : {};
+    return String(payload.key || payload.creator || '') === String(key || '');
+  });
+}
+
+function notifyCzester(type, text, options = {}) {
+  const value = String(text || '').trim();
+  if (!value) {
+    return Promise.resolve();
+  }
+  rememberCzesterNotice(type, options.payload || {});
+  return appendCzesterMessage('bot', value, {
+    animate: options.animate !== false,
+    variant: options.variant || ''
+  });
+}
+
+function getCzesterMessageAuthor(message) {
+  return String(message && (message.authorName || message.uniqueId) || '').replace(/^@+/, '').trim();
+}
+
+function getCzesterViewerKey(message) {
+  return getStatsUserKey(message) || normalizeCreatorHandle(getCzesterMessageAuthor(message));
+}
+
+function normalizeCzesterText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s?!.]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isCzesterQuestionText(text) {
+  const normalized = normalizeCzesterText(text);
+  return Boolean(
+    normalized
+    && (
+      normalized.includes('?')
+      || /^(czy|gdzie|kiedy|ile|jak|jaki|jaka|jakie|czemu|dlaczego|po co|za ile|skad|dokad|ktory|ktora|ktore)\b/u.test(normalized)
+    )
+  );
+}
+
+function getCzesterQuestionItems(windowMs = CZESTER_QUESTIONS_WINDOW_MS) {
+  const since = Date.now() - windowMs;
+  return czesterLiveAnalysisMessages
+    .filter((entry) => entry.kind === 'chat' && entry.createdAt >= since && isCzesterQuestionText(entry.text))
+    .slice(-20);
+}
+
+function getCzesterTopicHits(messages) {
+  const topicDefs = [
+    { key: 'cena', label: 'cena', patterns: [/\bcen\w*\b/u, /\bile\b/u, /\bkoszt\w*\b/u, /\bza ile\b/u] },
+    { key: 'wysylka', label: 'wysyłka', patterns: [/\bwysyl\w*\b/u, /\bpacz\w*\b/u, /\bkurier\w*\b/u, /\bodbi[oó]r\b/u] },
+    { key: 'live', label: 'kolejny live', patterns: [/\blive\b/u, /\bkiedy\b/u, /\bo kt[oó]rej\b/u] },
+    { key: 'obs', label: 'obs za obs', patterns: [/\bobs\b/u, /\bobserw\w*\b/u, /\bfollow\b/u] },
+    { key: 'prezenty', label: 'prezenty', patterns: [/\bgift\w*\b/u, /\bprezent\w*\b/u, /\bmonet\w*\b/u, /\bserc\w*\b/u] },
+    { key: 'problem', label: 'problemy/pretensje', patterns: [/\bproblem\w*\b/u, /\bczemu\b/u, /\bdlaczego\b/u, /\bnie dziala\b/u, /\boszust\w*\b/u] }
+  ];
+  const scores = new Map();
+  messages.forEach((entry) => {
+    const text = normalizeCzesterText(entry.text);
+    topicDefs.forEach((topic) => {
+      if (topic.patterns.some((pattern) => pattern.test(text))) {
+        scores.set(topic.key, {
+          label: topic.label,
+          count: (scores.get(topic.key) && scores.get(topic.key).count || 0) + 1
+        });
+      }
+    });
+  });
+  return [...scores.values()]
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 3);
+}
+
+function getCzesterMood(messages) {
+  const chatMessages = messages.filter((entry) => entry.kind === 'chat');
+  if (chatMessages.length < 3) {
+    return 'martwy';
+  }
+  const joined = chatMessages.map((entry) => normalizeCzesterText(entry.text)).join(' ');
+  const spamCount = chatMessages.filter((entry) => /(?:obs za obs|follow for follow|f4f|\bobs\b)/u.test(normalizeCzesterText(entry.text))).length;
+  const laughCount = chatMessages.filter((entry) => /(?:haha|hehe|xd|🤣|😂|😅)/iu.test(entry.text)).length;
+  const positiveCount = chatMessages.filter((entry) => /(?:super|dzieki|dzięki|kocham|git|fajnie|dobrze|sztos|❤️|💙|😍)/iu.test(entry.text)).length;
+  const conflictCount = chatMessages.filter((entry) => /(?:kurw|chuj|jeb|oszust|klam|kłam|debil|idiot|zamknij|nienawidze|nienawidzę)/iu.test(entry.text)).length;
+  const questionCount = chatMessages.filter((entry) => isCzesterQuestionText(entry.text)).length;
+
+  if (spamCount >= 3 || spamCount >= Math.ceil(chatMessages.length * 0.3)) {
+    return 'spamerski';
+  }
+  if (conflictCount >= 2 || joined.includes('drama')) {
+    return 'konfliktowy';
+  }
+  if (questionCount >= Math.max(4, Math.ceil(chatMessages.length * 0.35))) {
+    return 'chaotyczny';
+  }
+  if (laughCount >= 3) {
+    return 'śmieszkowy';
+  }
+  if (positiveCount >= 3) {
+    return 'pozytywny';
+  }
+  return 'neutralny';
+}
+
+function getCzesterMoodDescription(mood) {
+  const labels = {
+    pozytywny: 'aktywny i pozytywny',
+    neutralny: 'raczej neutralny',
+    nerwowy: 'nerwowy',
+    spamerski: 'spamerski',
+    konfliktowy: 'konfliktowy',
+    śmieszkowy: 'śmieszkowy',
+    martwy: 'martwy',
+    chaotyczny: 'chaotyczny'
+  };
+  return labels[mood] || mood || 'neutralny';
+}
+
+function getRepeatedCzesterQuestions(questions) {
+  const grouped = new Map();
+  questions.forEach((entry) => {
+    const key = normalizeCzesterText(entry.text).replace(/[?!.,]+$/g, '');
+    if (!key) {
+      return;
+    }
+    const current = grouped.get(key) || {
+      text: entry.text,
+      authors: new Set(),
+      count: 0
+    };
+    current.count += 1;
+    if (entry.author) {
+      current.authors.add(entry.author);
+    }
+    grouped.set(key, current);
+  });
+  return [...grouped.values()]
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 5)
+    .map((entry) => ({
+      text: entry.text,
+      count: entry.count,
+      authors: [...entry.authors].slice(0, 4)
+    }));
+}
+
+function buildCzesterLiveSummary() {
+  const since = Date.now() - CZESTER_LIVE_ANALYSIS_WINDOW_MS;
+  const messages = czesterLiveAnalysisMessages.filter((entry) => entry.createdAt >= since);
+  const chatMessages = messages.filter((entry) => entry.kind === 'chat');
+  if (chatMessages.length < CZESTER_LIVE_ANALYSIS_MIN_MESSAGES) {
+    return '';
+  }
+  const topics = getCzesterTopicHits(chatMessages);
+  const questions = getRepeatedCzesterQuestions(getCzesterQuestionItems(CZESTER_LIVE_ANALYSIS_WINDOW_MS));
+  const mood = getCzesterMood(messages);
+  const parts = [];
+  if (topics.length) {
+    parts.push(`Czat pisze głównie o: ${topics.map((topic) => topic.label).join(', ')}.`);
+  } else {
+    parts.push('Czat jest aktywny, ale bez jednego wyraźnego tematu.');
+  }
+  if (questions.length) {
+    parts.push(`Powtarzające się pytania: ${questions.slice(0, 3).map((item) => `„${item.text}”`).join('; ')}.`);
+  }
+  parts.push(`Nastrój: ${getCzesterMoodDescription(mood)}.`);
+  return parts.join(' ');
+}
+
+function maybeRunCzesterLiveAnalysis(force = false) {
+  const now = Date.now();
+  if (!force && now - czesterLastAnalysisAt < CZESTER_LIVE_ANALYSIS_INTERVAL_MS) {
+    return;
+  }
+  const newMessages = czesterLiveAnalysisMessages.length - czesterLastAnalysisMessageCount;
+  if (!force && newMessages < CZESTER_LIVE_ANALYSIS_MIN_MESSAGES) {
+    return;
+  }
+  const summary = buildCzesterLiveSummary();
+  if (!summary) {
+    return;
+  }
+  czesterLastAnalysisAt = now;
+  czesterLastAnalysisMessageCount = czesterLiveAnalysisMessages.length;
+  notifyCzester('live-summary', summary, {
+    animate: false,
+    variant: 'analysis',
+    payload: { key: `summary:${Math.floor(now / CZESTER_LIVE_ANALYSIS_INTERVAL_MS)}` }
+  });
+}
+
+function startCzesterLiveAnalysisTimer() {
+  if (czesterLiveAnalysisTimer) {
+    return;
+  }
+  czesterLiveAnalysisTimer = setInterval(() => maybeRunCzesterLiveAnalysis(false), 10 * 1000);
+}
+
+function resetCzesterLiveAnalysis() {
+  czesterLiveAnalysisMessages = [];
+  czesterLastAnalysisAt = 0;
+  czesterLastAnalysisMessageCount = 0;
+  czesterLiveEndedSummarySent = false;
+}
+
+function recordCzesterLiveAnalysisMessage(message) {
+  if (!message || message.czesterOnly) {
+    return;
+  }
+  const kind = message.kind || 'chat';
+  const text = getMessagePlainText(message);
+  if (!text && !message.textKey) {
+    return;
+  }
+  const createdAt = Date.now();
+  czesterLiveAnalysisMessages.push({
+    createdAt,
+    timestamp: message.timestamp || new Date(createdAt).toISOString(),
+    kind,
+    text,
+    author: getCzesterMessageAuthor(message),
+    uniqueId: message.uniqueId || '',
+    giftCost: Math.max(0, Number(message.giftCost) || 0),
+    likeCount: Math.max(0, Number(message.likeCount || message.total) || 0),
+    isModerator: Boolean(message.isModerator),
+    isSuperFan: Boolean(message.isSuperFan)
+  });
+  if (czesterLiveAnalysisMessages.length > CZESTER_LIVE_ANALYSIS_MAX_BUFFER) {
+    czesterLiveAnalysisMessages = czesterLiveAnalysisMessages.slice(-CZESTER_LIVE_ANALYSIS_MAX_BUFFER);
+  }
+  startCzesterLiveAnalysisTimer();
+}
+
+function updateCzesterViewerProfile(message, options = {}) {
+  const key = getCzesterViewerKey(message);
+  if (!key) {
+    return;
+  }
+  const nowIso = new Date().toISOString();
+  const currentCreator = options.creator || getCurrentCreatorHandle();
+  const profile = czesterMemory.viewerProfiles[key] || {
+    name: getCzesterMessageAuthor(message) || key,
+    uniqueId: message.uniqueId || '',
+    firstSeenAt: nowIso,
+    lastSeenAt: '',
+    seenSessions: 0,
+    lastCreator: '',
+    lastSessionKey: '',
+    chatCount: 0,
+    joinCount: 0,
+    giftCoins: 0,
+    tapCount: 0,
+    spamCount: 0,
+    positiveCount: 0,
+    problematicCount: 0,
+    helperCount: 0
+  };
+  profile.name = getCzesterMessageAuthor(message) || profile.name || key;
+  profile.uniqueId = message.uniqueId || profile.uniqueId || '';
+  profile.lastSeenAt = nowIso;
+  const sessionKey = options.sessionKey || czesterCurrentLiveSessionKey || (currentCreator ? `${currentCreator}:local` : '');
+  if (sessionKey && profile.lastSessionKey !== sessionKey) {
+    profile.seenSessions = Math.max(0, Number(profile.seenSessions) || 0) + 1;
+    profile.lastSessionKey = sessionKey;
+  }
+  profile.lastCreator = currentCreator || profile.lastCreator || '';
+  const kind = message.kind || 'chat';
+  if (kind === 'chat') {
+    profile.chatCount += 1;
+    const text = normalizeCzesterText(getMessagePlainText(message));
+    if (/(dzieki|dzięki|super|git|fajnie|sztos|kocham|❤️|💙)/iu.test(text)) {
+      profile.positiveCount += 1;
+    }
+    if (/(kurw|chuj|jeb|debil|idiot|oszust|klam|kłam)/iu.test(text)) {
+      profile.problematicCount += 1;
+    }
+    if (/(pomog|pomóg|odpowiad|spokojnie|nie spam|regulamin|moder)/iu.test(text)) {
+      profile.helperCount += 1;
+    }
+  } else if (kind === 'member') {
+    profile.joinCount += 1;
+  } else if (kind === 'gift' || kind === 'box') {
+    profile.giftCoins += Math.max(0, Number(message.giftCost) || 0);
+  } else if (kind === 'like') {
+    profile.tapCount += Math.max(1, Number(message.likeCount) || 1);
+  }
+  if (options.spam) {
+    profile.spamCount += 1;
+  }
+  czesterMemory.viewerProfiles[key] = profile;
+  const entries = Object.entries(czesterMemory.viewerProfiles);
+  if (entries.length > CZESTER_VIEWER_PROFILE_LIMIT) {
+    entries
+      .sort((left, right) => Date.parse(left[1].lastSeenAt || '') - Date.parse(right[1].lastSeenAt || ''))
+      .slice(0, entries.length - CZESTER_VIEWER_PROFILE_LIMIT)
+      .forEach(([oldKey]) => delete czesterMemory.viewerProfiles[oldKey]);
+  }
+  if (options.save !== false) {
+    scheduleCzesterMemorySave();
+  }
+}
+
+async function indexCzesterArchiveProfiles(entries = []) {
+  if (czesterArchiveIndexBusy || !window.tiktokLive || typeof window.tiktokLive.getArchiveContent !== 'function') {
+    return;
+  }
+  const indexed = new Set(Array.isArray(czesterMemory.indexedArchives) ? czesterMemory.indexedArchives : []);
+  const pending = entries
+    .filter((entry) => entry && entry.id && !indexed.has(entry.id));
+  if (!pending.length) {
+    return;
+  }
+
+  const batch = pending.slice(0, CZESTER_ARCHIVE_INDEX_BATCH_LIMIT);
+  czesterArchiveIndexBusy = true;
+  try {
+    for (const entry of batch) {
+      try {
+        const result = await window.tiktokLive.getArchiveContent(entry.id);
+        if (!result || !result.ok || !Array.isArray(result.messages)) {
+          continue;
+        }
+        const creator = normalizeCreatorHandle(entry.username || (result.entry && result.entry.username) || '');
+        const sessionKey = `archive:${entry.id}`;
+        result.messages.forEach((message) => {
+          updateCzesterViewerProfile(message, {
+            creator,
+            sessionKey,
+            save: false
+          });
+        });
+        indexed.add(entry.id);
+      } catch {
+        // Pojedyncze uszkodzone archiwum nie może zatrzymać indeksowania reszty.
+      }
+    }
+    czesterMemory.indexedArchives = [...indexed].slice(-1000);
+    saveCzesterMemory();
+  } finally {
+    czesterArchiveIndexBusy = false;
+    if (pending.length > batch.length) {
+      window.setTimeout(() => indexCzesterArchiveProfiles(entries), 750);
+    }
+  }
+}
+
+function showCzesterQuestionsFromLastFiveMinutes() {
+  const questions = getRepeatedCzesterQuestions(getCzesterQuestionItems(CZESTER_QUESTIONS_WINDOW_MS));
+  if (!questions.length) {
+    notifyCzester('live-questions', t('czester.questions.none'), { animate: false, variant: 'analysis' });
+    return;
+  }
+  const lines = questions.map((item, index) => {
+    const authors = item.authors.length ? ` — ${item.authors.join(', ')}` : '';
+    return `${index + 1}. ${item.text}${authors}`;
+  });
+  notifyCzester('live-questions', `Pytania z ostatnich 5 minut:\n${lines.join('\n')}`, {
+    animate: false,
+    variant: 'analysis'
+  });
+}
+
+function showCzesterActiveModerators() {
+  const moderators = getActiveModerators();
+  if (!moderators.length) {
+    notifyCzester('active-moderators', t('czester.moderators.none'), {
+      animate: false,
+      variant: 'analysis'
+    });
+    return;
+  }
+
+  const lines = moderators.map((entry, index) => `${index + 1}. ${entry.name}`);
+  notifyCzester('active-moderators', `${t('czester.moderators.title')}\n${lines.join('\n')}`, {
+    animate: false,
+    variant: 'analysis'
+  });
+}
+
+function getCzesterTopViewerProfiles(limit = 3) {
+  return Object.values(czesterMemory.viewerProfiles || {})
+    .sort((left, right) => (
+      (right.chatCount + right.giftCoins + right.tapCount / 20 + right.joinCount * 3)
+      - (left.chatCount + left.giftCoins + left.tapCount / 20 + left.joinCount * 3)
+    ))
+    .slice(0, limit);
+}
+
+function getCzesterCurrentLiveViewerProfiles(limit = 3) {
+  const profiles = new Map();
+
+  czesterLiveAnalysisMessages.forEach((entry) => {
+    const key = normalizeCreatorHandle(entry.uniqueId || entry.author || '');
+    if (!key) {
+      return;
+    }
+
+    const profile = profiles.get(key) || {
+      name: entry.author || key,
+      chatCount: 0,
+      giftCoins: 0,
+      tapCount: 0,
+      joinCount: 0
+    };
+    profile.name = entry.author || profile.name;
+
+    if (entry.kind === 'chat') {
+      profile.chatCount += 1;
+    } else if (entry.kind === 'gift' || entry.kind === 'box') {
+      profile.giftCoins += Math.max(0, Number(entry.giftCost) || 0);
+    } else if (entry.kind === 'like') {
+      profile.tapCount += Math.max(1, Number(entry.likeCount) || 1);
+    } else if (entry.kind === 'member') {
+      profile.joinCount += 1;
+    }
+
+    profiles.set(key, profile);
+  });
+
+  return Array.from(profiles.values())
+    .sort((left, right) => (
+      (right.chatCount + right.giftCoins + right.tapCount / 20 + right.joinCount * 3)
+      - (left.chatCount + left.giftCoins + left.tapCount / 20 + left.joinCount * 3)
+      || left.name.localeCompare(right.name)
+    ))
+    .slice(0, limit);
+}
+
+function buildCzesterLiveEndSummary() {
+  const topGifters = getTopGifters();
+  const topTappers = getTopTappers();
+  const moderators = getActiveModerators();
+  const profiles = getCzesterCurrentLiveViewerProfiles(3);
+  const mood = getCzesterMood(czesterLiveAnalysisMessages);
+  const parts = [
+    `Live zakończony.\nWiadomości: ${formatCounter(chatMessageCount)}.\nWidzowie teraz: ${formatCounter(liveViewerCount)}.`,
+    `Nastrój czatu:\n${getCzesterMoodDescription(mood)}.`
+  ];
+  if (topGifters.length) {
+    parts.push(`Top gifty:\n${topGifters.slice(0, 3).map((entry) => `${entry.name} (${formatCounter(entry.coins)})`).join('\n')}.`);
+  }
+  if (topTappers.length) {
+    parts.push(`Top tapnięcia:\n${topTappers.slice(0, 3).map((entry) => `${entry.name} (${formatCounter(entry.taps)})`).join('\n')}.`);
+  }
+  if (moderators.length) {
+    parts.push(`Aktywni moderatorzy:\n${moderators.slice(0, 3).map((entry) => entry.name).join('\n')}.`);
+  }
+  if (profiles.length) {
+    parts.push(`Wyróżniający się widzowie:\n${profiles.map((entry) => `${entry.name} (${entry.chatCount} wiadomości)`).join('\n')}.`);
+  }
+  return parts.join('\n\n');
+}
+
+function maybeNotifyCzesterLiveEndedSummary() {
+  if (czesterLiveEndedSummarySent || !visibleMessages.some((message) => message && !message.localOnly)) {
+    return;
+  }
+  czesterLiveEndedSummarySent = true;
+  notifyCzester('live-final-summary', buildCzesterLiveEndSummary(), {
+    animate: false,
+    variant: 'analysis'
+  });
+}
+
+function shouldShowCzesterBattleNotice(key, cooldownMs = 30000) {
+  const now = Date.now();
+  for (const [entryKey, timestamp] of czesterBattleNoticeAlerts) {
+    if (now - timestamp > 2 * 60 * 1000) {
+      czesterBattleNoticeAlerts.delete(entryKey);
+    }
+  }
+  const previous = czesterBattleNoticeAlerts.get(key);
+  if (previous && now - previous < cooldownMs) {
+    return false;
+  }
+  czesterBattleNoticeAlerts.set(key, now);
+  return true;
+}
+
+function setChatFreezeEffect(active, expiresAt = '') {
+  if (!chatViewEl) {
+    return;
+  }
+  if (chatFreezeTimer) {
+    clearTimeout(chatFreezeTimer);
+    chatFreezeTimer = null;
+  }
+  if (!active) {
+    delete chatViewEl.dataset.frozen;
+    return;
+  }
+  chatViewEl.dataset.frozen = 'true';
+  const endMs = new Date(expiresAt || '').getTime();
+  const fallbackMs = 15000;
+  const durationMs = Number.isFinite(endMs) && endMs > Date.now()
+    ? Math.max(1000, endMs - Date.now())
+    : fallbackMs;
+  chatFreezeTimer = setTimeout(() => {
+    chatFreezeTimer = null;
+    setChatFreezeEffect(false);
+  }, durationMs);
+}
+
+function getCzesterCreatorNoticeName(alert) {
+  const targetNames = Array.isArray(alert && alert.targetNames) ? alert.targetNames : [];
+  const directName = targetNames
+    .map((name) => String(name || '').replace(/^@+/, '').trim())
+    .find(Boolean);
+  if (directName) {
+    return directName;
+  }
+  const handle = getCurrentCreatorHandle();
+  return String(handle || '').replace(/^@+/, '').trim() || 'twórca';
+}
+
+function formatBattleScoreForCzester(sides) {
+  const entries = Array.isArray(sides) ? sides : [];
+  return entries
+    .slice(0, 4)
+    .map((side) => {
+      const name = String(side && (side.name || side.displayId || side.id) || '').replace(/^@+/, '').trim() || '?';
+      const score = Math.max(0, Number(side && side.score) || 0);
+      return `${name} (${score})`;
+    })
+    .filter(Boolean)
+    .join(' : ');
+}
+
+function formatBattleFightersForCzester(sides) {
+  const entries = Array.isArray(sides) ? sides : [];
+  return entries
+    .slice(0, 4)
+    .map((side, index) => String(side && (side.name || side.displayId || side.id) || '').replace(/^@+/, '').trim() || `${index === 0 ? 'Twórca' : 'Przeciwnik'}`)
+    .filter(Boolean)
+    .join(' vs ');
+}
+
+function isGenericBattleCreatorName(name) {
+  return /^(tw[oó]rca|tworca|creator)\s*\d+$/i.test(String(name || '').trim());
+}
+
+function normalizeBattleBarSide(side, fallbackName) {
+  const rawName = String(side && (side.name || side.displayId || side.id) || '').replace(/^@+/, '').trim();
+  const safeName = !rawName || isGenericBattleCreatorName(rawName) ? fallbackName : rawName;
+  const currentByIdentity = [
+    side && side.displayId,
+    side && side.name,
+    side && side.id,
+    rawName,
+    safeName
+  ].some(isCurrentCreatorName);
+  return {
+    id: String(side && side.id || ''),
+    name: safeName || fallbackName || '-',
+    displayId: String(side && side.displayId || ''),
+    score: Math.max(0, Number(side && side.score) || 0),
+    isCurrentCreator: Boolean(side && side.isCurrentCreator) || currentByIdentity,
+    isCurrentCreatorCertain: Boolean(side && side.isCurrentCreatorCertain) || currentByIdentity
+  };
+}
+
+function isBattleBarCurrentCreatorSide(side, options = {}) {
+  if (!side) {
+    return false;
+  }
+  if (side.isCurrentCreator || side.isCurrentCreatorCertain) {
+    return true;
+  }
+  if (options.certainOnly) {
+    return false;
+  }
+  const current = getCurrentCreatorHandle();
+  return [
+    side.displayId,
+    side.name,
+    side.id
+  ].some((value) => (
+    (current && normalizeCreatorHandle(value) === current)
+    || isCurrentCreatorName(value)
+  ));
+}
+
+function getBattleBarSides(sides) {
+  const entries = Array.isArray(sides) ? sides.filter(Boolean) : [];
+  if (!entries.length) {
+    return null;
+  }
+  const certainCurrentCreatorSide = entries.find((side) => isBattleBarCurrentCreatorSide(side, { certainOnly: true }));
+  const guessedCurrentCreatorSide = entries.find(isBattleBarCurrentCreatorSide);
+  const currentCreatorSide = certainCurrentCreatorSide || guessedCurrentCreatorSide;
+  const previousLeftId = String(battleScorebarState && battleScorebarState.leftSideId || '');
+  const previousRightId = String(battleScorebarState && battleScorebarState.rightSideId || '');
+  const stickyLeft = !certainCurrentCreatorSide && !currentCreatorSide && previousLeftId
+    ? entries.find((side) => String(side && side.id || '') === previousLeftId)
+    : null;
+  const baseLeft = currentCreatorSide || stickyLeft || entries[0];
+  const left = normalizeBattleBarSide(baseLeft, 'Twórca');
+  const opponents = entries
+    .filter((side) => side !== baseLeft)
+    .sort((a, b) => (Number(b && b.score) || 0) - (Number(a && a.score) || 0));
+  const stickyRight = previousRightId
+    ? opponents.find((side) => String(side && side.id || '') === previousRightId)
+    : null;
+  const right = normalizeBattleBarSide(stickyRight || opponents[0] || entries[1], 'Przeciwnik');
+  return { left, right };
+}
+
+function getBattleBarShares(left, right) {
+  const leftScore = Math.max(0, Number(left && left.score) || 0);
+  const rightScore = Math.max(0, Number(right && right.score) || 0);
+  const total = leftScore + rightScore;
+  if (!total) {
+    return { left: 50, right: 50, leading: 'draw' };
+  }
+  const rawLeft = (leftScore / total) * 100;
+  const leftShare = Math.min(92, Math.max(8, rawLeft));
+  return {
+    left: leftShare,
+    right: 100 - leftShare,
+    leading: leftScore === rightScore ? 'draw' : leftScore > rightScore ? 'left' : 'right'
+  };
+}
+
+function isBattleBarBioLikeName(value) {
+  const text = String(value || '').trim();
+  if (!text) {
+    return false;
+  }
+  const normalized = text.toLowerCase();
+  return text.length > 32
+    || /\b(ig|instagram|live codziennie|top\s*\d|oddaje|obserwacje|wokalista|serwisant|budowa|praca)\b/i.test(text)
+    || normalized.includes('\n');
+}
+
+function getBattleBarDedupKey(side) {
+  if ([
+    side && side.displayId,
+    side && side.name,
+    side && side.id
+  ].some(isCurrentCreatorName)) {
+    return 'current';
+  }
+  const handle = normalizeCreatorHandle(side && (side.displayId || side.name));
+  if (handle && !isBattleBarBioLikeName(handle)) {
+    return `handle:${handle}`;
+  }
+  const id = String(side && side.id || '').trim();
+  return id ? `id:${id}` : '';
+}
+
+function dedupeBattleBarEntries(entries) {
+  const merged = new Map();
+  entries.forEach((side) => {
+    if (!side) {
+      return;
+    }
+    if (isBattleBarBioLikeName(side.name) && !side.displayId && !side.isCurrentCreator && !side.isCurrentCreatorCertain) {
+      return;
+    }
+    const key = getBattleBarDedupKey(side);
+    if (!key) {
+      return;
+    }
+    const existing = merged.get(key);
+    if (!existing) {
+      merged.set(key, { ...side });
+      return;
+    }
+    existing.score = Math.max(Number(existing.score) || 0, Number(side.score) || 0);
+    existing.name = isBattleBarBioLikeName(existing.name) && !isBattleBarBioLikeName(side.name)
+      ? side.name
+      : existing.name || side.name;
+    existing.displayId = existing.displayId || side.displayId;
+    existing.isCurrentCreator = existing.isCurrentCreator || side.isCurrentCreator || isCurrentCreatorName(side.name) || isCurrentCreatorName(side.displayId);
+    existing.isCurrentCreatorCertain = existing.isCurrentCreatorCertain || side.isCurrentCreatorCertain || isCurrentCreatorName(side.name) || isCurrentCreatorName(side.displayId);
+  });
+  return [...merged.values()];
+}
+
+function getBattleBarSegments(sides) {
+  const entries = dedupeBattleBarEntries(Array.isArray(sides) ? sides.filter(Boolean) : []);
+  if (!entries.length) {
+    return [];
+  }
+  const currentHandle = getCurrentCreatorHandle();
+  const identityCurrentCreatorSide = entries.find((side) => [
+    side && side.displayId,
+    side && side.name,
+    side && side.id
+  ].some((value) => (
+    isCurrentCreatorName(value)
+    || (currentHandle && normalizeCreatorHandle(value) === currentHandle)
+  )));
+  const flaggedCurrentCreatorSides = entries.filter((side) => side && (side.isCurrentCreator || side.isCurrentCreatorCertain));
+  const currentCreatorSide = identityCurrentCreatorSide
+    || (flaggedCurrentCreatorSides.length === 1 ? flaggedCurrentCreatorSides[0] : null);
+  const previousSideIds = Array.isArray(battleScorebarState && battleScorebarState.sideIds)
+    ? battleScorebarState.sideIds.map(String)
+    : [
+      battleScorebarState && battleScorebarState.leftSideId,
+      battleScorebarState && battleScorebarState.rightSideId
+    ].map(String).filter(Boolean);
+  let ordered = [];
+  if (currentCreatorSide) {
+    ordered = [
+      currentCreatorSide,
+      ...entries.filter((side) => side !== currentCreatorSide)
+    ];
+  } else if (previousSideIds.length) {
+    const previous = previousSideIds
+      .map((id) => entries.find((side) => String(side && side.id || '') === id))
+      .filter(Boolean);
+    ordered = [
+      ...previous,
+      ...entries.filter((side) => !previous.includes(side))
+    ];
+  } else {
+    ordered = entries;
+  }
+  ordered = ordered.map((side, index) => {
+    if (index === 0 || !side) {
+      return side;
+    }
+    const duplicatesCurrentCreator = [
+      side.displayId,
+      side.name,
+      side.id
+    ].some((value) => (
+      isCurrentCreatorName(value)
+      || (currentHandle && normalizeCreatorHandle(value) === currentHandle)
+    ));
+    if (!duplicatesCurrentCreator) {
+      return side;
+    }
+    return {
+      ...side,
+      name: index === 1 ? 'Przeciwnik' : `Przeciwnik ${index}`,
+      displayId: '',
+      isCurrentCreator: false,
+      isCurrentCreatorCertain: false
+    };
+  });
+  return ordered
+    .slice(0, 4)
+    .map((side, index) => normalizeBattleBarSide(side, index === 0 ? 'Twórca' : `Przeciwnik ${index}`));
+}
+
+function getBattleBarSegmentShares(segments) {
+  const values = (Array.isArray(segments) ? segments : [])
+    .map((side) => Math.max(0, Number(side && side.score) || 0));
+  const total = values.reduce((sum, score) => sum + score, 0);
+  const count = Math.max(1, values.length);
+  if (!total) {
+    return {
+      shares: values.map(() => 100 / count),
+      leadingId: ''
+    };
+  }
+  const minShare = values.length >= 4 ? 9 : values.length === 3 ? 12 : 8;
+  let shares = values.map((score) => Math.max(minShare, (score / total) * 100));
+  const shareTotal = shares.reduce((sum, share) => sum + share, 0);
+  shares = shares.map((share) => (share / shareTotal) * 100);
+  const maxScore = Math.max(...values);
+  const leaderIndex = values.filter((score) => score === maxScore).length === 1
+    ? values.findIndex((score) => score === maxScore)
+    : -1;
+  return {
+    shares,
+    leadingId: leaderIndex >= 0 ? String(segments[leaderIndex] && segments[leaderIndex].id || '') : ''
+  };
+}
+
+function formatBattleBarTime(stateValue = {}) {
+  const status = stateValue.status || 'active';
+  if (status === 'finished') {
+    return appLanguage === 'en' ? 'END' : appLanguage === 'de' ? 'ENDE' : 'KONIEC';
+  }
+  if (status === 'cancelled') {
+    return appLanguage === 'en' ? 'STOP' : appLanguage === 'de' ? 'STOPP' : 'STOP';
+  }
+  const baseRemainingMs = Number(stateValue.remainingMs) || 0;
+  const timingUpdatedAt = Number(stateValue.timingUpdatedAt) || 0;
+  let remaining = 0;
+  if (baseRemainingMs > 0 && timingUpdatedAt > 0) {
+    remaining = Math.max(0, Math.ceil((baseRemainingMs - (Date.now() - timingUpdatedAt)) / 1000));
+  } else {
+    const endMs = new Date(stateValue.endsAt || '').getTime();
+    if (!Number.isFinite(endMs) || endMs <= 0) {
+      return '--:--';
+    }
+    remaining = Math.max(0, Math.ceil((endMs - Date.now()) / 1000));
+  }
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function sanitizeBattleBarVisibleSegments(segments) {
+  const list = Array.isArray(segments) ? segments.filter(Boolean) : [];
+  if (list.length < 2) {
+    return list;
+  }
+  const firstNameKey = normalizeCreatorComparableName(list[0] && list[0].name);
+  return list.map((side, index) => {
+    if (index === 0) {
+      return {
+        ...side,
+        isCurrentCreator: true,
+        isCurrentCreatorCertain: true
+      };
+    }
+    const sameNameAsCreator = firstNameKey
+      && normalizeCreatorComparableName(side && side.name) === firstNameKey;
+    const sameIdentityAsCreator = [
+      side && side.displayId,
+      side && side.id
+    ].some((value) => (
+      isCurrentCreatorName(value)
+      || (getCurrentCreatorHandle() && normalizeCreatorHandle(value) === getCurrentCreatorHandle())
+    ));
+    if (!sameNameAsCreator && !sameIdentityAsCreator) {
+      return {
+        ...side,
+        isCurrentCreator: false,
+        isCurrentCreatorCertain: false
+      };
+    }
+    return {
+      ...side,
+      name: index === 1 ? 'Przeciwnik' : `Przeciwnik ${index}`,
+      displayId: '',
+      isCurrentCreator: false,
+      isCurrentCreatorCertain: false
+    };
+  });
+}
+
+function renderBattleScorebar() {
+  if (!battleScorebarEl || !battleScorebarState) {
+    return;
+  }
+  let sides = getBattleBarSegments(battleScorebarState.sides);
+  if (sides.length < 2) {
+    battleScorebarEl.hidden = true;
+    return;
+  }
+  sides = sanitizeBattleBarVisibleSegments(sides);
+  const shares = getBattleBarSegmentShares(sides);
+  if (battleScorebarTrackEl) {
+    battleScorebarTrackEl.style.gridTemplateColumns = sides
+      .map((side, index) => `minmax(82px, ${shares.shares[index] || (100 / sides.length)}fr)`)
+      .join(' ');
+    battleScorebarTrackEl.replaceChildren(...sides.map((side, index) => {
+      const segment = document.createElement('div');
+      segment.className = `battle-scorebar-side battle-scorebar-side-${index + 1}`;
+      segment.dataset.currentCreator = side.isCurrentCreator || side.isCurrentCreatorCertain ? 'true' : 'false';
+      segment.dataset.leading = shares.leadingId && String(side.id || '') === shares.leadingId ? 'true' : 'false';
+      const score = document.createElement('strong');
+      score.className = 'battle-scorebar-score';
+      score.textContent = String(side.score);
+      const name = document.createElement('span');
+      name.className = 'battle-scorebar-name';
+      name.textContent = side.name;
+      segment.append(score, name);
+      return segment;
+    }));
+  }
+  if (battleScoreTimeEl) {
+    battleScoreTimeEl.textContent = formatBattleBarTime(battleScorebarState);
+  }
+  battleScorebarEl.dataset.sides = String(sides.length);
+  battleScorebarState.sideIds = sides.map((side) => String(side.id || '')).filter(Boolean);
+  battleScorebarState.leftSideId = battleScorebarState.sideIds[0] || battleScorebarState.leftSideId || '';
+  battleScorebarState.rightSideId = battleScorebarState.sideIds[1] || battleScorebarState.rightSideId || '';
+  battleScorebarEl.hidden = false;
+}
+
+function hideBattleScorebar() {
+  battleScorebarState = null;
+  if (battleScorebarTimer) {
+    clearInterval(battleScorebarTimer);
+    battleScorebarTimer = null;
+  }
+  if (battleScorebarHideTimer) {
+    clearTimeout(battleScorebarHideTimer);
+    battleScorebarHideTimer = null;
+  }
+  if (battleScorebarEl) {
+    battleScorebarEl.hidden = true;
+    delete battleScorebarEl.dataset.leading;
+  }
+}
+
+function scheduleBattleScorebarHide(delayMs) {
+  if (battleScorebarHideTimer) {
+    clearTimeout(battleScorebarHideTimer);
+  }
+  battleScorebarHideTimer = setTimeout(() => {
+    battleScorebarHideTimer = null;
+    hideBattleScorebar();
+  }, delayMs);
+}
+
+function updateBattleScorebarFromAlert(alert) {
+  if (!battleScorebarEl || !alert || typeof alert !== 'object') {
+    return;
+  }
+  const eventType = String(alert.eventType || '').trim();
+  const hasSides = Array.isArray(alert.sides) && alert.sides.length > 0;
+  if (eventType === 'reset') {
+    hideBattleScorebar();
+    setChatFreezeEffect(false);
+    return;
+  }
+  const previousLeftId = battleScorebarState && battleScorebarState.leftSideId || '';
+  const previousRightId = battleScorebarState && battleScorebarState.rightSideId || '';
+  const previousSideIds = Array.isArray(battleScorebarState && battleScorebarState.sideIds)
+    ? battleScorebarState.sideIds
+    : [previousLeftId, previousRightId].filter(Boolean);
+  if (eventType === 'cancelled') {
+    setChatFreezeEffect(false);
+    battleScorebarState = {
+      sides: battleScorebarState && battleScorebarState.sides || alert.sides || [],
+      leftSideId: previousLeftId,
+      rightSideId: previousRightId,
+      sideIds: previousSideIds,
+      endsAt: '',
+      remainingMs: 0,
+      timingUpdatedAt: 0,
+      status: 'cancelled'
+    };
+    renderBattleScorebar();
+    scheduleBattleScorebarHide(5000);
+    return;
+  }
+  if (eventType === 'finished') {
+    setChatFreezeEffect(false);
+    battleScorebarState = {
+      sides: hasSides ? alert.sides : battleScorebarState && battleScorebarState.sides || [],
+      leftSideId: previousLeftId,
+      rightSideId: previousRightId,
+      sideIds: previousSideIds,
+      endsAt: '',
+      remainingMs: 0,
+      timingUpdatedAt: 0,
+      status: 'finished'
+    };
+    renderBattleScorebar();
+    scheduleBattleScorebarHide(12000);
+    return;
+  }
+  if (!hasSides || !['start', 'score'].includes(eventType)) {
+    return;
+  }
+  if (battleScorebarHideTimer) {
+    clearTimeout(battleScorebarHideTimer);
+    battleScorebarHideTimer = null;
+  }
+  const canCarryPreviousTiming = eventType === 'score';
+  battleScorebarState = {
+    sides: alert.sides,
+    leftSideId: previousLeftId,
+    rightSideId: previousRightId,
+    sideIds: previousSideIds,
+    endsAt: alert.endsAt || (canCarryPreviousTiming && battleScorebarState && battleScorebarState.endsAt || ''),
+    remainingMs: Math.max(0, Number(alert.remainingMs) || (canCarryPreviousTiming && battleScorebarState && battleScorebarState.remainingMs || 0)),
+    timingUpdatedAt: Number(alert.timingUpdatedAt) || (canCarryPreviousTiming && battleScorebarState && battleScorebarState.timingUpdatedAt || Date.now()),
+    status: 'active'
+  };
+  renderBattleScorebar();
+  if (!battleScorebarTimer) {
+    battleScorebarTimer = setInterval(renderBattleScorebar, 1000);
+  }
+}
+
+function getBattleEffectLabel(effectType) {
+  const type = String(effectType || 'effect').trim().toLowerCase() || 'effect';
+  return t(`battle.effect.${type}`);
+}
+
+function getBattleTargetsText(alert) {
+  const targetNames = Array.isArray(alert && alert.targetNames) ? alert.targetNames : [];
+  const names = targetNames
+    .map((name) => String(name || '').replace(/^@+/, '').trim())
+    .filter(Boolean)
+    .slice(0, 4);
+  if (!names.length) {
+    return '';
+  }
+  if (appLanguage === 'en') {
+    return ` on: ${names.join(', ')}`;
+  }
+  if (appLanguage === 'de') {
+    return ` auf: ${names.join(', ')}`;
+  }
+  return ` na: ${names.join(', ')}`;
+}
+
+function getBattleActorText(alert) {
+  const actor = String(alert && alert.actorName || '').replace(/^@+/, '').trim();
+  if (!actor) {
+    return '';
+  }
+  if (appLanguage === 'en') {
+    return ` from ${actor}`;
+  }
+  if (appLanguage === 'de') {
+    return ` von ${actor}`;
+  }
+  return ` od ${actor}`;
+}
+
+function buildCzesterBattleEventText(alert) {
+  const eventType = String(alert && alert.eventType || '').trim();
+  const score = formatBattleScoreForCzester(alert && alert.sides);
+  const fighters = formatBattleFightersForCzester(alert && alert.sides);
+  const multiplier = Math.max(0, Number(alert && (alert.rewardMultiple || alert.multiplier)) || 0);
+  const target = Math.max(0, Number(alert && alert.target) || 0);
+  const progress = Math.max(0, Number(alert && alert.progress) || 0);
+  const detail = String(alert && alert.detail || '').trim() || '-';
+  const actorName = String(alert && alert.actorName || '').replace(/^@+/, '').trim() || 'Ktoś';
+
+  if (eventType === 'start') {
+    return t('czester.battle.start', { fighters: fighters || 'Twórca vs Przeciwnik' });
+  }
+  if (eventType === 'score') {
+    return '';
+  }
+  if (eventType === 'finished') {
+    return score ? t('czester.battle.finished', { score }) : '';
+  }
+  if (eventType === 'cancelled') {
+    return t('czester.battle.cancelled');
+  }
+  if (eventType === 'mission-start') {
+    return t('czester.battle.missionStart', { detail, target: target || '-', multiplier: multiplier || '-' });
+  }
+  if (eventType === 'mission-progress') {
+    return t('czester.battle.missionProgress', { actor: actorName, progress: progress || 0, target: target || '-' });
+  }
+  if (eventType === 'mission-success') {
+    return t('czester.battle.missionSuccess', { multiplier: multiplier || '-' });
+  }
+  if (eventType === 'mission-failed') {
+    return t('czester.battle.missionFailed');
+  }
+  if (eventType === 'mission-reward') {
+    return t('czester.battle.missionReward');
+  }
+  if (eventType === 'booster-card') {
+    return t('czester.battle.booster', { effect: getBattleEffectLabel(alert && alert.effectType) });
+  }
+  return '';
+}
+
+function handleCzesterBattleAlert(alert) {
+  if (!alert || typeof alert !== 'object') {
+    return;
+  }
+
+  const multiplier = Number(alert.multiplier);
+  const isMultiplierAlert = (
+    (alert.textKey === 'battle.multiplier' || alert.tone === 'battle')
+    && (multiplier === 2 || multiplier === 3)
+  );
+  if (isMultiplierAlert && generalSettings.multiplierNotifications && shouldShowCzesterBattleNotice(`multiplier:${multiplier}`, 30000)) {
+    notifyCzester('battle-multiplier', t('czester.notice.multiplier', { multiplier }), {
+      animate: false,
+      variant: 'multiplier',
+      payload: { multiplier, key: `multiplier:${multiplier}` }
+    });
+  }
+
+  const isCreatorFreeze = alert.effectType === 'freeze' && alert.targetIsCurrentCreator === true;
+
+  if (!isCreatorFreeze) {
+    return;
+  }
+  setChatFreezeEffect(true, alert.expiresAt || '');
+  if (shouldShowCzesterBattleNotice('creator-freeze', 8000)) {
+    notifyCzester('creator-freeze', t('czester.notice.creatorFreeze'), {
+      animate: false,
+      variant: 'freeze',
+      payload: {
+        key: 'creator-freeze',
+        expiresAt: alert.expiresAt || ''
+      }
+    });
+  }
+}
+
+function maybeNotifyCzesterCreatorSuggestion(handle, previousScore) {
+  const usage = czesterMemory.creatorUsage[handle];
+  if (usage && usage.count === 1) {
+    notifyCzester('creator-connection', t('czester.notice.connection'), { animate: false });
+  } else if (
+    usage
+    && usage.count >= 3
+    && previousScore < getCreatorUsageScore(handle)
+    && !wasCzesterNoticeRecentlyShown('creator-favorite', handle, 6 * 60 * 60 * 1000)
+  ) {
+    notifyCzester('creator-favorite', t('czester.notice.creatorFavorite', { creator: handle }), { animate: false, payload: { creator: handle, key: handle } });
+  }
+}
+
 function rememberCreator(value) {
   if (value && typeof value === 'object') {
     cacheRecentCreatorMeta(value);
@@ -1663,12 +3474,17 @@ function rememberCreator(value) {
     return;
   }
 
+  const previousScore = getCreatorUsageScore(handle);
+  recordCzesterCreatorConnection(handle, { successful: state.connectionStatus === 'online' });
+
   const nextRecentCreators = [
     handle,
     ...recentCreators.filter((item) => item !== handle)
   ].slice(0, MAX_RECENT_CREATORS);
   if (nextRecentCreators.join('|') === recentCreators.join('|')) {
     renderRecentCreatorsCarousel();
+    renderCreatorSuggestions();
+    maybeNotifyCzesterCreatorSuggestion(handle, previousScore);
     return;
   }
 
@@ -1677,6 +3493,7 @@ function rememberCreator(value) {
   saveRecentCreatorMeta();
   renderRecentCreatorsCarousel();
   syncCreatorOptions(state.creators);
+  maybeNotifyCzesterCreatorSuggestion(handle, previousScore);
 }
 
 function normalizeSystemSettings(value) {
@@ -1739,7 +3556,7 @@ function applyI18n() {
     ['.sidebar-button[data-section="archive"]', 'nav.archive'],
     ['.sidebar-button[data-section="notes"]', 'nav.notes'],
     ['.sidebar-button[data-section="achievements"]', 'nav.achievements'],
-    ['.sidebar-button[data-section="ranking"]', 'nav.ranking'],
+    ['.sidebar-button[data-section="coins"]', 'nav.coins'],
     ['.sidebar-button[data-section="settings"]', 'nav.settings'],
     ['.sidebar-button[data-section="about"]', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
@@ -1758,8 +3575,14 @@ function applyI18n() {
     ['.filter-button[data-archive-filter="member"]', 'filters.member'],
     ['.archive-title', 'archive.title'],
     ['.archive-status', 'archive.status'],
-    ['.view-panel[data-view="ranking"] .page-header h1', 'ranking.title'],
-    ['.view-panel[data-view="ranking"] .page-note', 'ranking.note'],
+    ['.czester-floating-panel [data-i18n="czester.title"]', 'czester.title'],
+    ['.view-panel[data-view="boxes"] .page-header h1', 'boxes.title'],
+    ['.view-panel[data-view="boxes"] .page-note', 'boxes.note'],
+    ['#refreshBoxesArchive span:last-child', 'boxes.refresh'],
+    ['#boxesSessionTitle', 'boxes.liveTitle'],
+    ['#boxesSessionMeta', 'boxes.liveDescription'],
+    ['#boxesEmpty strong', 'boxes.emptyTitle'],
+    ['#boxesEmpty p', 'boxes.emptyDescription'],
     ['.view-panel[data-view="achievements"] .page-header h1', 'achievements.title'],
     ['.view-panel[data-view="achievements"] .page-note', 'achievements.note'],
     ['.achievements-empty strong', 'achievements.emptyTitle'],
@@ -1790,6 +3613,9 @@ function applyI18n() {
     ['#themeRoseGoldGlass + span small', 'settings.theme.roseGlass.description'],
     ['#themeLazarskieRejony + span strong', 'settings.theme.lazarskieRejony.name'],
     ['#themeLazarskieRejony + span small', 'settings.theme.lazarskieRejony.description'],
+    ['#themeMiamiVice + span strong', 'settings.theme.miamiVice.name'],
+    ['#themeMiamiVice + span small', 'settings.theme.miamiVice.description'],
+    ['#themeMiamiVice + span .theme-lock-badge span:last-child', 'settings.theme.locked'],
     ['#appAppearanceStandard + span strong', 'settings.appAppearance.default.name'],
     ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
     ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
@@ -1821,9 +3647,11 @@ function applyI18n() {
   syncTtsVoices();
   syncSystemControls();
   syncRedeemCodeUi();
+  syncRedeemedFeatureNavigation();
   renderRecentCreatorsCarousel();
   renderAchievements();
-  renderRanking();
+  renderBoxesPanel();
+  renderCzester();
   syncRightWidgetDock();
   renderBattleBannerFromState();
   updateStatus();
@@ -1893,7 +3721,13 @@ function initAppearanceSettings() {
         return;
       }
 
-      appTheme = APP_THEMES.includes(input.value) ? input.value : 'rose-black';
+      if (!APP_THEMES.includes(input.value) || !isAppThemeUnlocked(input.value)) {
+        appTheme = loadAppTheme();
+        applyAppearanceSettings();
+        return;
+      }
+
+      appTheme = input.value;
       saveAppTheme();
       applyAppearanceSettings();
       broadcastAppearanceSettings();
@@ -1981,8 +3815,6 @@ function initGeneralSettings() {
         renderTopGiftersPanel();
       } else if (target === 'taps' && shouldOpen) {
         renderTopTappersPanel();
-      } else if (target === 'moderators' && shouldOpen) {
-        renderModeratorsWidget();
       }
       setOpenRightWidget(shouldOpen ? target : '');
     });
@@ -2063,9 +3895,6 @@ function applyIncomingSystemSettings(nextSettings, options = {}) {
     saveTtsSettings();
     stopSpeech();
     applyI18n();
-    if (activeSection === 'ranking') {
-      loadRanking(true);
-    }
   } else {
     updateStatus();
   }
@@ -2549,6 +4378,31 @@ function createUiIcon(name, className = '') {
   return svg;
 }
 
+function createMessageRoleBadge(role, iconName, label) {
+  const badge = document.createElement('span');
+  badge.className = 'message-role-badge';
+  badge.dataset.role = role;
+  badge.title = label;
+  badge.setAttribute('aria-label', label);
+  badge.appendChild(createUiIcon(iconName));
+  return badge;
+}
+
+function createMessageRoleBadges(message) {
+  const badges = document.createElement('span');
+  badges.className = 'message-role-badges';
+
+  if (message.isModerator) {
+    badges.appendChild(createMessageRoleBadge('moderator', 'hammer', 'Moderator'));
+  }
+
+  if (message.isSuperFan) {
+    badges.appendChild(createMessageRoleBadge('superfan', 'crown', 'Superfan'));
+  }
+
+  return badges.childElementCount ? badges : null;
+}
+
 function hydrateUiIcons(root = document) {
   root.querySelectorAll('[data-ui-icon]').forEach((slot) => {
     const iconName = slot.dataset.uiIcon;
@@ -2745,42 +4599,6 @@ function getActiveModerators() {
     .slice(0, ACTIVE_MODERATORS_LIMIT);
 }
 
-function renderModeratorsWidget() {
-  if (!moderatorsWidgetContent) {
-    return;
-  }
-
-  const moderators = getActiveModerators();
-  if (!moderators.length) {
-    const empty = document.createElement('div');
-    empty.className = 'top-gifters-empty moderators-widget-empty';
-    empty.textContent = t('moderatorsWidget.empty');
-    moderatorsWidgetContent.replaceChildren(empty);
-    return;
-  }
-
-  const list = document.createElement('ul');
-  list.className = 'top-gifters-list moderators-widget-list';
-
-  moderators.forEach((entry) => {
-    const item = document.createElement('li');
-    item.className = 'stats-widget-row moderator-widget-row';
-
-    const icon = document.createElement('span');
-    icon.className = 'stats-widget-icon moderator-widget-icon';
-    icon.appendChild(createUiIcon('shield'));
-
-    const name = document.createElement('span');
-    name.className = 'stats-widget-label moderator-widget-name';
-    name.textContent = entry.name;
-
-    item.append(icon, name);
-    list.appendChild(item);
-  });
-
-  moderatorsWidgetContent.replaceChildren(list);
-}
-
 function renderBattleBannerFromState() {
   // Multiplier alerts are handled by onBattleAlert.
 }
@@ -2800,17 +4618,13 @@ function updateStatus() {
     setStatusSegment(statusMessagesEl, formatCounter(chatMessageCount));
     setStatusSegment(statusMemberHeartsActiveEl, formatCounter(heartMeGiftStats.active));
     setStatusSegment(statusMemberHeartsExpiredEl, formatCounter(heartMeGiftStats.inactive));
-    const topWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'top');
+    const topWidget = rightWidgetsByName.get('top');
     if (topWidget && topWidget.dataset.expanded === 'true') {
       renderTopGiftersPanel();
     }
-    const tapsWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'taps');
+    const tapsWidget = rightWidgetsByName.get('taps');
     if (tapsWidget && tapsWidget.dataset.expanded === 'true') {
       renderTopTappersPanel();
-    }
-    const moderatorsWidget = rightWidgets.find((widget) => widget.dataset.rightWidget === 'moderators');
-    if (moderatorsWidget && moderatorsWidget.dataset.expanded === 'true') {
-      renderModeratorsWidget();
     }
   } else {
     statusEl.textContent = `${statusText} | ${delayText} | ${queueText}`;
@@ -2936,15 +4750,15 @@ function updateRecentCreatorsNav() {
     return;
   }
 
-  const overflow = recentCreatorsCarousel.scrollWidth > recentCreatorsCarousel.clientWidth + 4;
+  const overflow = recentCreatorsCarousel.scrollHeight > recentCreatorsCarousel.clientHeight + 4;
   recentCreatorsPrev.hidden = !overflow;
   recentCreatorsNext.hidden = !overflow;
   if (!overflow) {
     return;
   }
 
-  recentCreatorsPrev.disabled = recentCreatorsCarousel.scrollLeft <= 2;
-  recentCreatorsNext.disabled = recentCreatorsCarousel.scrollLeft + recentCreatorsCarousel.clientWidth >= recentCreatorsCarousel.scrollWidth - 2;
+  recentCreatorsPrev.disabled = recentCreatorsCarousel.scrollTop <= 2;
+  recentCreatorsNext.disabled = recentCreatorsCarousel.scrollTop + recentCreatorsCarousel.clientHeight >= recentCreatorsCarousel.scrollHeight - 2;
 }
 
 function scrollRecentCreators(direction) {
@@ -2952,9 +4766,9 @@ function scrollRecentCreators(direction) {
     return;
   }
 
-  const amount = Math.max(160, Math.floor(recentCreatorsCarousel.clientWidth * 0.75));
+  const amount = Math.max(120, Math.floor(recentCreatorsCarousel.clientHeight * 0.75));
   recentCreatorsCarousel.scrollBy({
-    left: amount * direction,
+    top: amount * direction,
     behavior: 'smooth'
   });
   window.setTimeout(updateRecentCreatorsNav, 180);
@@ -2965,11 +4779,9 @@ function renderRecentCreatorsCarousel() {
     return;
   }
 
-  const creators = recentCreators
-    .map(normalizeCreatorHandle)
-    .filter(Boolean)
-    .slice(0, MAX_RECENT_CREATORS);
+  const creators = getOrderedRecentCreators();
 
+  document.documentElement.dataset.recentCreators = creators.length ? 'true' : 'false';
   recentCreatorsStrip.hidden = creators.length === 0;
   if (!creators.length) {
     recentCreatorsCarousel.replaceChildren();
@@ -3046,11 +4858,21 @@ function getCreatorSuggestionQuery() {
   return normalized || creatorInput.value.trim().replace(/^@+/, '').toLowerCase();
 }
 
+function orderCreatorSuggestionItems(items) {
+  return [...items].sort((left, right) => {
+    const scoreDiff = getCreatorUsageScore(right.handle) - getCreatorUsageScore(left.handle);
+    if (Math.abs(scoreDiff) > 0.001) {
+      return scoreDiff;
+    }
+    return 0;
+  });
+}
+
 function getFilteredCreatorSuggestions() {
   const query = getCreatorSuggestionQuery();
-  const sourceItems = isRetroKb2Appearance()
+  const sourceItems = orderCreatorSuggestionItems(isRetroKb2Appearance()
     ? getRetroCreatorSuggestionItemsSafe()
-    : creatorSuggestionItems;
+    : creatorSuggestionItems);
   if (!query) {
     return sourceItems;
   }
@@ -3066,7 +4888,7 @@ function getRetroCreatorSuggestionItems() {
   const items = [];
   const seenHandles = new Set();
 
-  recentCreators.forEach((recentHandle) => {
+  getOrderedRecentCreators().forEach((recentHandle) => {
     const handle = normalizeCreatorHandle(recentHandle);
     if (!handle || seenHandles.has(handle)) {
       return;
@@ -3122,7 +4944,7 @@ function getRetroCreatorSuggestionItemsSafe() {
     );
   }
 
-  recentCreators.forEach((recentHandle) => {
+  getOrderedRecentCreators().forEach((recentHandle) => {
     const handle = normalizeCreatorHandle(recentHandle);
     const creator = findCreatorByHandle(handle);
     pushItem(
@@ -3288,162 +5110,327 @@ function syncCreatorOptions(creators) {
   renderRecentCreatorsCarousel();
 }
 
-function createRankingRefreshButton() {
-  const button = document.createElement('button');
-  button.className = 'page-action ranking-refresh-action';
-  button.type = 'button';
-  button.append(createUiIcon('refresh'));
-  const label = document.createElement('span');
-  label.textContent = t('ranking.refresh');
-  button.appendChild(label);
-  button.addEventListener('click', () => loadRanking(true));
-  return button;
+function getStoredCzesterUserAvatar() {
+  const saved = localStorage.getItem(CZESTER_USER_AVATAR_KEY) || '';
+  if (saved && (!avatarImages.length || avatarImages.includes(saved))) {
+    return saved;
+  }
+  const nextAvatar = avatarImages.length ? avatarImages[Math.floor(Math.random() * avatarImages.length)] : './assets/czatbox-icon.png';
+  localStorage.setItem(CZESTER_USER_AVATAR_KEY, nextAvatar);
+  return nextAvatar;
 }
 
-function renderRanking() {
-  if (!rankingSummaryEl || !rankingListEl) {
-    return;
+function getCzesterAvatar(role) {
+  if (role === 'bot') {
+    return CZESTER_AVATAR_SRC;
+  }
+  if (!czesterUserAvatar) {
+    czesterUserAvatar = getStoredCzesterUserAvatar();
+  }
+  return czesterUserAvatar;
+}
+
+function stopCzesterTyping() {
+  if (czesterTypingTimer) {
+    clearInterval(czesterTypingTimer);
+    czesterTypingTimer = null;
+  }
+}
+
+function typeCzesterMessage(messageId, fullText) {
+  stopCzesterTyping();
+  const target = czesterMessages.find((message) => message.id === messageId);
+  if (!target) {
+    return Promise.resolve();
   }
 
-  if (rankingState.loading) {
-    rankingSummaryEl.textContent = t('ranking.loading');
-    rankingListEl.replaceChildren();
-    return;
+  target.text = '';
+  target.typing = true;
+  let index = 0;
+  const text = String(fullText || '');
+  return new Promise((resolve) => {
+    czesterTypingTimer = setInterval(() => {
+      const current = czesterMessages.find((message) => message.id === messageId);
+      if (!current) {
+        stopCzesterTyping();
+        resolve();
+        return;
+      }
+
+      index = Math.min(text.length, index + 5);
+      current.text = text.slice(0, index);
+      current.typing = index < text.length;
+      renderCzester();
+
+      if (index >= text.length) {
+        stopCzesterTyping();
+        resolve();
+      }
+    }, 24);
+  });
+}
+
+function appendCzesterMessage(role, text, options = {}) {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  czesterMessages.push({
+    id,
+    role,
+    text: options.animate ? '' : String(text || ''),
+    fullText: String(text || ''),
+    typing: Boolean(options.animate),
+    variant: String(options.variant || ''),
+    actions: Array.isArray(options.actions) ? options.actions.filter(Boolean) : [],
+    createdAt: new Date().toISOString()
+  });
+  renderCzester();
+  if (options.animate) {
+    return typeCzesterMessage(id, text);
+  }
+  return Promise.resolve();
+}
+
+function createCzesterBubble(message) {
+  const article = document.createElement('article');
+  article.className = 'czester-message';
+  article.dataset.messageId = message.id || '';
+  article.dataset.role = message.role;
+  if (message.variant) {
+    article.dataset.variant = message.variant;
   }
 
-  if (rankingState.error) {
-    rankingSummaryEl.textContent = t('ranking.error');
-    const error = document.createElement('div');
-    error.className = 'ranking-empty';
-    error.textContent = rankingState.error;
-    rankingListEl.replaceChildren(error);
-    return;
+  const avatar = document.createElement('img');
+  avatar.className = 'czester-avatar';
+  avatar.alt = '';
+  avatar.decoding = 'async';
+  avatar.loading = 'lazy';
+  avatar.src = getCzesterAvatar(message.role);
+
+  const compactTime = document.createElement('time');
+  compactTime.className = 'czester-message-compact-time';
+  compactTime.dateTime = message.createdAt || '';
+  compactTime.textContent = message.createdAt ? formatTime(message.createdAt) : '';
+
+  const content = document.createElement('div');
+  content.className = 'czester-message-content';
+
+  const header = document.createElement('div');
+  header.className = 'czester-message-header';
+
+  const author = document.createElement('strong');
+  author.textContent = message.role === 'user' ? t('czester.userLabel') : t('czester.botLabel');
+
+  const time = document.createElement('time');
+  time.dateTime = message.createdAt || '';
+  time.textContent = message.createdAt ? formatTime(message.createdAt) : '';
+
+  const body = document.createElement('p');
+  body.className = 'czester-message-body';
+  body.textContent = message.text || (message.typing ? '...' : '');
+  if (message.typing) {
+    body.dataset.typing = 'true';
   }
 
-  const data = rankingState.data;
-  if (!data) {
-    const summary = document.createElement('div');
-    summary.className = 'ranking-summary-card';
-    const country = document.createElement('strong');
-    country.textContent = t('ranking.country', {
-      country: RANKING_COUNTRIES_BY_LANGUAGE[appLanguage] || RANKING_COUNTRIES_BY_LANGUAGE.pl
+  header.append(author, time);
+  content.append(header, body);
+  if (Array.isArray(message.actions) && message.actions.length) {
+    const actions = document.createElement('div');
+    actions.className = 'czester-message-actions';
+    message.actions.forEach((action) => {
+      const button = document.createElement('button');
+      button.className = 'czester-message-action';
+      button.type = 'button';
+      button.dataset.czesterAction = String(action.id || '');
+      button.textContent = String(action.label || '');
+      actions.appendChild(button);
     });
-    summary.append(country, createRankingRefreshButton());
-    rankingSummaryEl.replaceChildren(summary);
-    rankingListEl.replaceChildren();
-    return;
+    content.appendChild(actions);
   }
+  article.append(compactTime, avatar, content);
+  return article;
+}
 
-  const summary = document.createElement('div');
-  summary.className = 'ranking-summary-card';
-  const country = document.createElement('strong');
-  country.textContent = t('ranking.country', { country: data.country || RANKING_COUNTRIES_BY_LANGUAGE[appLanguage] || '' });
-  const updated = document.createElement('span');
-  updated.textContent = t('ranking.updated', { time: data.fetchedAt ? formatTime(data.fetchedAt) : '-' });
-  summary.append(country, updated, createRankingRefreshButton());
-  rankingSummaryEl.replaceChildren(summary);
-
-  const items = Array.isArray(data.items) ? data.items : [];
-  if (!items.length) {
-    const empty = document.createElement('div');
-    empty.className = 'ranking-empty';
-    empty.textContent = t('ranking.empty');
-    rankingListEl.replaceChildren(empty);
+function renderCzester() {
+  if (!czesterMessagesEl) {
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  items.forEach((entry) => {
-    const card = document.createElement('article');
-    card.className = 'ranking-card';
+  const messages = czesterMessages.length
+    ? czesterMessages
+    : [{
+        id: 'welcome',
+        role: 'bot',
+        text: t('czester.welcome'),
+        createdAt: new Date().toISOString()
+      }];
 
-    const rank = document.createElement('span');
-    rank.className = 'ranking-rank';
-    rank.textContent = `#${entry.rank || ''}`;
-
-    const avatar = document.createElement('img');
-    avatar.className = 'ranking-avatar';
-    avatar.alt = '';
-    avatar.loading = 'lazy';
-    avatar.decoding = 'async';
-    avatar.src = entry.avatar || './assets/czatbox-icon.png';
-
-    const identity = document.createElement('div');
-    identity.className = 'ranking-identity';
-    const name = document.createElement('strong');
-    name.textContent = entry.displayName || `@${entry.uniqueId}`;
-    identity.appendChild(name);
-    if (entry.uniqueId) {
-      const handle = document.createElement('span');
-      handle.textContent = `@${entry.uniqueId}`;
-      identity.appendChild(handle);
-    }
-
-    const status = document.createElement('span');
-    status.className = 'ranking-status';
-    status.dataset.live = String(Boolean(entry.live));
-    status.textContent = entry.live ? t('ranking.live') : t('ranking.offline');
-
-    const stats = document.createElement('div');
-    stats.className = 'ranking-stats';
-    [
-      ['ranking.diamonds', entry.diamonds],
-      ['ranking.revenue', entry.revenue],
-      ['ranking.earnings', entry.earnings]
-    ].forEach(([labelKey, value]) => {
-      if (!value) {
-        return;
-      }
-      const item = document.createElement('span');
-      item.textContent = `${t(labelKey)}: ${value}`;
-      stats.appendChild(item);
-    });
-
-    card.append(rank, avatar, identity, status, stats);
-    fragment.appendChild(card);
+  messages.forEach((message) => {
+    fragment.appendChild(createCzesterBubble(message));
   });
 
-  rankingListEl.replaceChildren(fragment);
+  czesterMessagesEl.replaceChildren(fragment);
+  czesterMessagesEl.scrollTop = czesterMessagesEl.scrollHeight;
 }
 
-async function loadRanking(force = false) {
-  if (!window.tiktokLive || typeof window.tiktokLive.getRanking !== 'function') {
+function setCzesterPanelOpen(open) {
+  if (!czesterPanelEl || !czesterLauncherEl) {
     return;
   }
+  const nextOpen = Boolean(open);
+  czesterPanelEl.hidden = !nextOpen;
+  czesterPanelEl.dataset.open = String(nextOpen);
+  czesterLauncherEl.dataset.open = String(nextOpen);
+  czesterLauncherEl.setAttribute('aria-expanded', String(nextOpen));
+  document.documentElement.dataset.czesterOpen = String(nextOpen);
+  if (nextOpen) {
+    renderCzester();
+    refreshCzesterAiStatus();
+  }
+}
 
-  if (!force && rankingState.data && rankingState.loadedLanguage === appLanguage) {
-    renderRanking();
+function toggleCzesterPanel() {
+  setCzesterPanelOpen(!(czesterPanelEl && !czesterPanelEl.hidden));
+}
+
+function setCzesterAiStatusText(text, state = 'idle') {
+  if (czesterAiStatusEl) {
+    czesterAiStatusEl.textContent = text;
+  }
+  if (czesterAiPanelEl) {
+    czesterAiPanelEl.dataset.state = state;
+    czesterAiPanelEl.hidden = true;
+  }
+  if (czesterTitleStatusEl) {
+    czesterTitleStatusEl.dataset.state = state;
+    czesterTitleStatusEl.title = text || '';
+  }
+}
+
+async function refreshCzesterAiStatus() {
+  if (!czesterAiPanelEl || !window.tiktokLive || typeof window.tiktokLive.getCzesterAiStatus !== 'function') {
     return;
   }
-
-  rankingState = {
-    ...rankingState,
-    loading: true,
-    error: ''
-  };
-  renderRanking();
-
+  if (czesterAiBusy) {
+    return;
+  }
+  setCzesterAiStatusText(t('czester.ai.checking'), 'checking');
   try {
-    const result = await window.tiktokLive.getRanking(appLanguage);
-    if (!result || !result.ok) {
-      throw new Error(result && result.error ? result.error : 'ranking-error');
+    const result = await window.tiktokLive.getCzesterAiStatus();
+    if (result && result.ready) {
+      setCzesterAiStatusText(t('czester.ai.ready', { model: result.model || result.recommendedModel || '' }), 'ready');
+      if (czesterAiInstallEl) {
+        czesterAiInstallEl.hidden = true;
+      }
+      return;
     }
-    rankingState = {
-      loading: false,
-      loadedLanguage: appLanguage,
-      data: result,
-      error: ''
-    };
-  } catch (error) {
-    rankingState = {
-      loading: false,
-      loadedLanguage: appLanguage,
-      data: null,
-      error: error && error.message ? error.message : t('ranking.error')
-    };
+    if (result && result.ollamaRunning && !result.modelInstalled) {
+      setCzesterAiStatusText(t('czester.ai.noModel'), 'warning');
+    } else {
+      setCzesterAiStatusText(t('czester.ai.noOllama'), 'warning');
+    }
+    if (czesterAiInstallEl) {
+      czesterAiInstallEl.hidden = false;
+      czesterAiInstallEl.disabled = false;
+      czesterAiInstallEl.textContent = t('czester.ai.install');
+    }
+  } catch {
+    setCzesterAiStatusText(t('czester.ai.error'), 'error');
+  }
+}
+
+async function installCzesterAiPack() {
+  if (!window.tiktokLive || typeof window.tiktokLive.installCzesterAiPack !== 'function' || czesterAiBusy) {
+    return null;
+  }
+  czesterAiBusy = true;
+  let installResult = null;
+  if (czesterAiInstallEl) {
+    czesterAiInstallEl.disabled = true;
+    czesterAiInstallEl.textContent = t('czester.ai.installing');
+  }
+  setCzesterAiStatusText(t('czester.ai.installing'), 'checking');
+  try {
+    const result = await window.tiktokLive.installCzesterAiPack();
+    installResult = result || null;
+    if (result && result.manual) {
+      setCzesterAiStatusText(t('czester.ai.installerStarted'), 'warning');
+    } else if (result && result.status && result.status.ready) {
+      setCzesterAiStatusText(t('czester.ai.ready', { model: result.status.model || result.status.recommendedModel || '' }), 'ready');
+      if (czesterAiInstallEl) {
+        czesterAiInstallEl.hidden = true;
+      }
+    } else if (result && result.ok) {
+      await refreshCzesterAiStatus();
+    } else {
+      setCzesterAiStatusText(t('czester.ai.error'), 'error');
+    }
+  } catch {
+    setCzesterAiStatusText(t('czester.ai.error'), 'error');
+  } finally {
+    czesterAiBusy = false;
+    if (czesterAiInstallEl && !czesterAiInstallEl.hidden) {
+      czesterAiInstallEl.disabled = false;
+      czesterAiInstallEl.textContent = t('czester.ai.install');
+    }
+  }
+  return installResult;
+}
+
+async function getCzesterAiStatusSafe() {
+  if (!window.tiktokLive || typeof window.tiktokLive.getCzesterAiStatus !== 'function') {
+    return null;
+  }
+  try {
+    return await window.tiktokLive.getCzesterAiStatus();
+  } catch {
+    return null;
+  }
+}
+
+function isCzesterAiReady(status) {
+  return Boolean(status && status.ready && status.ollamaRunning);
+}
+
+async function maybeShowCzesterOllamaPrompt(options = {}) {
+  if (!isOllamaPromptUnlocked()) {
+    return;
+  }
+  if (czesterOllamaPromptShownThisSession && !options.force) {
+    return;
   }
 
-  renderRanking();
+  const status = await getCzesterAiStatusSafe();
+  if (isCzesterAiReady(status)) {
+    return;
+  }
+
+  czesterOllamaPromptShownThisSession = true;
+  setCzesterPanelOpen(true);
+  appendCzesterMessage('bot', t('czester.ollama.prompt'), {
+    animate: false,
+    variant: 'analysis',
+    actions: [
+      { id: 'install-ollama', label: t('czester.ollama.accept') },
+      { id: 'decline-ollama', label: t('czester.ollama.decline') }
+    ]
+  });
+}
+
+async function acceptCzesterOllamaPrompt() {
+  localStorage.removeItem(OLLAMA_PROMPT_DECLINED_KEY);
+  appendCzesterMessage('bot', t('czester.ollama.installing'), { animate: false, variant: 'analysis' });
+  const result = await installCzesterAiPack();
+  const status = result && result.status ? result.status : await getCzesterAiStatusSafe();
+  if (isCzesterAiReady(status)) {
+    appendCzesterMessage('bot', t('czester.ollama.ready'), { animate: false, variant: 'analysis' });
+  } else if (!result || (!result.manual && !result.ok)) {
+    appendCzesterMessage('bot', t('czester.ollama.error'), { animate: false, variant: 'analysis' });
+  }
+}
+
+function declineCzesterOllamaPrompt() {
+  localStorage.setItem(OLLAMA_PROMPT_DECLINED_KEY, new Date().toISOString());
+  appendCzesterMessage('bot', t('czester.ollama.declined'), { animate: false, variant: 'analysis' });
 }
 
 function syncAvatarImages(images) {
@@ -3454,6 +5441,8 @@ function syncAvatarImages(images) {
 
   avatarImages = nextImages;
   userAvatars.clear();
+  czesterUserAvatar = '';
+  renderCzester();
 }
 
 function getAvatarKey(message) {
@@ -3502,24 +5491,35 @@ function getAvatarForMessage(message) {
 function resetStreamStats() {
   giftTotalsByUser.clear();
   tapTotalsByUser.clear();
+  liveBoxes.length = 0;
   activeChatUsers.clear();
   activeModerators.clear();
+  czesterSpamBuckets.clear();
+  czesterSpamAlerts.clear();
   lastHondaOnlineAlertAt = 0;
   liveViewerCount = 0;
   chatMessageCount = 0;
+  resetCzesterLiveAnalysis();
+  renderBoxesPanel();
   setOpenRightWidget('');
 }
 
 function resetMessages() {
   clearTimeout(revealFallbackTimer);
   revealFallbackTimer = null;
+  clearTimeout(boxesArchiveRefreshTimer);
+  boxesArchiveRefreshTimer = null;
   queue.length = 0;
   visibleMessages.length = 0;
   userAvatars.clear();
   queuedMessagesById.clear();
   visibleMessagesById.clear();
+  boxesArchiveContentCache.clear();
+  boxesArchiveEntries = [];
+  selectedBoxesArchiveId = '';
+  selectedBoxesArchive = null;
   resetStreamStats();
-  messagesEl.querySelectorAll('.message').forEach((item) => item.remove());
+  messagesEl.replaceChildren();
   renderedMessageElements.clear();
   updateStatus();
 }
@@ -3675,6 +5675,96 @@ function trackIncomingMessageStats(message) {
   if (kind === 'gift' || kind === 'box') {
     trackGiftStats(message);
   }
+
+  updateCzesterViewerProfile(message);
+}
+
+function normalizeSpamText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function getSpamAuthorKey(message) {
+  return normalizeCreatorHandle(message && (message.uniqueId || message.authorName))
+    || String(message && (message.uniqueId || message.authorName) || '').trim().toLowerCase();
+}
+
+function pruneCzesterSpamBuckets(now = Date.now()) {
+  for (const [key, timestamps] of czesterSpamBuckets) {
+    const fresh = timestamps.filter((timestamp) => now - timestamp <= CZESTER_SPAM_WINDOW_MS);
+    if (fresh.length) {
+      czesterSpamBuckets.set(key, fresh);
+    } else {
+      czesterSpamBuckets.delete(key);
+    }
+  }
+
+  for (const [key, timestamp] of czesterSpamAlerts) {
+    if (now - timestamp > CZESTER_SPAM_ALERT_COOLDOWN_MS) {
+      czesterSpamAlerts.delete(key);
+    }
+  }
+}
+
+function inspectCzesterSpam(message) {
+  if (!message || (message.kind || 'chat') !== 'chat') {
+    return;
+  }
+
+  const authorKey = getSpamAuthorKey(message);
+  const text = normalizeSpamText(getMessagePlainText(message));
+  if (!authorKey || !text) {
+    return;
+  }
+
+  const now = Date.now();
+  pruneCzesterSpamBuckets(now);
+  const bucketKey = `${authorKey}:${text}`;
+  const timestamps = (czesterSpamBuckets.get(bucketKey) || [])
+    .filter((timestamp) => now - timestamp <= CZESTER_SPAM_WINDOW_MS);
+  timestamps.push(now);
+  czesterSpamBuckets.set(bucketKey, timestamps);
+
+  if (timestamps.length < CZESTER_SPAM_MIN_REPEAT || czesterSpamAlerts.has(bucketKey)) {
+    return;
+  }
+
+  czesterSpamAlerts.set(bucketKey, now);
+  updateCzesterViewerProfile(message, { spam: true });
+  const author = String(message.authorName || message.uniqueId || authorKey).trim();
+  notifyCzester('spam-alert', t('czester.notice.spam', {
+    author,
+    count: timestamps.length
+  }), {
+    animate: false,
+    payload: {
+      key: bucketKey,
+      author,
+      text,
+      count: timestamps.length
+    }
+  });
+}
+
+function notifyCzesterSuperFanJoin(message) {
+  if (!message || (message.kind || '') !== 'member' || !message.isSuperFan) {
+    return;
+  }
+  const name = String(message.authorName || message.uniqueId || '').replace(/^@+/, '').trim();
+  if (!name) {
+    return;
+  }
+  const key = normalizeCreatorHandle(message.uniqueId || name) || name.toLowerCase();
+  if (wasCzesterNoticeRecentlyShown('superfan-join', key, 5 * 60 * 1000)) {
+    return;
+  }
+  notifyCzester('superfan-join', t('czester.notice.superfanJoin', { name }), {
+    animate: false,
+    variant: 'superfan',
+    payload: { key, name }
+  });
 }
 
 function hasHondaOnCurrentChat() {
@@ -3729,8 +5819,531 @@ function checkHondaOnlinePresence() {
   showHondaOnlineNotice();
 }
 
+function clearCoinsPromoTimer() {
+  clearTimeout(coinsPromoTimer);
+  coinsPromoTimer = null;
+  coinsPromoCreatorKey = '';
+}
+
+function getCoinsPromoCreatorKey() {
+  if (!isOnlineConnectionState(state)) {
+    return '';
+  }
+
+  return normalizeCreatorHandle(getCreatorUsernameFromState())
+    || String(state.creatorId || '').trim()
+    || 'creator';
+}
+
+function createCoinsPromoMessage() {
+  return {
+    id: `coin-promo-${Date.now()}`,
+    kind: 'coin-promo',
+    timestamp: Date.now(),
+    text: t('coins.chatPromo', {
+      code: COINS_REFERRAL_CODE,
+      url: COINS_REFERRAL_URL
+    }),
+    localOnly: true
+  };
+}
+
+function showCoinsPromoMessage() {
+  if (!isOnlineConnectionState(state)) {
+    clearCoinsPromoTimer();
+    return;
+  }
+
+  showMessageNow(createCoinsPromoMessage(), true);
+}
+
+function scheduleCoinsPromoForCurrentCreator() {
+  const creatorKey = getCoinsPromoCreatorKey();
+  if (!creatorKey) {
+    clearCoinsPromoTimer();
+    return;
+  }
+
+  if (coinsPromoTimer && coinsPromoCreatorKey === creatorKey) {
+    return;
+  }
+
+  clearTimeout(coinsPromoTimer);
+  coinsPromoCreatorKey = creatorKey;
+  coinsPromoTimer = setTimeout(() => {
+    coinsPromoTimer = null;
+    const currentKey = getCoinsPromoCreatorKey();
+    if (!currentKey || currentKey !== coinsPromoCreatorKey) {
+      clearCoinsPromoTimer();
+      return;
+    }
+    showCoinsPromoMessage();
+    scheduleCoinsPromoForCurrentCreator();
+  }, COINS_PROMO_INTERVAL_MS);
+}
+
+function getBoxDisplayName(message) {
+  const key = message && message.boxKey === 'portal' ? 'portal' : 'chest';
+  return t(key === 'portal' ? 'boxes.type.portal' : 'boxes.type.chest');
+}
+
+function getBoxSenderName(message) {
+  return String(
+    (message && message.authorName)
+    || (message && message.uniqueId)
+    || ''
+  ).trim();
+}
+
+function getBoxCoinCount(message) {
+  return Math.max(
+    0,
+    Number(message && (
+      message.boxCoinCount
+      || message.giftCost
+      || message.diamondCount
+    )) || 0
+  );
+}
+
+function getBoxPeopleCount(message) {
+  return Math.max(
+    0,
+    Number(message && (
+      message.boxPeopleCount
+      || message.audienceCount
+      || message.peopleCount
+    )) || 0
+  );
+}
+
+function getBoxEntryId(message) {
+  return String(
+    (message && message.boxEnvelopeId)
+    || (message && message.envelopeId)
+    || (message && message.id)
+    || `${message && message.timestamp || Date.now()}:${getBoxSenderName(message)}:${getBoxCoinCount(message)}`
+  );
+}
+
+function createBoxEntryFromMessage(message, fallbackIndex = 0) {
+  const sender = getBoxSenderName(message);
+  if (!message || !sender || isUnknownUserValue(sender)) {
+    return null;
+  }
+
+  return {
+    id: getBoxEntryId(message) || `box-${fallbackIndex}`,
+    timestamp: message.timestamp || message.time || new Date().toISOString(),
+    sender,
+    uniqueId: message.uniqueId || '',
+    type: message.boxKey === 'portal' ? 'portal' : 'chest',
+    coins: getBoxCoinCount(message),
+    people: getBoxPeopleCount(message)
+  };
+}
+
+function trackLiveBox(message) {
+  if (!message || (message.kind || 'chat') !== 'box') {
+    return;
+  }
+
+  const entry = createBoxEntryFromMessage(message);
+  if (!entry) {
+    return;
+  }
+
+  const existingIndex = liveBoxes.findIndex((item) => item.id === entry.id);
+
+  if (existingIndex >= 0) {
+    liveBoxes[existingIndex] = entry;
+  } else {
+    liveBoxes.unshift(entry);
+  }
+
+  renderBoxesPanel();
+  if (activeSection === 'boxes') {
+    scheduleBoxesArchiveRefresh();
+  }
+}
+
+function getBoxesSummary(entries) {
+  const boxes = Array.isArray(entries) ? entries : [];
+  return {
+    count: boxes.length,
+    coins: boxes.reduce((sum, entry) => sum + Math.max(0, Number(entry.coins) || 0), 0),
+    people: boxes.reduce((sum, entry) => sum + Math.max(0, Number(entry.people) || 0), 0)
+  };
+}
+
+function getArchiveEntryBoxCount(entry) {
+  if (!entry) {
+    return 0;
+  }
+
+  if (Array.isArray(entry.boxes)) {
+    return entry.boxes.length;
+  }
+
+  const summaryBoxCount = entry.summary && entry.summary.kinds
+    ? Number(entry.summary.kinds.box) || 0
+    : 0;
+
+  return Math.max(0, summaryBoxCount);
+}
+
+function archiveEntryHasBoxes(entry) {
+  return getArchiveEntryBoxCount(entry) > 0;
+}
+
+function updateBoxesSummary(entries) {
+  const summary = getBoxesSummary(entries);
+  if (boxesSummaryCountEl) {
+    boxesSummaryCountEl.textContent = formatCounter(summary.count);
+  }
+  if (boxesSummaryCoinsEl) {
+    boxesSummaryCoinsEl.textContent = formatCounter(summary.coins);
+  }
+  if (boxesSummaryPeopleEl) {
+    boxesSummaryPeopleEl.textContent = formatCounter(summary.people);
+  }
+}
+
+function renderBoxEntries(entries) {
+  if (!boxesListEl) {
+    return;
+  }
+
+  boxesListEl.replaceChildren();
+  const boxes = Array.isArray(entries) ? entries : [];
+  if (!boxes.length) {
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  boxes.forEach((entry) => {
+    const item = document.createElement('article');
+    item.className = 'box-entry';
+
+    const icon = document.createElement('span');
+    icon.className = 'box-entry-icon';
+    icon.appendChild(createUiIcon('chest'));
+
+    const content = document.createElement('div');
+    content.className = 'box-entry-content';
+
+    const header = document.createElement('div');
+    header.className = 'box-entry-header';
+
+    const title = document.createElement('strong');
+    title.textContent = entry.type === 'portal' ? t('boxes.type.portal') : t('boxes.type.chest');
+
+    const time = document.createElement('time');
+    time.textContent = formatTime(entry.timestamp);
+
+    header.append(title, time);
+
+    const meta = document.createElement('div');
+    meta.className = 'box-entry-meta';
+
+    const sender = document.createElement('span');
+    sender.append(document.createTextNode(`${t('boxes.sender')} `), document.createElement('strong'));
+    sender.querySelector('strong').textContent = entry.sender;
+
+    const coins = document.createElement('span');
+    coins.append(document.createTextNode(`${t('boxes.coins')} `), document.createElement('strong'));
+    coins.querySelector('strong').textContent = formatCounter(entry.coins);
+
+    meta.append(sender, coins);
+
+    if (entry.people > 0) {
+      const people = document.createElement('span');
+      people.append(document.createTextNode(`${t('boxes.people')} `), document.createElement('strong'));
+      people.querySelector('strong').textContent = formatCounter(entry.people);
+      meta.appendChild(people);
+    }
+
+    content.append(header, meta);
+    item.append(icon, content);
+    fragment.appendChild(item);
+  });
+
+  boxesListEl.appendChild(fragment);
+}
+
+function closeBoxesArchive() {
+  selectedBoxesArchiveId = '';
+  selectedBoxesArchive = null;
+  updateBoxesArchiveSelection();
+  updateBoxesSummary([]);
+  if (boxesSessionEl) {
+    boxesSessionEl.hidden = true;
+  }
+  if (boxesEmptyEl) {
+    boxesEmptyEl.hidden = false;
+  }
+  if (boxesListEl) {
+    boxesListEl.replaceChildren();
+  }
+}
+
+function updateBoxesArchiveSelection() {
+  if (!boxesArchiveListEl) {
+    return;
+  }
+
+  boxesArchiveListEl.querySelectorAll('[data-boxes-archive-id]').forEach((button) => {
+    button.dataset.active = String(button.dataset.boxesArchiveId === selectedBoxesArchiveId);
+  });
+}
+
+function getFilteredBoxesArchiveEntries() {
+  const query = boxesArchiveSearchEl ? boxesArchiveSearchEl.value.trim().toLowerCase() : '';
+  if (!query) {
+    return boxesArchiveEntries;
+  }
+
+  return boxesArchiveEntries.filter((entry) => (
+    [entry.name, entry.username, entry.date, entry.time]
+      .some((value) => String(value || '').toLowerCase().includes(query))
+  ));
+}
+
+function renderBoxesArchiveList() {
+  if (!boxesArchiveListEl) {
+    return;
+  }
+
+  const entries = getFilteredBoxesArchiveEntries();
+  boxesArchiveListEl.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement('div');
+    empty.className = 'archive-empty';
+    empty.textContent = boxesArchiveEntries.length ? t('boxes.noMatches') : t('boxes.noSessions');
+    boxesArchiveListEl.appendChild(empty);
+    return;
+  }
+
+  entries.forEach((entry) => {
+    const row = document.createElement('article');
+    row.className = 'archive-entry boxes-session-entry';
+
+    const button = document.createElement('button');
+    button.className = 'archive-row boxes-session-row';
+    button.type = 'button';
+    button.dataset.boxesArchiveId = entry.id;
+
+    const icon = document.createElement('span');
+    icon.className = 'archive-row-icon';
+    icon.appendChild(createUiIcon('chest'));
+
+    const content = document.createElement('span');
+    content.className = 'archive-row-content';
+
+    const name = document.createElement('strong');
+    name.className = 'archive-name';
+    name.textContent = entry.name || t('archive.defaultName');
+
+    const date = document.createElement('span');
+    date.className = 'archive-meta';
+    date.textContent = entry.date || '';
+
+    const time = document.createElement('time');
+    time.textContent = entry.time || '';
+
+    const count = document.createElement('span');
+    count.className = 'archive-count';
+    count.append(createUiIcon('chest'), document.createTextNode(t('boxes.sessionCount', {
+      count: formatCounter(getArchiveEntryBoxCount(entry))
+    })));
+
+    content.append(name, date, time);
+    button.append(icon, content, count);
+    button.addEventListener('click', () => openBoxesArchive(entry.id));
+
+    row.appendChild(button);
+    boxesArchiveListEl.appendChild(row);
+  });
+  updateBoxesArchiveSelection();
+}
+
+function renderBoxesPanel() {
+  if (!boxesListEl) {
+    return;
+  }
+
+  const boxes = selectedBoxesArchive && Array.isArray(selectedBoxesArchive.boxes)
+    ? selectedBoxesArchive.boxes
+    : [];
+  updateBoxesSummary(boxes);
+  if (boxesSessionEl) {
+    boxesSessionEl.hidden = !selectedBoxesArchive;
+  }
+  if (boxesEmptyEl) {
+    boxesEmptyEl.hidden = Boolean(selectedBoxesArchive);
+  }
+  if (boxesSessionTitleEl && selectedBoxesArchive) {
+    boxesSessionTitleEl.textContent = selectedBoxesArchive.entry.name || t('archive.defaultName');
+  }
+  if (boxesSessionMetaEl && selectedBoxesArchive) {
+    const entry = selectedBoxesArchive.entry || {};
+    boxesSessionMetaEl.textContent = [entry.date, entry.time, t('boxes.sessionCount', {
+      count: formatCounter(boxes.length)
+    })].filter(Boolean).join(' · ');
+  }
+  renderBoxEntries(boxes);
+}
+
+async function openBoxesArchive(archiveId, options = {}) {
+  const selected = boxesArchiveEntries.find((entry) => entry.id === archiveId);
+  if (!selected) {
+    closeBoxesArchive();
+    return;
+  }
+
+  selectedBoxesArchiveId = archiveId;
+  selectedBoxesArchive = {
+    ...selected,
+    entry: selected,
+    boxes: Array.isArray(selected.boxes) ? selected.boxes : []
+  };
+  updateBoxesArchiveSelection();
+  renderBoxesPanel();
+
+  const payload = await getBoxesArchiveContent(selected, Boolean(options.force));
+  if (!payload || selectedBoxesArchiveId !== archiveId) {
+    return;
+  }
+
+  selectedBoxesArchive = payload;
+  renderBoxesPanel();
+}
+
+function scheduleBoxesArchiveRefresh() {
+  if (boxesArchiveRefreshTimer || activeSection !== 'boxes') {
+    return;
+  }
+  boxesArchiveRefreshTimer = setTimeout(() => {
+    boxesArchiveRefreshTimer = null;
+    loadBoxesArchiveSessions({ preserveSelection: true, silent: true, force: true });
+  }, BOXES_ARCHIVE_REFRESH_DEBOUNCE_MS);
+}
+
+async function getBoxesArchiveContent(entry, force = false) {
+  if (!entry || !entry.id) {
+    return null;
+  }
+
+  if (!force && boxesArchiveContentCache.has(entry.id)) {
+    return boxesArchiveContentCache.get(entry.id);
+  }
+
+  const result = await window.tiktokLive.getArchiveContent(entry.id);
+  if (!result || !result.ok) {
+    return null;
+  }
+
+  const messages = Array.isArray(result.messages) ? result.messages : [];
+  const boxes = messages
+    .filter((message) => (message.kind || 'chat') === 'box')
+    .map((message, index) => createBoxEntryFromMessage(message, index))
+    .filter(Boolean);
+  const payload = {
+    ...entry,
+    entry: result.entry || entry,
+    messages,
+    boxes
+  };
+  boxesArchiveContentCache.set(entry.id, payload);
+  return payload;
+}
+
+async function loadBoxesArchiveSessions(options = {}) {
+  if (!boxesArchiveListEl || boxesArchiveLoading) {
+    return;
+  }
+
+  const preserveSelection = Boolean(options.preserveSelection);
+  boxesArchiveLoading = true;
+  if (!options.silent) {
+    boxesArchiveListEl.textContent = t('boxes.loading');
+  }
+
+  try {
+    const listResult = await window.tiktokLive.listArchives();
+    const entries = listResult && listResult.ok && Array.isArray(listResult.archives)
+      ? listResult.archives
+      : [];
+
+    {
+      const sessions = entries.filter(archiveEntryHasBoxes);
+      boxesArchiveEntries = sessions;
+      renderBoxesArchiveList();
+
+      if (preserveSelection && selectedBoxesArchiveId && boxesArchiveEntries.some((entry) => entry.id === selectedBoxesArchiveId)) {
+        openBoxesArchive(selectedBoxesArchiveId, { force: Boolean(options.force) });
+      } else if (!preserveSelection) {
+        closeBoxesArchive();
+      } else if (selectedBoxesArchiveId) {
+        closeBoxesArchive();
+      }
+      return;
+    }
+
+    const sessions = [];
+
+    for (const entry of entries) {
+      try {
+        const payload = await getBoxesArchiveContent(entry, Boolean(options.force));
+        if (!payload || !payload.boxes.length) {
+          continue;
+        }
+        sessions.push(payload);
+      } catch {
+        // Jedno uszkodzone archiwum nie może blokować całej listy skrzyneczek.
+      }
+    }
+
+    boxesArchiveEntries = sessions;
+    renderBoxesArchiveList();
+
+    if (preserveSelection && selectedBoxesArchiveId && boxesArchiveEntries.some((entry) => entry.id === selectedBoxesArchiveId)) {
+      openBoxesArchive(selectedBoxesArchiveId);
+    } else if (!preserveSelection) {
+      closeBoxesArchive();
+    } else if (selectedBoxesArchiveId) {
+      closeBoxesArchive();
+    }
+  } catch (error) {
+    boxesArchiveListEl.textContent = t('boxes.loadFailed');
+  } finally {
+    boxesArchiveLoading = false;
+  }
+}
+
 function isMessageVisible(message) {
+  if (message && message.kind === 'coin-promo') {
+    return true;
+  }
   return activeFilters.has(message.kind || 'chat');
+}
+
+function syncChatFilterButtons() {
+  filterButtons.forEach((button) => {
+    const filter = button.dataset.filter;
+    if (filter) {
+      button.dataset.active = String(activeFilters.has(filter));
+    }
+  });
+}
+
+function syncArchiveFilterButtons() {
+  archiveFilterButtons.forEach((button) => {
+    const filter = button.dataset.archiveFilter;
+    if (filter) {
+      button.dataset.active = String(activeArchiveFilters.has(filter));
+    }
+  });
 }
 
 function getMessageIdKey(message) {
@@ -3892,7 +6505,12 @@ function renderMessageElement(message) {
 
     const meta = document.createElement('div');
     meta.className = 'message-meta';
-    meta.append(author, inlineTime);
+    const roleBadges = createMessageRoleBadges(message);
+    if (roleBadges) {
+      meta.append(author, roleBadges, inlineTime);
+    } else {
+      meta.append(author, inlineTime);
+    }
 
     const body = document.createElement('span');
     body.className = 'message-body';
@@ -3920,6 +6538,56 @@ function renderMessageElement(message) {
     } else {
       content.appendChild(text);
     }
+  } else if (message.kind === 'coin-promo') {
+    const body = document.createElement('span');
+    body.className = 'message-body coin-promo-body';
+
+    const icon = document.createElement('span');
+    icon.className = 'coin-promo-inline-icon';
+    icon.appendChild(createUiIcon('coin'));
+
+    const text = document.createElement('span');
+    text.textContent = t('coins.chatPromo', {
+      code: COINS_REFERRAL_CODE,
+      url: COINS_REFERRAL_URL
+    });
+
+    const link = document.createElement('a');
+    link.href = COINS_REFERRAL_URL;
+    link.rel = 'noreferrer';
+    link.dataset.externalUrl = COINS_REFERRAL_URL;
+    link.textContent = COINS_REFERRAL_URL;
+
+    body.append(icon, text, document.createTextNode(' '), link);
+
+    if (document.documentElement.dataset.chatStyle === 'testowy') {
+      const avatar = document.createElement('img');
+      avatar.className = 'message-avatar coin-promo-avatar';
+      avatar.src = CZESTER_AVATAR_SRC;
+      avatar.alt = '';
+      avatar.decoding = 'async';
+      avatar.loading = 'lazy';
+
+      const author = document.createElement('span');
+      author.className = 'message-author';
+      author.textContent = t('czester.title');
+
+      const inlineTime = document.createElement('time');
+      inlineTime.className = 'message-inline-time';
+      inlineTime.textContent = formatTime(message.timestamp);
+
+      const meta = document.createElement('div');
+      meta.className = 'message-meta';
+      meta.append(author, inlineTime);
+
+      const textBox = document.createElement('div');
+      textBox.className = 'message-text coin-promo-text';
+      textBox.append(meta, body);
+
+      content.append(avatar, textBox);
+    } else {
+      content.appendChild(body);
+    }
   } else {
     const body = document.createElement('span');
     body.className = 'message-body';
@@ -3932,7 +6600,6 @@ function renderMessageElement(message) {
 }
 
 function renderVisibleMessages(scrollToEnd = false) {
-  messagesEl.querySelectorAll('.message').forEach((item) => item.remove());
   renderedMessageElements.clear();
 
   const fragment = document.createDocumentFragment();
@@ -3944,13 +6611,34 @@ function renderVisibleMessages(scrollToEnd = false) {
       fragment.appendChild(item);
     });
 
-  messagesEl.appendChild(fragment);
+  messagesEl.replaceChildren(fragment);
 
   if (scrollToEnd) {
     scrollMessagesToEnd();
   }
 
   updateStatus();
+}
+
+function trimVisibleMessagesIfNeeded() {
+  const overflow = visibleMessages.length - MAX_VISIBLE_MESSAGES;
+  if (overflow <= 0) {
+    return;
+  }
+
+  const removed = visibleMessages.splice(0, overflow);
+  removed.forEach((message) => {
+    const idKey = getMessageIdKey(message);
+    if (idKey) {
+      visibleMessagesById.delete(idKey);
+    }
+    const renderKey = getMessageRenderKey(message);
+    const element = renderedMessageElements.get(renderKey);
+    if (element) {
+      element.remove();
+    }
+    renderedMessageElements.delete(renderKey);
+  });
 }
 
 function upsertRenderedMessage(message, scrollToEnd = false) {
@@ -3992,6 +6680,7 @@ function showMessageNow(message, scrollToEnd = true) {
     queuedMessagesById.delete(idKey);
     visibleMessagesById.set(idKey, message);
   }
+  trimVisibleMessagesIfNeeded();
   upsertRenderedMessage(message, scrollToEnd);
   if (isMessageVisible(message)) {
     readMessageAloud(message);
@@ -4075,6 +6764,11 @@ window.tiktokLive.onState((nextState) => {
   const wasOffline = isOfflineConnectionState(state);
   const wasOnline = isOnlineConnectionState(state);
   state = nextState;
+  const isNowOffline = isOfflineConnectionState(state);
+  if (isOnlineConnectionState(state) && (!wasOnline || state.creatorId !== previousCreatorId || !czesterCurrentLiveSessionKey)) {
+    const sessionCreator = normalizeCreatorHandle(getCreatorUsernameFromState()) || String(state.creatorId || 'creator');
+    czesterCurrentLiveSessionKey = `${sessionCreator}:${Date.now()}`;
+  }
   trackLoggedInAchievement(state);
   trackCreatorConnectionAchievement(state, {
     countConnection: !wasOnline || state.creatorId !== previousCreatorId
@@ -4095,9 +6789,20 @@ window.tiktokLive.onState((nextState) => {
   syncAppVersion();
   syncCreatorInputValue();
   if (previousCreatorId && state.creatorId !== previousCreatorId) {
+    if (wasOnline && visibleMessages.length) {
+      maybeNotifyCzesterLiveEndedSummary();
+    }
     resetMessages();
-  } else if (isOfflineConnectionState(state) && (!wasOffline || queue.length || visibleMessages.length || renderedMessageElements.size)) {
+  } else if (isNowOffline && (!wasOffline || queue.length || visibleMessages.length || renderedMessageElements.size)) {
+    if (wasOnline) {
+      maybeNotifyCzesterLiveEndedSummary();
+    }
     resetMessages();
+  }
+  if (isOnlineConnectionState(state)) {
+    scheduleCoinsPromoForCurrentCreator();
+  } else {
+    clearCoinsPromoTimer();
   }
   updateStatus();
 });
@@ -4218,6 +6923,9 @@ document.addEventListener('pointerdown', (event) => {
   closeCreatorSuggestions();
 });
 
+syncChatFilterButtons();
+syncArchiveFilterButtons();
+
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const filter = button.dataset.filter;
@@ -4232,6 +6940,7 @@ filterButtons.forEach((button) => {
     }
 
     button.dataset.active = String(activeFilters.has(filter));
+    saveEventFilters(CHAT_FILTER_SETTINGS_KEY, activeFilters);
     renderVisibleMessages();
     if (filter === 'chat' && !activeFilters.has('chat')) {
       stopSpeech();
@@ -4590,6 +7299,7 @@ async function refreshArchive() {
     const result = await window.tiktokLive.listArchives();
     archiveEntries = result && result.ok && Array.isArray(result.archives) ? result.archives : [];
     renderArchiveList();
+    indexCzesterArchiveProfiles(archiveEntries);
     const hasSelectedArchive = selectedArchiveId && archiveEntries.some((entry) => entry.id === selectedArchiveId);
     if (hasSelectedArchive) {
       await openArchive(selectedArchiveId);
@@ -5011,7 +7721,9 @@ async function deleteCurrentNote() {
 }
 
 function setActiveSection(section) {
-  const nextSection = viewPanels.some((panel) => panel.dataset.view === section) ? section : 'chatbox';
+  const requestedButton = sidebarButtons.find((button) => button.dataset.section === section);
+  const requestedPanel = viewPanels.find((panel) => panel.dataset.view === section);
+  const nextSection = requestedPanel && !(requestedButton && requestedButton.hidden) ? section : 'chatbox';
   activeSection = nextSection;
 
   sidebarButtons.forEach((button) => {
@@ -5028,10 +7740,9 @@ function setActiveSection(section) {
   if (activeSection === 'notes') {
     refreshNotes();
   }
-  if (activeSection === 'ranking') {
-    loadRanking(false);
+  if (activeSection === 'boxes') {
+    loadBoxesArchiveSessions();
   }
-
   if (activeSection !== 'chatbox') {
     stopSpeech();
   }
@@ -5042,6 +7753,70 @@ sidebarButtons.forEach((button) => {
     setActiveSection(button.dataset.section);
   });
 });
+
+if (boxesArchiveSearchEl) {
+  boxesArchiveSearchEl.addEventListener('input', renderBoxesArchiveList);
+}
+
+if (refreshBoxesArchiveButton) {
+  refreshBoxesArchiveButton.addEventListener('click', () => {
+    loadBoxesArchiveSessions({ preserveSelection: true, force: true });
+  });
+}
+
+if (czesterQuestionsButtonEl) {
+  czesterQuestionsButtonEl.addEventListener('click', showCzesterQuestionsFromLastFiveMinutes);
+}
+
+if (czesterModeratorsButtonEl) {
+  czesterModeratorsButtonEl.addEventListener('click', showCzesterActiveModerators);
+}
+
+if (czesterMessagesEl) {
+  czesterMessagesEl.addEventListener('click', (event) => {
+    const actionButton = event.target && typeof event.target.closest === 'function'
+      ? event.target.closest('[data-czester-action]')
+      : null;
+    if (!actionButton) {
+      return;
+    }
+    const action = actionButton.dataset.czesterAction;
+    const actionMessage = actionButton.closest('.czester-message');
+    const actionMessageId = actionMessage ? actionMessage.dataset.messageId : '';
+    const storedMessage = czesterMessages.find((message) => message.id === actionMessageId);
+    if (storedMessage) {
+      storedMessage.actions = [];
+      renderCzester();
+    } else {
+      actionButton.disabled = true;
+    }
+    if (action === 'install-ollama') {
+      acceptCzesterOllamaPrompt();
+      return;
+    }
+    if (action === 'decline-ollama') {
+      declineCzesterOllamaPrompt();
+    }
+  });
+}
+
+if (czesterLauncherEl) {
+  czesterLauncherEl.addEventListener('click', toggleCzesterPanel);
+}
+
+if (czesterCloseEl) {
+  czesterCloseEl.addEventListener('click', () => setCzesterPanelOpen(false));
+}
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && czesterPanelEl && !czesterPanelEl.hidden) {
+    setCzesterPanelOpen(false);
+  }
+});
+
+if (czesterAiInstallEl) {
+  czesterAiInstallEl.addEventListener('click', installCzesterAiPack);
+}
 
 if (refreshArchiveButton) {
   refreshArchiveButton.addEventListener('click', refreshArchive);
@@ -5120,6 +7895,7 @@ archiveFilterButtons.forEach((button) => {
       activeArchiveFilters.add(filter);
     }
     button.dataset.active = String(activeArchiveFilters.has(filter));
+    saveEventFilters(ARCHIVE_FILTER_SETTINGS_KEY, activeArchiveFilters);
     renderArchiveMessages();
   });
 });
@@ -5138,8 +7914,22 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+document.addEventListener('click', (event) => {
+  const link = event.target.closest('[data-external-url]');
+  if (!link) {
+    return;
+  }
+
+  event.preventDefault();
+  const url = link.dataset.externalUrl || link.getAttribute('href') || '';
+  if (window.tiktokLive && typeof window.tiktokLive.openExternalUrl === 'function') {
+    window.tiktokLive.openExternalUrl(url).catch(() => {});
+  }
+});
+
 window.tiktokLive.onChatReset(() => {
   resetMessages();
+  setChatFreezeEffect(false);
 });
 
 if (typeof window.tiktokLive.onRoomStats === 'function') {
@@ -5151,6 +7941,7 @@ if (typeof window.tiktokLive.onRoomStats === 'function') {
 }
 
 window.tiktokLive.onBattleAlert((alert) => {
+  handleCzesterBattleAlert(alert);
   const isMultiplierAlert = alert && (
     alert.textKey === 'battle.multiplier'
     || alert.tone === 'battle'
@@ -5163,7 +7954,7 @@ window.tiktokLive.onBattleAlert((alert) => {
   if (alert && alert.tone === 'honda' && !isHondaAlertsUnlocked()) {
     return;
   }
-  if ((!isMultiplierAlert && !isSpecialJoinAlert) || (isMultiplierAlert && !generalSettings.multiplierNotifications) || !battleBanner) {
+  if ((isMultiplierAlert || !isSpecialJoinAlert) || !battleBanner) {
     return;
   }
   const text = alert && alert.textKey
@@ -5195,11 +7986,23 @@ window.tiktokLive.onChatMessage((message) => {
     return;
   }
 
-  if (message.kind === 'member') {
-    assignAvatarForJoin(message);
+  if ((message.kind || 'chat') === 'box') {
+    trackLiveBox(message);
   }
 
+  if (message.czesterOnly) {
+    notifyCzesterSuperFanJoin(message);
+    return;
+  }
+
+  if (message.kind === 'member') {
+    assignAvatarForJoin(message);
+    notifyCzesterSuperFanJoin(message);
+  }
+
+  recordCzesterLiveAnalysisMessage(message);
   trackIncomingMessageStats(message);
+  inspectCzesterSpam(message);
   const messageIdKey = getMessageIdKey(message);
 
   if (message.upsert && messageIdKey) {
@@ -5267,3 +8070,4 @@ setActiveAboutTab(activeAboutTab);
 setActiveSection(activeSection);
 syncAppVersion();
 updateStatus();
+maybeShowCzesterOllamaPrompt();

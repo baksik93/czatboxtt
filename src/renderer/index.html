@@ -16,11 +16,6 @@
             <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
           </div>
         </div>
-        <section class="recent-creators-strip" id="recentCreatorsStrip" aria-label="Ostatni twórcy" data-i18n-aria-label="recentCreators.aria" hidden>
-          <button class="recent-creators-nav" id="recentCreatorsPrev" type="button" data-direction="-1" aria-label="Poprzedni twórcy" hidden>&lsaquo;</button>
-          <div class="recent-creators-carousel" id="recentCreatorsCarousel"></div>
-          <button class="recent-creators-nav" id="recentCreatorsNext" type="button" data-direction="1" aria-label="Następni twórcy" hidden>&rsaquo;</button>
-        </section>
         <div class="creator-picker creator-combobox">
           <label for="creatorInput">Twórca</label>
           <span class="creator-input-wrap">
@@ -37,10 +32,19 @@
         <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
         <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
         <button class="sidebar-button" type="button" data-section="notes">Notatki</button>
+        <button class="sidebar-button" type="button" data-section="coins">Monetki</button>
+        <button class="sidebar-button" type="button" data-section="boxes" data-i18n="nav.boxes" hidden>Skrzyneczki</button>
         <button class="sidebar-button" type="button" data-section="achievements">Osiągnięcia</button>
-        <button class="sidebar-button" type="button" data-section="ranking">Ranking</button>
         <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
         <button class="sidebar-button" type="button" data-section="about">O programie</button>
+      </aside>
+
+      <aside class="recent-creators-column" aria-label="Ostatni twórcy" data-i18n-aria-label="recentCreators.aria">
+        <section class="recent-creators-strip" id="recentCreatorsStrip" hidden>
+          <button class="recent-creators-nav" id="recentCreatorsPrev" type="button" data-direction="-1" aria-label="Poprzedni twórcy" hidden>&uarr;</button>
+          <div class="recent-creators-carousel" id="recentCreatorsCarousel"></div>
+          <button class="recent-creators-nav" id="recentCreatorsNext" type="button" data-direction="1" aria-label="Następni twórcy" hidden>&darr;</button>
+        </section>
       </aside>
 
       <section class="content">
@@ -127,17 +131,6 @@
               <button class="right-widget-tab" type="button" id="topTappersButton" data-widget-target="taps" aria-expanded="false" aria-controls="topTappersPanel">
                 <span class="right-widget-tab-icon" data-ui-icon="heart" aria-hidden="true"></span>
                 <span class="right-widget-tab-text">TAP</span>
-              </button>
-            </section>
-
-            <section class="right-widget" data-right-widget="moderators" data-expanded="false">
-              <div class="right-widget-panel moderators-widget-panel" id="moderatorsWidgetPanel">
-                <h2 data-i18n="moderatorsWidget.title">Aktywni moderatorzy</h2>
-                <div id="moderatorsWidgetContent"></div>
-              </div>
-              <button class="right-widget-tab" type="button" id="moderatorsWidgetButton" data-widget-target="moderators" aria-expanded="false" aria-controls="moderatorsWidgetPanel">
-                <span class="right-widget-tab-icon" data-ui-icon="shield" aria-hidden="true"></span>
-                <span class="right-widget-tab-text">MOD</span>
               </button>
             </section>
           </aside>
@@ -329,6 +322,19 @@
                     <small>Półprzezroczysty, ciemno szaro-niebieski styl z neonowymi akcentami.</small>
                   </span>
                 </label>
+                <label class="setting-choice theme-choice-locked" for="themeMiamiVice" data-locked="true">
+                  <input type="radio" id="themeMiamiVice" name="appTheme" value="miami-vice">
+                  <span>
+                    <span class="theme-title-row">
+                      <strong>Miami Vice</strong>
+                      <span class="theme-lock-badge">
+                        <span data-ui-icon="lock" aria-hidden="true"></span>
+                        <span>Zablokowany</span>
+                      </span>
+                    </span>
+                    <small>Pastelowe odcienie Miami inspirowane klimatem GTA Vice City.</small>
+                  </span>
+                </label>
               </div>
             </section>
             <section class="setting-section appearance-app-section">
@@ -477,7 +483,7 @@
             </div>
             <div class="archive-toolbar-actions">
               <button class="page-action archive-icon-action" type="button" id="newNoteButton">
-                <span data-ui-icon="message" aria-hidden="true"></span>
+                <span data-ui-icon="questions" aria-hidden="true"></span>
                 <span data-i18n="notes.new">Nowa</span>
               </button>
               <button class="page-action archive-icon-action" type="button" id="editNoteButton" hidden>
@@ -522,16 +528,29 @@
           </section>
         </section>
 
-        <section class="view-panel page-view ranking-view" data-view="ranking" hidden>
-          <div class="page-header">
-            <div>
-              <h1 data-i18n="ranking.title">Ranking</h1>
-              <p class="page-note" id="rankingNote" data-i18n="ranking.note">Ranking twórców LIVE dla kraju wybranego według języka aplikacji.</p>
+        <aside class="czester-floating-panel czester-view" id="czesterPanel" aria-label="Asystent Czester" data-i18n-aria-label="czester.title" hidden>
+          <div class="page-header czester-floating-header">
+            <h1><span class="czester-title-status" id="czesterTitleStatus" aria-hidden="true"></span><span data-i18n="czester.title">Asystent Czester</span></h1>
+            <button class="czester-close" id="czesterClose" type="button" aria-label="Zamknij Czestera" data-i18n-aria-label="czester.close">
+              <span aria-hidden="true">×</span>
+            </button>
+            <div class="czester-ai-panel" id="czesterAiPanel" hidden>
+              <span id="czesterAiStatus" data-i18n="czester.ai.checking">Sprawdzam pakiet lokalny...</span>
+              <button class="page-action" type="button" id="czesterAiInstall" data-i18n="czester.ai.install">Zainstaluj pakiet AI</button>
             </div>
           </div>
-          <section class="ranking-summary" id="rankingSummary" aria-live="polite"></section>
-          <section class="ranking-list" id="rankingList" aria-live="polite"></section>
-        </section>
+          <section class="czester-chat" aria-live="polite">
+            <div class="czester-messages" id="czesterMessages"></div>
+            <div class="czester-form czester-info-actions" id="czesterForm">
+              <button class="page-action czester-questions" id="czesterQuestionsButton" type="button" data-i18n-title="czester.questionsButton" data-i18n-aria-label="czester.questionsButton" aria-label="Pokaż pytania z ostatnich 5 minut">
+                <span data-ui-icon="questions-list" aria-hidden="true"></span>
+              </button>
+              <button class="page-action czester-moderators" id="czesterModeratorsButton" type="button" data-i18n-title="czester.moderatorsButton" data-i18n-aria-label="czester.moderatorsButton" aria-label="Pokaż aktywnych moderatorów">
+                <span data-ui-icon="moderators-list" aria-hidden="true"></span>
+              </button>
+            </div>
+          </section>
+        </aside>
 
         <section class="view-panel page-view achievements-view" data-view="achievements" hidden>
           <div class="page-header">
@@ -541,6 +560,83 @@
             </div>
           </div>
           <section class="achievements-list" id="achievementsList" aria-live="polite"></section>
+        </section>
+
+        <section class="view-panel page-view coins-view" data-view="coins" hidden>
+          <div class="page-header">
+            <div>
+              <h1 data-i18n="coins.title">Monetki</h1>
+              <p class="page-note" data-i18n="coins.note">Wesprzyj rozwój programu, kupując monetki TikTok z rabatem.</p>
+            </div>
+          </div>
+          <article class="coins-card">
+            <span class="coins-card-icon" data-ui-icon="coin" aria-hidden="true"></span>
+            <div class="coins-card-copy">
+              <h2 data-i18n="coins.cardTitle">Wsparcie przez monetki TikTok</h2>
+              <p data-i18n="coins.description">Możesz wesprzeć autora programu, kupując monetki na stronie TikToka z 25% rabatem przez kod ZD3TKFBV.</p>
+              <p class="coins-code-row">
+                <span data-i18n="coins.codeLabel">Kod rabatowy:</span>
+                <strong>ZD3TKFBV</strong>
+              </p>
+              <a class="page-action coins-link" href="https://www.tiktok.com/coin?rc=ZD3TKFBV" data-external-url="https://www.tiktok.com/coin?rc=ZD3TKFBV" rel="noreferrer" data-i18n="coins.link">Przejdź do TikToka</a>
+            </div>
+          </article>
+        </section>
+
+        <section class="view-panel page-view boxes-view" data-view="boxes" hidden>
+          <div class="page-header">
+            <div>
+              <h1 data-i18n="boxes.title">Skrzyneczki</h1>
+              <p class="page-note" data-i18n="boxes.note">Archiwum skrzyneczek zapisanych z transmisji LIVE.</p>
+            </div>
+            <button class="page-action boxes-refresh-action" type="button" id="refreshBoxesArchive">
+              <span data-ui-icon="refresh" aria-hidden="true"></span>
+              <span data-i18n="boxes.refresh">Odśwież</span>
+            </button>
+          </div>
+
+          <section class="boxes-archive-workspace">
+            <aside class="boxes-archive-browser">
+              <label class="archive-search">
+                <span data-ui-icon="search" aria-hidden="true"></span>
+                <input id="boxesArchiveSearch" type="search" placeholder="Szukaj twórcy lub daty..." data-i18n-placeholder="boxes.searchPlaceholder">
+              </label>
+              <div class="boxes-session-list" id="boxesArchiveList" aria-live="polite"></div>
+            </aside>
+
+            <section class="boxes-archive-detail">
+              <div class="boxes-empty" id="boxesEmpty">
+                <span data-ui-icon="chest" aria-hidden="true"></span>
+                <strong data-i18n="boxes.emptyTitle">Wybierz transmisję.</strong>
+                <p data-i18n="boxes.emptyDescription">Po lewej znajdziesz transmisje, w których wykryto skrzyneczki.</p>
+              </div>
+
+              <section class="boxes-live-card boxes-session" id="boxesSession" hidden>
+                <div class="boxes-live-header boxes-session-header">
+                  <span class="boxes-live-icon" data-ui-icon="chest" aria-hidden="true"></span>
+                  <div>
+                    <h2 id="boxesSessionTitle" data-i18n="boxes.liveTitle">Skrzyneczki z transmisji</h2>
+                    <p id="boxesSessionMeta" data-i18n="boxes.liveDescription">Wybierz transmisję z listy, aby zobaczyć wykryte skrzyneczki.</p>
+                  </div>
+                </div>
+                <section class="boxes-live-summary" aria-label="Podsumowanie skrzyneczek">
+                  <article>
+                    <strong id="boxesSummaryCount">0</strong>
+                    <small data-i18n="boxes.summary.count">Skrzyneczki</small>
+                  </article>
+                  <article>
+                    <strong id="boxesSummaryCoins">0</strong>
+                    <small data-i18n="boxes.summary.coins">Monetki</small>
+                  </article>
+                  <article>
+                    <strong id="boxesSummaryPeople">0</strong>
+                    <small data-i18n="boxes.summary.people">Miejsca</small>
+                  </article>
+                </section>
+                <div class="boxes-list" id="boxesList" aria-live="polite"></div>
+              </section>
+            </section>
+          </section>
         </section>
 
         <section class="view-panel page-view" data-view="about" hidden>
@@ -586,34 +682,28 @@
           </article>
           <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
             <section class="about-section">
-              <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
-              <p data-i18n="about.news.intro">Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live'a.</p>
+              <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span> <span data-i18n="about.news.versionSuffix">AI</span>:</h2>
 
-              <h3 data-i18n="about.news.features.title">Główne funkcje:</h3>
-              <ul class="about-list">
-                <li data-i18n="about.news.features.achievements">dodano system osiągnięć, są widoczne w zakładce „Osiągnięcia”</li>
-                <li data-i18n="about.news.features.redeemCode">dodano zakładkę „Zrealizuj kod” w ustawieniach</li>
-                <li data-i18n="about.news.features.retroKb2">wygląd aplikacji: Retro KB2, który jest odciążoną wersją programu tzw. Lite</li>
-                <li data-i18n="about.news.features.desktopWidgetsRemoved">Usunięcie opcji widgetów na pulpicie i przypinania ich na wierzchu. Ta mechanika była mocno bugogenna i obciążała dodatkowo aplikacje, w połączeniu z cięższymi motywami spadała jakość używania mojego programu przez konsumentów ze słabszymi sprzętami. Nie to było moim celem, zależy mi na jakości, dlatego w obecnej wersji funkcja ta zostaje zawieszona.</li>
-                <li data-i18n="about.news.features.topTappers">dodany został nowy widget rankingu taperów.</li>
-              </ul>
+              <h3 data-i18n="about.news.statement.title">Oświadczenie:</h3>
+              <p data-i18n="about.news.statement.p1">Moi drodzy, obecna aktualizacja jest naprawdę potężna, że tak pozwolę sobie to ująć. Dotychczas wdrażałem wszystko to co miało większy lub mniejszy sens ale o co mnie prosiliście. Na wstępie zacznę od tego, że z kilku funkcji zrezygnowałem i już tłumaczę się bez bicia dlaczego? Pomysłem na program była chęć pomocy rozwoju wszystkim twórcom, i tym większym i tym mniejszym ale przede wszystkim ułatwienie moderacji w ich pracy, przy aktywniejszej społeczności, niestety pewne funkcje sprawiły, że program zamiast służyć i wspierać, stał się narzędziem do szpiegowania innych, ich zarobków i rankingów. Dla mnie to nie do pomyślenia, że coś co tworzę ma szkodzić, a nie pomagać, bo nigdy to nie było moją intencją, w tym też momencie od tej aktualizacji program faktycznie będzie pokazywać tylko statystyki twórcy, z którym jesteśmy połączeni, a wszelkie rankingi, czy przebiegi bitewek u przeciwnika zostają wycofane.</p>
+              <p data-i18n="about.news.statement.p2">Czy to już wszystko? Oczywiście, że nie. Nie mam w zwyczaju czegoś zabierać ale nie zostawić nic w zamian. Chociaż to modne w gamedevie i u twórców różnej maści aplikacji ja raz jeszcze podkreślę, że jestem jak wy, zwykłym użytkownikiem, moderatorem, odbiorcą twórców jak inni odbiorcy. W związku z tym, mówiąc szczerze... Dostaniemy coś, czego bałem się wdrażać, ze względu na drewniane komputery, wciąż funkcjonujące u wielu ludzi na starszych wersjach Windowsa jak 10 czy słabszym połączeniu internetowym ale... Jak to kilku testerów stwierdziło, tacy ludzie to mniejszość, a program powinien się rozwijać.</p>
+              <p data-i18n="about.news.statement.p3">Po namyśle jednak podjąłem tą decyzję i wszczepiłem w program AI, które pozwoli lepiej kontrolować czat i statystyki dla twórcy i moderacji. I od teraz daje nam możliwość lepszej personalizacji i przepływu informacji na czacie live. Jak działa program w połączeniu z AI? Po wprowadzeniu specjalnego kodu w ustawieniach → Zrealizuj kod odblokowuje nam się opcja AI. Wtedy program automatycznie zacznie pobierać Ollamę która zajmuje ponad 1 GB, a następnie ją zaktualizuje o kolejną podobną wartość GB. Tak wiem, dla ludzi z drewnianym internetem może to być problematyczne jednak jest to opcja dodatkowa, a sam program nadal może działać bez tego, jednak gdy zdecydujecie się na aktywację Czester ulegnie on diametralnym zmianom, i będzie wam służył z lepszą wygodą operacyjną. Jeżeli jesteście ciekawi zmian zapraszam do wprowadzenia kodu AI: 19BM 9ARV 9IN1 K4M4.</p>
 
-              <h3 data-i18n="about.news.fixes.title">Poprawki:</h3>
+              <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
               <ul class="about-list">
-                <li data-i18n="about.news.fixes.recentCreators">poprawiono działanie ostatnich twórców i przywrócono ich poprawne wyświetlanie poza Retro KB2</li>
-              </ul>
-
-              <h3 data-i18n="about.news.known.title">Znane błędy:</h3>
-              <ul class="about-list">
-                <li data-i18n="about.news.known.multiplier">mnożnik bitewek nadal pozostaje funkcją testową i może czasem błędnie pojawić się pod koniec bitwy</li>
+                <li data-i18n="about.news.changes.removeRanking">Usunięto ranking z funkcjonalności programu</li>
+                <li data-i18n="about.news.changes.ai">Wdrożono funkcjonalność AI</li>
+                <li data-i18n="about.news.changes.codes">Dodano nowe funkcje, które mają wspomóc live wzrastające. Można aktywować je kodem. Wystarczy się do mnie odezwać w prywatnej wiadomości.</li>
+                <li data-i18n="about.news.changes.multiplier">Poprawiono mnożnik bitewek, aczkolwiek nadal jest to funkcja do wytestowania.</li>
+                <li data-i18n="about.news.changes.optimization">Ogromna optymalizacja programu. Właściwie obciążenie zmniejszyło się o kilkanaście procent.</li>
+                <li data-i18n="about.news.changes.viceCity">Dodano nowy motyw do odblokowania - Vice City. Motyw jest dedykowany dla osób, które program testowały i miałem tego świadomość. To właściwie podziękowanie dla testerów za wsparcie i dobre słowo.</li>
               </ul>
 
               <h3 data-i18n="about.news.next.title">Co dalej:</h3>
               <ul class="about-list">
                 <li data-i18n="about.news.next.achievements">rozbudowa systemu osiągnięć</li>
-                <li data-i18n="about.news.next.redeemCodes">dodanie kolejnych kodów aktywacyjnych</li>
-                <li data-i18n="about.news.next.specialNotifications">dalsze porządkowanie funkcji specjalnych i powiadomień</li>
-                <li data-i18n="about.news.next.connection">optymalizacja stabilności połączenia z twórcą</li>
+                <li data-i18n="about.news.next.ai">Dodatkowe funkcje AI w programie.</li>
+                <li data-i18n="about.news.next.fixes">Poprawki nad funkcjonowaniem programu.</li>
               </ul>
             </section>
           </section>
@@ -675,6 +765,11 @@
         </section>
       </section>
     </main>
+
+    <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
+      <img src="./assets/czester-avatar.svg" alt="" aria-hidden="true">
+      <span class="czester-launcher-badge" aria-hidden="true"></span>
+    </button>
 
     <section class="first-run-language" id="firstRunLanguage" role="dialog" aria-modal="true" aria-labelledby="firstRunLanguageTitle" hidden>
       <div class="first-run-language-card">
