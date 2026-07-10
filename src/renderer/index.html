@@ -16,6 +16,14 @@
             <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
           </div>
         </div>
+        <aside class="radio-floating-player" id="radioFloatingPlayer" hidden aria-live="polite">
+          <span class="radio-floating-icon" aria-hidden="true">♫</span>
+          <span class="radio-floating-copy">
+            <strong id="radioFloatingName">Radio</strong>
+            <small id="radioFloatingStatus">Odtwarzanie</small>
+          </span>
+          <button class="radio-floating-toggle" id="radioFloatingToggle" type="button" aria-label="Pauza radia">Ⅱ</button>
+        </aside>
         <div class="creator-picker creator-combobox">
           <label for="creatorInput">Twórca</label>
           <span class="creator-input-wrap">
@@ -35,6 +43,7 @@
         <button class="sidebar-button" type="button" data-section="coins">Monetki</button>
         <button class="sidebar-button" type="button" data-section="boxes" data-i18n="nav.boxes" hidden>Skrzyneczki</button>
         <button class="sidebar-button" type="button" data-section="achievements">Osiągnięcia</button>
+        <button class="sidebar-button" type="button" data-section="radio" data-i18n="nav.radio">Radio</button>
         <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
         <button class="sidebar-button" type="button" data-section="about">O programie</button>
       </aside>
@@ -243,10 +252,6 @@
           <section class="settings-panel" data-settings-panel="general">
             <p class="page-note">Ogólne ustawienia aplikacji.</p>
             <div class="settings-list">
-              <label class="setting-row" for="multiplierNotifications">
-                <span>Powiadomienia o mnożnikach</span>
-                <input class="setting-toggle" type="checkbox" id="multiplierNotifications">
-              </label>
               <label class="setting-row" for="statsToolbox">
                 <span>Przybornik statystyk</span>
                 <input class="setting-toggle" type="checkbox" id="statsToolbox">
@@ -562,6 +567,37 @@
           <section class="achievements-list" id="achievementsList" aria-live="polite"></section>
         </section>
 
+        <section class="view-panel page-view radio-view" data-view="radio" hidden>
+          <div class="page-header">
+            <div>
+              <h1 data-i18n="radio.title">Radio</h1>
+              <p class="page-note" data-i18n="radio.note">Słuchaj wybranej stacji podczas pracy z czatem.</p>
+            </div>
+          </div>
+          <section class="radio-stations" aria-label="Stacje radiowe" data-i18n-aria-label="radio.aria">
+            <article class="radio-station-card">
+              <img src="./assets/radio-zet.jpg" alt="Radio ZET" loading="lazy" decoding="async">
+              <div class="radio-station-copy"><h2>Radio ZET</h2><p>Radio ZET online</p><audio controls preload="none" data-radio-audio data-radio-name="Radio ZET" data-radio-src="https://n-6-4.dcs.redcdn.pl/sc/o2/Eurozet/live/audio.livx" aria-label="Radio ZET"></audio></div>
+            </article>
+            <article class="radio-station-card">
+              <img src="./assets/rmf-fm.jpg" alt="RMF FM" loading="lazy" decoding="async">
+              <div class="radio-station-copy"><h2>RMF FM</h2><p>RMF FM online</p><audio controls preload="none" data-radio-audio data-radio-name="RMF FM" data-radio-src="https://rs6-krk2.rmfstream.pl/RMFFM48" aria-label="RMF FM"></audio></div>
+            </article>
+            <article class="radio-station-card">
+              <img src="./assets/radio-eska.jpg" alt="Radio Eska" loading="lazy" decoding="async">
+              <div class="radio-station-copy"><h2>Radio Eska</h2><p>Radio Eska online</p><audio controls preload="none" data-radio-audio data-radio-name="Radio Eska" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/2380-1.aac/playlist.m3u8" aria-label="Radio Eska"></audio></div>
+            </article>
+            <article class="radio-station-card">
+              <img src="./assets/eska-rock.jpg" alt="Eska Rock" loading="lazy" decoding="async">
+              <div class="radio-station-copy"><h2>Eska Rock</h2><p>Eska Rock online</p><audio controls preload="none" data-radio-audio data-radio-name="Eska Rock" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/5380-1.aac/playlist.m3u8" aria-label="Eska Rock"></audio></div>
+            </article>
+            <article class="radio-station-card">
+              <img src="./assets/eska2.jpg" alt="ESKA2" loading="lazy" decoding="async">
+              <div class="radio-station-copy"><h2>ESKA2</h2><p>ESKA2 online</p><audio controls preload="none" data-radio-audio data-radio-name="ESKA2" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/1380-1.aac/playlist.m3u8" aria-label="ESKA2"></audio></div>
+            </article>
+          </section>
+        </section>
+
         <section class="view-panel page-view coins-view" data-view="coins" hidden>
           <div class="page-header">
             <div>
@@ -647,119 +683,156 @@
             <button class="settings-tab" type="button" role="tab" data-about-tab="program" data-active="true" aria-selected="true" aria-controls="aboutProgramPanel">O programie</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="news" aria-selected="false" aria-controls="aboutNewsPanel">Co nowego?</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="faq" aria-selected="false" aria-controls="aboutFaqPanel">FAQ</button>
+            <button class="settings-tab about-author-tab" type="button" role="tab" data-about-tab="author" aria-selected="false" aria-controls="aboutAuthorPanel" hidden>Autor</button>
           </div>
           <article class="about-content about-panel" id="aboutProgramPanel" role="tabpanel" data-about-panel="program">
-            <p>
-              Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić
-              wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą
-              o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.
-            </p>
-            <p>
-              Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w
-              uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować
-              typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.
-            </p>
+            <div class="about-faq-layout">
+              <figure class="about-faq-media" aria-hidden="true">
+                <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
+              </figure>
+              <div class="about-faq-copy">
+                <p>
+                  Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić
+                  wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą
+                  o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.
+                </p>
+                <p>
+                  Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w
+                  uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować
+                  typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.
+                </p>
 
-            <section class="about-section">
-              <h2>Jak działa program:</h2>
-              <p>
-                Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta,
-                aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany
-                w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.
-              </p>
-              <p>
-                Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić
-                przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia,
-                mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu,
-                motyw lub opóźnienie.
-              </p>
-              <p>
-                Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po
-                zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do
-                wcześniejszych rozmów.
-              </p>
-            </section>
+                <section class="about-section">
+                  <h2>Jak działa program:</h2>
+                  <p>
+                    Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta,
+                    aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany
+                    w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.
+                  </p>
+                  <p>
+                    Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić
+                    przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia,
+                    mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu,
+                    motyw lub opóźnienie.
+                  </p>
+                  <p>
+                    Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po
+                    zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do
+                    wcześniejszych rozmów.
+                  </p>
+                </section>
+              </div>
+            </div>
           </article>
           <section class="about-content about-panel" id="aboutNewsPanel" role="tabpanel" data-about-panel="news" hidden>
             <section class="about-section">
-              <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span> <span data-i18n="about.news.versionSuffix">AI</span>:</h2>
+              <div class="about-faq-layout">
+                <figure class="about-faq-media" aria-hidden="true">
+                  <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
+                </figure>
+                <div class="about-faq-copy">
+                  <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
 
-              <h3 data-i18n="about.news.statement.title">Oświadczenie:</h3>
-              <p data-i18n="about.news.statement.p1">Moi drodzy, obecna aktualizacja jest naprawdę potężna, że tak pozwolę sobie to ująć. Dotychczas wdrażałem wszystko to co miało większy lub mniejszy sens ale o co mnie prosiliście. Na wstępie zacznę od tego, że z kilku funkcji zrezygnowałem i już tłumaczę się bez bicia dlaczego? Pomysłem na program była chęć pomocy rozwoju wszystkim twórcom, i tym większym i tym mniejszym ale przede wszystkim ułatwienie moderacji w ich pracy, przy aktywniejszej społeczności, niestety pewne funkcje sprawiły, że program zamiast służyć i wspierać, stał się narzędziem do szpiegowania innych, ich zarobków i rankingów. Dla mnie to nie do pomyślenia, że coś co tworzę ma szkodzić, a nie pomagać, bo nigdy to nie było moją intencją, w tym też momencie od tej aktualizacji program faktycznie będzie pokazywać tylko statystyki twórcy, z którym jesteśmy połączeni, a wszelkie rankingi, czy przebiegi bitewek u przeciwnika zostają wycofane.</p>
-              <p data-i18n="about.news.statement.p2">Czy to już wszystko? Oczywiście, że nie. Nie mam w zwyczaju czegoś zabierać ale nie zostawić nic w zamian. Chociaż to modne w gamedevie i u twórców różnej maści aplikacji ja raz jeszcze podkreślę, że jestem jak wy, zwykłym użytkownikiem, moderatorem, odbiorcą twórców jak inni odbiorcy. W związku z tym, mówiąc szczerze... Dostaniemy coś, czego bałem się wdrażać, ze względu na drewniane komputery, wciąż funkcjonujące u wielu ludzi na starszych wersjach Windowsa jak 10 czy słabszym połączeniu internetowym ale... Jak to kilku testerów stwierdziło, tacy ludzie to mniejszość, a program powinien się rozwijać.</p>
-              <p data-i18n="about.news.statement.p3">Po namyśle jednak podjąłem tą decyzję i wszczepiłem w program AI, które pozwoli lepiej kontrolować czat i statystyki dla twórcy i moderacji. I od teraz daje nam możliwość lepszej personalizacji i przepływu informacji na czacie live. Jak działa program w połączeniu z AI? Po wprowadzeniu specjalnego kodu w ustawieniach → Zrealizuj kod odblokowuje nam się opcja AI. Wtedy program automatycznie zacznie pobierać Ollamę która zajmuje ponad 1 GB, a następnie ją zaktualizuje o kolejną podobną wartość GB. Tak wiem, dla ludzi z drewnianym internetem może to być problematyczne jednak jest to opcja dodatkowa, a sam program nadal może działać bez tego, jednak gdy zdecydujecie się na aktywację Czester ulegnie on diametralnym zmianom, i będzie wam służył z lepszą wygodą operacyjną. Jeżeli jesteście ciekawi zmian zapraszam do wprowadzenia kodu AI: 19BM 9ARV 9IN1 K4M4.</p>
+                  <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
+                  <ul class="about-list">
+                    <li data-i18n="about.news.changes.removeRanking">System odczytu wrzucanych skrzyneczek na transmisji live - opcja wsparcia dla live wzrastających.</li>
+                    <li data-i18n="about.news.changes.ai">Optymalizacja menu - kilka funkcji ciągle się odświeżało, powodując po czasie wolniejsze działanie programu.</li>
+                    <li data-i18n="about.news.changes.codes">Odświeżona zakładka O programie.</li>
+                    <li data-i18n="about.news.changes.multiplier">Poprawione błędy w wyglądzie aplikacji Retro KB2.</li>
+                    <li data-i18n="about.news.changes.radio">Dodano radio.</li>
+                  </ul>
 
-              <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
-              <ul class="about-list">
-                <li data-i18n="about.news.changes.removeRanking">Usunięto ranking z funkcjonalności programu</li>
-                <li data-i18n="about.news.changes.ai">Wdrożono funkcjonalność AI</li>
-                <li data-i18n="about.news.changes.codes">Dodano nowe funkcje, które mają wspomóc live wzrastające. Można aktywować je kodem. Wystarczy się do mnie odezwać w prywatnej wiadomości.</li>
-                <li data-i18n="about.news.changes.multiplier">Poprawiono mnożnik bitewek, aczkolwiek nadal jest to funkcja do wytestowania.</li>
-                <li data-i18n="about.news.changes.optimization">Ogromna optymalizacja programu. Właściwie obciążenie zmniejszyło się o kilkanaście procent.</li>
-                <li data-i18n="about.news.changes.viceCity">Dodano nowy motyw do odblokowania - Vice City. Motyw jest dedykowany dla osób, które program testowały i miałem tego świadomość. To właściwie podziękowanie dla testerów za wsparcie i dobre słowo.</li>
-              </ul>
-
-              <h3 data-i18n="about.news.next.title">Co dalej:</h3>
-              <ul class="about-list">
-                <li data-i18n="about.news.next.achievements">rozbudowa systemu osiągnięć</li>
-                <li data-i18n="about.news.next.ai">Dodatkowe funkcje AI w programie.</li>
-                <li data-i18n="about.news.next.fixes">Poprawki nad funkcjonowaniem programu.</li>
-              </ul>
+                  <h3 data-i18n="about.news.next.title">Co dalej:</h3>
+                  <ul class="about-list">
+                    <li data-i18n="about.news.next.achievements">Rozbudowa osiągnięć.</li>
+                    <li data-i18n="about.news.next.ai">Dodatkowe funkcje AI w programie.</li>
+                    <li data-i18n="about.news.next.fixes">Dźwięki dla giftów od xxx wartości monet.</li>
+                  </ul>
+                </div>
+              </div>
             </section>
           </section>
           <section class="about-content about-panel" id="aboutFaqPanel" role="tabpanel" data-about-panel="faq" hidden>
             <section class="about-section about-faq">
-              <h2 data-i18n="about.faq.title">FAQ</h2>
+              <div class="about-faq-layout">
+                <figure class="about-faq-media" aria-hidden="true">
+                  <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
+                </figure>
+                <div class="about-faq-copy">
+                  <h2 data-i18n="about.faq.title">FAQ</h2>
 
-              <h3 data-i18n="about.faq.idea.question">Skąd pomysł na aplikację?</h3>
-              <p data-i18n="about.faq.idea.answer">
-                Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują
-                lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie
-                do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest
-                dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna
-                aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość
-                dla każdego.
-              </p>
+                  <h3 data-i18n="about.faq.idea.question">Skąd pomysł na aplikację?</h3>
+                  <p data-i18n="about.faq.idea.answer">
+                    Głównie ze względu na pobugowany czat Tiktoka, który wrzuca wszystko na raz i treści szybko
+                    znikają. Na pomysł wpadłem podczas moderowania czatu u Kamy (@teambibii), którą serdecznie
+                    pozdrawiam.
+                  </p>
 
-              <h3 data-i18n="about.faq.systems.question">Czy powstanie wersja na inne systemy niż Windows?</h3>
-              <p data-i18n="about.faq.systems.answer">
-                Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego
-                systemu.
-              </p>
+                  <h3 data-i18n="about.faq.systems.question">Program jest tylko na Windowsa?</h3>
+                  <p data-i18n="about.faq.systems.answer">
+                    Tak. Program jest tylko na system Windows, nie planuję go rozszerzać na inne platformy czy
+                    systemy - kwestia kosztów. Nie pobieram za niego opłat, a zawiera wiele funkcji, które w innych
+                    programach są płatne dlatego radujmy się, że wgl. na coś powstał...
+                  </p>
 
-              <h3 data-i18n="about.faq.mobile.question">Co z iOS, android itd.?</h3>
-              <p data-i18n="about.faq.mobile.answer">
-                Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować
-                coś pod coś, z czym nie mam doczynienia.
-              </p>
+                  <h3 data-i18n="about.faq.support.question">Czy mogę ciebie jakoś wesprzeć?</h3>
+                  <p data-i18n="about.faq.support.answer">
+                    Powiedziałbym, że możesz mi postawić jakąś okrutną pizzę margaritę albo energola ale nie
+                    potrzebuję wsparcia. Jak chcesz się odwdzięczyć, to kliknij w zakładkę Monetki i użyj mojego
+                    reflinka.
+                  </p>
 
-              <h3 data-i18n="about.faq.appearance.question">Wygląd programu, czy będą aktualizacje?</h3>
-              <p data-i18n="about.faq.appearance.answer">
-                Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na
-                kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie,
-                wybierzcie to co wam odpowiada najlepiej.
-              </p>
+                  <h3 data-i18n="about.faq.future.question">Czy planuje rozwijać dalej projekt?</h3>
+                  <p data-i18n="about.faq.future.answer">
+                    Kropla drąży skałę, a czas wszystko pokaże. Nie żyjmy tym co było wczoraj, żyjmy tym co będzie
+                    jutro, a jutro jest już dzisiaj. Jej, jak enigmatycznie wyszło...
+                  </p>
 
-              <h3 data-i18n="about.faq.support.question">Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?</h3>
-              <p data-i18n="about.faq.support.answer">
-                Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun,
-                wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na
-                już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.
-              </p>
+                  <h3 data-i18n="about.faq.codes.question">Skąd wziąć kody do Zrealizuj kod?</h3>
+                  <p data-i18n="about.faq.codes.answer">
+                    Zazwyczaj kody skrywają ukryte funkcje dla testerów bądź jakiś drobny prezent za wsparcie.
+                    Oficjalnie jest dostępny jeden, publiczny kod, który pobiera mózg Czestera, by był w stanie
+                    analizować co dzieje się na czacie: 19BM 9ARV 9IN1 K4M4. Powiedźmy, ze mam dobry humor, a rzadko
+                    mam zły, to łapcie coś, co przyda się na live wzrastające, nie ma za co: 1THU 3GS6 TO7O L6S2.
+                    Jak pojawią się w przyszłości jakieś kody, to pewnie będą to nagrody dla aktywnych członków
+                    społeczności Kamy, dlatego warto ją obserwować i wspierać.
+                  </p>
 
-              <h3 data-i18n="about.faq.features.question">Mam pomysł na nowe funkcje!</h3>
-              <p data-i18n="about.faq.features.answer">
-                I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na
-                discord pw (inavoxy).
-              </p>
-
-              <h3 data-i18n="about.faq.future.question">Czy planuję rozwijać projekt dalej?</h3>
-              <p data-i18n="about.faq.future.answer">
-                Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy
-                aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego
-                projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję
-                również każdemu za obecne pomysły, zainteresowanie i słowa wsparcia.
-              </p>
+                  <h3 data-i18n="about.faq.magic.question">A jest jakiś tajny, magiczny kod?</h3>
+                  <p data-i18n="about.faq.magic.answer">
+                    Hm… Jak chcesz mnie lepiej poznać, to łapaj BOCI 4NEK ANT0 SIEK. Tylko potem mi nie narzekaj...
+                    Ostrzegam, ze jestem nudnym człowiekiem.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </section>
+          <section class="about-content about-panel" id="aboutAuthorPanel" role="tabpanel" data-about-panel="author" hidden>
+            <section class="about-section about-author">
+              <figure class="about-author-media" aria-hidden="true">
+                <img src="./assets/baksel-tlo.png" alt="" loading="lazy" decoding="async">
+              </figure>
+              <div class="about-author-copy">
+                <p class="about-author-intro">
+                  Ogólnie nie lubię jakiejś opisówy o sobie robić, to zróbmy to na zasadzie powiem co tam lubię czy coś... Będzie mi łatwiej was zanudzić, skoro się zdecydowaliście to już sprawdzić...
+                </p>
+                <dl class="about-author-facts">
+                  <div><dt>Ulubiony kolor:</dt><dd>Fiolet, niebieski, czerń, biel</dd></div>
+                  <div><dt>Ulubiona piosenka:</dt><dd>Małpa - Budzę Się (prod. Magiera)</dd></div>
+                  <div><dt>Ulubiony kompozytor:</dt><dd>Kai Rosenkranz</dd></div>
+                  <div><dt>Ulubiona gra:</dt><dd>Seria Gothic i Wiedźmin</dd></div>
+                  <div><dt>Ulubiony film:</dt><dd>Wszystkie Ironmany od Marvela, Gladiator</dd></div>
+                  <div><dt>Ulubiona postać z gier:</dt><dd>Gaunter O'dim</dd></div>
+                  <div><dt>Ulubione anime:</dt><dd>Berserk, Bleach, Naruto</dd></div>
+                  <div><dt>Ulubiona postać z anime:</dt><dd>Jiraiya z naruto i Shunsui Kyōraku z Bleach</dd></div>
+                  <div class="about-author-break"><dt>Nie lubię kolorów:</dt><dd>Czerwonych odcieni, denerwują mnie i stresują</dd></div>
+                  <div><dt>Denerwują mnie zachowania:</dt><dd>Gdy ktoś próbuje mnie naśladować lub gdy ktoś wytyka mi błąd, mimo że popełnia ten sam</dd></div>
+                  <div><dt>Bywam:</dt><dd>Sarkastyczny i dokuczliwy, nie odbieraj tego personalnie.</dd></div>
+                  <div><dt>Irytują mnie:</dt><dd>Kubki po fusiastej kawie w zlewie, jedzenie w łóżku, jak ktoś ma słomę w butach, a kreuje się na człowieka sukcesu.</dd></div>
+                  <div><dt>Zawsze chciałem:</dt><dd>Mieszkać w górach, kocham góry.</dd></div>
+                  <div><dt>Zbieram:</dt><dd>Figurki i karty Pokemon (jeden z albumów ma wartość 1k euro).</dd></div>
+                </dl>
+              </div>
             </section>
           </section>
         </section>
@@ -770,6 +843,7 @@
       <img src="./assets/czester-avatar.svg" alt="" aria-hidden="true">
       <span class="czester-launcher-badge" aria-hidden="true"></span>
     </button>
+
 
     <section class="first-run-language" id="firstRunLanguage" role="dialog" aria-modal="true" aria-labelledby="firstRunLanguageTitle" hidden>
       <div class="first-run-language-card">
@@ -783,6 +857,7 @@
       </div>
     </section>
 
+    <script src="./vendor/hls.min.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

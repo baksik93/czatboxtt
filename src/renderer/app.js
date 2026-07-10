@@ -39,6 +39,7 @@ const HONDA_REDEEM_CODE = '10FDBF47H0NDA250';
 const OLLAMA_REDEEM_CODE = '19BM9ARV9IN1K4M4';
 const BOXES_REDEEM_CODE = '1THU3GS6TO7OL6S2';
 const MIAMI_VICE_REDEEM_CODE = 'LEAVEME0ALONE173';
+const AUTHOR_REDEEM_CODE = 'BOCI4NEKANT0SIEK';
 const OLLAMA_PROMPT_DECLINED_KEY = 'czatbox.czester.ollamaPromptDeclined';
 const CZESTER_AVATAR_SRC = './assets/czester-avatar.svg';
 const CZESTER_USER_AVATAR_KEY = 'czatbox.czester.userAvatar';
@@ -52,7 +53,9 @@ const CZESTER_QUESTIONS_WINDOW_MS = 5 * 60 * 1000;
 const CZESTER_LIVE_ANALYSIS_MIN_MESSAGES = 8;
 const CZESTER_LIVE_ANALYSIS_MAX_BUFFER = 600;
 const CZESTER_ARCHIVE_INDEX_BATCH_LIMIT = 10;
+const CZESTER_MAX_MESSAGES = 120;
 const BOXES_ARCHIVE_REFRESH_DEBOUNCE_MS = 2500;
+const SECTION_AUTO_REFRESH_COOLDOWN_MS = 15 * 1000;
 const CZESTER_VIEWER_PROFILE_LIMIT = 500;
 const KAMA_CREATOR_HANDLE = 'teambibii';
 const ACHIEVEMENT_DEFINITIONS = [
@@ -170,6 +173,7 @@ const I18N = {
     'nav.achievements': 'Osiągnięcia',
     'nav.coins': 'Monetki',
     'nav.boxes': 'Skrzyneczki',
+    'nav.radio': 'Radio',
     'nav.czester': 'Asystent Czester',
     'nav.about': 'O programie',
     'creator.label': 'Twórca',
@@ -222,6 +226,7 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Kod przyjęty. Zakładka Skrzyneczki jest aktywna.',
     'settings.redeem.unlockedMiamiVice': 'Kod przyjęty. Motyw Miami Vice jest aktywny w ustawieniach wyglądu.',
+    'settings.redeem.unlockedAuthor': 'Kod przyjęty. Zakładka Autor jest aktywna.',
     'czester.title': 'Asystent Czester',
     'czester.note.before': 'Dzień dobry! Jestem Czester i spróbuję rozwiązać twój problem z tik tok. Pamiętaj, że dopiero ',
     'czester.note.learning': 'uczę się',
@@ -378,6 +383,10 @@ const I18N = {
     'about.tabs.program': 'O programie',
     'about.tabs.news': 'Co nowego?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.author': 'Autor',
+    'radio.title': 'Radio',
+    'radio.note': 'Słuchaj wybranej stacji podczas pracy z czatem.',
+    'radio.aria': 'Stacje radiowe',
     'about.tabs.aria': 'Zakładki o programie',
     'about.program.p1': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.',
     'about.program.p2': 'Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.',
@@ -386,18 +395,19 @@ const I18N = {
     'about.program.how.p2': 'Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia, mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu, motyw lub opóźnienie.',
     'about.program.how.p3': 'Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do wcześniejszych rozmów.',
     'about.news.version': 'Wersja programu',
-    'about.news.versionSuffix': 'AI',
+    'about.news.versionSuffix': '',
     'about.news.statement.title': 'Oświadczenie:',
     'about.news.statement.p1': `Moi drodzy, obecna aktualizacja jest naprawdę potężna, że tak pozwolę sobie to ująć. Dotychczas wdrażałem wszystko to co miało większy lub mniejszy sens ale o co mnie prosiliście. Na wstępie zacznę od tego, że z kilku funkcji zrezygnowałem i już tłumaczę się bez bicia dlaczego? Pomysłem na program była chęć pomocy rozwoju wszystkim twórcom, i tym większym i tym mniejszym ale przede wszystkim ułatwienie moderacji w ich pracy, przy aktywniejszej społeczności, niestety pewne funkcje sprawiły, że program zamiast służyć i wspierać, stał się narzędziem do szpiegowania innych, ich zarobków i rankingów. Dla mnie to nie do pomyślenia, że coś co tworzę ma szkodzić, a nie pomagać, bo nigdy to nie było moją intencją, w tym też momencie od tej aktualizacji program faktycznie będzie pokazywać tylko statystyki twórcy, z którym jesteśmy połączeni, a wszelkie rankingi, czy przebiegi bitewek u przeciwnika zostają wycofane.`,
     'about.news.statement.p2': `Czy to już wszystko? Oczywiście, że nie. Nie mam w zwyczaju czegoś zabierać ale nie zostawić nic w zamian. Chociaż to modne w gamedevie i u twórców różnej maści aplikacji ja raz jeszcze podkreślę, że jestem jak wy, zwykłym użytkownikiem, moderatorem, odbiorcą twórców jak inni odbiorcy. W związku z tym, mówiąc szczerze... Dostaniemy coś, czego bałem się wdrażać, ze względu na drewniane komputery, wciąż funkcjonujące u wielu ludzi na starszych wersjach Windowsa jak 10 czy słabszym połączeniu internetowym ale... Jak to kilku testerów stwierdziło, tacy ludzie to mniejszość, a program powinien się rozwijać.`,
     'about.news.statement.p3': `Po namyśle jednak podjąłem tą decyzję i wszczepiłem w program AI, które pozwoli lepiej kontrolować czat i statystyki dla twórcy i moderacji. I od teraz daje nam możliwość lepszej personalizacji i przepływu informacji na czacie live. Jak działa program w połączeniu z AI? Po wprowadzeniu specjalnego kodu w ustawieniach → Zrealizuj kod odblokowuje nam się opcja AI. Wtedy program automatycznie zacznie pobierać Ollamę która zajmuje ponad 1 GB, a następnie ją zaktualizuje o kolejną podobną wartość GB. Tak wiem, dla ludzi z drewnianym internetem może to być problematyczne jednak jest to opcja dodatkowa, a sam program nadal może działać bez tego, jednak gdy zdecydujecie się na aktywację Czester ulegnie on diametralnym zmianom, i będzie wam służył z lepszą wygodą operacyjną. Jeżeli jesteście ciekawi zmian zapraszam do wprowadzenia kodu AI: 19BM 9ARV 9IN1 K4M4.`,
     'about.news.changes.title': 'Zmiany:',
-    'about.news.changes.removeRanking': 'Usunięto ranking z funkcjonalności programu',
-    'about.news.changes.ai': 'Wdrożono funkcjonalność AI',
-    'about.news.changes.codes': 'Dodano nowe funkcje, które mają wspomóc live wzrastające. Można aktywować je kodem. Wystarczy się do mnie odezwać w prywatnej wiadomości.',
-    'about.news.changes.multiplier': 'Poprawiono mnożnik bitewek, aczkolwiek nadal jest to funkcja do wytestowania.',
-    'about.news.changes.optimization': 'Ogromna optymalizacja programu. Właściwie obciążenie zmniejszyło się o kilkanaście procent.',
-    'about.news.changes.viceCity': 'Dodano nowy motyw do odblokowania - Vice City. Motyw jest dedykowany dla osób, które program testowały i miałem tego świadomość. To właściwie podziękowanie dla testerów za wsparcie i dobre słowo.',
+    'about.news.changes.removeRanking': 'System odczytu wrzucanych skrzyneczek na transmisji live - opcja wsparcia dla live wzrastających.',
+    'about.news.changes.ai': 'Optymalizacja menu - kilka funkcji ciągle się odświeżało, powodując po czasie wolniejsze działanie programu.',
+    'about.news.changes.codes': 'Odświeżona zakładka O programie.',
+    'about.news.changes.multiplier': 'Poprawione błędy w wyglądzie aplikacji Retro KB2.',
+    'about.news.changes.optimization': '',
+    'about.news.changes.radio': 'Dodano radio.',
+    'about.news.changes.viceCity': '',
     'about.news.next.ai': 'Dodatkowe funkcje AI w programie.',
     'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
@@ -432,30 +442,28 @@ const I18N = {
     'about.news.known.enigmaPerformance': 'Wygląd Motyw: Enigma-Z i wygląd aplikacji: ozdobny zamulają aplikację na słabszych sprzętach, niestety na chwilę obecną nie jestem w stanie tego rozwiązać ponieważ działa to na półprzezroczystych powierzchniach zgodnie z założeniem i wymaga nieco więcej mocy od twojego PC, na te konto masz wiele innych opcji wizualnych aplikacji, które śmigają na słabszych komputerach',
     'about.news.next.title': 'Co dalej:',
     'about.news.next.archive': 'Poprawki nad odczytem archiwizowanych czatów. Będąc szczerym jestem niezadowolony z obecnej wersji i potrzebuje ona przebudowy.',
-    'about.news.next.fixes': 'Poprawki pomniejszych błędów',
+    'about.news.next.fixes': 'Dźwięki dla giftów od xxx wartości monet.',
     'about.news.next.widgets': 'rozbudowa systemu widgetów',
     'about.news.next.ttsLanguages': '',
     'about.news.next.superFans': 'wyróżnienie super fanów na czacie',
-    'about.news.next.achievements': 'rozbudowa systemu osiągnięć',
+    'about.news.next.achievements': 'Rozbudowa osiągnięć.',
     'about.news.next.redeemCodes': 'dodanie kolejnych kodów aktywacyjnych',
     'about.news.next.specialNotifications': 'dalsze porządkowanie funkcji specjalnych i powiadomień',
     'about.news.next.connection': 'optymalizacja stabilności połączenia z twórcą',
     'about.news.next.giftSounds': 'powiadomienia dźwiękowe dla większych prezentów',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Skąd pomysł na aplikację?',
-    'about.faq.idea.answer': 'Właściwie program powstał po to by nadążyć za czatem gdy szybko leci i wiadomości przeskakują lub się nie pojawiają u jednej osoby, a u drugiej już tak. Dodatkowo chciałem stworzyć narzędzie do tiktok, które nieco ułatwi prowadzenie live. Dla osób streamujących na innych platformach jest dużo wtyczek do programów typu OBS, natomiast tik tok jest dość ubogi. Jest co prawda jedna aplikacja, która czyta wiadomości ale trzeba za nią zapłacić, a ja chciałem dać równą możliwość dla każdego.',
-    'about.faq.systems.question': 'Czy powstanie wersja na inne systemy niż Windows?',
-    'about.faq.systems.answer': 'Obecnie planuję rozwijać tylko tą wersję. Program powstał pod windowsa, ponieważ używam tego systemu.',
-    'about.faq.mobile.question': 'Co z iOS, android itd.?',
-    'about.faq.mobile.answer': 'Szczerze? Nie wiem... to bardzo odległy temat, nie posiadam iMac, więc ciężko byłoby mi zbudować coś pod coś, z czym nie mam doczynienia.',
-    'about.faq.appearance.question': 'Wygląd programu, czy będą aktualizacje?',
-    'about.faq.appearance.answer': 'Myślę, że coś z czasem się pojawi, obecnie mamy trzy opcje modyfikowania wyglądu, z podziałem na kilka sekwencji. Jest to dość sporo i każdy znajdzie coś dla siebie. Pobawcie się i potestujcie, wybierzcie to co wam odpowiada najlepiej.',
-    'about.faq.support.question': 'Czy mogę ciebie jakoś wesprzeć finansowo w rozwoju projektu?',
-    'about.faq.support.answer': 'Jak mam być szczery kilka osób już proponowało ale... Na chwilę obecną grzebie sobie w tym for fun, wolną chwilą na czilku, jeżeli w grę weszły by pieniążki, czułbym presję robienia wszystkiego na już. Być może pojawi się w przyszłości opcja dobrowolnej dotacji ale... Pożyjemy, zobaczymy.',
-    'about.faq.features.question': 'Mam pomysł na nowe funkcje!',
-    'about.faq.features.answer': 'I cieszy mnie to niezmiernie! Serdecznie zapraszam do kontaktu na tiktok pw (Baksik.03) lub na discord pw (inavoxy).',
-    'about.faq.future.question': 'Czy planuję rozwijać projekt dalej?',
-    'about.faq.future.answer': 'Oczywiście, że tak. Wszelkie pomysły będę zapisywać w drugiej zakładce, podobnie jak opisy aktualizacji. Nie mniej jednak chciałem podziękować dla Kamy, bez której nie siadłbym do tego projektu. To jej paplanie do czatu i jego aktywność zmobilizowały mnie do działania. Dziękuję również każdemu za obecne pomysły, zainteresowanie i słowa wsparcia.',
+    'about.faq.idea.answer': 'Głównie ze względu na pobugowany czat Tiktoka, który wrzuca wszystko na raz i treści szybko znikają. Na pomysł wpadłem podczas moderowania czatu u Kamy (@teambibii), którą serdecznie pozdrawiam.',
+    'about.faq.systems.question': 'Program jest tylko na Windowsa?',
+    'about.faq.systems.answer': 'Tak. Program jest tylko na system Windows, nie planuję go rozszerzać na inne platformy czy systemy - kwestia kosztów. Nie pobieram za niego opłat, a zawiera wiele funkcji, które w innych programach są płatne dlatego radujmy się, że wgl. na coś powstał...',
+    'about.faq.support.question': 'Czy mogę ciebie jakoś wesprzeć?',
+    'about.faq.support.answer': 'Powiedziałbym, że możesz mi postawić jakąś okrutną pizzę margaritę albo energola ale nie potrzebuję wsparcia. Jak chcesz się odwdzięczyć, to kliknij w zakładkę Monetki i użyj mojego reflinka.',
+    'about.faq.future.question': 'Czy planuje rozwijać dalej projekt?',
+    'about.faq.future.answer': 'Kropla drąży skałę, a czas wszystko pokaże. Nie żyjmy tym co było wczoraj, żyjmy tym co będzie jutro, a jutro jest już dzisiaj. Jej, jak enigmatycznie wyszło...',
+    'about.faq.codes.question': 'Skąd wziąć kody do Zrealizuj kod?',
+    'about.faq.codes.answer': 'Zazwyczaj kody skrywają ukryte funkcje dla testerów bądź jakiś drobny prezent za wsparcie. Oficjalnie jest dostępny jeden, publiczny kod, który pobiera mózg Czestera, by był w stanie analizować co dzieje się na czacie: 19BM 9ARV 9IN1 K4M4. Powiedźmy, ze mam dobry humor, a rzadko mam zły, to łapcie coś, co przyda się na live wzrastające, nie ma za co: 1THU 3GS6 TO7O L6S2. Jak pojawią się w przyszłości jakieś kody, to pewnie będą to nagrody dla aktywnych członków społeczności Kamy, dlatego warto ją obserwować i wspierać.',
+    'about.faq.magic.question': 'A jest jakiś tajny, magiczny kod?',
+    'about.faq.magic.answer': 'Hm… Jak chcesz mnie lepiej poznać, to łapaj BOCI 4NEK ANT0 SIEK. Tylko potem mi nie narzekaj... Ostrzegam, ze jestem nudnym człowiekiem.',
     'statsWidget.title': 'Statystyki LIVE',
     'statsWidget.viewers': 'Osoby na czacie',
     'statsWidget.messages': 'Wysłane wiadomości',
@@ -557,6 +565,7 @@ const I18N = {
     'nav.achievements': 'Achievements',
     'nav.coins': 'Coins',
     'nav.boxes': 'Boxes',
+    'nav.radio': 'Radio',
     'nav.czester': 'Assistant Czester',
     'nav.about': 'About',
     'creator.label': 'Creator',
@@ -609,6 +618,7 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Code accepted. The Boxes tab is active.',
     'settings.redeem.unlockedMiamiVice': 'Code accepted. The Miami Vice theme is active in appearance settings.',
+    'settings.redeem.unlockedAuthor': 'Code accepted. The Author tab is active.',
     'czester.title': 'Assistant Czester',
     'czester.note.before': 'Good day! I am Czester and I will try to solve your TikTok problem. Remember that I am still ',
     'czester.note.learning': 'learning',
@@ -765,6 +775,10 @@ const I18N = {
     'about.tabs.program': 'About',
     'about.tabs.news': 'What’s new?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.author': 'Author',
+    'radio.title': 'Radio',
+    'radio.note': 'Listen to a selected station while working with the chat.',
+    'radio.aria': 'Radio stations',
     'about.tabs.aria': 'About application tabs',
     'about.program.p1': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.program.p2': 'After logging in to TikTok, the program reads chat from the selected LIVE creator and displays it in an organized form. You can switch between supported creators, filter event types and adjust the application look to your preferences.',
@@ -773,18 +787,19 @@ const I18N = {
     'about.program.how.p2': 'Chat messages can be shown with a configured delay, making them easier to follow during active streams. Other events, such as gifts, joins and likes, can appear live. You can change the filter, chat style, theme or delay at any time.',
     'about.program.how.p3': 'While the program is running, all stream events are saved to the archive. After ending or changing a stream, you can open the archive tab and return to earlier conversations.',
     'about.news.version': 'Program version',
-    'about.news.versionSuffix': 'AI',
+    'about.news.versionSuffix': '',
     'about.news.statement.title': 'Statement:',
     'about.news.statement.p1': `This update is a major one. Until now I have been adding features that made more or less sense, but were requested by users. I want to start by saying that I have removed some features, and I want to explain why. The idea behind this program was to help creators grow, both larger and smaller ones, and above all to make moderation easier when the community is active. Unfortunately, some features made the program feel less like support and more like a tool for spying on other creators, their income and rankings. That was never my intention. From this update onward, the program will show only the statistics of the creator you are connected to, while rankings and opponent battle tracking are being withdrawn.`,
     'about.news.statement.p2': `Is that all? No. I do not like taking something away without leaving something useful in return. I am a regular user, moderator and viewer like many others. After thinking it through, I decided to add something I had been afraid to introduce because many people still use weaker computers, older Windows versions such as Windows 10, or slower internet connections. Still, several testers made a fair point: the program should keep developing.`,
     'about.news.statement.p3': `After considering it, I embedded AI into the program. It can help control chat and creator/moderation statistics better, and it gives more personalization and better information flow during LIVE chat. How does it work? After entering a special code in Settings → Redeem code, the AI option unlocks. The program can then download Ollama, which takes over 1 GB, and then update it by a similar amount. This is optional. The program can still work without it, but after activation Czester changes significantly and becomes more useful operationally. If you want to try it, enter the AI code: 19BM 9ARV 9IN1 K4M4.`,
     'about.news.changes.title': 'Changes:',
-    'about.news.changes.removeRanking': 'Removed ranking from the program functionality',
-    'about.news.changes.ai': 'Added AI functionality',
-    'about.news.changes.codes': 'Added new features intended to support growing LIVE streams. They can be activated with codes. Contact me privately to get them.',
-    'about.news.changes.multiplier': 'Improved the battle multiplier, although it still needs testing.',
-    'about.news.changes.optimization': 'Major application optimization. The load has been reduced by over a dozen percent.',
-    'about.news.changes.viceCity': 'Added a new unlockable theme - Vice City. The theme is dedicated to testers as a thank-you for support and good feedback.',
+    'about.news.changes.removeRanking': 'Added reading of treasure boxes sent during LIVE streams - support for growing LIVE rooms.',
+    'about.news.changes.ai': 'Optimized the menu - several functions were refreshing constantly and made the program slower over time.',
+    'about.news.changes.codes': 'Refreshed the About section.',
+    'about.news.changes.multiplier': 'Fixed bugs in the Retro KB2 application appearance.',
+    'about.news.changes.optimization': '',
+    'about.news.changes.radio': 'Added radio.',
+    'about.news.changes.viceCity': '',
     'about.news.next.ai': 'Additional AI features in the program.',
     'about.news.intro': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.news.features.title': 'Main features:',
@@ -818,30 +833,28 @@ const I18N = {
     'about.news.known.multiplier': 'battle multipliers remain experimental and may sometimes appear incorrectly near the end of a battle',
     'about.news.next.title': 'What comes next:',
     'about.news.next.archive': 'Improvements to archived chat reading. To be honest, I am not satisfied with the current version and it needs to be rebuilt.',
-    'about.news.next.fixes': 'Fixes for minor issues',
+    'about.news.next.fixes': 'Sounds for gifts above xxx coin value.',
     'about.news.next.widgets': 'expanding the widget system',
     'about.news.next.ttsLanguages': 'additional TTS chat reading languages',
     'about.news.next.superFans': 'highlighting super fans in chat',
-    'about.news.next.achievements': 'expanding the achievements system',
+    'about.news.next.achievements': 'Expanding achievements.',
     'about.news.next.redeemCodes': 'adding more activation codes',
     'about.news.next.specialNotifications': 'further cleanup of special features and notifications',
     'about.news.next.connection': 'optimizing creator connection stability',
     'about.news.next.giftSounds': 'sound notifications for larger gifts',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Where did the idea for the application come from?',
-    'about.faq.idea.answer': 'The program was mainly created to keep up with fast chat when messages jump around or appear for one person but not another. I also wanted to make a TikTok tool that makes hosting live streams a little easier. Streamers on other platforms have many plugins for programs such as OBS, while TikTok is fairly limited. There is an application that reads messages aloud, but it is paid, and I wanted everyone to have the same opportunity.',
-    'about.faq.systems.question': 'Will there be a version for systems other than Windows?',
-    'about.faq.systems.answer': 'For now, I only plan to develop this version. The program was made for Windows because that is the system I use.',
-    'about.faq.mobile.question': 'What about iOS, Android and other platforms?',
-    'about.faq.mobile.answer': 'Honestly? I do not know. It is a very distant topic. I do not own an iMac, so it would be difficult to build something for a platform I do not work with.',
-    'about.faq.appearance.question': 'Will the appearance of the program receive updates?',
-    'about.faq.appearance.answer': 'I think more options will appear over time. There are currently three ways to customize the appearance, divided into several choices. That already offers plenty of combinations, so experiment and choose what suits you best.',
-    'about.faq.support.question': 'Can I financially support the development of the project?',
-    'about.faq.support.answer': 'To be honest, several people have already suggested it, but for now I work on the project for fun in my free time. If money were involved, I would feel pressure to do everything immediately. A voluntary donation option may appear in the future, but time will tell.',
-    'about.faq.features.question': 'I have an idea for a new feature!',
-    'about.faq.features.answer': 'That makes me very happy! Feel free to contact me through TikTok private messages (Baksik.03) or Discord private messages (inavoxy).',
+    'about.faq.idea.answer': 'Mainly because TikTok chat can be buggy, throw everything in at once and make messages disappear quickly. The idea came to me while moderating Kama\'s chat (@teambibii), whom I warmly greet.',
+    'about.faq.systems.question': 'Is the program only for Windows?',
+    'about.faq.systems.answer': 'Yes. The program is only for Windows. I do not plan to expand it to other platforms or systems because of costs. I do not charge for it, and it includes many features that are paid in other programs, so let us be glad that something was created at all...',
+    'about.faq.support.question': 'Can I support you somehow?',
+    'about.faq.support.answer': 'I would say you can buy me some brutal margherita pizza or an energy drink, but I do not need support. If you want to give something back, click the Coins tab and use my referral link.',
     'about.faq.future.question': 'Do I plan to continue developing the project?',
-    'about.faq.future.answer': 'Of course. I will record ideas in the second tab, together with update descriptions. I would also like to thank Kama, without whom I would not have started this project. Her chatting and the activity of her viewers motivated me to act. Thank you as well to everyone for the ideas, interest and words of support.',
+    'about.faq.future.answer': 'A drop hollows the stone, and time will tell. Let us not live by what happened yesterday, let us live by what comes tomorrow, and tomorrow is already today. That came out strangely enigmatic...',
+    'about.faq.codes.question': 'Where can I get codes for Redeem code?',
+    'about.faq.codes.answer': 'Codes usually hide features for testers or small gifts for support. Officially there is one public code that downloads Czester\'s brain so it can analyze what is happening in chat: 19BM 9ARV 9IN1 K4M4. Let us say I am in a good mood, and I am rarely in a bad one, so here is something useful for growing LIVE streams: 1THU 3GS6 TO7O L6S2. If more codes appear in the future, they will probably be rewards for active members of Kama\'s community, so it is worth following and supporting her.',
+    'about.faq.magic.question': 'Is there any secret, magical code?',
+    'about.faq.magic.answer': 'Hm… If you want to get to know me better, take BOCI 4NEK ANT0 SIEK. Just do not complain afterwards... I warn you, I am a boring person.',
     'statsWidget.title': 'LIVE statistics',
     'statsWidget.viewers': 'People in chat',
     'statsWidget.messages': 'Messages sent',
@@ -943,6 +956,7 @@ const I18N = {
     'nav.achievements': 'Erfolge',
     'nav.coins': 'Münzen',
     'nav.boxes': 'Boxen',
+    'nav.radio': 'Radio',
     'nav.czester': 'Assistent Czester',
     'nav.about': 'Über das Programm',
     'creator.label': 'Creator',
@@ -995,6 +1009,7 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Code angenommen. Der Boxen-Tab ist aktiv.',
     'settings.redeem.unlockedMiamiVice': 'Code akzeptiert. Das Miami-Vice-Theme ist in den Darstellungseinstellungen aktiv.',
+    'settings.redeem.unlockedAuthor': 'Code akzeptiert. Der Tab Autor ist aktiv.',
     'czester.title': 'Assistent Czester',
     'czester.note.before': 'Guten Tag! Ich bin Czester und versuche, dein TikTok-Problem zu lösen. Denk daran, dass ich noch ',
     'czester.note.learning': 'lerne',
@@ -1151,6 +1166,10 @@ const I18N = {
     'about.tabs.program': 'Über das Programm',
     'about.tabs.news': 'Was ist neu?',
     'about.tabs.faq': 'FAQ',
+    'about.tabs.author': 'Autor',
+    'radio.title': 'Radio',
+    'radio.note': 'Höre einen ausgewählten Sender während der Arbeit mit dem Chat.',
+    'radio.aria': 'Radiostationen',
     'about.tabs.aria': 'Registerkarten über das Programm',
     'about.program.p1': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.program.p2': 'Nach der Anmeldung bei TikTok lädt das Programm den Chat des ausgewählten LIVE-Creators und zeigt ihn geordnet an. Du kannst zwischen unterstützten Creators wechseln, Ereignistypen filtern und das Aussehen anpassen.',
@@ -1159,18 +1178,19 @@ const I18N = {
     'about.program.how.p2': 'Chatnachrichten können mit einer festgelegten Verzögerung angezeigt werden, damit sie bei aktiven Streams leichter zu verfolgen sind. Andere Ereignisse wie Geschenke, Beitritte oder Likes können live erscheinen. Filter, Chat-Stil, Theme und Verzögerung können jederzeit geändert werden.',
     'about.program.how.p3': 'Während das Programm läuft, werden alle Stream-Ereignisse im Archiv gespeichert. Nach dem Ende oder Wechsel eines Streams kannst du das Archiv öffnen und zu früheren Gesprächen zurückkehren.',
     'about.news.version': 'Programmversion',
-    'about.news.versionSuffix': 'AI',
+    'about.news.versionSuffix': '',
     'about.news.statement.title': 'Erklärung:',
     'about.news.statement.p1': `Dieses Update ist wirklich groß. Bisher habe ich vieles umgesetzt, was mehr oder weniger sinnvoll war, aber von euch gewünscht wurde. Zuerst möchte ich erklären, warum ich einige Funktionen entfernt habe. Die Idee hinter dem Programm war, Creatorn beim Wachstum zu helfen, größeren wie kleineren, und vor allem Moderation bei aktiven Communities zu erleichtern. Leider haben manche Funktionen das Programm weniger zu einem Werkzeug der Unterstützung und mehr zu einem Werkzeug zum Ausspähen anderer Creator, ihrer Einnahmen und Rankings gemacht. Das war nie meine Absicht. Ab diesem Update zeigt das Programm deshalb nur noch Statistiken des Creators, mit dem man verbunden ist. Rankings und Battle-Verläufe von Gegnern werden zurückgezogen.`,
     'about.news.statement.p2': `Ist das alles? Nein. Ich nehme ungern etwas weg, ohne etwas Sinnvolles zurückzugeben. Ich bin wie ihr ein normaler Nutzer, Moderator und Zuschauer. Nach längerer Überlegung habe ich mich entschieden, etwas einzubauen, vor dem ich mich wegen schwächerer Computer, älterer Windows-Versionen wie Windows 10 und langsamerer Internetverbindungen lange gedrückt habe. Einige Tester hatten aber recht: Das Programm sollte sich weiterentwickeln.`,
     'about.news.statement.p3': `Nach dieser Entscheidung habe ich AI in das Programm eingebaut. Sie soll helfen, Chat und Statistiken für Creator und Moderation besser zu kontrollieren, und ermöglicht mehr Personalisierung sowie besseren Informationsfluss im LIVE-Chat. Wie funktioniert das? Nach Eingabe eines speziellen Codes unter Einstellungen → Code einlösen wird die AI-Option freigeschaltet. Danach kann das Programm Ollama herunterladen, das über 1 GB benötigt, und anschließend eine Aktualisierung in ähnlicher Größe durchführen. Diese Funktion ist optional. Das Programm funktioniert weiterhin ohne sie, aber nach der Aktivierung verändert sich Czester deutlich und wird operativ nützlicher. Wenn du es testen möchtest, gib den AI-Code ein: 19BM 9ARV 9IN1 K4M4.`,
     'about.news.changes.title': 'Änderungen:',
-    'about.news.changes.removeRanking': 'Ranking wurde aus der Programmlogik entfernt',
-    'about.news.changes.ai': 'AI-Funktionalität wurde integriert',
-    'about.news.changes.codes': 'Neue Funktionen zur Unterstützung wachsender LIVE-Streams wurden hinzugefügt. Sie können per Code aktiviert werden. Kontaktiere mich privat, um sie zu erhalten.',
-    'about.news.changes.multiplier': 'Der Battle-Multiplikator wurde verbessert, bleibt aber weiterhin eine Testfunktion.',
-    'about.news.changes.optimization': 'Große Optimierung des Programms. Die Belastung wurde um über ein Dutzend Prozent reduziert.',
-    'about.news.changes.viceCity': 'Ein neues freischaltbares Theme wurde hinzugefügt - Vice City. Es ist als Dankeschön für Tester gedacht.',
+    'about.news.changes.removeRanking': 'System zum Lesen von Schatzkisten während LIVE-Streams hinzugefügt - Unterstützung für wachsende LIVE-Räume.',
+    'about.news.changes.ai': 'Menü optimiert - mehrere Funktionen wurden ständig aktualisiert und machten das Programm mit der Zeit langsamer.',
+    'about.news.changes.codes': 'Der Bereich Über das Programm wurde aufgefrischt.',
+    'about.news.changes.multiplier': 'Fehler im App-Aussehen Retro KB2 wurden behoben.',
+    'about.news.changes.optimization': '',
+    'about.news.changes.radio': 'Radio hinzugefügt.',
+    'about.news.changes.viceCity': '',
     'about.news.next.ai': 'Weitere AI-Funktionen im Programm.',
     'about.news.intro': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.news.features.title': 'Hauptfunktionen:',
@@ -1204,30 +1224,28 @@ const I18N = {
     'about.news.known.multiplier': 'Battle-Multiplikatoren bleiben eine Testfunktion und können gegen Ende eines Battles gelegentlich fälschlich erscheinen',
     'about.news.next.title': 'Wie geht es weiter:',
     'about.news.next.archive': 'Verbesserungen beim Lesen archivierter Chats. Ehrlich gesagt bin ich mit der aktuellen Version nicht zufrieden und sie muss überarbeitet werden.',
-    'about.news.next.fixes': 'Behebung kleinerer Fehler',
+    'about.news.next.fixes': 'Sounds für Gifts ab xxx Münzwert.',
     'about.news.next.widgets': 'Ausbau des Widget-Systems',
     'about.news.next.ttsLanguages': 'zusätzliche Sprachen für das Vorlesen des Chats per TTS',
     'about.news.next.superFans': 'Hervorhebung von Superfans im Chat',
-    'about.news.next.achievements': 'Ausbau des Erfolgssystems',
+    'about.news.next.achievements': 'Ausbau der Erfolge.',
     'about.news.next.redeemCodes': 'Hinzufügen weiterer Aktivierungscodes',
     'about.news.next.specialNotifications': 'weitere Bereinigung von Sonderfunktionen und Benachrichtigungen',
     'about.news.next.connection': 'Optimierung der Verbindungsstabilität zum Creator',
     'about.news.next.giftSounds': 'Tonbenachrichtigungen für größere Geschenke',
     'about.faq.title': 'FAQ',
     'about.faq.idea.question': 'Wie entstand die Idee für die Anwendung?',
-    'about.faq.idea.answer': 'Das Programm entstand hauptsächlich, um bei einem schnellen Chat mithalten zu können, wenn Nachrichten springen oder bei einer Person erscheinen und bei einer anderen nicht. Außerdem wollte ich ein TikTok-Werkzeug entwickeln, das das Durchführen von Live-Streams etwas erleichtert. Für Streamer auf anderen Plattformen gibt es viele Plugins für Programme wie OBS, während TikTok recht eingeschränkt ist. Es gibt zwar eine Anwendung, die Nachrichten vorliest, sie ist jedoch kostenpflichtig. Ich wollte allen die gleichen Möglichkeiten geben.',
-    'about.faq.systems.question': 'Wird es eine Version für andere Systeme als Windows geben?',
-    'about.faq.systems.answer': 'Derzeit plane ich nur diese Version weiterzuentwickeln. Das Programm wurde für Windows erstellt, weil ich dieses System selbst benutze.',
-    'about.faq.mobile.question': 'Was ist mit iOS, Android und anderen Plattformen?',
-    'about.faq.mobile.answer': 'Ehrlich gesagt weiß ich es nicht. Das ist ein sehr weit entferntes Thema. Ich besitze keinen iMac, daher wäre es schwierig, etwas für eine Plattform zu entwickeln, mit der ich nicht arbeite.',
-    'about.faq.appearance.question': 'Wird das Aussehen des Programms aktualisiert?',
-    'about.faq.appearance.answer': 'Mit der Zeit werden wahrscheinlich weitere Optionen erscheinen. Derzeit gibt es drei Möglichkeiten, das Aussehen mit mehreren Auswahlvarianten anzupassen. Das bietet bereits viele Kombinationen. Probiert sie aus und wählt, was euch am besten gefällt.',
-    'about.faq.support.question': 'Kann ich die Entwicklung des Projekts finanziell unterstützen?',
-    'about.faq.support.answer': 'Ehrlich gesagt haben das bereits mehrere Personen vorgeschlagen. Momentan arbeite ich jedoch in meiner Freizeit und aus Spaß an dem Projekt. Sobald Geld im Spiel wäre, würde ich den Druck spüren, alles sofort erledigen zu müssen. Vielleicht wird es in Zukunft eine freiwillige Spendenmöglichkeit geben, aber das wird sich zeigen.',
-    'about.faq.features.question': 'Ich habe eine Idee für eine neue Funktion!',
-    'about.faq.features.answer': 'Das freut mich sehr! Kontaktiert mich gerne per TikTok-Privatnachricht (Baksik.03) oder Discord-Privatnachricht (inavoxy).',
+    'about.faq.idea.answer': 'Hauptsächlich wegen des fehlerhaften TikTok-Chats, der alles auf einmal anzeigt und Inhalte schnell verschwinden lässt. Die Idee kam mir beim Moderieren des Chats von Kama (@teambibii), die ich herzlich grüße.',
+    'about.faq.systems.question': 'Ist das Programm nur für Windows?',
+    'about.faq.systems.answer': 'Ja. Das Programm ist nur für Windows. Ich plane nicht, es auf andere Plattformen oder Systeme zu erweitern - aus Kostengründen. Ich verlange kein Geld dafür, und es enthält viele Funktionen, die in anderen Programmen kostenpflichtig sind. Freuen wir uns also, dass überhaupt etwas entstanden ist...',
+    'about.faq.support.question': 'Kann ich dich irgendwie unterstützen?',
+    'about.faq.support.answer': 'Ich würde sagen, du kannst mir eine brutale Margherita-Pizza oder einen Energy-Drink spendieren, aber ich brauche keine Unterstützung. Wenn du dich revanchieren möchtest, klicke auf den Tab Coins und nutze meinen Empfehlungslink.',
     'about.faq.future.question': 'Plane ich, das Projekt weiterzuentwickeln?',
-    'about.faq.future.answer': 'Natürlich. Alle Ideen werde ich im zweiten Tab zusammen mit den Beschreibungen der Updates festhalten. Außerdem möchte ich Kama danken, ohne die ich dieses Projekt nicht begonnen hätte. Ihr Reden mit dem Chat und dessen Aktivität haben mich zum Handeln motiviert. Vielen Dank auch an alle für die bisherigen Ideen, das Interesse und die unterstützenden Worte.',
+    'about.faq.future.answer': 'Steter Tropfen höhlt den Stein, und die Zeit wird es zeigen. Leben wir nicht von dem, was gestern war, sondern von dem, was morgen kommt, und morgen ist schon heute. Klingt ziemlich rätselhaft...',
+    'about.faq.codes.question': 'Woher bekomme ich Codes für Code einlösen?',
+    'about.faq.codes.answer': 'Codes verbergen meistens Funktionen für Tester oder kleine Geschenke für Unterstützung. Offiziell gibt es einen öffentlichen Code, der Czesters Gehirn herunterlädt, damit er analysieren kann, was im Chat passiert: 19BM 9ARV 9IN1 K4M4. Sagen wir, ich habe gute Laune, und schlechte Laune habe ich selten, also bekommt ihr etwas Nützliches für wachsende LIVE-Streams: 1THU 3GS6 TO7O L6S2. Wenn in Zukunft weitere Codes erscheinen, werden sie wahrscheinlich Belohnungen für aktive Mitglieder von Kamas Community sein. Es lohnt sich also, ihr zu folgen und sie zu unterstützen.',
+    'about.faq.magic.question': 'Gibt es einen geheimen, magischen Code?',
+    'about.faq.magic.answer': 'Hm… Wenn du mich besser kennenlernen willst, nimm BOCI 4NEK ANT0 SIEK. Beschwer dich danach aber nicht... Ich warne dich, ich bin ein langweiliger Mensch.',
     'statsWidget.title': 'LIVE-Statistiken',
     'statsWidget.viewers': 'Personen im Chat',
     'statsWidget.messages': 'Gesendete Nachrichten',
@@ -1385,6 +1403,107 @@ const editNoteButton = document.getElementById('editNoteButton');
 const saveNoteButton = document.getElementById('saveNoteButton');
 const deleteNoteButton = document.getElementById('deleteNoteButton');
 const notesSearchEl = document.getElementById('notesSearch');
+const radioAudioElements = Array.from(document.querySelectorAll('[data-radio-audio]'));
+const radioHlsInstances = new Map();
+const radioFloatingPlayerEl = document.getElementById('radioFloatingPlayer');
+const radioFloatingNameEl = document.getElementById('radioFloatingName');
+const radioFloatingStatusEl = document.getElementById('radioFloatingStatus');
+const radioFloatingToggleEl = document.getElementById('radioFloatingToggle');
+let activeRadioAudio = null;
+
+function updateRadioFloatingVisibility() {
+  if (!radioFloatingPlayerEl) {
+    return;
+  }
+  radioFloatingPlayerEl.hidden = !activeRadioAudio || activeSection === 'radio';
+}
+
+function initRadioPlayers() {
+  radioAudioElements.forEach((audio) => {
+    if (audio.dataset.radioInitialized === 'true') {
+      return;
+    }
+
+    const source = audio.dataset.radioSrc || '';
+    audio.dataset.radioInitialized = 'true';
+    audio.dataset.radioSource = source;
+
+    if (source.endsWith('.m3u8') && window.Hls && window.Hls.isSupported()) {
+      const hls = new window.Hls({ enableWorker: true, lowLatencyMode: false });
+      hls.loadSource(source);
+      hls.attachMedia(audio);
+      radioHlsInstances.set(audio, hls);
+    } else {
+      audio.src = source;
+    }
+
+    if (audio.dataset.radioPlayBound !== 'true') {
+      audio.dataset.radioPlayBound = 'true';
+      audio.addEventListener('play', () => {
+        activeRadioAudio = audio;
+        if (radioFloatingNameEl) {
+          radioFloatingNameEl.textContent = audio.dataset.radioName || 'Radio';
+        }
+        if (radioFloatingStatusEl) {
+          radioFloatingStatusEl.textContent = 'Odtwarzanie';
+        }
+        if (radioFloatingPlayerEl) {
+          updateRadioFloatingVisibility();
+        }
+        if (radioFloatingToggleEl) {
+          radioFloatingToggleEl.textContent = 'Ⅱ';
+          radioFloatingToggleEl.setAttribute('aria-label', 'Pauza radia');
+        }
+        radioAudioElements.forEach((otherAudio) => {
+          if (otherAudio !== audio) {
+            otherAudio.pause();
+          }
+        });
+      });
+      audio.addEventListener('pause', () => {
+        if (activeRadioAudio !== audio) {
+          return;
+        }
+        if (radioFloatingStatusEl) {
+          radioFloatingStatusEl.textContent = 'Wstrzymano';
+        }
+        if (radioFloatingToggleEl) {
+          radioFloatingToggleEl.textContent = '▶';
+          radioFloatingToggleEl.setAttribute('aria-label', 'Wznów radio');
+        }
+      });
+    }
+  });
+}
+
+function stopRadioPlayers() {
+  radioAudioElements.forEach((audio) => {
+    audio.pause();
+    const hls = radioHlsInstances.get(audio);
+    if (hls) {
+      hls.destroy();
+      radioHlsInstances.delete(audio);
+    }
+    audio.removeAttribute('src');
+    audio.load();
+    audio.dataset.radioInitialized = 'false';
+  });
+  activeRadioAudio = null;
+  updateRadioFloatingVisibility();
+}
+
+if (radioFloatingToggleEl) {
+  radioFloatingToggleEl.addEventListener('click', () => {
+    if (!activeRadioAudio) {
+      return;
+    }
+    if (activeRadioAudio.paused) {
+      activeRadioAudio.play().catch(() => {});
+    } else {
+      activeRadioAudio.pause();
+    }
+  });
+}
 const notesListEl = document.getElementById('notesList');
 const noteTitleInput = document.getElementById('noteTitleInput');
 const noteContentInput = document.getElementById('noteContentInput');
@@ -1484,6 +1603,9 @@ let noteEntries = [];
 let selectedNoteId = '';
 let selectedNote = null;
 let noteEditorMode = 'edit';
+let archiveLastRefreshAt = 0;
+let notesLastRefreshAt = 0;
+let boxesArchiveLastRefreshAt = 0;
 let czesterMessages = [];
 let czesterTypingTimer = null;
 let czesterUserAvatar = '';
@@ -1586,7 +1708,7 @@ function saveTtsSettings() {
 function normalizeGeneralSettings(value) {
   const next = { ...DEFAULT_GENERAL_SETTINGS, ...(value && typeof value === 'object' ? value : {}) };
   return {
-    multiplierNotifications: next.multiplierNotifications !== false,
+    multiplierNotifications: true,
     statsToolbox: next.statsToolbox !== false,
     galleryAvatars: next.galleryAvatars !== false
   };
@@ -1601,6 +1723,7 @@ function loadGeneralSettings() {
 }
 
 function saveGeneralSettings() {
+  generalSettings.multiplierNotifications = true;
   localStorage.setItem(GENERAL_SETTINGS_KEY, JSON.stringify(generalSettings));
 }
 
@@ -1758,6 +1881,7 @@ function loadRedeemedFeatures() {
       ollamaPrompt: Boolean(saved.ollamaPrompt) || codes.includes(OLLAMA_REDEEM_CODE),
       boxesPanel: Boolean(saved.boxesPanel) || codes.includes(BOXES_REDEEM_CODE),
       miamiViceTheme: Boolean(saved.miamiViceTheme) || codes.includes(MIAMI_VICE_REDEEM_CODE),
+      authorPanel: Boolean(saved.authorPanel) || codes.includes(AUTHOR_REDEEM_CODE),
       codes
     };
   } catch {
@@ -1766,6 +1890,7 @@ function loadRedeemedFeatures() {
       ollamaPrompt: false,
       boxesPanel: false,
       miamiViceTheme: false,
+      authorPanel: false,
       codes: []
     };
   }
@@ -1799,6 +1924,10 @@ function isMiamiViceThemeUnlocked() {
   return Boolean(redeemedFeatures.miamiViceTheme) || loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
 }
 
+function isAuthorPanelUnlocked() {
+  return Boolean(redeemedFeatures.authorPanel) || loadStoredRedeemCodes().includes(AUTHOR_REDEEM_CODE);
+}
+
 function syncLockedThemeChoice(inputId, unlocked) {
   const input = document.getElementById(inputId);
   const choice = input ? input.closest('.setting-choice') : null;
@@ -1822,6 +1951,9 @@ function syncRedeemedFeatureNavigation() {
   const boxesPanel = viewPanels.find((panel) => panel.dataset.view === 'boxes');
   const unlocked = isBoxesPanelUnlocked();
   const miamiUnlocked = isMiamiViceThemeUnlocked();
+  const authorButton = aboutTabs.find((button) => button.dataset.aboutTab === 'author');
+  const authorPanel = aboutPanels.find((panel) => panel.dataset.aboutPanel === 'author');
+  const authorUnlocked = isAuthorPanelUnlocked();
 
   if (boxesButton) {
     boxesButton.hidden = !unlocked;
@@ -1831,6 +1963,16 @@ function syncRedeemedFeatureNavigation() {
   }
   if (!unlocked && activeSection === 'boxes') {
     setActiveSection('chatbox');
+  }
+
+  if (authorButton) {
+    authorButton.hidden = !authorUnlocked;
+  }
+  if (authorPanel && !authorUnlocked) {
+    authorPanel.hidden = true;
+  }
+  if (!authorUnlocked && activeAboutTab === 'author') {
+    setActiveAboutTab('program');
   }
 
   syncLockedThemeChoice('themeMiamiVice', miamiUnlocked);
@@ -1884,7 +2026,8 @@ function redeemEnteredCode() {
   if (normalized !== HONDA_REDEEM_CODE
     && normalized !== OLLAMA_REDEEM_CODE
     && normalized !== BOXES_REDEEM_CODE
-    && normalized !== MIAMI_VICE_REDEEM_CODE) {
+    && normalized !== MIAMI_VICE_REDEEM_CODE
+    && normalized !== AUTHOR_REDEEM_CODE) {
     setRedeemCodeStatus(t('settings.redeem.invalid'), 'error');
     return;
   }
@@ -1901,6 +2044,9 @@ function redeemEnteredCode() {
   if (normalized === MIAMI_VICE_REDEEM_CODE) {
     redeemedFeatures.miamiViceTheme = true;
   }
+  if (normalized === AUTHOR_REDEEM_CODE) {
+    redeemedFeatures.authorPanel = true;
+  }
   redeemedFeatures.codes = Array.from(new Set([...(redeemedFeatures.codes || []), normalized]));
   saveRedeemedFeatures();
   redeemCodeInput.value = '';
@@ -1911,7 +2057,9 @@ function redeemEnteredCode() {
         ? t('settings.redeem.unlockedBoxes')
         : normalized === MIAMI_VICE_REDEEM_CODE
           ? t('settings.redeem.unlockedMiamiVice')
-          : t('settings.redeem.unlocked'),
+          : normalized === AUTHOR_REDEEM_CODE
+            ? t('settings.redeem.unlockedAuthor')
+            : t('settings.redeem.unlocked'),
     'success'
   );
   syncRedeemedFeatureNavigation();
@@ -3557,6 +3705,7 @@ function applyI18n() {
     ['.sidebar-button[data-section="notes"]', 'nav.notes'],
     ['.sidebar-button[data-section="achievements"]', 'nav.achievements'],
     ['.sidebar-button[data-section="coins"]', 'nav.coins'],
+    ['.sidebar-button[data-section="radio"]', 'nav.radio'],
     ['.sidebar-button[data-section="settings"]', 'nav.settings'],
     ['.sidebar-button[data-section="about"]', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
@@ -3636,6 +3785,7 @@ function applyI18n() {
     ['.settings-tab[data-about-tab="program"]', 'about.tabs.program'],
     ['.settings-tab[data-about-tab="news"]', 'about.tabs.news'],
     ['.settings-tab[data-about-tab="faq"]', 'about.tabs.faq'],
+    ['.settings-tab[data-about-tab="author"]', 'about.tabs.author'],
     ['#aboutProgramPanel > p:nth-of-type(1)', 'about.program.p1'],
     ['#aboutProgramPanel > p:nth-of-type(2)', 'about.program.p2'],
     ['#aboutProgramPanel .about-section h2', 'about.program.how'],
@@ -3750,7 +3900,7 @@ function initAppearanceSettings() {
 
 function applyGeneralSettings() {
   if (multiplierNotificationsEl) {
-    multiplierNotificationsEl.checked = generalSettings.multiplierNotifications;
+    multiplierNotificationsEl.checked = true;
   }
 
   if (statsToolboxEl) {
@@ -3783,7 +3933,8 @@ function initGeneralSettings() {
 
   if (multiplierNotificationsEl) {
     multiplierNotificationsEl.addEventListener('change', () => {
-      generalSettings.multiplierNotifications = multiplierNotificationsEl.checked;
+      generalSettings.multiplierNotifications = true;
+      multiplierNotificationsEl.checked = true;
       saveGeneralSettings();
       applyGeneralSettings();
     });
@@ -5137,6 +5288,16 @@ function stopCzesterTyping() {
   }
 }
 
+function shouldRenderCzesterNow() {
+  return !czesterPanelEl || !czesterPanelEl.hidden;
+}
+
+function renderCzesterIfVisible() {
+  if (shouldRenderCzesterNow()) {
+    renderCzester();
+  }
+}
+
 function typeCzesterMessage(messageId, fullText) {
   stopCzesterTyping();
   const target = czesterMessages.find((message) => message.id === messageId);
@@ -5160,7 +5321,7 @@ function typeCzesterMessage(messageId, fullText) {
       index = Math.min(text.length, index + 5);
       current.text = text.slice(0, index);
       current.typing = index < text.length;
-      renderCzester();
+      renderCzesterIfVisible();
 
       if (index >= text.length) {
         stopCzesterTyping();
@@ -5182,7 +5343,10 @@ function appendCzesterMessage(role, text, options = {}) {
     actions: Array.isArray(options.actions) ? options.actions.filter(Boolean) : [],
     createdAt: new Date().toISOString()
   });
-  renderCzester();
+  while (czesterMessages.length > CZESTER_MAX_MESSAGES) {
+    czesterMessages.shift();
+  }
+  renderCzesterIfVisible();
   if (options.animate) {
     return typeCzesterMessage(id, text);
   }
@@ -6263,6 +6427,7 @@ async function loadBoxesArchiveSessions(options = {}) {
     return;
   }
 
+  boxesArchiveLastRefreshAt = Date.now();
   const preserveSelection = Boolean(options.preserveSelection);
   boxesArchiveLoading = true;
   if (!options.silent) {
@@ -6970,7 +7135,8 @@ settingsTabs.forEach((button) => {
 });
 
 function setActiveAboutTab(tab) {
-  const nextTab = aboutPanels.some((panel) => panel.dataset.aboutPanel === tab) ? tab : 'program';
+  const requestedPanel = aboutPanels.find((panel) => panel.dataset.aboutPanel === tab);
+  const nextTab = requestedPanel && (tab !== 'author' || isAuthorPanelUnlocked()) ? tab : 'program';
   activeAboutTab = nextTab;
 
   aboutTabs.forEach((button) => {
@@ -7294,6 +7460,7 @@ async function refreshArchive() {
     return;
   }
 
+  archiveLastRefreshAt = Date.now();
   archiveListEl.textContent = t('archive.refreshing');
   try {
     const result = await window.tiktokLive.listArchives();
@@ -7620,6 +7787,7 @@ async function refreshNotes() {
     return;
   }
 
+  notesLastRefreshAt = Date.now();
   try {
     const result = await window.tiktokLive.listNotes();
     noteEntries = result && result.ok && Array.isArray(result.notes) ? result.notes : [];
@@ -7724,7 +7892,11 @@ function setActiveSection(section) {
   const requestedButton = sidebarButtons.find((button) => button.dataset.section === section);
   const requestedPanel = viewPanels.find((panel) => panel.dataset.view === section);
   const nextSection = requestedPanel && !(requestedButton && requestedButton.hidden) ? section : 'chatbox';
+  const previousSection = activeSection;
+  const sectionChanged = previousSection !== nextSection;
+  const now = Date.now();
   activeSection = nextSection;
+  updateRadioFloatingVisibility();
 
   sidebarButtons.forEach((button) => {
     button.dataset.active = String(button.dataset.section === activeSection);
@@ -7734,16 +7906,19 @@ function setActiveSection(section) {
     panel.hidden = panel.dataset.view !== activeSection;
   });
 
-  if (activeSection === 'archive') {
+  if (activeSection === 'archive' && (sectionChanged || !archiveEntries.length) && now - archiveLastRefreshAt > SECTION_AUTO_REFRESH_COOLDOWN_MS) {
     refreshArchive();
   }
-  if (activeSection === 'notes') {
+  if (activeSection === 'notes' && (sectionChanged || !noteEntries.length) && now - notesLastRefreshAt > SECTION_AUTO_REFRESH_COOLDOWN_MS) {
     refreshNotes();
   }
-  if (activeSection === 'boxes') {
+  if (activeSection === 'boxes' && (sectionChanged || !boxesArchiveEntries.length) && now - boxesArchiveLastRefreshAt > SECTION_AUTO_REFRESH_COOLDOWN_MS) {
     loadBoxesArchiveSessions();
   }
-  if (activeSection !== 'chatbox') {
+  if (activeSection === 'radio' && sectionChanged) {
+    initRadioPlayers();
+  }
+  if (activeSection !== 'chatbox' && sectionChanged) {
     stopSpeech();
   }
 }
@@ -7753,6 +7928,8 @@ sidebarButtons.forEach((button) => {
     setActiveSection(button.dataset.section);
   });
 });
+
+window.addEventListener('beforeunload', stopRadioPlayers);
 
 if (boxesArchiveSearchEl) {
   boxesArchiveSearchEl.addEventListener('input', renderBoxesArchiveList);

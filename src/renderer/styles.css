@@ -969,6 +969,10 @@ body {
   display: none;
 }
 
+.settings-tab[hidden] {
+  display: none !important;
+}
+
 .about-content p {
   margin: 0 0 12px;
 }
@@ -1004,6 +1008,126 @@ body {
 
 .about-faq p {
   margin-bottom: 16px;
+}
+
+#aboutFaqPanel {
+  width: min(1120px, 100%);
+}
+
+#aboutAuthorPanel {
+  width: min(1120px, 100%);
+}
+
+.about-author {
+  margin-top: 0;
+}
+
+.about-author-media {
+  margin: 0 0 18px;
+}
+
+.about-author-media img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  object-position: center 38%;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 24px;
+  background: var(--surface-muted);
+  box-shadow: var(--soft-shadow);
+}
+
+.about-author-copy {
+  display: grid;
+  gap: 16px;
+}
+
+.about-author-intro {
+  max-width: 920px;
+  font-weight: 700;
+}
+
+.about-author-facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.about-author-facts > div {
+  display: grid;
+  grid-template-columns: minmax(180px, 250px) minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 14px;
+  background: var(--surface-muted);
+}
+
+.about-author-facts > .about-author-break {
+  margin-top: 8px;
+}
+
+.about-author-facts dt {
+  color: var(--dropdown-active-text);
+  font-weight: 900;
+}
+
+.about-author-facts dd {
+  margin: 0;
+  color: var(--dropdown-text);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .about-author-facts > div {
+    grid-template-columns: 1fr;
+  }
+}
+
+.about-faq-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.about-faq-media {
+  margin: 0;
+  min-height: 100%;
+}
+
+.about-faq-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 24px;
+  background: var(--surface-muted);
+  box-shadow: var(--soft-shadow);
+}
+
+.about-faq-copy {
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .about-faq-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .about-faq-media {
+    position: static;
+    max-width: 320px;
+    min-height: 0;
+  }
+
+  .about-faq-media img {
+    height: auto;
+    max-height: 420px;
+  }
 }
 
 .about-list {
@@ -6619,6 +6743,21 @@ body {
   color: #222222;
 }
 
+:root[data-app-appearance="retro-kb2"] .page-header h1,
+:root[data-app-appearance="retro-kb2"] .archive-title,
+:root[data-app-appearance="retro-kb2"] .settings-heading,
+:root[data-app-appearance="retro-kb2"] .about-section h2,
+:root[data-app-appearance="retro-kb2"] .about-section h3,
+:root[data-app-appearance="retro-kb2"] .about-version-title,
+:root[data-app-appearance="retro-kb2"] .setting-choice strong,
+:root[data-app-appearance="retro-kb2"] .setting-row > span,
+:root[data-app-appearance="retro-kb2"] .note-preview h3,
+:root[data-app-appearance="retro-kb2"] .achievement-title,
+:root[data-app-appearance="retro-kb2"] .boxes-session-title,
+:root[data-app-appearance="retro-kb2"] .boxes-live-title {
+  color: #162632 !important;
+}
+
 :root[data-app-appearance="retro-kb2"] .archive-view,
 :root[data-app-appearance="retro-kb2"] .notes-view,
 :root[data-app-appearance="retro-kb2"] .archive-workspace,
@@ -8063,7 +8202,7 @@ body {
 
 .view-panel[data-view="about"] .about-content > .about-section:first-child,
 .view-panel[data-view="about"] .about-content > p:first-child + p + .about-section {
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .view-panel[data-view="about"] .about-section h2,
@@ -9408,4 +9547,477 @@ body {
 :root[data-theme="miami-vice"] .boxes-list::-webkit-scrollbar-thumb:hover,
 :root[data-theme="miami-vice"] .czester-messages::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ffe08a, #ff75c8);
+}
+
+/* Autor: jednolity kontrast i jedna ramka dla całej treści. */
+.about-author-copy {
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--dropdown-surface) 76%, #101827 24%);
+  color: #fff;
+}
+
+.about-author-copy,
+.about-author-copy p,
+.about-author-copy dt,
+.about-author-copy dd {
+  color: #fff !important;
+}
+
+.about-author-facts > div {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Wspólny układ paneli ustawień: zachowuje kolory motywów, ujednolica tylko formę. */
+.settings-panel {
+  box-sizing: border-box;
+  width: min(100%, 980px);
+  max-width: 920px;
+  padding: 16px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--dropdown-surface) 92%, transparent);
+  box-shadow: var(--dropdown-shadow);
+}
+
+.settings-panel .settings-list,
+.settings-panel .choice-list,
+.settings-panel .chat-delay-section,
+.settings-panel .redeem-code-panel {
+  width: 100%;
+  max-width: none;
+}
+
+.settings-panel .choice-list {
+  border-top: 0;
+}
+
+.settings-panel .setting-choice {
+  grid-template-columns: minmax(0, 1fr) 20px;
+  align-items: center;
+  min-height: 58px;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--dropdown-text);
+}
+
+.settings-panel[data-settings-panel="appearance"] {
+  width: min(100%, 980px);
+  max-width: 980px;
+}
+
+.settings-panel[data-settings-panel="appearance"] .setting-section {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.settings-panel[data-settings-panel="appearance"] .settings-heading {
+  margin: 4px 0 10px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent);
+}
+
+.settings-panel[data-settings-panel="appearance"] .setting-section:first-child .settings-heading {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.settings-panel .setting-choice > span {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.settings-panel .setting-choice input {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  margin: 0;
+  accent-color: var(--dropdown-active-text);
+}
+
+.settings-panel .setting-choice strong,
+.settings-panel .setting-row,
+.settings-panel .settings-heading {
+  color: var(--dropdown-text);
+}
+
+.settings-panel .setting-choice small,
+.settings-panel .page-note,
+.settings-panel .setting-range-marks {
+  color: var(--dropdown-muted);
+}
+
+.settings-panel .setting-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 58px;
+  border-bottom: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent);
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings-panel .setting-row-stacked {
+  display: block;
+  min-height: auto;
+  padding: 0 0 14px;
+  border-bottom: 0;
+}
+
+.settings-panel .setting-toggle,
+.settings-panel .setting-select,
+.settings-panel .setting-input {
+  justify-self: end;
+}
+
+.settings-panel .setting-select,
+.settings-panel .setting-input {
+  border-color: var(--dropdown-border);
+  background: var(--dropdown-bg);
+  color: var(--dropdown-text);
+}
+
+.settings-panel .redeem-code-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+}
+
+.settings-panel .redeem-code-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.radio-stations {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+}
+
+.radio-station-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--dropdown-surface) 92%, transparent);
+  box-shadow: var(--dropdown-shadow);
+}
+
+.radio-station-card > img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 14px;
+}
+
+.radio-station-copy {
+  min-width: 0;
+}
+
+.radio-station-copy h2 {
+  margin: 0;
+  color: var(--dropdown-text);
+  font-size: 15px;
+}
+
+.radio-station-copy p {
+  margin: 4px 0 10px;
+  color: var(--dropdown-muted);
+  font-size: 12px;
+}
+
+.radio-station-copy audio {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--dropdown-active-text);
+}
+
+.radio-floating-player {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 34px minmax(120px, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  width: min(250px, 28vw);
+  min-width: 190px;
+  padding: 6px 8px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 12px;
+  background: var(--dropdown-surface);
+  color: var(--dropdown-text);
+  box-shadow: var(--dropdown-shadow);
+  backdrop-filter: blur(14px) saturate(1.1);
+}
+
+.radio-floating-player[hidden] { display: none; }
+
+.radio-floating-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 12px;
+  background: var(--dropdown-active-bg);
+  color: var(--dropdown-active-text);
+  font-size: 18px;
+}
+
+.radio-floating-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.radio-floating-copy strong,
+.radio-floating-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-floating-copy strong { font-size: 13px; }
+.radio-floating-copy small { color: var(--dropdown-muted); font-size: 11px; }
+
+.radio-floating-toggle {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: var(--dropdown-bg);
+  color: var(--dropdown-text);
+  cursor: pointer;
+}
+
+@media (max-width: 1050px) {
+  .radio-stations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .radio-floating-player { width: min(220px, 24vw); min-width: 170px; }
+}
+
+@media (max-width: 620px) {
+  .radio-stations { grid-template-columns: 1fr; }
+  .radio-floating-player { width: 180px; min-width: 0; }
+}
+
+/* Ostateczna warstwa geometrii ustawień: motyw dostarcza kolory, a panel ma
+   wszędzie tę samą konstrukcję i nie pozwala na zawężanie etykiet. */
+.settings-panel .setting-choice,
+.settings-panel .setting-row,
+.settings-panel .setting-section,
+.settings-panel .chat-delay-section {
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.settings-panel .choice-list {
+  display: grid !important;
+  gap: 0 !important;
+  border-top: 0 !important;
+}
+
+.settings-panel .setting-section,
+.settings-panel .chat-delay-section {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: visible !important;
+}
+
+.settings-panel .setting-choice {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 20px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 58px !important;
+  padding: 12px 0 !important;
+}
+
+.settings-panel .setting-choice input {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+}
+
+.settings-panel .setting-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 58px !important;
+  padding: 12px 0 !important;
+}
+
+.settings-panel .setting-row.setting-row-stacked {
+  display: block !important;
+  min-height: auto !important;
+  padding: 0 0 14px !important;
+}
+
+/* Enigma-Z i Miami Vice mają starsze, ważniejsze reguły z własnym układem
+   18px + treść. Te selektory celowo są bardziej szczegółowe, aby formularz
+   zachowywał identyczną szerokość jak w pozostałych motywach. */
+:root[data-theme="lazarskie-rejony"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-choice,
+:root[data-theme="miami-vice"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-choice {
+  grid-template-columns: minmax(0, 1fr) 20px !important;
+  gap: 14px !important;
+  min-height: 58px !important;
+  padding: 12px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="lazarskie-rejony"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-row,
+:root[data-theme="miami-vice"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-row {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  min-height: 58px !important;
+  padding: 12px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="lazarskie-rejony"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-section,
+:root[data-theme="lazarskie-rejony"]:not([data-app-appearance="retro-kb2"]) .settings-panel .chat-delay-section,
+:root[data-theme="miami-vice"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-section,
+:root[data-theme="miami-vice"]:not([data-app-appearance="retro-kb2"]) .settings-panel .chat-delay-section {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="lazarskie-rejony"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-choice input,
+:root[data-theme="miami-vice"]:not([data-app-appearance="retro-kb2"]) .settings-panel .setting-choice input {
+  grid-column: 2 !important;
+  justify-self: end !important;
+  flex: initial !important;
+}
+
+/* Autor korzysta z tej samej zewnętrznej ramki co pozostałe zakładki
+   „O programie”; wewnątrz nie ma już drugiego, konkurencyjnego panelu. */
+.view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.view-panel[data-view="about"] #aboutAuthorPanel .about-author-facts > div {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--dropdown-border) 72%, transparent);
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Ozdobny zmienia tylko obudowę aplikacji. Zawartość zakładek pozostaje
+   układowo taka sama jak w wyglądzie domyślnym. */
+:root[data-app-appearance="ozdobny"] .page-view,
+:root[data-app-appearance="ozdobny"] .archive-view,
+:root[data-app-appearance="ozdobny"] .notes-view {
+  padding: 18px !important;
+  border-radius: 0 !important;
+  background: var(--dropdown-bg) !important;
+}
+
+:root[data-app-appearance="ozdobny"] .settings-panel,
+:root[data-app-appearance="ozdobny"] .about-content,
+:root[data-app-appearance="ozdobny"] .archive-browser,
+:root[data-app-appearance="ozdobny"] .archive-detail,
+:root[data-app-appearance="ozdobny"] .notes-sidebar,
+:root[data-app-appearance="ozdobny"] .notes-detail {
+  border-radius: 16px !important;
+  background: var(--dropdown-surface) !important;
+  box-shadow: var(--dropdown-shadow) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+:root[data-app-appearance="ozdobny"] .settings-panel .setting-choice,
+:root[data-app-appearance="ozdobny"] .settings-panel .setting-row,
+:root[data-app-appearance="ozdobny"] .settings-panel .setting-section,
+:root[data-app-appearance="ozdobny"] .settings-panel .chat-delay-section {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-app-appearance="ozdobny"] .archive-row,
+:root[data-app-appearance="ozdobny"] .note-row {
+  border-radius: 10px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Autor dziedziczy typografię aktywnego motywu, także w jasnych paletach. */
+:root[data-app-appearance="ozdobny"] .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy,
+:root[data-app-appearance="ozdobny"] .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy p,
+:root[data-app-appearance="ozdobny"] .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy dd {
+  color: var(--dropdown-text) !important;
+}
+
+:root[data-app-appearance="ozdobny"] .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy dt {
+  color: var(--dropdown-active-text) !important;
+}
+
+/* Ostateczny kontrast zakładki Autor dla każdej palety. Nie używamy tu
+   kolorów stałych, bo w jasnych motywach poprzednia reguła robiła tekst
+   niewidoczny na tle, a w ciemnych dawała zbyt ciemne etykiety. */
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy,
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy p,
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy dt,
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy dd {
+  color: var(--dropdown-text) !important;
+}
+
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-copy {
+  border-color: var(--dropdown-border);
+  background: var(--dropdown-surface);
+}
+
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-facts dt,
+:root .view-panel[data-view="about"] #aboutAuthorPanel .about-author-facts dd {
+  color: var(--dropdown-text) !important;
+  text-shadow: none !important;
+}
+
+.settings-panel .setting-choice > span,
+.settings-panel .setting-row > span {
+  min-width: 0 !important;
+}
+
+.chat-header {
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+}
+
+.chat-header > .radio-floating-player {
+  justify-self: end;
 }
