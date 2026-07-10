@@ -538,6 +538,7 @@ const state = {
   archiveDir: ARCHIVE_DIR,
   source: 'rozlaczony',
   appVersion: APP_VERSION,
+  update: { status: 'idle', version: '', message: '' },
   systemSettings: getPublicSystemSettings(),
   creatorId: DEFAULT_CREATOR_ID,
   currentCreator: publicCreator(LIVE_CREATORS[0]),
@@ -6760,6 +6761,27 @@ function installIpc() {
   });
   handleShell('shell:get-system-settings', async () => ({ ok: true, settings: getPublicSystemSettings() }));
   handleShell('shell:set-system-settings', async (patch) => ({ ok: true, settings: updateSystemSettings(patch) }));
+  handleShell('shell:check-for-updates', async () => {
+    if (!configureAutoUpdates()) {
+      return { ok: false, error: 'updates-unavailable' };
+    }
+    try {
+      const result = await autoUpdater.checkForUpdates();
+      const info = result && result.updateInfo ? result.updateInfo : null;
+      if (!info || !isVersionNewer(info.version, APP_VERSION)) {
+        publishUpdateState('current', null, 'Program jest aktualny.');
+        return { ok: true, status: 'current' };
+      }
+      latestUpdateInfo = info;
+      publishUpdateState('available', info, `Dostępna aktualizacja ${info.version}`);
+      return { ok: true, status: 'available', version: info.version };
+    } catch (error) {
+      publishUpdateState('error', null, getConnectionErrorMessage(error));
+      return { ok: false, error: getConnectionErrorMessage(error) };
+    }
+  });
+  handleShell('shell:download-update', async () => startBackgroundUpdateDownload(latestUpdateInfo));
+  handleShell('shell:install-update', async () => installDownloadedUpdate());
 
   handleShell('shell:open-in-browser', async () => {
     await shell.openExternal(getCurrentCreator().liveUrl);
@@ -6791,6 +6813,18 @@ let autoUpdatesConfigured = false;
 let updatePromptVisible = false;
 let updateInstallInProgress = false;
 let updateDownloadReject = null;
+let updateInstallAfterDownload = false;
+let latestUpdateInfo = null;
+let downloadedUpdateInfo = null;
+
+function publishUpdateState(status, info = null, message = '') {
+  state.update = {
+    status,
+    version: String(info && info.version ? info.version : ''),
+    message: String(message || '')
+  };
+  publishState();
+}
 
 function normalizeVersionParts(version) {
   return String(version || '')
@@ -6917,6 +6951,16 @@ function configureAutoUpdates() {
   autoUpdatesConfigured = true;
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
+  // Ustaw feed jawnie. Dzięki temu electron-updater nie opiera się na
+  // konfiguracji z poprzedniego pakietu i zawsze pobiera latest.yml z
+  // publicznego release GitHub dla aktualnej aplikacji.
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'baksik93',
+    repo: 'czatboxtt',
+    releaseType: 'release',
+    private: false
+  });
   autoUpdater.logger = {
     info() {},
     warn() {},
@@ -6925,12 +6969,20 @@ function configureAutoUpdates() {
   };
 
   autoUpdater.on('update-available', (info) => {
+    latestUpdateInfo = info || null;
+    downloadedUpdateInfo = null;
+    publishUpdateState('available', info, `Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
     setUpdateMessage(`Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
   });
 
   autoUpdater.on('update-downloaded', async (info) => {
+    downloadedUpdateInfo = info || latestUpdateInfo || null;
+    latestUpdateInfo = null;
+    updateDownloadReject = null;
     setUpdateMessage(`Aktualizacja ${info && info.version ? info.version : ''} pobrana.`.trim());
-    if (!updateInstallInProgress) {
+    if (!updateInstallAfterDownload) {
+      updateInstallInProgress = false;
+      publishUpdateState('downloaded', info, 'Aktualizacja jest gotowa do instalacji.');
       return;
     }
 
@@ -6948,6 +7000,9 @@ function configureAutoUpdates() {
   });
 
   autoUpdater.on('error', (error) => {
+    updateInstallInProgress = false;
+    updateInstallAfterDownload = false;
+    publishUpdateState('error', null, getConnectionErrorMessage(error));
     setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
     if (updateDownloadReject) {
       const reject = updateDownloadReject;
@@ -6960,6 +7015,7 @@ function configureAutoUpdates() {
 }
 
 async function beginUpdateInstall(info) {
+  updateInstallAfterDownload = true;
   updateInstallInProgress = true;
   await dialog.showMessageBox({
     type: 'info',
@@ -6978,6 +7034,37 @@ async function beginUpdateInstall(info) {
       .then(resolve)
       .catch(reject);
   });
+}
+
+async function startBackgroundUpdateDownload(info) {
+  if (!info || !info.version || updateInstallInProgress) {
+    return { ok: false, error: 'update-unavailable' };
+  }
+  updateInstallAfterDownload = false;
+  updateInstallInProgress = true;
+  publishUpdateState('downloading', info, `Pobieram aktualizację ${info.version}`);
+  try {
+    await new Promise((resolve, reject) => {
+      updateDownloadReject = reject;
+      autoUpdater.downloadUpdate().then(resolve).catch(reject);
+    });
+    return { ok: true };
+  } catch (error) {
+    updateInstallInProgress = false;
+    updateDownloadReject = null;
+    publishUpdateState('error', info, getConnectionErrorMessage(error));
+    return { ok: false, error: getConnectionErrorMessage(error) };
+  }
+}
+
+async function installDownloadedUpdate() {
+  if (!downloadedUpdateInfo) {
+    return { ok: false, error: 'update-not-downloaded' };
+  }
+  markUpdateCompleted(downloadedUpdateInfo.version, getUpdateNotes(downloadedUpdateInfo));
+  publishUpdateState('installing', downloadedUpdateInfo, 'Instaluję aktualizację.');
+  autoUpdater.quitAndInstall(true, true);
+  return { ok: true };
 }
 
 async function promptForUpdate(info) {

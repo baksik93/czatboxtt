@@ -23,6 +23,9 @@ const api = {
   openArchiveFolder: () => ipcRenderer.invoke('shell:open-archive-folder'),
   getSystemSettings: () => ipcRenderer.invoke('shell:get-system-settings'),
   setSystemSettings: (settings) => ipcRenderer.invoke('shell:set-system-settings', settings),
+  checkForUpdates: () => ipcRenderer.invoke('shell:check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('shell:download-update'),
+  installUpdate: () => ipcRenderer.invoke('shell:install-update'),
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on('shell:state', listener);

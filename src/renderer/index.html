@@ -16,14 +16,6 @@
             <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
           </div>
         </div>
-        <aside class="radio-floating-player" id="radioFloatingPlayer" hidden aria-live="polite">
-          <span class="radio-floating-icon" aria-hidden="true">♫</span>
-          <span class="radio-floating-copy">
-            <strong id="radioFloatingName">Radio</strong>
-            <small id="radioFloatingStatus">Odtwarzanie</small>
-          </span>
-          <button class="radio-floating-toggle" id="radioFloatingToggle" type="button" aria-label="Pauza radia">Ⅱ</button>
-        </aside>
         <div class="creator-picker creator-combobox">
           <label for="creatorInput">Twórca</label>
           <span class="creator-input-wrap">
@@ -574,28 +566,7 @@
               <p class="page-note" data-i18n="radio.note">Słuchaj wybranej stacji podczas pracy z czatem.</p>
             </div>
           </div>
-          <section class="radio-stations" aria-label="Stacje radiowe" data-i18n-aria-label="radio.aria">
-            <article class="radio-station-card">
-              <img src="./assets/radio-zet.jpg" alt="Radio ZET" loading="lazy" decoding="async">
-              <div class="radio-station-copy"><h2>Radio ZET</h2><p>Radio ZET online</p><audio controls preload="none" data-radio-audio data-radio-name="Radio ZET" data-radio-src="https://n-6-4.dcs.redcdn.pl/sc/o2/Eurozet/live/audio.livx" aria-label="Radio ZET"></audio></div>
-            </article>
-            <article class="radio-station-card">
-              <img src="./assets/rmf-fm.jpg" alt="RMF FM" loading="lazy" decoding="async">
-              <div class="radio-station-copy"><h2>RMF FM</h2><p>RMF FM online</p><audio controls preload="none" data-radio-audio data-radio-name="RMF FM" data-radio-src="https://rs6-krk2.rmfstream.pl/RMFFM48" aria-label="RMF FM"></audio></div>
-            </article>
-            <article class="radio-station-card">
-              <img src="./assets/radio-eska.jpg" alt="Radio Eska" loading="lazy" decoding="async">
-              <div class="radio-station-copy"><h2>Radio Eska</h2><p>Radio Eska online</p><audio controls preload="none" data-radio-audio data-radio-name="Radio Eska" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/2380-1.aac/playlist.m3u8" aria-label="Radio Eska"></audio></div>
-            </article>
-            <article class="radio-station-card">
-              <img src="./assets/eska-rock.jpg" alt="Eska Rock" loading="lazy" decoding="async">
-              <div class="radio-station-copy"><h2>Eska Rock</h2><p>Eska Rock online</p><audio controls preload="none" data-radio-audio data-radio-name="Eska Rock" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/5380-1.aac/playlist.m3u8" aria-label="Eska Rock"></audio></div>
-            </article>
-            <article class="radio-station-card">
-              <img src="./assets/eska2.jpg" alt="ESKA2" loading="lazy" decoding="async">
-              <div class="radio-station-copy"><h2>ESKA2</h2><p>ESKA2 online</p><audio controls preload="none" data-radio-audio data-radio-name="ESKA2" data-radio-src="https://radio.stream.smcdn.pl/icradio-p/1380-1.aac/playlist.m3u8" aria-label="ESKA2"></audio></div>
-            </article>
-          </section>
+          <section class="radio-stations" id="radioStations" aria-label="Stacje radiowe" data-i18n-aria-label="radio.aria"></section>
         </section>
 
         <section class="view-panel page-view coins-view" data-view="coins" hidden>
@@ -809,10 +780,11 @@
           </section>
           <section class="about-content about-panel" id="aboutAuthorPanel" role="tabpanel" data-about-panel="author" hidden>
             <section class="about-section about-author">
-              <figure class="about-author-media" aria-hidden="true">
+              <div class="about-faq-layout">
+              <figure class="about-faq-media" aria-hidden="true">
                 <img src="./assets/baksel-tlo.png" alt="" loading="lazy" decoding="async">
               </figure>
-              <div class="about-author-copy">
+              <div class="about-faq-copy about-author-copy">
                 <p class="about-author-intro">
                   Ogólnie nie lubię jakiejś opisówy o sobie robić, to zróbmy to na zasadzie powiem co tam lubię czy coś... Będzie mi łatwiej was zanudzić, skoro się zdecydowaliście to już sprawdzić...
                 </p>
@@ -833,12 +805,28 @@
                   <div><dt>Zbieram:</dt><dd>Figurki i karty Pokemon (jeden z albumów ma wartość 1k euro).</dd></div>
                 </dl>
               </div>
+              </div>
             </section>
           </section>
         </section>
       </section>
     </main>
 
+    <div class="app-update-action" id="appUpdateAction" hidden>
+      <span class="app-update-copy" id="appUpdateCopy">Dostępna aktualizacja</span>
+      <button class="app-update-button" id="appUpdateButton" type="button">Pobierz</button>
+    </div>
+    <aside class="radio-floating-player" id="radioFloatingPlayer" hidden aria-live="polite">
+      <img class="radio-floating-icon" id="radioFloatingIcon" src="./assets/radio-icon.svg" alt="" aria-hidden="true" draggable="false">
+      <span class="radio-floating-copy">
+        <strong id="radioFloatingName">Radio</strong>
+        <small id="radioFloatingStatus">Odtwarzanie</small>
+      </span>
+      <button class="radio-floating-toggle" id="radioFloatingToggle" type="button" aria-label="Pauza radia">Ⅱ</button>
+    </aside>
+    <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz odtwarzacz radia" title="Otwórz odtwarzacz radia" hidden>
+      <img id="radioLauncherIcon" src="./assets/radio-icon.svg" alt="" aria-hidden="true" draggable="false">
+    </button>
     <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
       <img src="./assets/czester-avatar.svg" alt="" aria-hidden="true">
       <span class="czester-launcher-badge" aria-hidden="true"></span>

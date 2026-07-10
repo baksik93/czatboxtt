@@ -1403,19 +1403,154 @@ const editNoteButton = document.getElementById('editNoteButton');
 const saveNoteButton = document.getElementById('saveNoteButton');
 const deleteNoteButton = document.getElementById('deleteNoteButton');
 const notesSearchEl = document.getElementById('notesSearch');
-const radioAudioElements = Array.from(document.querySelectorAll('[data-radio-audio]'));
+let radioAudioElements = [];
 const radioHlsInstances = new Map();
+const radioStationsEl = document.getElementById('radioStations');
 const radioFloatingPlayerEl = document.getElementById('radioFloatingPlayer');
+const radioFloatingIconEl = document.getElementById('radioFloatingIcon');
 const radioFloatingNameEl = document.getElementById('radioFloatingName');
 const radioFloatingStatusEl = document.getElementById('radioFloatingStatus');
 const radioFloatingToggleEl = document.getElementById('radioFloatingToggle');
+const radioLauncherEl = document.getElementById('radioLauncher');
+const radioLauncherIconEl = document.getElementById('radioLauncherIcon');
+const appUpdateActionEl = document.getElementById('appUpdateAction');
+const appUpdateCopyEl = document.getElementById('appUpdateCopy');
+const appUpdateButtonEl = document.getElementById('appUpdateButton');
 let activeRadioAudio = null;
+let radioFloatingOpen = false;
+
+function getUpdateUiText(key, version = '') {
+  const language = appLanguage || 'pl';
+  const texts = {
+    pl: {
+      available: `Dostępna aktualizacja${version ? ` ${version}` : ''}`,
+      downloading: 'Pobieranie aktualizacji...',
+      downloaded: 'Aktualizacja gotowa',
+      installing: 'Instalowanie aktualizacji...',
+      download: 'Pobierz',
+      install: 'Aktualizuj',
+      error: 'Nie udało się sprawdzić aktualizacji'
+    },
+    en: {
+      available: `Update available${version ? ` ${version}` : ''}`,
+      downloading: 'Downloading update...',
+      downloaded: 'Update ready',
+      installing: 'Installing update...',
+      download: 'Download',
+      install: 'Update',
+      error: 'Could not check for updates'
+    },
+    de: {
+      available: `Update verfügbar${version ? ` ${version}` : ''}`,
+      downloading: 'Update wird heruntergeladen...',
+      downloaded: 'Update bereit',
+      installing: 'Update wird installiert...',
+      download: 'Herunterladen',
+      install: 'Aktualisieren',
+      error: 'Update konnte nicht geprüft werden'
+    }
+  };
+  return texts[language] && texts[language][key] ? texts[language][key] : texts.pl[key];
+}
+
+function syncUpdateAction(update = null) {
+  if (!appUpdateActionEl || !appUpdateButtonEl) {
+    return;
+  }
+  const status = update && update.status ? update.status : 'idle';
+  const version = update && update.version ? update.version : '';
+  const visible = ['available', 'downloading', 'downloaded', 'installing', 'error'].includes(status);
+  appUpdateActionEl.hidden = !visible;
+  appUpdateActionEl.dataset.state = status;
+  if (appUpdateCopyEl) {
+    const copyKey = status === 'available' ? 'available'
+      : status === 'downloading' ? 'downloading'
+        : status === 'downloaded' ? 'downloaded'
+          : status === 'installing' ? 'installing' : 'error';
+    appUpdateCopyEl.textContent = getUpdateUiText(copyKey, version);
+  }
+  appUpdateButtonEl.disabled = status === 'downloading' || status === 'installing';
+  appUpdateButtonEl.textContent = status === 'downloaded'
+    ? getUpdateUiText('install')
+    : getUpdateUiText('download');
+}
+
+if (appUpdateButtonEl) {
+  appUpdateButtonEl.addEventListener('click', async () => {
+    appUpdateButtonEl.disabled = true;
+    if (appUpdateActionEl && appUpdateActionEl.dataset.state === 'downloaded') {
+      await window.tiktokLive.installUpdate().catch(() => {});
+      return;
+    }
+    await window.tiktokLive.downloadUpdate().catch(() => {});
+  });
+}
+
+const RADIO_STATIONS_BY_LANGUAGE = {
+  pl: [
+    ['Radio ZET', 'Radio ZET online', './assets/radio-zet.jpg', 'https://n-6-4.dcs.redcdn.pl/sc/o2/Eurozet/live/audio.livx'],
+    ['RMF FM', 'RMF FM online', './assets/rmf-fm.jpg', 'https://rs6-krk2.rmfstream.pl/RMFFM48'],
+    ['Radio Eska', 'Radio Eska online', './assets/radio-eska.jpg', 'https://radio.stream.smcdn.pl/icradio-p/2380-1.aac/playlist.m3u8'],
+    ['Eska Rock', 'Eska Rock online', './assets/eska-rock.jpg', 'https://radio.stream.smcdn.pl/icradio-p/5380-1.aac/playlist.m3u8'],
+    ['ESKA2', 'ESKA2 online', './assets/eska2.jpg', 'https://radio.stream.smcdn.pl/icradio-p/1380-1.aac/playlist.m3u8']
+  ],
+  de: [
+    ['1LIVE', '1LIVE online hören', './assets/radio-1live.jpg', 'https://wdr-1live-live.icecastssl.wdr.de/wdr/1live/live/mp3/128/stream.mp3'],
+    ['WDR 2', 'WDR 2 online hören', './assets/radio-wdr2.jpg', 'https://wdr-wdr2-rheinland.icecastssl.wdr.de/wdr/wdr2/rheinland/mp3/128/stream.mp3'],
+    ['WDR 4', 'WDR 4 online hören', './assets/radio-wdr4.jpg', 'https://wdr-wdr4-live.icecastssl.wdr.de/wdr/wdr4/live/mp3/128/stream.mp3'],
+    ['Antenne Bayern', 'Antenne Bayern online hören', './assets/radio-antenne-bayern.jpg', 'https://mp3channels.webradio.de/antenne?&aw_0_1st.playerid=AntenneBayernWebPlayer']
+  ],
+  en: [
+    ['BBC Radio 1', 'BBC Radio 1 live', './assets/radio-bbc1.jpg', 'https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one'],
+    ['BBC Radio 2', 'BBC Radio 2 live', './assets/radio-bbc2.jpg', 'https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two'],
+    ['Heart', 'Heart London live', './assets/radio-heart.jpg', 'https://media-ssl.musicradio.com/HeartLondon?isLoggedIn=false'],
+    ['Capital FM', 'Capital FM live', './assets/radio-capital.jpg', 'https://media-ssl.musicradio.com/Capital']
+  ]
+};
+
+function renderRadioStations() {
+  if (!radioStationsEl) {
+    return;
+  }
+  const stations = RADIO_STATIONS_BY_LANGUAGE[appLanguage] || RADIO_STATIONS_BY_LANGUAGE.pl;
+  radioStationsEl.replaceChildren(...stations.map(([name, description, icon, source]) => {
+    const card = document.createElement('article');
+    card.className = 'radio-station-card';
+    const image = document.createElement('img');
+    image.src = icon;
+    image.alt = name;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    const copy = document.createElement('div');
+    copy.className = 'radio-station-copy';
+    const title = document.createElement('h2');
+    title.textContent = name;
+    const note = document.createElement('p');
+    note.textContent = description;
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.preload = 'none';
+    audio.dataset.radioAudio = '';
+    audio.dataset.radioName = name;
+    audio.dataset.radioIcon = icon;
+    audio.dataset.radioSrc = source;
+    audio.setAttribute('aria-label', name);
+    copy.append(title, note, audio);
+    card.append(image, copy);
+    return card;
+  }));
+  radioAudioElements = Array.from(radioStationsEl.querySelectorAll('[data-radio-audio]'));
+}
 
 function updateRadioFloatingVisibility() {
   if (!radioFloatingPlayerEl) {
     return;
   }
-  radioFloatingPlayerEl.hidden = !activeRadioAudio || activeSection === 'radio';
+  const visible = Boolean(activeRadioAudio) && activeSection !== 'radio';
+  radioFloatingPlayerEl.hidden = !visible || !radioFloatingOpen;
+  if (radioLauncherEl) {
+    radioLauncherEl.hidden = !activeRadioAudio || activeSection === 'radio';
+  }
 }
 
 function initRadioPlayers() {
@@ -1489,6 +1624,15 @@ function stopRadioPlayers() {
     audio.dataset.radioInitialized = 'false';
   });
   activeRadioAudio = null;
+  radioFloatingOpen = false;
+  updateRadioFloatingVisibility();
+}
+
+function toggleRadioFloatingPlayer() {
+  if (!radioFloatingPlayerEl || !activeRadioAudio) {
+    return;
+  }
+  radioFloatingOpen = !radioFloatingOpen;
   updateRadioFloatingVisibility();
 }
 
@@ -1503,6 +1647,10 @@ if (radioFloatingToggleEl) {
       activeRadioAudio.pause();
     }
   });
+}
+
+if (radioLauncherEl) {
+  radioLauncherEl.addEventListener('click', toggleRadioFloatingPlayer);
 }
 const notesListEl = document.getElementById('notesList');
 const noteTitleInput = document.getElementById('noteTitleInput');
@@ -4045,6 +4193,8 @@ function applyIncomingSystemSettings(nextSettings, options = {}) {
     ttsSettings.voiceURI = '';
     saveTtsSettings();
     stopSpeech();
+    stopRadioPlayers();
+    renderRadioStations();
     applyI18n();
   } else {
     updateStatus();
@@ -6952,6 +7102,7 @@ window.tiktokLive.onState((nextState) => {
   syncCreatorOptions(state.creators);
   syncAvatarImages(state.avatarImages);
   syncAppVersion();
+  syncUpdateAction(state.update);
   syncCreatorInputValue();
   if (previousCreatorId && state.creatorId !== previousCreatorId) {
     if (wasOnline && visibleMessages.length) {
@@ -7916,6 +8067,7 @@ function setActiveSection(section) {
     loadBoxesArchiveSessions();
   }
   if (activeSection === 'radio' && sectionChanged) {
+    renderRadioStations();
     initRadioPlayers();
   }
   if (activeSection !== 'chatbox' && sectionChanged) {
