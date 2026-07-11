@@ -32,8 +32,6 @@ const TRANSMISSION_ARCHIVE_PREFIX = 'transmisja-';
 const AVATAR_DIR = path.join(__dirname, 'pic');
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 const AVATAR_EXTENSIONS = new Set(['.gif', '.jpg', '.jpeg', '.png', '.webp']);
-const PROGRAM_AUTHOR_UNIQUE_ID = 'baksik.93';
-const PROGRAM_AUTHOR_JOIN_TEXT = 'Budzimy śpiocha, Baksik dołączył do LIVE!';
 const HONDA_UNIQUE_ID = 'grzegorzpawemisiu';
 const HONDA_JOIN_TEXT = 'Honda wjechała na rejony.';
 const APP_VERSION = app.getVersion();
@@ -3305,9 +3303,6 @@ async function connectLiveChat() {
       }
       const event = formatMemberEvent(data);
       archiveChatMessage(event);
-      if (isProgramAuthorEvent(event)) {
-        sendProgramAuthorJoinAlert();
-      }
       if (isHondaJoinEvent(event)) {
         sendHondaJoinAlert();
       }
@@ -3730,10 +3725,6 @@ function formatMemberEvent(data) {
   return createDisplayEvent(data, 'member', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.member.join'
   });
-}
-
-function isProgramAuthorEvent(event) {
-  return normalizeUniqueId(event && event.uniqueId) === PROGRAM_AUTHOR_UNIQUE_ID;
 }
 
 function isHondaJoinEvent(event) {
@@ -6344,15 +6335,6 @@ function sendBattleAlert(multiplier) {
   });
 }
 
-function sendProgramAuthorJoinAlert() {
-  sendToShell('shell:battle-alert', {
-    tone: 'author',
-    textKey: 'battle.authorJoin',
-    uppercase: false,
-    text: PROGRAM_AUTHOR_JOIN_TEXT
-  });
-}
-
 function sendHondaJoinAlert() {
   sendToShell('shell:battle-alert', {
     tone: 'honda',
@@ -6761,6 +6743,14 @@ function installIpc() {
   });
   handleShell('shell:get-system-settings', async () => ({ ok: true, settings: getPublicSystemSettings() }));
   handleShell('shell:set-system-settings', async (patch) => ({ ok: true, settings: updateSystemSettings(patch) }));
+  handleShell('shell:set-big-picture', async (enabled) => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return { ok: false };
+    }
+    mainWindow.setFullScreen(Boolean(enabled));
+    layoutViews();
+    return { ok: true, enabled: mainWindow.isFullScreen() };
+  });
   handleShell('shell:check-for-updates', async () => {
     if (!configureAutoUpdates()) {
       return { ok: false, error: 'updates-unavailable' };
@@ -6810,18 +6800,17 @@ function setUpdateMessage(text) {
 }
 
 let autoUpdatesConfigured = false;
-let updatePromptVisible = false;
 let updateInstallInProgress = false;
 let updateDownloadReject = null;
-let updateInstallAfterDownload = false;
 let latestUpdateInfo = null;
 let downloadedUpdateInfo = null;
 
-function publishUpdateState(status, info = null, message = '') {
+function publishUpdateState(status, info = null, message = '', progress = 0) {
   state.update = {
     status,
     version: String(info && info.version ? info.version : ''),
-    message: String(message || '')
+    message: String(message || ''),
+    progress: Math.max(0, Math.min(100, Number(progress) || 0))
   };
   publishState();
 }
@@ -6980,28 +6969,21 @@ function configureAutoUpdates() {
     latestUpdateInfo = null;
     updateDownloadReject = null;
     setUpdateMessage(`Aktualizacja ${info && info.version ? info.version : ''} pobrana.`.trim());
-    if (!updateInstallAfterDownload) {
-      updateInstallInProgress = false;
-      publishUpdateState('downloaded', info, 'Aktualizacja jest gotowa do instalacji.');
-      return;
-    }
+    updateInstallInProgress = false;
+    publishUpdateState('downloaded', info, 'Aktualizacja jest gotowa do instalacji.', 100);
+  });
 
-    markUpdateCompleted(info && info.version ? info.version : '', getUpdateNotes(info));
-    await dialog.showMessageBox({
-      type: 'info',
-      title: 'Aktualizacja pobrana',
-      message: 'Aktualizacja pobrana',
-      detail: 'Program zostanie teraz zamknięty i uruchomiony ponownie, aby dokończyć instalację.',
-      buttons: ['OK'],
-      defaultId: 0,
-      noLink: true
-    }).catch(() => {});
-    autoUpdater.quitAndInstall(true, true);
+  autoUpdater.on('download-progress', (progress) => {
+    publishUpdateState(
+      'downloading',
+      latestUpdateInfo,
+      `Pobieram aktualizację ${latestUpdateInfo && latestUpdateInfo.version ? latestUpdateInfo.version : ''}`.trim(),
+      progress && progress.percent
+    );
   });
 
   autoUpdater.on('error', (error) => {
     updateInstallInProgress = false;
-    updateInstallAfterDownload = false;
     publishUpdateState('error', null, getConnectionErrorMessage(error));
     setUpdateMessage(`Błąd aktualizacji: ${getConnectionErrorMessage(error)}`);
     if (updateDownloadReject) {
@@ -7014,35 +6996,12 @@ function configureAutoUpdates() {
   return true;
 }
 
-async function beginUpdateInstall(info) {
-  updateInstallAfterDownload = true;
-  updateInstallInProgress = true;
-  await dialog.showMessageBox({
-    type: 'info',
-    title: 'Aktualizacja',
-    message: 'Rozpoczynam aktualizację',
-    detail: 'Funkcje programu będą niedostępne do czasu zakończenia aktualizacji i ponownego uruchomienia aplikacji.',
-    buttons: ['OK'],
-    defaultId: 0,
-    noLink: true
-  }).catch(() => {});
-
-  setUpdateMessage(`Pobieram aktualizację ${info && info.version ? info.version : ''}`.trim());
-  await new Promise((resolve, reject) => {
-    updateDownloadReject = reject;
-    autoUpdater.downloadUpdate()
-      .then(resolve)
-      .catch(reject);
-  });
-}
-
 async function startBackgroundUpdateDownload(info) {
   if (!info || !info.version || updateInstallInProgress) {
     return { ok: false, error: 'update-unavailable' };
   }
-  updateInstallAfterDownload = false;
   updateInstallInProgress = true;
-  publishUpdateState('downloading', info, `Pobieram aktualizację ${info.version}`);
+  publishUpdateState('downloading', info, `Pobieram aktualizację ${info.version}`, 0);
   try {
     await new Promise((resolve, reject) => {
       updateDownloadReject = reject;
@@ -7062,71 +7021,9 @@ async function installDownloadedUpdate() {
     return { ok: false, error: 'update-not-downloaded' };
   }
   markUpdateCompleted(downloadedUpdateInfo.version, getUpdateNotes(downloadedUpdateInfo));
-  publishUpdateState('installing', downloadedUpdateInfo, 'Instaluję aktualizację.');
+  publishUpdateState('installing', downloadedUpdateInfo, 'Instaluję aktualizację.', 100);
   autoUpdater.quitAndInstall(true, true);
   return { ok: true };
-}
-
-async function promptForUpdate(info) {
-  if (!info || !info.version || updatePromptVisible || updateInstallInProgress) {
-    return false;
-  }
-
-  if (!isVersionNewer(info.version, APP_VERSION)) {
-    return false;
-  }
-
-  updatePromptVisible = true;
-  const result = await dialog.showMessageBox({
-    type: 'question',
-    title: 'Dostępna aktualizacja',
-    message: `Dostępna jest aktualizacja ${info.version}`,
-    detail: `${getUpdateNotes(info)}\n\nObecna wersja: ${APP_VERSION}`,
-    buttons: ['Aktualizuj teraz', 'Uruchom bez aktualizacji'],
-    defaultId: 0,
-    cancelId: 1,
-    noLink: true
-  }).catch(() => ({ response: 1 }));
-  updatePromptVisible = false;
-
-  if (result.response !== 0) {
-    return false;
-  }
-
-  try {
-    await beginUpdateInstall(info);
-    return true;
-  } catch (error) {
-    updateInstallInProgress = false;
-    updateDownloadReject = null;
-    await dialog.showMessageBox({
-      type: 'error',
-      title: 'Błąd aktualizacji',
-      message: 'Nie udało się pobrać aktualizacji',
-      detail: getConnectionErrorMessage(error),
-      buttons: ['OK'],
-      defaultId: 0,
-      noLink: true
-    }).catch(() => {});
-    return false;
-  }
-}
-
-async function runStartupUpdateCheck() {
-  if (!configureAutoUpdates()) {
-    return false;
-  }
-
-  try {
-    const result = await autoUpdater.checkForUpdates();
-    const info = result && result.updateInfo ? result.updateInfo : null;
-    if (!info || !isVersionNewer(info.version, APP_VERSION)) {
-      return false;
-    }
-    return promptForUpdate(info);
-  } catch (error) {
-    return false;
-  }
 }
 
 function setupAutoUpdates() {
@@ -7135,16 +7032,11 @@ function setupAutoUpdates() {
   }
 
   const checkForUpdates = () => {
-    if (updateInstallInProgress || updatePromptVisible) {
+    if (updateInstallInProgress) {
       return;
     }
 
-    autoUpdater.checkForUpdates()
-      .then((result) => {
-        const info = result && result.updateInfo ? result.updateInfo : null;
-        return promptForUpdate(info);
-      })
-      .catch(() => {});
+    autoUpdater.checkForUpdates().catch(() => {});
   };
 
   setTimeout(checkForUpdates, 15000);
@@ -7219,11 +7111,6 @@ if (!singleInstanceLock) {
 
 if (singleInstanceLock) {
 app.whenReady().then(async () => {
-  const updateStarted = await runStartupUpdateCheck();
-  if (updateStarted) {
-    return new Promise(() => {});
-  }
-
   const connector = await import('tiktok-live-connector');
   ({
     TikTokLiveConnection,

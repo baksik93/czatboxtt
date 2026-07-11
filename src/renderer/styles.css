@@ -21,6 +21,7 @@
   --czester-muted: #9da5b2;
   --czester-accent: #ff4f7b;
   --czester-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+  --app-sidebar-width: 132px;
   --right-side-rail-offset: 0px;
 }
 
@@ -62,7 +63,7 @@ body {
   height: 100vh;
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr);
-  grid-template-rows: 74px minmax(0, 1fr);
+  grid-template-rows: 74px minmax(0, 1fr) 32px;
   background: #111214;
 }
 
@@ -76,7 +77,7 @@ body {
 
 .sidebar {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 2 / 4;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -124,6 +125,24 @@ body {
   min-height: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
+}
+
+.app-bottom-taskbar {
+  grid-column: 2;
+  grid-row: 3;
+  position: relative;
+  z-index: 20;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  display: block;
+  border-top: 1px solid var(--dropdown-border);
+  background: var(--dropdown-surface);
+  color: var(--dropdown-text);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.14);
+  font-size: 0;
+  line-height: 0;
+  text-decoration: none;
 }
 
 .recent-creators-column {
@@ -1113,7 +1132,7 @@ body {
   min-width: 0;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 930px) {
   .about-faq-layout {
     grid-template-columns: 1fr;
   }
@@ -1449,11 +1468,15 @@ body {
 
 .app-icon {
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.24));
   user-select: none;
+}
+
+.app-icon-retro {
+  display: none;
 }
 
 .title {
@@ -2140,10 +2163,6 @@ body {
 .battle-banner[data-tone="battle-stage"] {
   font-size: 13px;
   line-height: 1.3;
-}
-
-.battle-banner[data-tone="author"] {
-  background: #6b3fd6;
 }
 
 .battle-banner[data-tone="honda"] {
@@ -4004,7 +4023,7 @@ body {
 
 :root[data-app-appearance="ozdobny"] .chat-app {
   grid-template-columns: 136px minmax(0, 1fr);
-  grid-template-rows: 78px minmax(0, 1fr);
+  grid-template-rows: 78px minmax(0, 1fr) 32px;
   gap: 8px;
   padding: 8px;
   background:
@@ -6218,6 +6237,14 @@ body {
   box-shadow: none;
 }
 
+:root[data-app-appearance="retro-kb2"] .app-icon-modern {
+  display: none;
+}
+
+:root[data-app-appearance="retro-kb2"] .app-icon-retro {
+  display: block;
+}
+
 :root[data-app-appearance="retro-kb2"] .brand-copy {
   gap: 0;
 }
@@ -6480,11 +6507,589 @@ body {
   }
 }
 
+/* Końcowy kontrakt okien widgetów. Umieszczony na końcu celowo: starsze
+   warianty motywów nie mogą zmieniać geometrii Radia, Notatek ani Czestera. */
+#radioDialog,
+#notesDialog,
+#czesterPanel {
+  box-sizing: border-box !important;
+  padding: 22px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 18px !important;
+  background: var(--dropdown-bg) !important;
+  color: var(--dropdown-text) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: none !important;
+}
+
+#radioDialog,
+#notesDialog {
+  width: min(1040px, 94vw) !important;
+  max-width: 1040px !important;
+  max-height: min(760px, 88vh) !important;
+}
+
+#notesDialog {
+  height: min(760px, 88vh) !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  overflow: hidden !important;
+}
+
+#radioDialog .radio-dialog-header,
+#notesDialog .radio-dialog-header,
+#czesterPanel .radio-dialog-header {
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#radioDialog .radio-dialog-header h1,
+#notesDialog .radio-dialog-header h1,
+#czesterPanel .radio-dialog-header h1 {
+  margin: 0 0 6px !important;
+  color: var(--dropdown-text) !important;
+  font-size: 2em !important;
+  line-height: 1.2 !important;
+}
+
+#radioDialog .radio-dialog-close,
+#notesDialog .radio-dialog-close,
+#czesterPanel .radio-dialog-close {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 10px !important;
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+#notesDialog .notes-actions-toolbar {
+  margin: 0 0 14px !important;
+}
+
+#czesterPanel {
+  width: min(620px, calc(100vw - 44px)) !important;
+  height: min(640px, calc(100vh - 124px)) !important;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .notes-launcher img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+/* Pasek filtrów zawsze jest pełną, prostą belką od krawędzi do krawędzi. */
+.filters,
+:root[data-theme] .filters,
+:root[data-app-appearance] .filters,
+:root[data-theme][data-app-appearance] .filters {
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Scrollbary okien launcherów są osadzone wewnątrz i dziedziczą paletę. */
+#radioDialog,
+#notesDialog,
+#settingsDialog,
+#achievementsDialog,
+#coinsDialog,
+#czesterPanel,
+#radioDialog *,
+#notesDialog *,
+#settingsDialog *,
+#achievementsDialog *,
+#coinsDialog *,
+#czesterPanel * {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--dropdown-active-bg) 72%, var(--dropdown-border)) transparent;
+}
+
+#radioDialog,
+#notesDialog,
+#settingsDialog,
+#achievementsDialog,
+#coinsDialog,
+#czesterPanel {
+  scrollbar-gutter: stable;
+}
+
+#radioDialog *::-webkit-scrollbar,
+#notesDialog *::-webkit-scrollbar,
+#settingsDialog *::-webkit-scrollbar,
+#achievementsDialog *::-webkit-scrollbar,
+#coinsDialog *::-webkit-scrollbar,
+#czesterPanel *::-webkit-scrollbar,
+#radioDialog::-webkit-scrollbar,
+#notesDialog::-webkit-scrollbar,
+#settingsDialog::-webkit-scrollbar,
+#achievementsDialog::-webkit-scrollbar,
+#coinsDialog::-webkit-scrollbar,
+#czesterPanel::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+#radioDialog *::-webkit-scrollbar-track,
+#notesDialog *::-webkit-scrollbar-track,
+#settingsDialog *::-webkit-scrollbar-track,
+#achievementsDialog *::-webkit-scrollbar-track,
+#coinsDialog *::-webkit-scrollbar-track,
+#czesterPanel *::-webkit-scrollbar-track,
+#radioDialog::-webkit-scrollbar-track,
+#notesDialog::-webkit-scrollbar-track,
+#settingsDialog::-webkit-scrollbar-track,
+#achievementsDialog::-webkit-scrollbar-track,
+#coinsDialog::-webkit-scrollbar-track,
+#czesterPanel::-webkit-scrollbar-track {
+  margin-block: 10px;
+  background: transparent;
+}
+
+#radioDialog *::-webkit-scrollbar-thumb,
+#notesDialog *::-webkit-scrollbar-thumb,
+#settingsDialog *::-webkit-scrollbar-thumb,
+#achievementsDialog *::-webkit-scrollbar-thumb,
+#coinsDialog *::-webkit-scrollbar-thumb,
+#czesterPanel *::-webkit-scrollbar-thumb,
+#radioDialog::-webkit-scrollbar-thumb,
+#notesDialog::-webkit-scrollbar-thumb,
+#settingsDialog::-webkit-scrollbar-thumb,
+#achievementsDialog::-webkit-scrollbar-thumb,
+#coinsDialog::-webkit-scrollbar-thumb,
+#czesterPanel::-webkit-scrollbar-thumb {
+  min-height: 30px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dropdown-active-bg) 72%, var(--dropdown-border));
+  background-clip: content-box;
+}
+
+/* Pasek sekcji i pasek filtrów stanowią jeden wizualny moduł. */
+.section-nav,
+.filters,
+:root[data-theme] .section-nav,
+:root[data-theme] .filters,
+:root[data-app-appearance] .section-nav,
+:root[data-app-appearance] .filters {
+  background: var(--dropdown-bg) !important;
+  border-color: var(--dropdown-border) !important;
+}
+
+.section-nav .sidebar-button,
+.filter-button,
+:root[data-theme] .section-nav .sidebar-button,
+:root[data-theme] .filter-button,
+:root[data-app-appearance] .section-nav .sidebar-button,
+:root[data-app-appearance] .filter-button {
+  border-color: var(--dropdown-border) !important;
+  background: var(--dropdown-surface) !important;
+  color: var(--dropdown-muted) !important;
+}
+
+.section-nav .sidebar-button[data-active="true"],
+.filter-button[data-active="true"],
+:root[data-theme] .section-nav .sidebar-button[data-active="true"],
+:root[data-theme] .filter-button[data-active="true"],
+:root[data-app-appearance] .section-nav .sidebar-button[data-active="true"],
+:root[data-app-appearance] .filter-button[data-active="true"] {
+  border-color: var(--dropdown-active-border, var(--dropdown-border)) !important;
+  background: var(--dropdown-active-bg) !important;
+  color: var(--dropdown-active-text) !important;
+}
+
+/* Discordowy zestaw launcherów: wspólna bryła i glify z systemu aplikacji. */
+:root .app-bottom-taskbar-actions > button {
+  position: relative;
+  inset: auto;
+  width: 36px !important;
+  height: 36px !important;
+  flex: 0 0 36px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 12px !important;
+  background: var(--dropdown-surface) !important;
+  color: var(--dropdown-muted) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+:root .app-bottom-taskbar-actions > button:hover,
+:root .app-bottom-taskbar-actions > button:focus-visible {
+  border-color: var(--dropdown-active-border, var(--dropdown-border)) !important;
+  border-radius: 10px !important;
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+  transform: translateY(-1px) !important;
+}
+
+:root .app-bottom-taskbar-actions > button[data-open="true"],
+:root .app-bottom-taskbar-actions > button[aria-expanded="true"] {
+  border-color: var(--dropdown-active-border, var(--dropdown-border)) !important;
+  background: var(--dropdown-active-bg) !important;
+  color: var(--dropdown-active-text) !important;
+}
+
+:root .app-bottom-taskbar-actions .launcher-icon {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: currentColor !important;
+}
+
+:root .app-bottom-taskbar-actions .launcher-icon .ui-icon {
+  width: 21px !important;
+  height: 21px !important;
+  stroke-width: 1.9 !important;
+}
+
+:root .app-bottom-taskbar-actions .czester-launcher-badge {
+  display: none !important;
+}
+
+/* Nawigacja sekcji zastępuje lewą kolumnę we wszystkich motywach. */
+.chat-app,
+:root[data-app-appearance="ozdobny"] .chat-app,
+:root[data-app-appearance="retro-kb2"] .chat-app {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+:root[data-recent-creators="true"] .chat-app,
+:root[data-recent-creators="true"][data-app-appearance="ozdobny"] .chat-app,
+:root[data-recent-creators="true"][data-app-appearance="retro-kb2"] .chat-app {
+  grid-template-columns: minmax(0, 1fr) 82px !important;
+}
+
+.chat-header,
+:root[data-app-appearance="ozdobny"] .chat-header,
+:root[data-app-appearance="retro-kb2"] .chat-header {
+  grid-column: 1 / -1 !important;
+}
+
+.content,
+:root[data-app-appearance="ozdobny"] .content,
+:root[data-app-appearance="retro-kb2"] .content {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.section-nav {
+  grid-row: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--dropdown-border);
+  background: var(--dropdown-bg);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.section-nav .sidebar-button,
+:root[data-app-appearance="ozdobny"] .section-nav .sidebar-button,
+:root[data-app-appearance="retro-kb2"] .section-nav .sidebar-button {
+  width: auto !important;
+  min-width: max-content !important;
+  min-height: 34px !important;
+  padding: 0 16px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 9px !important;
+  background: var(--dropdown-surface) !important;
+  color: var(--dropdown-muted) !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+.section-nav .sidebar-button:hover {
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+}
+
+.section-nav .sidebar-button[data-active="true"] {
+  border-color: var(--dropdown-active-border, var(--dropdown-border)) !important;
+  background: var(--dropdown-active-bg) !important;
+  color: var(--dropdown-active-text) !important;
+}
+
+.content > .view-panel {
+  grid-row: 2 !important;
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-bottom-taskbar,
+.chat-app > .app-bottom-taskbar,
+:root[data-app-appearance="ozdobny"] .app-bottom-taskbar,
+:root[data-app-appearance="retro-kb2"] .app-bottom-taskbar {
+  grid-column: 1 !important;
+}
+
+.recent-creators-column,
+:root[data-app-appearance="retro-kb2"] .recent-creators-column {
+  grid-column: 2 !important;
+}
+
+.sidebar { display: none !important; }
+
+/* Logo w nagłówku ma jeden czytelny rozmiar we wszystkich wyglądach. */
+.app-icon,
+:root[data-app-appearance="ozdobny"] .app-icon,
+:root[data-app-appearance="retro-kb2"] .app-icon {
+  width: 52px !important;
+  height: 52px !important;
+}
+
+@media (max-width: 520px) {
+  .app-icon,
+  :root[data-app-appearance="ozdobny"] .app-icon,
+  :root[data-app-appearance="retro-kb2"] .app-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
+/* Wspólna responsywność wszystkich okien launcherów. */
+#settingsDialog,
+#achievementsDialog,
+#coinsDialog {
+  box-sizing: border-box !important;
+  width: min(1040px, calc(100vw - 56px)) !important;
+  height: min(760px, calc(100vh - 56px)) !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  padding: 22px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 18px !important;
+  background: var(--dropdown-bg) !important;
+  color: var(--dropdown-text) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: none !important;
+}
+
+#settingsDialog .radio-dialog-header,
+#achievementsDialog .radio-dialog-header,
+#coinsDialog .radio-dialog-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#settingsDialog .radio-dialog-header h1,
+#achievementsDialog .radio-dialog-header h1,
+#coinsDialog .radio-dialog-header h1 {
+  margin: 0 0 6px !important;
+  color: var(--dropdown-text) !important;
+  font-size: 2em !important;
+  line-height: 1.2 !important;
+}
+
+#settingsDialog .radio-dialog-close,
+#achievementsDialog .radio-dialog-close,
+#coinsDialog .radio-dialog-close {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 10px !important;
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .achievements-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .settings-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .coins-launcher img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+@media (max-width: 700px), (max-height: 620px) {
+  .radio-dialog-backdrop,
+  .notes-dialog-backdrop,
+  .widget-dialog-backdrop {
+    padding: 10px !important;
+  }
+
+  #radioDialog,
+  #notesDialog,
+  #settingsDialog,
+  #achievementsDialog,
+  #coinsDialog {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    height: calc(100vh - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+    overflow: auto !important;
+  }
+
+  #czesterPanel {
+    width: calc(100vw - 20px) !important;
+    height: max(180px, calc(100vh - var(--czester-anchor-bottom, 62px) - 10px)) !important;
+    max-height: calc(100vh - 20px) !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+}
+
+.widget-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10140;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(4, 8, 16, 0.68);
+}
+
+.widget-dialog-backdrop[hidden] { display: none; }
+
+#settingsDialog,
+#achievementsDialog {
+  box-sizing: border-box !important;
+  width: min(1040px, 94vw) !important;
+  height: min(760px, 88vh) !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  padding: 22px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 18px !important;
+  background: var(--dropdown-bg) !important;
+  color: var(--dropdown-text) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: none !important;
+}
+
+#settingsDialog .radio-dialog-header,
+#achievementsDialog .radio-dialog-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#settingsDialog .radio-dialog-header h1,
+#achievementsDialog .radio-dialog-header h1 {
+  margin: 0 0 6px !important;
+  color: var(--dropdown-text) !important;
+  font-size: 2em !important;
+  line-height: 1.2 !important;
+}
+
+#settingsDialog .radio-dialog-close,
+#achievementsDialog .radio-dialog-close {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 10px !important;
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .achievements-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .settings-launcher img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+@media (max-width: 700px), (max-height: 620px) {
+  .radio-dialog-backdrop,
+  .notes-dialog-backdrop,
+  .widget-dialog-backdrop {
+    padding: 10px !important;
+  }
+
+  #radioDialog,
+  #notesDialog,
+  #settingsDialog,
+  #achievementsDialog {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: calc(100vh - 20px) !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+    overflow: auto !important;
+  }
+
+  #notesDialog,
+  #settingsDialog,
+  #achievementsDialog {
+    height: calc(100vh - 20px) !important;
+  }
+
+  #czesterPanel {
+    width: calc(100vw - 20px) !important;
+    height: min(520px, calc(100vh - var(--czester-anchor-bottom, 62px) - 10px)) !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+}
+
 /* Retro KB2 correction: K2 is content-left + secondary column-right.
    Navigation and creator controls belong to the right column; chat filters stay above chat. */
 :root[data-app-appearance="retro-kb2"] .chat-app {
   grid-template-columns: minmax(0, 1fr) 282px;
-  grid-template-rows: 142px auto minmax(0, 1fr);
+  grid-template-rows: 142px auto minmax(0, 1fr) 32px;
   position: relative;
   overflow: hidden;
 }
@@ -6549,7 +7154,7 @@ body {
 
 :root[data-app-appearance="retro-kb2"] .sidebar {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 2 / 5;
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
@@ -7466,20 +8071,23 @@ body {
 :root[data-chat-style="compact"] .czester-floating-panel,
 :root[data-chat-style="spacious"] .czester-floating-panel,
 :root[data-chat-style="testowy"] .czester-floating-panel {
-  right: calc(22px + var(--right-side-rail-offset, 0px));
-  bottom: 96px;
-  width: min(430px, calc(100vw - 44px - var(--right-side-rail-offset, 0px)));
+  position: fixed;
+  left: var(--czester-anchor-x, 50%);
+  right: auto;
+  bottom: var(--czester-anchor-bottom, 62px);
+  transform: translateX(-50%);
+  width: min(620px, calc(100vw - 44px - var(--right-side-rail-offset, 0px)));
   height: min(640px, calc(100vh - 124px));
   min-height: 400px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0;
-  padding: 0;
-  border: 1px solid var(--czester-border);
-  border-radius: 26px;
-  background: var(--czester-panel-bg) !important;
-  color: var(--czester-text);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  padding: 22px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 18px;
+  background: var(--dropdown-bg) !important;
+  color: var(--dropdown-text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
   overflow: hidden;
   opacity: 1;
   -webkit-backdrop-filter: none;
@@ -7494,24 +8102,31 @@ body {
 :root[data-chat-style="compact"] .czester-floating-header,
 :root[data-chat-style="spacious"] .czester-floating-header,
 :root[data-chat-style="testowy"] .czester-floating-header {
-  min-height: 54px;
-  padding: 14px 54px 12px 16px;
-  border-bottom: 1px solid var(--czester-border);
-  background: var(--czester-panel-bg);
+  min-height: 0;
+  padding: 0;
+  margin-bottom: 18px;
+  border: 0;
+  background: var(--dropdown-bg);
 }
 
 .czester-floating-header h1 {
   gap: 8px;
-  font-size: 18px;
+  margin: 0 0 6px;
+  font-size: 2em;
   line-height: 1.2;
 }
 
+.czester-floating-header .page-note { margin: 0; }
+
 .czester-close {
-  top: 10px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  position: static;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 10px;
+  border-color: var(--dropdown-border);
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-text);
   box-shadow: none;
 }
 
@@ -7523,8 +8138,8 @@ body {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 10px;
-  padding: 12px;
-  background: var(--czester-panel-bg);
+  padding: 0;
+  background: var(--dropdown-bg);
 }
 
 .czester-messages,
@@ -9708,10 +10323,119 @@ body {
 
 .radio-stations {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(420px, 1fr));
   gap: 14px;
   width: 100%;
   max-width: none;
+}
+
+.radio-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10150;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(4, 8, 16, 0.68);
+}
+
+.radio-dialog-backdrop[hidden] { display: none; }
+
+.radio-dialog {
+  width: min(1040px, 94vw);
+  max-height: min(760px, 88vh);
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 18px;
+  background: var(--dropdown-bg);
+  color: var(--dropdown-text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.radio-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.radio-dialog-header h1 { margin: 0 0 6px; }
+
+.radio-dialog-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-text);
+  font: inherit;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.radio-dialog-close:hover,
+.radio-dialog-close:focus-visible { background: var(--dropdown-active-bg); }
+
+body.radio-dialog-open { overflow: hidden; }
+
+.notes-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10140;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(4, 8, 16, 0.68);
+}
+
+.notes-dialog-backdrop[hidden] { display: none; }
+
+.notes-dialog {
+  width: min(1040px, 94vw);
+  height: min(760px, 88vh);
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 18px;
+  background: var(--dropdown-bg);
+  color: var(--dropdown-text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.notes-dialog .archive-workspace { min-height: 0; }
+
+.notes-dialog-header { margin-bottom: 18px; }
+.notes-dialog-header h1 { margin: 0 0 6px; }
+.notes-dialog-header .page-note { margin: 0; }
+.notes-actions-toolbar { margin-bottom: 14px; }
+
+.notes-dialog-close {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 10px;
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-text);
+  font: inherit;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.notes-dialog-close:hover,
+.notes-dialog-close:focus-visible { background: var(--dropdown-active-bg); }
+
+@media (max-width: 600px) {
+  .radio-dialog-backdrop { padding: 10px; }
+  .radio-dialog { width: 100%; max-height: 94vh; padding: 16px; border-radius: 14px; }
 }
 
 .radio-station-card {
@@ -9754,7 +10478,7 @@ body {
 .radio-station-copy audio {
   display: block;
   width: 100%;
-  min-width: 0;
+  min-width: 280px;
   accent-color: var(--dropdown-active-text);
 }
 
@@ -9817,13 +10541,16 @@ body {
   cursor: pointer;
 }
 
-@media (max-width: 1050px) {
-  .radio-stations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 980px) {
+  .radio-stations { grid-template-columns: 1fr; }
   .radio-floating-player { width: min(220px, 24vw); min-width: 170px; }
 }
 
 @media (max-width: 620px) {
   .radio-stations { grid-template-columns: 1fr; }
+  .radio-station-card { grid-template-columns: 58px minmax(0, 1fr); gap: 10px; padding: 10px; }
+  .radio-station-card > img { width: 58px; height: 58px; }
+  .radio-station-copy audio { min-width: 0; }
   .radio-floating-player { width: 180px; min-width: 0; }
 }
 
@@ -10050,13 +10777,14 @@ body {
 
 .app-update-action {
   position: fixed;
-  left: 18px;
-  bottom: 18px;
+  left: 14px;
+  bottom: 56px;
   z-index: 10070;
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: min(360px, calc(100vw - 36px));
+  width: min(315px, calc(100vw - 28px));
+  box-sizing: border-box;
   padding: 8px 10px 8px 12px;
   border: 1px solid var(--dropdown-active-border, var(--dropdown-border));
   border-radius: 12px;
@@ -10071,6 +10799,7 @@ body {
 
 .app-update-copy {
   min-width: 0;
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -10095,6 +10824,157 @@ body {
 .app-update-button:disabled {
   cursor: wait;
   opacity: 0.62;
+}
+
+:root[data-app-appearance="ozdobny"] {
+  --app-sidebar-width: 152px;
+}
+
+:root[data-app-appearance="retro-kb2"] .app-bottom-taskbar {
+  grid-column: 1;
+  grid-row: 4;
+  height: auto;
+}
+
+/* Normalne wyglądy: launchery są elementami środkowego paska, nie pływającymi kołami. */
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar-actions {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .radio-launcher,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .notes-launcher,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .achievements-launcher,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .settings-launcher,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .coins-launcher,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .czester-launcher {
+  position: relative;
+  inset: auto;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: 1px solid var(--dropdown-active-border, var(--dropdown-border));
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--dropdown-active-bg), var(--dropdown-hover-bg));
+  color: var(--dropdown-active-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: none;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .radio-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .notes-launcher > span,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .achievements-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .settings-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .coins-launcher img,
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .czester-launcher img {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .notes-launcher > span {
+  display: block;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .czester-launcher-badge {
+  display: none !important;
+}
+
+/* Retro KB2 zachowuje dotychczasowe, pływające launchery. */
+:root[data-app-appearance="retro-kb2"] .app-bottom-taskbar-actions {
+  display: contents;
+}
+
+:root[data-app-appearance="retro-kb2"] .app-bottom-taskbar .radio-launcher {
+  position: fixed;
+  right: calc(94px + var(--right-side-rail-offset, 0px));
+  bottom: 22px;
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  z-index: 10060;
+}
+
+:root[data-app-appearance="retro-kb2"] .app-bottom-taskbar .czester-launcher {
+  position: fixed;
+  right: calc(22px + var(--right-side-rail-offset, 0px));
+  bottom: 22px;
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  z-index: 10060;
+}
+
+.update-progress-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.36);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.update-progress-backdrop[hidden] {
+  display: none;
+}
+
+.update-progress-modal {
+  width: min(420px, 100%);
+  padding: 24px 22px 20px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 18px;
+  background: var(--dropdown-surface);
+  color: var(--dropdown-text);
+  box-shadow: var(--dropdown-shadow);
+}
+
+.update-progress-modal h1 {
+  margin: 0 0 8px;
+  color: var(--dropdown-text);
+  font-size: 20px;
+}
+
+.update-progress-modal p {
+  margin: 0 0 18px;
+  color: var(--dropdown-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.update-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dropdown-border) 72%, transparent);
+}
+
+.update-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--dropdown-active-bg);
+  transition: width 180ms ease;
+}
+
+.update-progress-modal > strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--dropdown-muted);
+  font-size: 12px;
+  text-align: right;
 }
 
 /* Radio działa jak drugi launcher obok Czestera. Panel jest niezależny od
@@ -10144,4 +11024,165 @@ body {
 
 .radio-floating-icon {
   border-radius: 12px;
+}
+
+/* Dolny pasek jest osobnym wierszem siatki, nie nakładką na czat. */
+.chat-app > .app-bottom-taskbar {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  grid-column: 2;
+  grid-row: 3;
+  align-self: stretch;
+  z-index: 20;
+  overflow: hidden;
+  padding: 0 10px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 8px;
+  background: var(--dropdown-bg);
+  box-shadow: none;
+  color: var(--dropdown-text);
+  font: inherit;
+  font-size: 0;
+  line-height: 0;
+  text-decoration: none;
+}
+
+/* Środkowy pasek nie zabiera wysokości prawej kolumnie. */
+.chat-app {
+  grid-template-rows: 74px minmax(0, 1fr) 44px;
+}
+
+.chat-app > .recent-creators-column {
+  grid-row: 2 / 4;
+}
+
+:root[data-app-appearance="ozdobny"] .chat-app {
+  grid-template-rows: 78px minmax(0, 1fr) 44px;
+}
+
+:root[data-app-appearance="retro-kb2"] .chat-app {
+  grid-template-rows: 142px auto minmax(0, 1fr) 44px;
+}
+
+@media (max-width: 520px) {
+  .chat-app {
+    grid-template-rows: 74px minmax(0, 1fr) 44px;
+  }
+
+  :root[data-app-appearance="ozdobny"] .chat-app {
+    grid-template-rows: 76px minmax(0, 1fr) 44px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root[data-app-appearance="retro-kb2"] .chat-app {
+    grid-template-rows: 132px auto minmax(0, 1fr) 44px;
+  }
+
+  :root[data-app-appearance="retro-kb2"] .sidebar {
+    grid-column: 2;
+    grid-row: 2 / 5;
+  }
+
+  :root[data-app-appearance="retro-kb2"] .content {
+    grid-column: 1;
+    grid-row: 2 / 4;
+  }
+
+  :root[data-app-appearance="retro-kb2"] .app-bottom-taskbar {
+    grid-column: 1;
+    grid-row: 4;
+    border-color: var(--kb2-border);
+    border-radius: 0;
+    background: var(--kb2-content-bg);
+  }
+}
+
+/* Bezwzględnie ostatnia warstwa: trzy widgety korzystają z jednego standardu
+   okna niezależnie od wybranego motywu i wyglądu aplikacji. */
+#radioDialog,
+#notesDialog,
+#czesterPanel {
+  box-sizing: border-box !important;
+  padding: 22px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 18px !important;
+  background: var(--dropdown-bg) !important;
+  color: var(--dropdown-text) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: none !important;
+}
+
+#radioDialog,
+#notesDialog {
+  width: min(1040px, 94vw) !important;
+  max-width: 1040px !important;
+  max-height: min(760px, 88vh) !important;
+}
+
+#notesDialog {
+  height: min(760px, 88vh) !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  overflow: hidden !important;
+}
+
+#radioDialog .radio-dialog-header,
+#notesDialog .radio-dialog-header,
+#czesterPanel .radio-dialog-header {
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#radioDialog .radio-dialog-header h1,
+#notesDialog .radio-dialog-header h1,
+#czesterPanel .radio-dialog-header h1 {
+  margin: 0 0 6px !important;
+  color: var(--dropdown-text) !important;
+  font-size: 2em !important;
+  line-height: 1.2 !important;
+}
+
+#radioDialog .radio-dialog-close,
+#notesDialog .radio-dialog-close,
+#czesterPanel .radio-dialog-close {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 10px !important;
+  background: var(--dropdown-hover-bg) !important;
+  color: var(--dropdown-text) !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+#notesDialog .notes-actions-toolbar { margin: 0 0 14px !important; }
+
+#czesterPanel {
+  width: min(620px, calc(100vw - 44px)) !important;
+  height: min(640px, calc(100vh - 124px)) !important;
+}
+
+:root:not([data-app-appearance="retro-kb2"]) .app-bottom-taskbar .notes-launcher img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  object-fit: contain;
 }

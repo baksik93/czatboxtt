@@ -10,7 +10,8 @@
     <main class="chat-app">
       <header class="chat-header">
         <div class="brand">
-          <img class="app-icon" src="./assets/czatbox-icon.png" alt="" aria-hidden="true" draggable="false">
+          <img class="app-icon app-icon-modern" src="./assets/czatbox-icon-modern.png" alt="" aria-hidden="true" draggable="false">
+          <img class="app-icon app-icon-retro" src="./assets/czatbox-icon.png" alt="" aria-hidden="true" draggable="false">
           <div class="brand-copy">
             <div class="title">Czatbox TT</div>
             <div class="tagline">Śledź i zarządzaj czatem live w czasie rzeczywistym.</div>
@@ -28,18 +29,6 @@
         </div>
       </header>
 
-      <aside class="sidebar" aria-label="Nawigacja">
-        <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
-        <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
-        <button class="sidebar-button" type="button" data-section="notes">Notatki</button>
-        <button class="sidebar-button" type="button" data-section="coins">Monetki</button>
-        <button class="sidebar-button" type="button" data-section="boxes" data-i18n="nav.boxes" hidden>Skrzyneczki</button>
-        <button class="sidebar-button" type="button" data-section="achievements">Osiągnięcia</button>
-        <button class="sidebar-button" type="button" data-section="radio" data-i18n="nav.radio">Radio</button>
-        <button class="sidebar-button" type="button" data-section="settings">Ustawienia</button>
-        <button class="sidebar-button" type="button" data-section="about">O programie</button>
-      </aside>
-
       <aside class="recent-creators-column" aria-label="Ostatni twórcy" data-i18n-aria-label="recentCreators.aria">
         <section class="recent-creators-strip" id="recentCreatorsStrip" hidden>
           <button class="recent-creators-nav" id="recentCreatorsPrev" type="button" data-direction="-1" aria-label="Poprzedni twórcy" hidden>&uarr;</button>
@@ -49,6 +38,12 @@
       </aside>
 
       <section class="content">
+        <nav class="section-nav" aria-label="Nawigacja">
+          <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
+          <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
+          <button class="sidebar-button" type="button" data-section="boxes" data-i18n="nav.boxes" hidden>Skrzyneczki</button>
+          <button class="sidebar-button" type="button" data-section="about">O programie</button>
+        </nav>
         <section class="view-panel chat-view" data-view="chatbox">
           <section class="filters" aria-label="Filtry czatu">
             <div class="filter-buttons">
@@ -230,10 +225,15 @@
           </section>
         </section>
 
-        <section class="view-panel page-view" data-view="settings" hidden>
-          <div class="page-header">
-            <h1>Ustawienia</h1>
-          </div>
+        <div class="widget-dialog-backdrop" id="settingsDialogBackdrop" hidden>
+        <section class="widget-dialog settings-dialog page-view" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsDialogTitle">
+          <header class="radio-dialog-header">
+            <div>
+              <h1 id="settingsDialogTitle">Ustawienia</h1>
+              <p class="page-note">Dostosuj działanie i wygląd aplikacji.</p>
+            </div>
+            <button class="radio-dialog-close" id="settingsDialogClose" type="button" aria-label="Zamknij ustawienia" title="Zamknij ustawienia">×</button>
+          </header>
           <div class="settings-tabs" role="tablist" aria-label="Kategorie ustawień">
             <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true">Ogólne</button>
             <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">Wygląd</button>
@@ -251,6 +251,14 @@
               <label class="setting-row" for="galleryAvatars">
                 <span>Awatary z galerii</span>
                 <input class="setting-toggle" type="checkbox" id="galleryAvatars">
+              </label>
+              <label class="setting-row" for="deleteOldArchives">
+                <span>Wyczyść archiwa starsze niż 7 dni</span>
+                <input class="setting-toggle" type="checkbox" id="deleteOldArchives">
+              </label>
+              <label class="setting-row" for="bigPictureMode">
+                <span>Big Picture (pełny ekran)</span>
+                <input class="setting-toggle" type="checkbox" id="bigPictureMode">
               </label>
             </div>
           </section>
@@ -351,10 +359,13 @@
                     <small>Elegancki, nowoczesny układ aplikacji.</small>
                   </span>
                 </label>
-                <label class="setting-choice" for="appAppearanceRetroKb2">
-                  <input type="radio" id="appAppearanceRetroKb2" name="appAppearance" value="retro-kb2">
+                <label class="setting-choice theme-choice-locked" for="appAppearanceRetroKb2" data-locked="true">
+                  <input type="radio" id="appAppearanceRetroKb2" name="appAppearance" value="retro-kb2" disabled>
                   <span>
-                    <strong>Retro KB2</strong>
+                    <span class="theme-title-row">
+                      <strong>Retro KB2</strong>
+                      <span class="theme-lock-badge"><span data-ui-icon="lock" aria-hidden="true"></span><span>Zablokowany</span></span>
+                    </span>
                     <small>Lekki, archaiczny układ inspirowany starym blogowym K2: nagłówek i linki zamiast przycisków.</small>
                   </span>
                 </label>
@@ -389,6 +400,13 @@
                 <span class="setting-range">
                   <input type="range" id="ttsRate" min="0.7" max="1.3" step="0.1" value="1">
                   <output id="ttsRateValue">1.0x</output>
+                </span>
+              </label>
+              <label class="setting-row" for="ttsVolume">
+                <span>Głośność czytania wiadomości</span>
+                <span class="setting-range">
+                  <input type="range" id="ttsVolume" min="0" max="1" step="0.05" value="1">
+                  <output id="ttsVolumeValue">100%</output>
                 </span>
               </label>
             </div>
@@ -471,13 +489,19 @@
             </div>
           </section>
         </section>
+        </div>
 
-        <section class="view-panel notes-view" data-view="notes" hidden>
-          <section class="archive-toolbar">
+        <div class="notes-dialog-backdrop" id="notesDialogBackdrop" hidden>
+        <section class="notes-dialog notes-view" id="notesDialog" role="dialog" aria-modal="true" aria-labelledby="notesDialogTitle">
+          <header class="radio-dialog-header notes-dialog-header">
             <div>
-              <div class="archive-title" data-i18n="notes.title">Notatki</div>
-              <div class="archive-status" id="notesStatus" data-i18n="notes.status">Twój notes na zapiski</div>
+              <h1 id="notesDialogTitle" data-i18n="notes.title">Notatki</h1>
+              <p class="page-note" id="notesStatus" data-i18n="notes.status">Twój notes na zapiski</p>
             </div>
+            <button class="radio-dialog-close notes-dialog-close" id="notesDialogClose" type="button" aria-label="Zamknij notatki" title="Zamknij notatki">×</button>
+          </header>
+          <section class="archive-toolbar notes-actions-toolbar">
+            <div></div>
             <div class="archive-toolbar-actions">
               <button class="page-action archive-icon-action" type="button" id="newNoteButton">
                 <span data-ui-icon="questions" aria-hidden="true"></span>
@@ -524,18 +548,20 @@
             </section>
           </section>
         </section>
+        </div>
 
         <aside class="czester-floating-panel czester-view" id="czesterPanel" aria-label="Asystent Czester" data-i18n-aria-label="czester.title" hidden>
-          <div class="page-header czester-floating-header">
-            <h1><span class="czester-title-status" id="czesterTitleStatus" aria-hidden="true"></span><span data-i18n="czester.title">Asystent Czester</span></h1>
-            <button class="czester-close" id="czesterClose" type="button" aria-label="Zamknij Czestera" data-i18n-aria-label="czester.close">
-              <span aria-hidden="true">×</span>
-            </button>
+          <header class="radio-dialog-header czester-floating-header">
+            <div>
+              <h1><span class="czester-title-status" id="czesterTitleStatus" aria-hidden="true"></span><span data-i18n="czester.title">Asystent Czester</span></h1>
+              <p class="page-note">Twój asystent podczas transmisji.</p>
+            </div>
+            <button class="radio-dialog-close czester-close" id="czesterClose" type="button" aria-label="Zamknij Czestera" data-i18n-aria-label="czester.close">×</button>
             <div class="czester-ai-panel" id="czesterAiPanel" hidden>
               <span id="czesterAiStatus" data-i18n="czester.ai.checking">Sprawdzam pakiet lokalny...</span>
               <button class="page-action" type="button" id="czesterAiInstall" data-i18n="czester.ai.install">Zainstaluj pakiet AI</button>
             </div>
-          </div>
+          </header>
           <section class="czester-chat" aria-live="polite">
             <div class="czester-messages" id="czesterMessages"></div>
             <div class="czester-form czester-info-actions" id="czesterForm">
@@ -549,33 +575,28 @@
           </section>
         </aside>
 
-        <section class="view-panel page-view achievements-view" data-view="achievements" hidden>
-          <div class="page-header">
+        <div class="widget-dialog-backdrop" id="achievementsDialogBackdrop" hidden>
+        <section class="widget-dialog achievements-dialog page-view achievements-view" id="achievementsDialog" role="dialog" aria-modal="true" aria-labelledby="achievementsDialogTitle">
+          <header class="radio-dialog-header">
             <div>
-              <h1 data-i18n="achievements.title">Osiągnięcia</h1>
+              <h1 id="achievementsDialogTitle" data-i18n="achievements.title">Osiągnięcia</h1>
               <p class="page-note" data-i18n="achievements.note">Tutaj pojawią się cele i odznaki za aktywność podczas LIVE.</p>
             </div>
-          </div>
+            <button class="radio-dialog-close" id="achievementsDialogClose" type="button" aria-label="Zamknij osiągnięcia" title="Zamknij osiągnięcia">×</button>
+          </header>
           <section class="achievements-list" id="achievementsList" aria-live="polite"></section>
         </section>
+        </div>
 
-        <section class="view-panel page-view radio-view" data-view="radio" hidden>
-          <div class="page-header">
+        <div class="widget-dialog-backdrop" id="coinsDialogBackdrop" hidden>
+        <section class="widget-dialog coins-dialog page-view coins-view" id="coinsDialog" role="dialog" aria-modal="true" aria-labelledby="coinsDialogTitle">
+          <header class="radio-dialog-header">
             <div>
-              <h1 data-i18n="radio.title">Radio</h1>
-              <p class="page-note" data-i18n="radio.note">Słuchaj wybranej stacji podczas pracy z czatem.</p>
-            </div>
-          </div>
-          <section class="radio-stations" id="radioStations" aria-label="Stacje radiowe" data-i18n-aria-label="radio.aria"></section>
-        </section>
-
-        <section class="view-panel page-view coins-view" data-view="coins" hidden>
-          <div class="page-header">
-            <div>
-              <h1 data-i18n="coins.title">Monetki</h1>
+              <h1 id="coinsDialogTitle" data-i18n="coins.title">Monetki</h1>
               <p class="page-note" data-i18n="coins.note">Wesprzyj rozwój programu, kupując monetki TikTok z rabatem.</p>
             </div>
-          </div>
+            <button class="radio-dialog-close" id="coinsDialogClose" type="button" aria-label="Zamknij monetki" title="Zamknij monetki">×</button>
+          </header>
           <article class="coins-card">
             <span class="coins-card-icon" data-ui-icon="coin" aria-hidden="true"></span>
             <div class="coins-card-copy">
@@ -589,6 +610,7 @@
             </div>
           </article>
         </section>
+        </div>
 
         <section class="view-panel page-view boxes-view" data-view="boxes" hidden>
           <div class="page-header">
@@ -654,7 +676,6 @@
             <button class="settings-tab" type="button" role="tab" data-about-tab="program" data-active="true" aria-selected="true" aria-controls="aboutProgramPanel">O programie</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="news" aria-selected="false" aria-controls="aboutNewsPanel">Co nowego?</button>
             <button class="settings-tab" type="button" role="tab" data-about-tab="faq" aria-selected="false" aria-controls="aboutFaqPanel">FAQ</button>
-            <button class="settings-tab about-author-tab" type="button" role="tab" data-about-tab="author" aria-selected="false" aria-controls="aboutAuthorPanel" hidden>Autor</button>
           </div>
           <article class="about-content about-panel" id="aboutProgramPanel" role="tabpanel" data-about-panel="program">
             <div class="about-faq-layout">
@@ -706,11 +727,13 @@
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.changes.removeRanking">System odczytu wrzucanych skrzyneczek na transmisji live - opcja wsparcia dla live wzrastających.</li>
-                    <li data-i18n="about.news.changes.ai">Optymalizacja menu - kilka funkcji ciągle się odświeżało, powodując po czasie wolniejsze działanie programu.</li>
-                    <li data-i18n="about.news.changes.codes">Odświeżona zakładka O programie.</li>
-                    <li data-i18n="about.news.changes.multiplier">Poprawione błędy w wyglądzie aplikacji Retro KB2.</li>
-                    <li data-i18n="about.news.changes.radio">Dodano radio.</li>
+                    <li data-i18n="about.news.024.layout">Przebudowa wyglądu aplikacji</li>
+                    <li data-i18n="about.news.024.launcher">Wprowadzenie launchera z okienkami u dołu aplikacji</li>
+                    <li data-i18n="about.news.024.archives">Wprowadzenie automatycznego czyszczenia archiwów powyżej 7 dni w ustawieniach (by program wam nie zamulał i działał sprawniej).</li>
+                    <li data-i18n="about.news.024.ttsVolume">Możliwość zmiany głośności czytania wiadomości TTS na czacie.</li>
+                    <li data-i18n="about.news.024.icon">Nowa ikona programu.</li>
+                    <li data-i18n="about.news.024.bigPicture">Wprowadzono Big Picture.</li>
+                    <li data-i18n="about.news.024.about">Zmiany w zakładce O programie (polecam zajrzeć).</li>
                   </ul>
 
                   <h3 data-i18n="about.news.next.title">Co dalej:</h3>
@@ -771,51 +794,67 @@
 
                   <h3 data-i18n="about.faq.magic.question">A jest jakiś tajny, magiczny kod?</h3>
                   <p data-i18n="about.faq.magic.answer">
-                    Hm… Jak chcesz mnie lepiej poznać, to łapaj BOCI 4NEK ANT0 SIEK. Tylko potem mi nie narzekaj...
-                    Ostrzegam, ze jestem nudnym człowiekiem.
+                    Hm… Nie ma żadnych magicznych kodów, jest tylko tryb deweloperski, na którym sobie dodaje
+                    nowości i czasem je ukrywam pod kodem, by testerzy mogli sobie posprawdzać i przetestować nim
+                    wy je otrzymacie osobiście.
                   </p>
                 </div>
               </div>
             </section>
           </section>
-          <section class="about-content about-panel" id="aboutAuthorPanel" role="tabpanel" data-about-panel="author" hidden>
-            <section class="about-section about-author">
-              <div class="about-faq-layout">
-              <figure class="about-faq-media" aria-hidden="true">
-                <img src="./assets/baksel-tlo.png" alt="" loading="lazy" decoding="async">
-              </figure>
-              <div class="about-faq-copy about-author-copy">
-                <p class="about-author-intro">
-                  Ogólnie nie lubię jakiejś opisówy o sobie robić, to zróbmy to na zasadzie powiem co tam lubię czy coś... Będzie mi łatwiej was zanudzić, skoro się zdecydowaliście to już sprawdzić...
-                </p>
-                <dl class="about-author-facts">
-                  <div><dt>Ulubiony kolor:</dt><dd>Fiolet, niebieski, czerń, biel</dd></div>
-                  <div><dt>Ulubiona piosenka:</dt><dd>Małpa - Budzę Się (prod. Magiera)</dd></div>
-                  <div><dt>Ulubiony kompozytor:</dt><dd>Kai Rosenkranz</dd></div>
-                  <div><dt>Ulubiona gra:</dt><dd>Seria Gothic i Wiedźmin</dd></div>
-                  <div><dt>Ulubiony film:</dt><dd>Wszystkie Ironmany od Marvela, Gladiator</dd></div>
-                  <div><dt>Ulubiona postać z gier:</dt><dd>Gaunter O'dim</dd></div>
-                  <div><dt>Ulubione anime:</dt><dd>Berserk, Bleach, Naruto</dd></div>
-                  <div><dt>Ulubiona postać z anime:</dt><dd>Jiraiya z naruto i Shunsui Kyōraku z Bleach</dd></div>
-                  <div class="about-author-break"><dt>Nie lubię kolorów:</dt><dd>Czerwonych odcieni, denerwują mnie i stresują</dd></div>
-                  <div><dt>Denerwują mnie zachowania:</dt><dd>Gdy ktoś próbuje mnie naśladować lub gdy ktoś wytyka mi błąd, mimo że popełnia ten sam</dd></div>
-                  <div><dt>Bywam:</dt><dd>Sarkastyczny i dokuczliwy, nie odbieraj tego personalnie.</dd></div>
-                  <div><dt>Irytują mnie:</dt><dd>Kubki po fusiastej kawie w zlewie, jedzenie w łóżku, jak ktoś ma słomę w butach, a kreuje się na człowieka sukcesu.</dd></div>
-                  <div><dt>Zawsze chciałem:</dt><dd>Mieszkać w górach, kocham góry.</dd></div>
-                  <div><dt>Zbieram:</dt><dd>Figurki i karty Pokemon (jeden z albumów ma wartość 1k euro).</dd></div>
-                </dl>
-              </div>
-              </div>
-            </section>
-          </section>
         </section>
       </section>
+      <footer class="app-bottom-taskbar" id="appBottomTaskbar" aria-label="Pasek aplikacji">
+        <div class="app-bottom-taskbar-actions">
+          <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz radio" title="Otwórz radio" aria-haspopup="dialog" aria-controls="radioDialog">
+            <span class="launcher-icon" id="radioLauncherIcon" data-ui-icon="broadcast" aria-hidden="true"></span>
+          </button>
+          <button class="notes-launcher" id="notesLauncher" type="button" aria-label="Otwórz notatki" title="Otwórz notatki" aria-haspopup="dialog" aria-controls="notesDialog">
+            <span class="launcher-icon" data-ui-icon="message" aria-hidden="true"></span>
+          </button>
+          <button class="achievements-launcher" id="achievementsLauncher" type="button" aria-label="Otwórz osiągnięcia" title="Otwórz osiągnięcia" aria-haspopup="dialog" aria-controls="achievementsDialog">
+            <span class="launcher-icon" data-ui-icon="trophy" aria-hidden="true"></span>
+          </button>
+          <button class="settings-launcher" id="settingsLauncher" type="button" aria-label="Otwórz ustawienia" title="Otwórz ustawienia" aria-haspopup="dialog" aria-controls="settingsDialog">
+            <span class="launcher-icon" data-ui-icon="settings" aria-hidden="true"></span>
+          </button>
+          <button class="coins-launcher" id="coinsLauncher" type="button" aria-label="Otwórz monetki" title="Otwórz monetki" aria-haspopup="dialog" aria-controls="coinsDialog">
+            <span class="launcher-icon" data-ui-icon="coin" aria-hidden="true"></span>
+          </button>
+          <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
+            <span class="launcher-icon" data-ui-icon="chat" aria-hidden="true"></span>
+            <span class="czester-launcher-badge" aria-hidden="true"></span>
+          </button>
+        </div>
+      </footer>
     </main>
+
+    <div class="radio-dialog-backdrop" id="radioDialogBackdrop" hidden>
+      <section class="radio-dialog" id="radioDialog" role="dialog" aria-modal="true" aria-labelledby="radioDialogTitle">
+        <header class="radio-dialog-header">
+          <div>
+            <h1 id="radioDialogTitle" data-i18n="radio.title">Radio</h1>
+            <p class="page-note" data-i18n="radio.note">Słuchaj wybranej stacji podczas pracy z czatem.</p>
+          </div>
+          <button class="radio-dialog-close" id="radioDialogClose" type="button" aria-label="Zamknij radio" title="Zamknij radio">×</button>
+        </header>
+        <section class="radio-stations" id="radioStations" aria-label="Stacje radiowe" data-i18n-aria-label="radio.aria"></section>
+      </section>
+    </div>
 
     <div class="app-update-action" id="appUpdateAction" hidden>
       <span class="app-update-copy" id="appUpdateCopy">Dostępna aktualizacja</span>
       <button class="app-update-button" id="appUpdateButton" type="button">Pobierz</button>
     </div>
+    <div class="update-progress-backdrop" id="updateProgressBackdrop" hidden>
+      <section class="update-progress-modal" role="dialog" aria-modal="true" aria-labelledby="updateProgressTitle">
+        <h1 id="updateProgressTitle">Pobieranie aktualizacji</h1>
+        <p id="updateProgressCopy">Po zakończeniu instalacji aplikacja uruchomi się ponownie.</p>
+        <div class="update-progress-track" aria-hidden="true"><span id="updateProgressBar"></span></div>
+        <strong id="updateProgressPercent">0%</strong>
+      </section>
+    </div>
+
     <aside class="radio-floating-player" id="radioFloatingPlayer" hidden aria-live="polite">
       <img class="radio-floating-icon" id="radioFloatingIcon" src="./assets/radio-icon.svg" alt="" aria-hidden="true" draggable="false">
       <span class="radio-floating-copy">
@@ -824,15 +863,6 @@
       </span>
       <button class="radio-floating-toggle" id="radioFloatingToggle" type="button" aria-label="Pauza radia">Ⅱ</button>
     </aside>
-    <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz odtwarzacz radia" title="Otwórz odtwarzacz radia" hidden>
-      <img id="radioLauncherIcon" src="./assets/radio-icon.svg" alt="" aria-hidden="true" draggable="false">
-    </button>
-    <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
-      <img src="./assets/czester-avatar.svg" alt="" aria-hidden="true">
-      <span class="czester-launcher-badge" aria-hidden="true"></span>
-    </button>
-
-
     <section class="first-run-language" id="firstRunLanguage" role="dialog" aria-modal="true" aria-labelledby="firstRunLanguageTitle" hidden>
       <div class="first-run-language-card">
         <h1 id="firstRunLanguageTitle">Wybierz jÄ™zyk aplikacji</h1>

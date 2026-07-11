@@ -39,7 +39,6 @@ const HONDA_REDEEM_CODE = '10FDBF47H0NDA250';
 const OLLAMA_REDEEM_CODE = '19BM9ARV9IN1K4M4';
 const BOXES_REDEEM_CODE = '1THU3GS6TO7OL6S2';
 const MIAMI_VICE_REDEEM_CODE = 'LEAVEME0ALONE173';
-const AUTHOR_REDEEM_CODE = 'BOCI4NEKANT0SIEK';
 const OLLAMA_PROMPT_DECLINED_KEY = 'czatbox.czester.ollamaPromptDeclined';
 const CZESTER_AVATAR_SRC = './assets/czester-avatar.svg';
 const CZESTER_USER_AVATAR_KEY = 'czatbox.czester.userAvatar';
@@ -118,6 +117,7 @@ const UI_ICONS = {
   coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
   folder: '<path d="M3.5 7.5h6l1.7 2H20a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5h5l1.5 2H20"/>',
   refresh: '<path d="M19 8a7.5 7.5 0 1 0 .35 7"/><path d="M19 4.5V8h-3.5"/>',
+  settings: '<circle cx="12" cy="12" r="3.25"/><path d="M9.8 3.8h4.4l.65 2.15 1.75 1 2.2-.55 2.2 3.8-1.55 1.6v2l1.55 1.6-2.2 3.8-2.2-.55-1.75 1-.65 2.15H9.8l-.65-2.15-1.75-1-2.2.55L3 15.4l1.55-1.6v-2L3 10.2l2.2-3.8 2.2.55 1.75-1 .65-2.15Z"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.25 15.25 4.25 4.25"/>',
   archive: '<path d="M4.5 7.5h15v11h-15z"/><path d="M3.5 4.5h17v3h-17zM9 11h6"/>',
   broadcast: '<circle cx="12" cy="12" r="2.25"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 7.4a6.5 6.5 0 0 1 0 9.2M4.25 4.25a11 11 0 0 0 0 15.5M19.75 4.25a11 11 0 0 1 0 15.5"/>',
@@ -135,7 +135,9 @@ const DEFAULT_SYSTEM_SETTINGS = {
 const DEFAULT_GENERAL_SETTINGS = {
   multiplierNotifications: true,
   statsToolbox: true,
-  galleryAvatars: true
+  galleryAvatars: true,
+  deleteOldArchives: false,
+  bigPictureMode: false
 };
 const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
@@ -226,7 +228,6 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Kod przyjęty. Zakładka Skrzyneczki jest aktywna.',
     'settings.redeem.unlockedMiamiVice': 'Kod przyjęty. Motyw Miami Vice jest aktywny w ustawieniach wyglądu.',
-    'settings.redeem.unlockedAuthor': 'Kod przyjęty. Zakładka Autor jest aktywna.',
     'czester.title': 'Asystent Czester',
     'czester.note.before': 'Dzień dobry! Jestem Czester i spróbuję rozwiązać twój problem z tik tok. Pamiętaj, że dopiero ',
     'czester.note.learning': 'uczę się',
@@ -322,6 +323,8 @@ const I18N = {
     'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
     'settings.general.statsToolbox': 'Przybornik statystyk',
     'settings.general.galleryAvatars': 'Awatary z galerii',
+    'settings.general.deleteOldArchives': 'Wyczyść archiwa starsze niż 7 dni',
+    'settings.general.bigPicture': 'Big Picture (pełny ekran)',
     'settings.appearance.chatStyle': 'Styl czatu:',
     'settings.appearance.theme': 'Motyw:',
     'settings.appearance.appAppearance': 'Wygląd aplikacji:',
@@ -355,6 +358,7 @@ const I18N = {
     'settings.accessibility.voice': 'Głos',
     'settings.accessibility.systemVoice': 'Systemowy',
     'settings.accessibility.rate': 'Tempo',
+    'settings.accessibility.volume': 'Głośność czytania wiadomości',
     'settings.accessibility.delay': 'Opóźnienie czatu:',
     'settings.system.note': 'Informacje i ustawienia systemowe.',
     'settings.redeem.note': 'Wprowadź kod, aby odblokować dodatkowe funkcje.',
@@ -383,7 +387,6 @@ const I18N = {
     'about.tabs.program': 'O programie',
     'about.tabs.news': 'Co nowego?',
     'about.tabs.faq': 'FAQ',
-    'about.tabs.author': 'Autor',
     'radio.title': 'Radio',
     'radio.note': 'Słuchaj wybranej stacji podczas pracy z czatem.',
     'radio.aria': 'Stacje radiowe',
@@ -408,6 +411,13 @@ const I18N = {
     'about.news.changes.optimization': '',
     'about.news.changes.radio': 'Dodano radio.',
     'about.news.changes.viceCity': '',
+    'about.news.024.layout': 'Przebudowa wyglądu aplikacji',
+    'about.news.024.launcher': 'Wprowadzenie launchera z okienkami u dołu aplikacji',
+    'about.news.024.archives': 'Wprowadzenie automatycznego czyszczenia archiwów powyżej 7 dni w ustawieniach (by program wam nie zamulał i działał sprawniej).',
+    'about.news.024.ttsVolume': 'Możliwość zmiany głośności czytania wiadomości TTS na czacie.',
+    'about.news.024.icon': 'Nowa ikona programu.',
+    'about.news.024.bigPicture': 'Wprowadzono Big Picture.',
+    'about.news.024.about': 'Zmiany w zakładce O programie (polecam zajrzeć).',
     'about.news.next.ai': 'Dodatkowe funkcje AI w programie.',
     'about.news.intro': 'Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić wiadomości z wybranego live\'a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live\'a.',
     'about.news.features.title': 'Główne funkcje:',
@@ -463,7 +473,7 @@ const I18N = {
     'about.faq.codes.question': 'Skąd wziąć kody do Zrealizuj kod?',
     'about.faq.codes.answer': 'Zazwyczaj kody skrywają ukryte funkcje dla testerów bądź jakiś drobny prezent za wsparcie. Oficjalnie jest dostępny jeden, publiczny kod, który pobiera mózg Czestera, by był w stanie analizować co dzieje się na czacie: 19BM 9ARV 9IN1 K4M4. Powiedźmy, ze mam dobry humor, a rzadko mam zły, to łapcie coś, co przyda się na live wzrastające, nie ma za co: 1THU 3GS6 TO7O L6S2. Jak pojawią się w przyszłości jakieś kody, to pewnie będą to nagrody dla aktywnych członków społeczności Kamy, dlatego warto ją obserwować i wspierać.',
     'about.faq.magic.question': 'A jest jakiś tajny, magiczny kod?',
-    'about.faq.magic.answer': 'Hm… Jak chcesz mnie lepiej poznać, to łapaj BOCI 4NEK ANT0 SIEK. Tylko potem mi nie narzekaj... Ostrzegam, ze jestem nudnym człowiekiem.',
+    'about.faq.magic.answer': 'Hm… Nie ma żadnych magicznych kodów, jest tylko tryb deweloperski, na którym sobie dodaje nowości i czasem je ukrywam pod kodem, by testerzy mogli sobie posprawdzać i przetestować nim wy je otrzymacie osobiście.',
     'statsWidget.title': 'Statystyki LIVE',
     'statsWidget.viewers': 'Osoby na czacie',
     'statsWidget.messages': 'Wysłane wiadomości',
@@ -531,7 +541,6 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Bitwa zakończona',
     'battle.cancelled': 'Bitwa została przerwana',
-    'battle.authorJoin': 'Budzimy śpiocha, Baksik dołączył do LIVE!',
     'czester.notice.multiplier': 'Uwaga, zaraz w bitwie będzie mnożnik x{multiplier}.',
     'czester.notice.creatorFreeze': 'Twórca został zamrożony.',
     'czester.battle.start': 'Rozpoczęła się walka: {fighters}.',
@@ -618,7 +627,6 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Code accepted. The Boxes tab is active.',
     'settings.redeem.unlockedMiamiVice': 'Code accepted. The Miami Vice theme is active in appearance settings.',
-    'settings.redeem.unlockedAuthor': 'Code accepted. The Author tab is active.',
     'czester.title': 'Assistant Czester',
     'czester.note.before': 'Good day! I am Czester and I will try to solve your TikTok problem. Remember that I am still ',
     'czester.note.learning': 'learning',
@@ -714,6 +722,8 @@ const I18N = {
     'settings.general.multiplierNotifications': 'Multiplier notifications',
     'settings.general.statsToolbox': 'Statistics toolbox',
     'settings.general.galleryAvatars': 'Gallery avatars',
+    'settings.general.deleteOldArchives': 'Clear archives older than 7 days',
+    'settings.general.bigPicture': 'Big Picture (fullscreen)',
     'settings.appearance.chatStyle': 'Chat style:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'Application appearance:',
@@ -747,6 +757,7 @@ const I18N = {
     'settings.accessibility.voice': 'Voice',
     'settings.accessibility.systemVoice': 'System',
     'settings.accessibility.rate': 'Rate',
+    'settings.accessibility.volume': 'Message reading volume',
     'settings.accessibility.delay': 'Chat delay:',
     'settings.system.note': 'System information and settings.',
     'settings.redeem.note': 'Enter a code to unlock extra features.',
@@ -775,7 +786,6 @@ const I18N = {
     'about.tabs.program': 'About',
     'about.tabs.news': 'What’s new?',
     'about.tabs.faq': 'FAQ',
-    'about.tabs.author': 'Author',
     'radio.title': 'Radio',
     'radio.note': 'Listen to a selected station while working with the chat.',
     'radio.aria': 'Radio stations',
@@ -800,6 +810,13 @@ const I18N = {
     'about.news.changes.optimization': '',
     'about.news.changes.radio': 'Added radio.',
     'about.news.changes.viceCity': '',
+    'about.news.024.layout': 'Redesigned application appearance',
+    'about.news.024.launcher': 'Added the bottom launcher with application windows',
+    'about.news.024.archives': 'Added automatic cleanup of archives older than 7 days for better performance.',
+    'about.news.024.ttsVolume': 'Added TTS message reading volume control.',
+    'about.news.024.icon': 'New application icon.',
+    'about.news.024.bigPicture': 'Added Big Picture mode.',
+    'about.news.024.about': 'Updated the About section.',
     'about.news.next.ai': 'Additional AI features in the program.',
     'about.news.intro': 'Czatbox TT is an application for handling TikTok LIVE chat. It lets you follow messages from a selected live stream in a separate, readable window. The app was created for comfortable chat preview, conversation archiving and extra live events.',
     'about.news.features.title': 'Main features:',
@@ -854,7 +871,7 @@ const I18N = {
     'about.faq.codes.question': 'Where can I get codes for Redeem code?',
     'about.faq.codes.answer': 'Codes usually hide features for testers or small gifts for support. Officially there is one public code that downloads Czester\'s brain so it can analyze what is happening in chat: 19BM 9ARV 9IN1 K4M4. Let us say I am in a good mood, and I am rarely in a bad one, so here is something useful for growing LIVE streams: 1THU 3GS6 TO7O L6S2. If more codes appear in the future, they will probably be rewards for active members of Kama\'s community, so it is worth following and supporting her.',
     'about.faq.magic.question': 'Is there any secret, magical code?',
-    'about.faq.magic.answer': 'Hm… If you want to get to know me better, take BOCI 4NEK ANT0 SIEK. Just do not complain afterwards... I warn you, I am a boring person.',
+    'about.faq.magic.answer': 'There are no magical codes. There is only a developer mode where I add new features and sometimes hide them behind a code so testers can check them before everyone receives them.',
     'statsWidget.title': 'LIVE statistics',
     'statsWidget.viewers': 'People in chat',
     'statsWidget.messages': 'Messages sent',
@@ -922,7 +939,6 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle finished',
     'battle.cancelled': 'The battle was cancelled',
-    'battle.authorJoin': 'Wake up, sleepyhead, Baksik joined the LIVE!',
     'czester.notice.multiplier': 'Heads up, battle multiplier x{multiplier} is coming.',
     'czester.notice.creatorFreeze': 'The creator has been frozen.',
     'czester.battle.start': 'Battle started: {fighters}.',
@@ -1009,7 +1025,6 @@ const I18N = {
     'boxes.type.portal': 'Portal',
     'settings.redeem.unlockedBoxes': 'Code angenommen. Der Boxen-Tab ist aktiv.',
     'settings.redeem.unlockedMiamiVice': 'Code akzeptiert. Das Miami-Vice-Theme ist in den Darstellungseinstellungen aktiv.',
-    'settings.redeem.unlockedAuthor': 'Code akzeptiert. Der Tab Autor ist aktiv.',
     'czester.title': 'Assistent Czester',
     'czester.note.before': 'Guten Tag! Ich bin Czester und versuche, dein TikTok-Problem zu lösen. Denk daran, dass ich noch ',
     'czester.note.learning': 'lerne',
@@ -1105,6 +1120,8 @@ const I18N = {
     'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
     'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
     'settings.general.galleryAvatars': 'Avatare aus der Galerie',
+    'settings.general.deleteOldArchives': 'Archive löschen, die älter als 7 Tage sind',
+    'settings.general.bigPicture': 'Big Picture (Vollbild)',
     'settings.appearance.chatStyle': 'Chat-Stil:',
     'settings.appearance.theme': 'Theme:',
     'settings.appearance.appAppearance': 'App-Aussehen:',
@@ -1138,6 +1155,7 @@ const I18N = {
     'settings.accessibility.voice': 'Stimme',
     'settings.accessibility.systemVoice': 'System',
     'settings.accessibility.rate': 'Tempo',
+    'settings.accessibility.volume': 'Lautstärke beim Vorlesen von Nachrichten',
     'settings.accessibility.delay': 'Chat-Verzögerung:',
     'settings.system.note': 'Systeminformationen und Einstellungen.',
     'settings.redeem.note': 'Gib einen Code ein, um zusätzliche Funktionen freizuschalten.',
@@ -1166,7 +1184,6 @@ const I18N = {
     'about.tabs.program': 'Über das Programm',
     'about.tabs.news': 'Was ist neu?',
     'about.tabs.faq': 'FAQ',
-    'about.tabs.author': 'Autor',
     'radio.title': 'Radio',
     'radio.note': 'Höre einen ausgewählten Sender während der Arbeit mit dem Chat.',
     'radio.aria': 'Radiostationen',
@@ -1191,6 +1208,13 @@ const I18N = {
     'about.news.changes.optimization': '',
     'about.news.changes.radio': 'Radio hinzugefügt.',
     'about.news.changes.viceCity': '',
+    'about.news.024.layout': 'Das Erscheinungsbild der Anwendung wurde überarbeitet',
+    'about.news.024.launcher': 'Launcher mit Fenstern am unteren Rand hinzugefügt',
+    'about.news.024.archives': 'Automatische Bereinigung von Archiven älter als 7 Tage hinzugefügt.',
+    'about.news.024.ttsVolume': 'Lautstärkeregelung für das Vorlesen von TTS-Nachrichten hinzugefügt.',
+    'about.news.024.icon': 'Neues Programmsymbol.',
+    'about.news.024.bigPicture': 'Big Picture wurde hinzugefügt.',
+    'about.news.024.about': 'Der Bereich Über das Programm wurde aktualisiert.',
     'about.news.next.ai': 'Weitere AI-Funktionen im Programm.',
     'about.news.intro': 'Czatbox TT ist eine Anwendung zur Bedienung des TikTok-LIVE-Chats. Sie zeigt Nachrichten aus einem ausgewählten Live in einem separaten, gut lesbaren Fenster. Die App wurde für eine bequeme Chat-Ansicht, Archivierung und zusätzliche Live-Ereignisse erstellt.',
     'about.news.features.title': 'Hauptfunktionen:',
@@ -1245,7 +1269,7 @@ const I18N = {
     'about.faq.codes.question': 'Woher bekomme ich Codes für Code einlösen?',
     'about.faq.codes.answer': 'Codes verbergen meistens Funktionen für Tester oder kleine Geschenke für Unterstützung. Offiziell gibt es einen öffentlichen Code, der Czesters Gehirn herunterlädt, damit er analysieren kann, was im Chat passiert: 19BM 9ARV 9IN1 K4M4. Sagen wir, ich habe gute Laune, und schlechte Laune habe ich selten, also bekommt ihr etwas Nützliches für wachsende LIVE-Streams: 1THU 3GS6 TO7O L6S2. Wenn in Zukunft weitere Codes erscheinen, werden sie wahrscheinlich Belohnungen für aktive Mitglieder von Kamas Community sein. Es lohnt sich also, ihr zu folgen und sie zu unterstützen.',
     'about.faq.magic.question': 'Gibt es einen geheimen, magischen Code?',
-    'about.faq.magic.answer': 'Hm… Wenn du mich besser kennenlernen willst, nimm BOCI 4NEK ANT0 SIEK. Beschwer dich danach aber nicht... Ich warne dich, ich bin ein langweiliger Mensch.',
+    'about.faq.magic.answer': 'Es gibt keine magischen Codes. Es gibt nur einen Entwicklermodus, in dem ich neue Funktionen hinzufüge und manchmal hinter einem Code verstecke, damit Tester sie prüfen können, bevor alle sie erhalten.',
     'statsWidget.title': 'LIVE-Statistiken',
     'statsWidget.viewers': 'Personen im Chat',
     'statsWidget.messages': 'Gesendete Nachrichten',
@@ -1313,7 +1337,6 @@ const I18N = {
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle beendet',
     'battle.cancelled': 'Das Battle wurde abgebrochen',
-    'battle.authorJoin': 'Aufwachen, Schlafmütze, Baksik ist dem LIVE beigetreten!',
     'czester.notice.multiplier': 'Achtung, gleich kommt im Battle Multiplikator x{multiplier}.',
     'czester.notice.creatorFreeze': 'Der Creator wurde eingefroren.',
     'czester.battle.start': 'Battle gestartet: {fighters}.',
@@ -1381,6 +1404,8 @@ const appAppearanceInputs = Array.from(document.querySelectorAll('input[name="ap
 const multiplierNotificationsEl = document.getElementById('multiplierNotifications');
 const statsToolboxEl = document.getElementById('statsToolbox');
 const galleryAvatarsEl = document.getElementById('galleryAvatars');
+const deleteOldArchivesEl = document.getElementById('deleteOldArchives');
+const bigPictureModeEl = document.getElementById('bigPictureMode');
 const refreshArchiveButton = document.getElementById('refreshArchive');
 const openArchiveFolderButton = document.getElementById('openArchiveFolder');
 const archiveListEl = document.getElementById('archiveList');
@@ -1398,6 +1423,27 @@ const archiveSummaryModeratorsEl = document.getElementById('archiveSummaryModera
 const exportArchiveButton = document.getElementById('exportArchive');
 const deleteArchiveButton = document.getElementById('deleteArchive');
 const notesStatusEl = document.getElementById('notesStatus');
+const notesLauncherEl = document.getElementById('notesLauncher');
+const notesDialogBackdropEl = document.getElementById('notesDialogBackdrop');
+const notesDialogCloseEl = document.getElementById('notesDialogClose');
+const achievementsLauncherEl = document.getElementById('achievementsLauncher');
+const achievementsDialogBackdropEl = document.getElementById('achievementsDialogBackdrop');
+const achievementsDialogCloseEl = document.getElementById('achievementsDialogClose');
+const settingsLauncherEl = document.getElementById('settingsLauncher');
+const settingsDialogBackdropEl = document.getElementById('settingsDialogBackdrop');
+const settingsDialogCloseEl = document.getElementById('settingsDialogClose');
+const coinsLauncherEl = document.getElementById('coinsLauncher');
+const coinsDialogBackdropEl = document.getElementById('coinsDialogBackdrop');
+const coinsDialogCloseEl = document.getElementById('coinsDialogClose');
+
+// Wszystkie okna launcherów muszą być dziećmi body. W przeciwnym razie
+// transformacje i siatka głównej aplikacji ograniczają position: fixed.
+[
+  notesDialogBackdropEl,
+  achievementsDialogBackdropEl,
+  settingsDialogBackdropEl,
+  coinsDialogBackdropEl
+].filter(Boolean).forEach((backdrop) => document.body.appendChild(backdrop));
 const newNoteButton = document.getElementById('newNoteButton');
 const editNoteButton = document.getElementById('editNoteButton');
 const saveNoteButton = document.getElementById('saveNoteButton');
@@ -1413,9 +1459,17 @@ const radioFloatingStatusEl = document.getElementById('radioFloatingStatus');
 const radioFloatingToggleEl = document.getElementById('radioFloatingToggle');
 const radioLauncherEl = document.getElementById('radioLauncher');
 const radioLauncherIconEl = document.getElementById('radioLauncherIcon');
+const radioDialogBackdropEl = document.getElementById('radioDialogBackdrop');
+const radioDialogEl = document.getElementById('radioDialog');
+const radioDialogCloseEl = document.getElementById('radioDialogClose');
 const appUpdateActionEl = document.getElementById('appUpdateAction');
 const appUpdateCopyEl = document.getElementById('appUpdateCopy');
 const appUpdateButtonEl = document.getElementById('appUpdateButton');
+const updateProgressBackdropEl = document.getElementById('updateProgressBackdrop');
+const updateProgressTitleEl = document.getElementById('updateProgressTitle');
+const updateProgressCopyEl = document.getElementById('updateProgressCopy');
+const updateProgressBarEl = document.getElementById('updateProgressBar');
+const updateProgressPercentEl = document.getElementById('updateProgressPercent');
 let activeRadioAudio = null;
 let radioFloatingOpen = false;
 
@@ -1459,6 +1513,7 @@ function syncUpdateAction(update = null) {
   }
   const status = update && update.status ? update.status : 'idle';
   const version = update && update.version ? update.version : '';
+  const progress = Math.max(0, Math.min(100, Number(update && update.progress) || 0));
   const visible = ['available', 'downloading', 'downloaded', 'installing', 'error'].includes(status);
   appUpdateActionEl.hidden = !visible;
   appUpdateActionEl.dataset.state = status;
@@ -1473,13 +1528,39 @@ function syncUpdateAction(update = null) {
   appUpdateButtonEl.textContent = status === 'downloaded'
     ? getUpdateUiText('install')
     : getUpdateUiText('download');
+
+  const modalVisible = status === 'downloading' || status === 'installing';
+  if (updateProgressBackdropEl) {
+    updateProgressBackdropEl.hidden = !modalVisible;
+  }
+  if (updateProgressTitleEl) {
+    updateProgressTitleEl.textContent = status === 'installing'
+      ? 'Instalowanie aktualizacji'
+      : 'Pobieranie aktualizacji';
+  }
+  if (updateProgressCopyEl) {
+    updateProgressCopyEl.textContent = status === 'installing'
+      ? 'Po zakończeniu instalacji aplikacja uruchomi się ponownie.'
+      : 'Po zakończeniu pobierania instalacja będzie gotowa do uruchomienia.';
+  }
+  if (updateProgressBarEl) {
+    updateProgressBarEl.style.width = `${progress}%`;
+  }
+  if (updateProgressPercentEl) {
+    updateProgressPercentEl.textContent = `${Math.round(progress)}%`;
+  }
 }
 
 if (appUpdateButtonEl) {
   appUpdateButtonEl.addEventListener('click', async () => {
     appUpdateButtonEl.disabled = true;
-    if (appUpdateActionEl && appUpdateActionEl.dataset.state === 'downloaded') {
+    const updateState = appUpdateActionEl ? appUpdateActionEl.dataset.state : '';
+    if (updateState === 'downloaded') {
       await window.tiktokLive.installUpdate().catch(() => {});
+      return;
+    }
+    if (updateState === 'error') {
+      await window.tiktokLive.checkForUpdates().catch(() => {});
       return;
     }
     await window.tiktokLive.downloadUpdate().catch(() => {});
@@ -1546,10 +1627,31 @@ function updateRadioFloatingVisibility() {
   if (!radioFloatingPlayerEl) {
     return;
   }
-  const visible = Boolean(activeRadioAudio) && activeSection !== 'radio';
+  const visible = Boolean(activeRadioAudio);
   radioFloatingPlayerEl.hidden = !visible || !radioFloatingOpen;
   if (radioLauncherEl) {
-    radioLauncherEl.hidden = !activeRadioAudio || activeSection === 'radio';
+    radioLauncherEl.hidden = false;
+  }
+}
+
+function setRadioDialogOpen(open) {
+  if (!radioDialogBackdropEl) {
+    return;
+  }
+  const shouldOpen = Boolean(open);
+  if (shouldOpen) {
+    if (radioStationsEl && !radioStationsEl.childElementCount) {
+      renderRadioStations();
+    }
+    initRadioPlayers();
+  }
+  radioDialogBackdropEl.hidden = !shouldOpen;
+  document.body.classList.toggle('radio-dialog-open', shouldOpen);
+  radioLauncherEl?.setAttribute('aria-expanded', String(shouldOpen));
+  if (shouldOpen) {
+    radioDialogCloseEl?.focus();
+  } else {
+    radioLauncherEl?.focus();
   }
 }
 
@@ -1650,8 +1752,21 @@ if (radioFloatingToggleEl) {
 }
 
 if (radioLauncherEl) {
-  radioLauncherEl.addEventListener('click', toggleRadioFloatingPlayer);
+  radioLauncherEl.addEventListener('click', () => {
+    setRadioDialogOpen(Boolean(radioDialogBackdropEl?.hidden));
+  });
 }
+radioDialogCloseEl?.addEventListener('click', () => setRadioDialogOpen(false));
+radioDialogBackdropEl?.addEventListener('click', (event) => {
+  if (event.target === radioDialogBackdropEl) {
+    setRadioDialogOpen(false);
+  }
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && radioDialogBackdropEl && !radioDialogBackdropEl.hidden) {
+    setRadioDialogOpen(false);
+  }
+});
 const notesListEl = document.getElementById('notesList');
 const noteTitleInput = document.getElementById('noteTitleInput');
 const noteContentInput = document.getElementById('noteContentInput');
@@ -1691,6 +1806,8 @@ const ttsSkipSpamMessagesEl = document.getElementById('ttsSkipSpamMessages');
 const ttsVoiceEl = document.getElementById('ttsVoice');
 const ttsRateEl = document.getElementById('ttsRate');
 const ttsRateValueEl = document.getElementById('ttsRateValue');
+const ttsVolumeEl = document.getElementById('ttsVolume');
+const ttsVolumeValueEl = document.getElementById('ttsVolumeValue');
 const chatDelayEl = document.getElementById('chatDelay');
 const chatDelayValueEl = document.getElementById('chatDelayValue');
 const systemAutoLaunchEl = document.getElementById('systemAutoLaunch');
@@ -1833,6 +1950,7 @@ function loadTtsSettings() {
       enabled: Boolean(saved.enabled),
       voiceURI: typeof saved.voiceURI === 'string' ? saved.voiceURI : '',
       rate: Number(saved.rate) || 1,
+      volume: Number.isFinite(Number(saved.volume)) ? Number(saved.volume) : 1,
       skipVulgarNicknames: Boolean(saved.skipVulgarNicknames),
       skipVulgarMessages: Boolean(saved.skipVulgarMessages),
       skipSpamMessages: Boolean(saved.skipSpamMessages)
@@ -1842,6 +1960,7 @@ function loadTtsSettings() {
       enabled: false,
       voiceURI: '',
       rate: 1,
+      volume: 1,
       skipVulgarNicknames: false,
       skipVulgarMessages: false,
       skipSpamMessages: false
@@ -1858,7 +1977,9 @@ function normalizeGeneralSettings(value) {
   return {
     multiplierNotifications: true,
     statsToolbox: next.statsToolbox !== false,
-    galleryAvatars: next.galleryAvatars !== false
+    galleryAvatars: next.galleryAvatars !== false,
+    deleteOldArchives: Boolean(next.deleteOldArchives),
+    bigPictureMode: Boolean(next.bigPictureMode)
   };
 }
 
@@ -1967,7 +2088,7 @@ function saveAppTheme() {
 
 function loadAppAppearance() {
   const saved = localStorage.getItem(APP_APPEARANCE_SETTINGS_KEY);
-  return APP_APPEARANCES.includes(saved) ? saved : 'standard';
+  return APP_APPEARANCES.includes(saved) && saved !== 'retro-kb2' ? saved : 'standard';
 }
 
 function saveAppAppearance() {
@@ -2029,7 +2150,6 @@ function loadRedeemedFeatures() {
       ollamaPrompt: Boolean(saved.ollamaPrompt) || codes.includes(OLLAMA_REDEEM_CODE),
       boxesPanel: Boolean(saved.boxesPanel) || codes.includes(BOXES_REDEEM_CODE),
       miamiViceTheme: Boolean(saved.miamiViceTheme) || codes.includes(MIAMI_VICE_REDEEM_CODE),
-      authorPanel: Boolean(saved.authorPanel) || codes.includes(AUTHOR_REDEEM_CODE),
       codes
     };
   } catch {
@@ -2038,7 +2158,6 @@ function loadRedeemedFeatures() {
       ollamaPrompt: false,
       boxesPanel: false,
       miamiViceTheme: false,
-      authorPanel: false,
       codes: []
     };
   }
@@ -2072,10 +2191,6 @@ function isMiamiViceThemeUnlocked() {
   return Boolean(redeemedFeatures.miamiViceTheme) || loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
 }
 
-function isAuthorPanelUnlocked() {
-  return Boolean(redeemedFeatures.authorPanel) || loadStoredRedeemCodes().includes(AUTHOR_REDEEM_CODE);
-}
-
 function syncLockedThemeChoice(inputId, unlocked) {
   const input = document.getElementById(inputId);
   const choice = input ? input.closest('.setting-choice') : null;
@@ -2099,9 +2214,6 @@ function syncRedeemedFeatureNavigation() {
   const boxesPanel = viewPanels.find((panel) => panel.dataset.view === 'boxes');
   const unlocked = isBoxesPanelUnlocked();
   const miamiUnlocked = isMiamiViceThemeUnlocked();
-  const authorButton = aboutTabs.find((button) => button.dataset.aboutTab === 'author');
-  const authorPanel = aboutPanels.find((panel) => panel.dataset.aboutPanel === 'author');
-  const authorUnlocked = isAuthorPanelUnlocked();
 
   if (boxesButton) {
     boxesButton.hidden = !unlocked;
@@ -2113,15 +2225,6 @@ function syncRedeemedFeatureNavigation() {
     setActiveSection('chatbox');
   }
 
-  if (authorButton) {
-    authorButton.hidden = !authorUnlocked;
-  }
-  if (authorPanel && !authorUnlocked) {
-    authorPanel.hidden = true;
-  }
-  if (!authorUnlocked && activeAboutTab === 'author') {
-    setActiveAboutTab('program');
-  }
 
   syncLockedThemeChoice('themeMiamiVice', miamiUnlocked);
   if (!miamiUnlocked && appTheme === 'miami-vice') {
@@ -2174,8 +2277,7 @@ function redeemEnteredCode() {
   if (normalized !== HONDA_REDEEM_CODE
     && normalized !== OLLAMA_REDEEM_CODE
     && normalized !== BOXES_REDEEM_CODE
-    && normalized !== MIAMI_VICE_REDEEM_CODE
-    && normalized !== AUTHOR_REDEEM_CODE) {
+    && normalized !== MIAMI_VICE_REDEEM_CODE) {
     setRedeemCodeStatus(t('settings.redeem.invalid'), 'error');
     return;
   }
@@ -2192,9 +2294,6 @@ function redeemEnteredCode() {
   if (normalized === MIAMI_VICE_REDEEM_CODE) {
     redeemedFeatures.miamiViceTheme = true;
   }
-  if (normalized === AUTHOR_REDEEM_CODE) {
-    redeemedFeatures.authorPanel = true;
-  }
   redeemedFeatures.codes = Array.from(new Set([...(redeemedFeatures.codes || []), normalized]));
   saveRedeemedFeatures();
   redeemCodeInput.value = '';
@@ -2205,9 +2304,7 @@ function redeemEnteredCode() {
         ? t('settings.redeem.unlockedBoxes')
         : normalized === MIAMI_VICE_REDEEM_CODE
           ? t('settings.redeem.unlockedMiamiVice')
-          : normalized === AUTHOR_REDEEM_CODE
-            ? t('settings.redeem.unlockedAuthor')
-            : t('settings.redeem.unlocked'),
+          : t('settings.redeem.unlocked'),
     'success'
   );
   syncRedeemedFeatureNavigation();
@@ -2340,7 +2437,9 @@ function syncAppearanceFromValues(nextValues = {}) {
   const nextTheme = APP_THEMES.includes(nextValues.appTheme) && isAppThemeUnlocked(nextValues.appTheme)
     ? nextValues.appTheme
     : appTheme;
-  const nextAppearance = APP_APPEARANCES.includes(nextValues.appAppearance) ? nextValues.appAppearance : appAppearance;
+  const nextAppearance = APP_APPEARANCES.includes(nextValues.appAppearance) && nextValues.appAppearance !== 'retro-kb2'
+    ? nextValues.appAppearance
+    : appAppearance;
   const chatStyleChanged = nextChatStyle !== chatStyle;
   const appearanceChanged = nextAppearance !== appAppearance;
   const changed = chatStyleChanged || nextTheme !== appTheme || nextAppearance !== appAppearance;
@@ -3894,6 +3993,8 @@ function applyI18n() {
     ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
     ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
     ['label[for="galleryAvatars"] > span', 'settings.general.galleryAvatars'],
+    ['label[for="deleteOldArchives"] > span', 'settings.general.deleteOldArchives'],
+    ['label[for="bigPictureMode"] > span', 'settings.general.bigPicture'],
     ['.appearance-chat-style-section .settings-heading', 'settings.appearance.chatStyle'],
     ['.appearance-theme-section .settings-heading', 'settings.appearance.theme'],
     ['.appearance-app-section .settings-heading', 'settings.appearance.appAppearance'],
@@ -3926,6 +4027,7 @@ function applyI18n() {
     ['label[for="ttsSkipSpamMessages"] > span', 'settings.accessibility.skipSpamMessages'],
     ['label[for="ttsVoice"] > span', 'settings.accessibility.voice'],
     ['label[for="ttsRate"] > span', 'settings.accessibility.rate'],
+    ['label[for="ttsVolume"] > span', 'settings.accessibility.volume'],
     ['.chat-delay-section .settings-heading', 'settings.accessibility.delay'],
     ['.settings-panel[data-settings-panel="redeem"] .page-note', 'settings.redeem.note'],
     ['label[for="redeemCodeInput"] > span:first-child', 'settings.redeem.codeLabel'],
@@ -3933,7 +4035,6 @@ function applyI18n() {
     ['.settings-tab[data-about-tab="program"]', 'about.tabs.program'],
     ['.settings-tab[data-about-tab="news"]', 'about.tabs.news'],
     ['.settings-tab[data-about-tab="faq"]', 'about.tabs.faq'],
-    ['.settings-tab[data-about-tab="author"]', 'about.tabs.author'],
     ['#aboutProgramPanel > p:nth-of-type(1)', 'about.program.p1'],
     ['#aboutProgramPanel > p:nth-of-type(2)', 'about.program.p2'],
     ['#aboutProgramPanel .about-section h2', 'about.program.how'],
@@ -3980,6 +4081,10 @@ function applyAppearanceSettings() {
 
   appAppearanceInputs.forEach((input) => {
     input.checked = input.value === appAppearance;
+    if (input.value === 'retro-kb2') {
+      input.disabled = true;
+      input.checked = false;
+    }
   });
 }
 
@@ -4038,7 +4143,11 @@ function initAppearanceSettings() {
         return;
       }
 
-      appAppearance = APP_APPEARANCES.includes(input.value) ? input.value : 'standard';
+      if (input.value === 'retro-kb2' || !APP_APPEARANCES.includes(input.value)) {
+        applyAppearanceSettings();
+        return;
+      }
+      appAppearance = input.value;
       saveAppAppearance();
       applyAppearanceSettings();
       broadcastAppearanceSettings();
@@ -4056,6 +4165,12 @@ function applyGeneralSettings() {
   }
   if (galleryAvatarsEl) {
     galleryAvatarsEl.checked = generalSettings.galleryAvatars;
+  }
+  if (deleteOldArchivesEl) {
+    deleteOldArchivesEl.checked = generalSettings.deleteOldArchives;
+  }
+  if (bigPictureModeEl) {
+    bigPictureModeEl.checked = generalSettings.bigPictureMode;
   }
 
   if (statusStatsEl) {
@@ -4076,8 +4191,28 @@ function applyGeneralSettings() {
   }
 }
 
+async function cleanupArchivesOlderThanSevenDays() {
+  if (!generalSettings.deleteOldArchives || !window.tiktokLive) {
+    return;
+  }
+  const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  try {
+    const result = await window.tiktokLive.listArchives();
+    const oldArchives = result && result.ok && Array.isArray(result.archives)
+      ? result.archives.filter((entry) => Number(entry.modifiedAt) > 0 && Number(entry.modifiedAt) < cutoff)
+      : [];
+    await Promise.all(oldArchives.map((entry) => window.tiktokLive.deleteArchive(entry.id).catch(() => null)));
+  } catch {
+    // Czyszczenie archiwów nie może blokować uruchomienia aplikacji.
+  }
+}
+
 function initGeneralSettings() {
   applyGeneralSettings();
+  cleanupArchivesOlderThanSevenDays();
+  if (generalSettings.bigPictureMode) {
+    window.tiktokLive?.setBigPicture?.(true).catch(() => {});
+  }
 
   if (multiplierNotificationsEl) {
     multiplierNotificationsEl.addEventListener('change', () => {
@@ -4102,6 +4237,28 @@ function initGeneralSettings() {
       applyGeneralSettings();
       userAvatars.clear();
       renderVisibleMessages();
+    });
+  }
+  if (deleteOldArchivesEl) {
+    deleteOldArchivesEl.addEventListener('change', () => {
+      generalSettings.deleteOldArchives = deleteOldArchivesEl.checked;
+      saveGeneralSettings();
+      if (generalSettings.deleteOldArchives) {
+        cleanupArchivesOlderThanSevenDays();
+      }
+    });
+  }
+  if (bigPictureModeEl) {
+    bigPictureModeEl.addEventListener('change', async () => {
+      const requested = bigPictureModeEl.checked;
+      try {
+        const result = await window.tiktokLive.setBigPicture(requested);
+        generalSettings.bigPictureMode = Boolean(result && result.ok && result.enabled);
+      } catch {
+        generalSettings.bigPictureMode = false;
+      }
+      bigPictureModeEl.checked = generalSettings.bigPictureMode;
+      saveGeneralSettings();
     });
   }
 
@@ -4320,6 +4477,11 @@ function clampSpeechRate(value) {
   return Math.min(1.3, Math.max(0.7, rate));
 }
 
+function clampSpeechVolume(value) {
+  const volume = Number(value);
+  return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 1;
+}
+
 function stopSpeech() {
   speechQueue.length = 0;
   speechPlaying = false;
@@ -4350,6 +4512,7 @@ function playNextSpeech() {
   }
 
   utterance.rate = clampSpeechRate(ttsSettings.rate);
+  utterance.volume = clampSpeechVolume(ttsSettings.volume);
   utterance.onend = () => {
     speechPlaying = false;
     playNextSpeech();
@@ -4521,6 +4684,13 @@ function syncTtsControls() {
   if (ttsRateValueEl) {
     ttsRateValueEl.value = `${clampSpeechRate(ttsSettings.rate).toFixed(1)}x`;
   }
+  if (ttsVolumeEl) {
+    ttsVolumeEl.value = String(clampSpeechVolume(ttsSettings.volume));
+    ttsVolumeEl.disabled = !supported;
+  }
+  if (ttsVolumeValueEl) {
+    ttsVolumeValueEl.value = `${Math.round(clampSpeechVolume(ttsSettings.volume) * 100)}%`;
+  }
 }
 
 function syncChatDelayControls() {
@@ -4582,6 +4752,14 @@ function initTextToSpeech() {
   if (ttsRateEl) {
     ttsRateEl.addEventListener('input', () => {
       ttsSettings.rate = clampSpeechRate(ttsRateEl.value);
+      saveTtsSettings();
+      syncTtsControls();
+    });
+  }
+
+  if (ttsVolumeEl) {
+    ttsVolumeEl.addEventListener('input', () => {
+      ttsSettings.volume = clampSpeechVolume(ttsVolumeEl.value);
       saveTtsSettings();
       syncTtsControls();
     });
@@ -5597,9 +5775,19 @@ function setCzesterPanelOpen(open) {
   czesterLauncherEl.setAttribute('aria-expanded', String(nextOpen));
   document.documentElement.dataset.czesterOpen = String(nextOpen);
   if (nextOpen) {
+    positionCzesterPanel();
     renderCzester();
     refreshCzesterAiStatus();
   }
+}
+
+function positionCzesterPanel() {
+  if (!czesterPanelEl || !czesterLauncherEl) {
+    return;
+  }
+  const launcherRect = czesterLauncherEl.getBoundingClientRect();
+  czesterPanelEl.style.setProperty('--czester-anchor-x', `${launcherRect.left + launcherRect.width / 2}px`);
+  czesterPanelEl.style.setProperty('--czester-anchor-bottom', `${Math.max(8, window.innerHeight - launcherRect.top + 10)}px`);
 }
 
 function toggleCzesterPanel() {
@@ -7287,7 +7475,7 @@ settingsTabs.forEach((button) => {
 
 function setActiveAboutTab(tab) {
   const requestedPanel = aboutPanels.find((panel) => panel.dataset.aboutPanel === tab);
-  const nextTab = requestedPanel && (tab !== 'author' || isAuthorPanelUnlocked()) ? tab : 'program';
+  const nextTab = requestedPanel ? tab : 'program';
   activeAboutTab = nextTab;
 
   aboutTabs.forEach((button) => {
@@ -8066,10 +8254,6 @@ function setActiveSection(section) {
   if (activeSection === 'boxes' && (sectionChanged || !boxesArchiveEntries.length) && now - boxesArchiveLastRefreshAt > SECTION_AUTO_REFRESH_COOLDOWN_MS) {
     loadBoxesArchiveSessions();
   }
-  if (activeSection === 'radio' && sectionChanged) {
-    renderRadioStations();
-    initRadioPlayers();
-  }
   if (activeSection !== 'chatbox' && sectionChanged) {
     stopSpeech();
   }
@@ -8133,6 +8317,88 @@ if (czesterLauncherEl) {
   czesterLauncherEl.addEventListener('click', toggleCzesterPanel);
 }
 
+function setNotesDialogOpen(open) {
+  if (!notesDialogBackdropEl) {
+    return;
+  }
+  const nextOpen = Boolean(open);
+  notesDialogBackdropEl.hidden = !nextOpen;
+  notesLauncherEl?.setAttribute('aria-expanded', String(nextOpen));
+  if (nextOpen) {
+    refreshNotes();
+    notesDialogCloseEl?.focus();
+  } else {
+    notesLauncherEl?.focus();
+  }
+}
+
+notesLauncherEl?.addEventListener('click', () => {
+  setNotesDialogOpen(Boolean(notesDialogBackdropEl?.hidden));
+});
+notesDialogCloseEl?.addEventListener('click', () => setNotesDialogOpen(false));
+notesDialogBackdropEl?.addEventListener('click', (event) => {
+  if (event.target === notesDialogBackdropEl) {
+    setNotesDialogOpen(false);
+  }
+});
+
+function setWidgetDialogOpen(backdrop, launcher, closeButton, open, onOpen) {
+  if (!backdrop) {
+    return;
+  }
+  const nextOpen = Boolean(open);
+  backdrop.hidden = !nextOpen;
+  launcher?.setAttribute('aria-expanded', String(nextOpen));
+  if (nextOpen) {
+    onOpen?.();
+    closeButton?.focus();
+  } else {
+    launcher?.focus();
+  }
+}
+
+achievementsLauncherEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(achievementsDialogBackdropEl, achievementsLauncherEl, achievementsDialogCloseEl, Boolean(achievementsDialogBackdropEl?.hidden), renderAchievements);
+});
+achievementsDialogCloseEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(achievementsDialogBackdropEl, achievementsLauncherEl, achievementsDialogCloseEl, false);
+});
+achievementsDialogBackdropEl?.addEventListener('click', (event) => {
+  if (event.target === achievementsDialogBackdropEl) {
+    setWidgetDialogOpen(achievementsDialogBackdropEl, achievementsLauncherEl, achievementsDialogCloseEl, false);
+  }
+});
+
+settingsLauncherEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(settingsDialogBackdropEl, settingsLauncherEl, settingsDialogCloseEl, Boolean(settingsDialogBackdropEl?.hidden));
+});
+settingsDialogCloseEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(settingsDialogBackdropEl, settingsLauncherEl, settingsDialogCloseEl, false);
+});
+settingsDialogBackdropEl?.addEventListener('click', (event) => {
+  if (event.target === settingsDialogBackdropEl) {
+    setWidgetDialogOpen(settingsDialogBackdropEl, settingsLauncherEl, settingsDialogCloseEl, false);
+  }
+});
+
+coinsLauncherEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, Boolean(coinsDialogBackdropEl?.hidden));
+});
+coinsDialogCloseEl?.addEventListener('click', () => {
+  setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
+});
+coinsDialogBackdropEl?.addEventListener('click', (event) => {
+  if (event.target === coinsDialogBackdropEl) {
+    setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (czesterPanelEl && !czesterPanelEl.hidden) {
+    positionCzesterPanel();
+  }
+});
+
 if (czesterCloseEl) {
   czesterCloseEl.addEventListener('click', () => setCzesterPanelOpen(false));
 }
@@ -8140,6 +8406,18 @@ if (czesterCloseEl) {
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && czesterPanelEl && !czesterPanelEl.hidden) {
     setCzesterPanelOpen(false);
+  }
+  if (event.key === 'Escape' && notesDialogBackdropEl && !notesDialogBackdropEl.hidden) {
+    setNotesDialogOpen(false);
+  }
+  if (event.key === 'Escape' && achievementsDialogBackdropEl && !achievementsDialogBackdropEl.hidden) {
+    setWidgetDialogOpen(achievementsDialogBackdropEl, achievementsLauncherEl, achievementsDialogCloseEl, false);
+  }
+  if (event.key === 'Escape' && settingsDialogBackdropEl && !settingsDialogBackdropEl.hidden) {
+    setWidgetDialogOpen(settingsDialogBackdropEl, settingsLauncherEl, settingsDialogCloseEl, false);
+  }
+  if (event.key === 'Escape' && coinsDialogBackdropEl && !coinsDialogBackdropEl.hidden) {
+    setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
   }
 });
 
@@ -8275,11 +8553,7 @@ window.tiktokLive.onBattleAlert((alert) => {
     alert.textKey === 'battle.multiplier'
     || alert.tone === 'battle'
   );
-  const isSpecialJoinAlert = alert && (
-    alert.textKey === 'battle.authorJoin'
-    || alert.tone === 'author'
-    || alert.tone === 'honda'
-  );
+  const isSpecialJoinAlert = alert && alert.tone === 'honda';
   if (alert && alert.tone === 'honda' && !isHondaAlertsUnlocked()) {
     return;
   }

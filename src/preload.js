@@ -23,6 +23,7 @@ const api = {
   openArchiveFolder: () => ipcRenderer.invoke('shell:open-archive-folder'),
   getSystemSettings: () => ipcRenderer.invoke('shell:get-system-settings'),
   setSystemSettings: (settings) => ipcRenderer.invoke('shell:set-system-settings', settings),
+  setBigPicture: (enabled) => ipcRenderer.invoke('shell:set-big-picture', enabled),
   checkForUpdates: () => ipcRenderer.invoke('shell:check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('shell:download-update'),
   installUpdate: () => ipcRenderer.invoke('shell:install-update'),
