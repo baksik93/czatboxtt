@@ -24,6 +24,7 @@ const api = {
   getSystemSettings: () => ipcRenderer.invoke('shell:get-system-settings'),
   setSystemSettings: (settings) => ipcRenderer.invoke('shell:set-system-settings', settings),
   setBigPicture: (enabled) => ipcRenderer.invoke('shell:set-big-picture', enabled),
+  setQuietMode: (enabled) => ipcRenderer.invoke('shell:set-quiet-mode', enabled),
   checkForUpdates: () => ipcRenderer.invoke('shell:check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('shell:download-update'),
   installUpdate: () => ipcRenderer.invoke('shell:install-update'),

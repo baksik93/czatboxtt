@@ -229,20 +229,24 @@
         <section class="widget-dialog settings-dialog page-view" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsDialogTitle">
           <header class="radio-dialog-header">
             <div>
-              <h1 id="settingsDialogTitle">Ustawienia</h1>
-              <p class="page-note">Dostosuj działanie i wygląd aplikacji.</p>
+              <h1 id="settingsDialogTitle" data-i18n="settings.title">Ustawienia</h1>
+              <p class="page-note" data-i18n="settings.subtitle">Dostosuj działanie i wygląd aplikacji.</p>
             </div>
-            <button class="radio-dialog-close" id="settingsDialogClose" type="button" aria-label="Zamknij ustawienia" title="Zamknij ustawienia">×</button>
+            <div class="settings-dialog-header-actions">
+              <button class="page-action settings-reset-button" id="resetSettingsButton" type="button" data-i18n="settings.reset">Przywróć domyślne</button>
+              <button class="radio-dialog-close" id="settingsDialogClose" type="button" aria-label="Zamknij ustawienia" title="Zamknij ustawienia">×</button>
+            </div>
           </header>
           <div class="settings-tabs" role="tablist" aria-label="Kategorie ustawień">
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true">Ogólne</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">Wygląd</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="accessibility">Dostępność</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="system">System</button>
-            <button class="settings-tab" type="button" role="tab" data-settings-tab="redeem">Zrealizuj kod</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="general" data-active="true" data-i18n="settings.tabs.general">Czat i archiwa</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance" data-i18n="settings.tabs.appearance">Wygląd</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="accessibility" data-i18n="settings.tabs.accessibility">Audio</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="system" data-i18n="settings.tabs.system">System</button>
+            <button class="settings-tab" type="button" role="tab" data-settings-tab="redeem" data-i18n="settings.tabs.redeem">Kody</button>
           </div>
           <section class="settings-panel" data-settings-panel="general">
-            <p class="page-note">Ogólne ustawienia aplikacji.</p>
+            <p class="page-note" data-i18n="settings.general.note">Ustawienia czatu, archiwów i trybu Big Picture.</p>
+            <h2 class="settings-heading" data-i18n="settings.tabs.general">Czat i archiwa</h2>
             <div class="settings-list">
               <label class="setting-row" for="statsToolbox">
                 <span>Przybornik statystyk</span>
@@ -260,6 +264,23 @@
                 <span>Big Picture (pełny ekran)</span>
                 <input class="setting-toggle" type="checkbox" id="bigPictureMode">
               </label>
+              <label class="setting-row" for="quietMode">
+                <span data-i18n="settings.general.quietMode">Tryb cichy (wycisz powiadomienia Windows)</span>
+                <input class="setting-toggle" type="checkbox" id="quietMode" disabled>
+              </label>
+              <section class="setting-section chat-delay-section">
+                <h2 class="settings-heading">Opóźnienie czatu</h2>
+                <label class="setting-row setting-row-stacked chat-delay-control" for="chatDelay">
+                  <span class="setting-range">
+                    <input type="range" id="chatDelay" min="0" max="6" step="1" value="4" list="chatDelaySteps">
+                    <datalist id="chatDelaySteps">
+                      <option value="0" label="0.5s"></option><option value="1" label="0.8s"></option><option value="2" label="1.0s"></option><option value="3" label="1.5s"></option><option value="4" label="1.8s"></option><option value="5" label="2.2s"></option><option value="6" label="2.8s"></option>
+                    </datalist>
+                    <output id="chatDelayValue">1.8s</output>
+                    <span class="setting-range-marks" aria-hidden="true"><span>0.5s</span><span>0.8s</span><span>1.0s</span><span>1.5s</span><span>1.8s</span><span>2.2s</span><span>2.8s</span></span>
+                  </span>
+                </label>
+              </section>
             </div>
           </section>
           <section class="settings-panel" data-settings-panel="appearance" hidden>
@@ -373,7 +394,7 @@
             </section>
           </section>
           <section class="settings-panel" data-settings-panel="accessibility" hidden>
-            <h2 class="settings-heading">Wiadomości TTS:</h2>
+            <h2 class="settings-heading">Audio i czytanie wiadomości</h2>
             <div class="settings-list">
               <label class="setting-row" for="ttsEnabled">
                 <span>Czytaj czat na głos</span>
@@ -410,33 +431,6 @@
                 </span>
               </label>
             </div>
-            <section class="setting-section chat-delay-section">
-                <h2 class="settings-heading">Opóźnienie czatu:</h2>
-                <label class="setting-row setting-row-stacked chat-delay-control" for="chatDelay">
-                  <span class="setting-range">
-                    <input type="range" id="chatDelay" min="0" max="6" step="1" value="4" list="chatDelaySteps">
-                    <datalist id="chatDelaySteps">
-                      <option value="0" label="0.5s"></option>
-                      <option value="1" label="0.8s"></option>
-                      <option value="2" label="1.0s"></option>
-                      <option value="3" label="1.5s"></option>
-                      <option value="4" label="1.8s"></option>
-                      <option value="5" label="2.2s"></option>
-                      <option value="6" label="2.8s"></option>
-                    </datalist>
-                    <output id="chatDelayValue">1.8s</output>
-                    <span class="setting-range-marks" aria-hidden="true">
-                      <span>0.5s</span>
-                      <span>0.8s</span>
-                      <span>1.0s</span>
-                      <span>1.5s</span>
-                      <span>1.8s</span>
-                      <span>2.2s</span>
-                      <span>2.8s</span>
-                    </span>
-                  </span>
-                </label>
-            </section>
           </section>
           <section class="settings-panel" data-settings-panel="system" hidden>
             <p class="page-note" data-i18n="settings.system.note">Informacje i ustawienia systemowe.</p>
@@ -459,6 +453,7 @@
                   <option value="pl" data-i18n="settings.system.language.pl">Polski</option>
                   <option value="en" data-i18n="settings.system.language.en">Angielski</option>
                   <option value="de" data-i18n="settings.system.language.de">Niemiecki</option>
+                  <option value="hu" data-i18n="settings.system.language.hu">Węgierski</option>
                 </select>
               </label>
               <label class="setting-row" for="timeFormat">
@@ -683,31 +678,31 @@
                 <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
               </figure>
               <div class="about-faq-copy">
-                <p>
+                <p data-i18n="about.program.p1">
                   Czatbox TT to aplikacja do obsługi czatu z transmisji TikTok LIVE. Program pozwala śledzić
                   wiadomości z wybranego live’a w osobnym, czytelnym oknie. Aplikacja została stworzona z myślą
                   o wygodnym podglądzie czatu, archiwizacji rozmów oraz dodatkowych zdarzeń z live’a.
                 </p>
-                <p>
+                <p data-i18n="about.program.p2">
                   Program po zalogowaniu do TikToka pobiera czat z wybranego twórcy LIVE i wyświetla go w
                   uporządkowanej formie. Użytkownik może przełączać się między obsługiwanymi twórcami, filtrować
                   typy zdarzeń oraz dostosować wygląd aplikacji do własnych preferencji.
                 </p>
 
                 <section class="about-section">
-                  <h2>Jak działa program:</h2>
-                  <p>
+                  <h2 data-i18n="about.program.how">Jak działa program:</h2>
+                  <p data-i18n="about.program.how.p1">
                     Po uruchomieniu aplikacji użytkownik loguje się do TikToka. Gdy sesja zostanie wykryta,
                     aplikacja przełącza się do widoku czatu i łączy się z wybranym live’em. Czat jest pobierany
                     w tle i wyświetlany w aplikacji jako osobna lista zdarzeń.
                   </p>
-                  <p>
+                  <p data-i18n="about.program.how.p2">
                     Wiadomości czatu mogą być pokazywane z ustawionym opóźnieniem, aby łatwiej było je śledzić
                     przy aktywnych transmisjach. Pozostałe zdarzenia, takie jak prezenty, dołączenia czy polubienia,
                     mogą pojawiać się na bieżąco. Użytkownik może w każdej chwili zmienić filtr, styl czatu,
                     motyw lub opóźnienie.
                   </p>
-                  <p>
+                  <p data-i18n="about.program.how.p3">
                     Podczas działania programu wszystkie zdarzenia z transmisji są zapisywane do archiwum. Po
                     zakończeniu lub zmianie transmisji archiwum można otworzyć w zakładce Archiwum i wrócić do
                     wcześniejszych rozmów.
@@ -723,17 +718,15 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.1.0</span>:</h2>
+                  <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.2.5</span>:</h2>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.024.layout">Przebudowa wyglądu aplikacji</li>
-                    <li data-i18n="about.news.024.launcher">Wprowadzenie launchera z okienkami u dołu aplikacji</li>
-                    <li data-i18n="about.news.024.archives">Wprowadzenie automatycznego czyszczenia archiwów powyżej 7 dni w ustawieniach (by program wam nie zamulał i działał sprawniej).</li>
-                    <li data-i18n="about.news.024.ttsVolume">Możliwość zmiany głośności czytania wiadomości TTS na czacie.</li>
-                    <li data-i18n="about.news.024.icon">Nowa ikona programu.</li>
-                    <li data-i18n="about.news.024.bigPicture">Wprowadzono Big Picture.</li>
-                    <li data-i18n="about.news.024.about">Zmiany w zakładce O programie (polecam zajrzeć).</li>
+                    <li data-i18n="about.news.025.creators">Od teraz zapamiętani twórcy i łączenie się są w dolnym pasku launchera.</li>
+                    <li data-i18n="about.news.025.bigPicture">Poprawiono Big Picture — krawędzie ramek nie wyglądają już jak poszarpane.</li>
+                    <li data-i18n="about.news.025.hungarian">Dodano język węgierski.</li>
+                    <li data-i18n="about.news.025.translations">Poprawiono tłumaczenia na inne języki.</li>
+                    <li data-i18n="about.news.025.widgets">Poprawiono błąd z przycinkami widgetów przy zmianie na tryb Big Picture.</li>
                   </ul>
 
                   <h3 data-i18n="about.news.next.title">Co dalej:</h3>
@@ -806,6 +799,9 @@
       </section>
       <footer class="app-bottom-taskbar" id="appBottomTaskbar" aria-label="Pasek aplikacji">
         <div class="app-bottom-taskbar-actions">
+          <button class="creator-launcher" id="creatorLauncher" type="button" aria-label="Otwórz twórców" title="Twórcy" aria-haspopup="dialog" aria-controls="creatorLauncherPanel">
+            <span class="launcher-icon" data-ui-icon="user" aria-hidden="true"></span>
+          </button>
           <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz radio" title="Otwórz radio" aria-haspopup="dialog" aria-controls="radioDialog">
             <span class="launcher-icon" id="radioLauncherIcon" data-ui-icon="broadcast" aria-hidden="true"></span>
           </button>
@@ -826,8 +822,20 @@
             <span class="czester-launcher-badge" aria-hidden="true"></span>
           </button>
         </div>
+        <div class="app-taskbar-clock" id="appTaskbarClock" aria-label="Aktualna data i godzina">
+          <span class="taskbar-clock-line"><time id="appTaskbarTime"></time><span class="taskbar-clock-icon" data-ui-icon="clock" aria-hidden="true"></span></span>
+          <span class="taskbar-clock-line"><time id="appTaskbarDate"></time><span class="taskbar-clock-icon" data-ui-icon="calendar" aria-hidden="true"></span></span>
+        </div>
       </footer>
     </main>
+
+    <section class="creator-launcher-panel" id="creatorLauncherPanel" role="dialog" aria-label="Twórcy" hidden>
+      <div class="creator-launcher-panel-header">
+        <div><h1 data-i18n="creator.panelTitle">Twórcy</h1><p data-i18n="creator.panelNote">Wybierz twórcę lub wyszukaj transmisję.</p></div>
+        <button class="radio-dialog-close" id="creatorLauncherPanelClose" type="button" aria-label="Zamknij twórców" title="Zamknij">×</button>
+      </div>
+      <div class="creator-launcher-panel-content" id="creatorLauncherPanelContent"></div>
+    </section>
 
     <div class="radio-dialog-backdrop" id="radioDialogBackdrop" hidden>
       <section class="radio-dialog" id="radioDialog" role="dialog" aria-modal="true" aria-labelledby="radioDialogTitle">
@@ -865,12 +873,13 @@
     </aside>
     <section class="first-run-language" id="firstRunLanguage" role="dialog" aria-modal="true" aria-labelledby="firstRunLanguageTitle" hidden>
       <div class="first-run-language-card">
-        <h1 id="firstRunLanguageTitle">Wybierz jÄ™zyk aplikacji</h1>
-        <p>Wybierz język, którego chcesz używać w Czatbox TT. Możesz go później zmienić w ustawieniach.</p>
+        <h1 id="firstRunLanguageTitle">WYBIERZ JEZYK PROGRAMU | CHOOSE THE PROGRAM LANGUAGE | PROGRAMMSPRACHE AUSWÄHLEN | VÁLASSZA KI A PROGRAM NYELVÉT</h1>
+        <p>Wybierz flagę, aby automatycznie ustawić język programu.</p>
         <div class="first-run-language-actions">
-          <button type="button" class="page-action" data-first-language="pl">Polski</button>
-          <button type="button" class="page-action" data-first-language="en">English</button>
-          <button type="button" class="page-action" data-first-language="de">Deutsch</button>
+          <button type="button" class="page-action language-flag-button" data-first-language="pl"><span class="language-flag">🇵🇱</span><span>Polski</span></button>
+          <button type="button" class="page-action language-flag-button" data-first-language="en"><span class="language-flag">🇬🇧</span><span>English</span></button>
+          <button type="button" class="page-action language-flag-button" data-first-language="de"><span class="language-flag">🇩🇪</span><span>Deutsch</span></button>
+          <button type="button" class="page-action language-flag-button" data-first-language="hu"><span class="language-flag">🇭🇺</span><span>Magyar</span></button>
         </div>
       </div>
     </section>

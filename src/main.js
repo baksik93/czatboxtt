@@ -66,7 +66,8 @@ const CZESTER_OLLAMA_PREFERRED_MODELS = [
 const CZESTER_WIKIPEDIA_LANGUAGES = {
   pl: 'pl',
   en: 'en',
-  de: 'de'
+  de: 'de',
+  hu: 'hu'
 };
 const CZESTER_WEATHER_LOCATION_ALIASES = {
   warszawie: 'Warszawa',
@@ -156,6 +157,18 @@ const CZESTER_LANGUAGE_META = {
     thanks: 'Kein Problem. Beschreibe das nächste Thema und ich versuche es einzuordnen.',
     weatherPrefix: 'Ich habe es kurz geprüft.',
     weatherUnavailable: 'Ich wollte das Wetter prüfen, habe aber gerade keine Daten bekommen. Versuch es gleich nochmal oder nenne die Stadt genauer.'
+  },
+  hu: {
+    locale: 'hu-HU,hu;q=0.9,en;q=0.7',
+    fallbackTitle: 'TikTok támogatás',
+    intro: 'Rendben, ez úgy hangzik, mint:',
+    fallbackAnswer: 'Értem a lényeget, de szükségem van még egy konkrét részletre. Írd le, mi történt és hol akadtál el, én pedig egyszerű lépésekre bontom.',
+    noMessage: 'Tegyél fel egy kérdést, és Czester megpróbál világosan válaszolni.',
+    greeting: 'Szia! Czester vagyok. Írhatsz természetesen, hivatalos megfogalmazás nélkül. Ha valami nem világos, visszakérdezek.',
+    howAreYou: 'Működöm, és tanulom a beszélgetési stílusodat. Még nem vagyok zseni, de legalább nem teszek úgy, mintha mindent tudnék.',
+    thanks: 'Szívesen. Írd le a következő problémát, és megpróbálom megfejteni.',
+    weatherPrefix: 'Gyorsan ellenőriztem.',
+    weatherUnavailable: 'Megpróbáltam lekérni az időjárást, de most nem kaptam adatot. Próbáld újra később, vagy add meg pontosabban a várost.'
   }
 };
 const CZESTER_SUPPORT_TOPICS = [
@@ -350,7 +363,7 @@ try {
   app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
 }
 cleanChromiumCacheArtifacts();
-const SYSTEM_LANGUAGES = new Set(['pl', 'en', 'de']);
+const SYSTEM_LANGUAGES = new Set(['pl', 'en', 'de', 'hu']);
 const SYSTEM_TIME_FORMATS = new Set(['auto', '12', '24']);
 const LIVE_CREATORS = [
   {
@@ -523,6 +536,42 @@ let czesterSupportCache = null;
 let czesterArchiveProfileCache = null;
 let czesterOllamaModelCache = null;
 let czesterStyleCache = null;
+let quietNotificationsActive = false;
+let quietNotificationsPreviousValue = null;
+let quietNotificationsPreviousExists = false;
+
+const WINDOWS_TOASTS_KEY = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings';
+const WINDOWS_TOASTS_VALUE = 'NOC_GLOBAL_SETTING_TOASTS_ENABLED';
+
+async function setQuietNotifications(enabled) {
+  const requested = Boolean(enabled);
+  if (requested === quietNotificationsActive) {
+    return { ok: true, enabled: quietNotificationsActive };
+  }
+  try {
+    if (requested) {
+      const query = await execFileAsync('reg.exe', ['query', WINDOWS_TOASTS_KEY, '/v', WINDOWS_TOASTS_VALUE], { timeout: 5000 });
+      const match = String(query.stdout || '').match(/0x([0-9a-f]+)/i);
+      quietNotificationsPreviousExists = Boolean(match);
+      quietNotificationsPreviousValue = match ? parseInt(match[1], 16) : null;
+      await execFileAsync('reg.exe', ['add', WINDOWS_TOASTS_KEY, '/v', WINDOWS_TOASTS_VALUE, '/t', 'REG_DWORD', '/d', '0', '/f'], { timeout: 5000 });
+      quietNotificationsActive = true;
+      return { ok: true, enabled: true };
+    }
+
+    if (quietNotificationsPreviousExists && quietNotificationsPreviousValue !== null) {
+      await execFileAsync('reg.exe', ['add', WINDOWS_TOASTS_KEY, '/v', WINDOWS_TOASTS_VALUE, '/t', 'REG_DWORD', '/d', String(quietNotificationsPreviousValue), '/f'], { timeout: 5000 });
+    } else {
+      await execFileAsync('reg.exe', ['delete', WINDOWS_TOASTS_KEY, '/v', WINDOWS_TOASTS_VALUE, '/f'], { timeout: 5000 }).catch(() => {});
+    }
+    quietNotificationsActive = false;
+    quietNotificationsPreviousValue = null;
+    quietNotificationsPreviousExists = false;
+    return { ok: true, enabled: false };
+  } catch {
+    return { ok: false, enabled: quietNotificationsActive };
+  }
+}
 
 const recentMessages = [];
 const czesterLiveStyleMessages = [];
@@ -1113,6 +1162,9 @@ function getTrayLabels() {
   }
   if (language === 'de') {
     return { show: 'Czatbox TT anzeigen', quit: 'Beenden' };
+  }
+  if (language === 'hu') {
+    return { show: 'Czatbox TT megjelenítése', quit: 'Kilépés' };
   }
   return { show: 'Pokaż Czatbox TT', quit: 'Zamknij' };
 }
@@ -2719,12 +2771,20 @@ async function installCzesterAiPack() {
 
 function buildCzesterLocalAiPrompt(message, language, docs) {
   const normalizedLanguage = normalizeCzesterLanguage(language);
-  const languageName = normalizedLanguage === 'en' ? 'English' : normalizedLanguage === 'de' ? 'German' : 'Polish';
+  const languageName = normalizedLanguage === 'en'
+    ? 'English'
+    : normalizedLanguage === 'de'
+      ? 'German'
+      : normalizedLanguage === 'hu'
+        ? 'Hungarian'
+        : 'Polish';
   const languageRule = normalizedLanguage === 'pl'
     ? 'TWARDA ZASADA: odpowiadaj wyłącznie po polsku. Nie mieszaj angielskiego, niemieckiego ani innych języków. Jeśli kontekst jest w innym języku, przetłumacz sens na polski.'
     : normalizedLanguage === 'de'
-      ? 'HARTER GRUNDSATZ: Antworte ausschließlich auf Deutsch. Mische kein Polnisch, Englisch oder andere Sprachen. Wenn der Kontext anderssprachig ist, übertrage den Sinn ins Deutsche.'
-      : 'STRICT RULE: answer only in English. Do not mix Polish, German or other languages. If context is in another language, translate the meaning into English.';
+      ? 'HARTER GRUNDSATZ: Antworte ausschließlich auf Deutsch. Mische kein Polnisch, Englisch, Ungarisch oder andere Sprachen. Wenn der Kontext anderssprachig ist, übertrage den Sinn ins Deutsche.'
+      : normalizedLanguage === 'hu'
+        ? 'SZIGORÚ SZABÁLY: kizárólag magyarul válaszolj. Ne keverd a lengyelt, angolt, németet vagy más nyelveket. Ha a környezet más nyelvű, fordítsd le a jelentését magyarra.'
+        : 'STRICT RULE: answer only in English. Do not mix Polish, German, Hungarian or other languages. If context is in another language, translate the meaning into English.';
   const context = docs.length
     ? docs.map((doc, index) => `[${index + 1}] ${doc.title || doc.source}\n${doc.text}`).join('\n\n')
     : 'Brak dodatkowego kontekstu.';
@@ -6747,10 +6807,15 @@ function installIpc() {
     if (!mainWindow || mainWindow.isDestroyed()) {
       return { ok: false };
     }
-    mainWindow.setFullScreen(Boolean(enabled));
+    const nextEnabled = Boolean(enabled);
+    mainWindow.setFullScreen(nextEnabled);
+    if (!nextEnabled) {
+      await setQuietNotifications(false);
+    }
     layoutViews();
     return { ok: true, enabled: mainWindow.isFullScreen() };
   });
+  handleShell('shell:set-quiet-mode', async (enabled) => setQuietNotifications(enabled));
   handleShell('shell:check-for-updates', async () => {
     if (!configureAutoUpdates()) {
       return { ok: false, error: 'updates-unavailable' };
@@ -7138,6 +7203,7 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', () => {
+  setQuietNotifications(false).catch(() => {});
   isQuitting = true;
 });
 

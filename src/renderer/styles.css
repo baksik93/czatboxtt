@@ -4053,6 +4053,28 @@ body {
   box-shadow: var(--glass-shadow);
 }
 
+/* Creator search now lives in the launcher; reclaim the former side column. */
+:root .chat-app {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+:root .chat-app > .content {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+:root .chat-app > .recent-creators-column {
+  display: none !important;
+}
+
+:root .right-widget-dock {
+  right: 0 !important;
+}
+
+:root .right-widget {
+  margin-right: 0 !important;
+}
+
 :root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .chat-header,
 :root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .sidebar,
 :root[data-theme="lazarskie-rejony"][data-app-appearance="ozdobny"] .recent-creators-column,
@@ -4083,6 +4105,84 @@ body {
 :root[data-app-appearance="ozdobny"] .recent-creators-column {
   padding: 10px 7px;
   border-radius: 18px;
+}
+
+.creator-launcher-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 120;
+  width: min(1040px, calc(100vw - 48px));
+  height: min(760px, calc(100vh - 48px));
+  overflow: hidden;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 14px;
+  background: var(--dropdown-bg);
+  box-shadow: var(--dropdown-shadow);
+}
+
+.creator-launcher-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 12px;
+  border-bottom: 1px solid var(--dropdown-border);
+}
+
+.creator-launcher-panel-header h1 { margin: 0; font-size: 24px; }
+.creator-launcher-panel-header p { margin: 5px 0 0; color: var(--dropdown-muted); font-size: 13px; }
+
+.creator-launcher-panel[hidden] { display: none; }
+
+.creator-launcher-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: calc(100% - 84px);
+  max-height: none;
+  padding: 18px 22px 22px;
+  overflow: auto;
+}
+
+.creator-launcher-panel .creator-picker {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.creator-launcher-panel .recent-creators-column {
+  position: static !important;
+  display: flex !important;
+  width: 100% !important;
+  align-self: stretch !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 10px;
+}
+
+.creator-launcher-panel .recent-creators-strip {
+  flex-direction: column !important;
+}
+
+.creator-launcher-panel .recent-creators-carousel {
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  overflow-y: auto;
+  align-content: flex-start;
+  width: 100% !important;
+}
+
+:root .creator-launcher {
+  order: -1;
 }
 
 :root[data-app-appearance="ozdobny"] .content {
@@ -6591,6 +6691,45 @@ body {
   border: 0;
   border-radius: 5px;
   object-fit: contain;
+}
+
+/* Big Picture: pełne piksele i ostre krawędzie bez antyaliasingu narożników. */
+html[data-big-picture="true"] .chat-app,
+html[data-big-picture="true"] .content,
+html[data-big-picture="true"] .section-nav,
+html[data-big-picture="true"] .filters,
+html[data-big-picture="true"] .view-panel,
+html[data-big-picture="true"] .app-bottom-taskbar,
+html[data-big-picture="true"] .archive-toolbar,
+html[data-big-picture="true"] .archive-workspace,
+html[data-big-picture="true"] .settings-panel {
+  border-radius: 0 !important;
+}
+
+html[data-big-picture="true"] .chat-app,
+html[data-big-picture="true"] .content {
+  transform: translateZ(0);
+  contain: paint;
+}
+
+html[data-big-picture="true"] .chat-app > * {
+  border-inline-width: 1px !important;
+}
+
+html[data-big-picture="true"] .section-nav,
+html[data-big-picture="true"] .filters {
+  padding-inline: 8px !important;
+  border-inline: 0 !important;
+}
+
+html[data-big-picture="true"] .messages,
+html[data-big-picture="true"] .archive-list,
+html[data-big-picture="true"] .archive-messages,
+html[data-big-picture="true"] .notes-list,
+html[data-big-picture="true"] .notes-detail,
+html[data-big-picture="true"] .czester-messages {
+  scrollbar-gutter: stable;
+  transform: translateZ(0);
 }
 
 /* Pasek filtrów zawsze jest pełną, prostą belką od krawędzi do krawędzi. */
@@ -10778,7 +10917,7 @@ body.radio-dialog-open { overflow: hidden; }
 .app-update-action {
   position: fixed;
   left: 14px;
-  bottom: 56px;
+  bottom: 4px;
   z-index: 10070;
   display: flex;
   align-items: center;
@@ -10791,6 +10930,133 @@ body.radio-dialog-open { overflow: hidden; }
   background: var(--dropdown-surface);
   color: var(--dropdown-text);
   box-shadow: var(--dropdown-shadow);
+}
+
+.settings-dialog-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-reset-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 9px;
+  background: var(--dropdown-surface);
+  color: var(--dropdown-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-reset-button:hover,
+.settings-reset-button:focus-visible {
+  border-color: var(--dropdown-active-border, var(--dropdown-border));
+  background: var(--dropdown-hover-bg);
+}
+
+.app-bottom-taskbar {
+  font-family: inherit !important;
+}
+
+.app-taskbar-clock {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dropdown-muted);
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Final layout correction: preserve the decorative window grid. */
+.app-bottom-taskbar,
+.chat-app > .app-bottom-taskbar {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 32px !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+}
+
+.recent-creators-column,
+:root[data-app-appearance="retro-kb2"] .recent-creators-column {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  align-self: stretch !important;
+  z-index: 15 !important;
+  margin-top: 19px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Default layout keeps the creator rail at the full chat height. */
+:root:not([data-app-appearance="ozdobny"]) .recent-creators-column {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Decorative mode: content and creator rail end together above the taskbar. */
+:root[data-app-appearance="ozdobny"] .content {
+  margin-bottom: 12px !important;
+}
+
+:root[data-app-appearance="ozdobny"] .recent-creators-column {
+  margin-top: 19px !important;
+  margin-bottom: 12px !important;
+}
+
+.first-run-language-card {
+  width: min(760px, calc(100vw - 32px));
+}
+
+.first-run-language-card h1 {
+  font-size: clamp(16px, 2vw, 24px);
+  line-height: 1.35;
+}
+
+.first-run-language-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.language-flag-button {
+  min-height: 82px;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  font-family: inherit !important;
+}
+
+.language-flag {
+  font-size: 34px;
+  line-height: 1;
+}
+
+@media (max-width: 620px) {
+  .first-run-language-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .app-taskbar-clock {
+    right: 6px;
+    font-size: 9px !important;
+  }
 }
 
 .app-update-action[hidden] {
@@ -11185,4 +11451,92 @@ body.radio-dialog-open { overflow: hidden; }
   border: 0;
   border-radius: 5px;
   object-fit: contain;
+}
+.settings-panel > .page-note {
+  display: none;
+}
+
+/* Full-width launcher bar; the creator rail ends directly above it. */
+.app-bottom-taskbar,
+.chat-app > .app-bottom-taskbar,
+:root .app-bottom-taskbar {
+  grid-column: 1 / 4 !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 40 !important;
+}
+
+.recent-creators-column {
+  position: absolute !important;
+  top: 74px !important;
+  right: 0 !important;
+  bottom: 32px !important;
+  width: 82px !important;
+  height: auto !important;
+  z-index: 15 !important;
+}
+
+.app-taskbar-clock {
+  top: 50% !important;
+  right: 14px !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  line-height: 1.1 !important;
+}
+
+.taskbar-clock-line {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 108px;
+  text-align: right;
+}
+
+.taskbar-clock-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  color: var(--dropdown-muted);
+}
+
+.taskbar-clock-icon .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Final launcher layout: every appearance uses the full content width. */
+:root[data-app-appearance="ozdobny"] .chat-app {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+:root[data-app-appearance="ozdobny"] .chat-app > .content {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+:root[data-app-appearance="ozdobny"] .chat-app > .recent-creators-column {
+  display: none !important;
+}
+:root[data-app-appearance="ozdobny"] .right-widget-dock {
+  right: 0 !important;
+}
+
+:root[data-app-appearance="ozdobny"] .content {
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}
+
+:root[data-app-appearance="ozdobny"] .app-bottom-taskbar {
+  position: fixed !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  width: auto !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
 }

@@ -22,13 +22,14 @@ const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-g
 const MAX_VISIBLE_MESSAGES = 800;
 const DEFAULT_EVENT_FILTERS = ['chat', 'like', 'gift', 'box', 'repost', 'share', 'member'];
 const APP_APPEARANCES = ['standard', 'ozdobny', 'retro-kb2'];
-const APP_LANGUAGES = ['pl', 'en', 'de'];
+const APP_LANGUAGES = ['pl', 'en', 'de', 'hu'];
+const APP_LANGUAGE_VERSION_KEY = 'czatbox.language.version';
 const TIME_FORMATS = ['auto', '12', '24'];
 const TOP_GIFTERS_LIMIT = 5;
 const TOP_TAPPERS_LIMIT = 5;
 const MODERATOR_ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 const ACTIVE_MODERATORS_LIMIT = 20;
-const MAX_RECENT_CREATORS = 20;
+const MAX_RECENT_CREATORS = 100;
 const HEART_ME_GIFT_NAME = 'heart me';
 const RECENT_CREATOR_META_KEY = 'czatbox.recent.creator.meta';
 const HONDA_CHAT_UNIQUE_ID = 'grzegorzpawemisiu';
@@ -93,9 +94,11 @@ const UI_ICONS = {
   'chevron-down': '<path d="m7 10 5 5 5-5"/>',
   lock: '<rect x="5.5" y="10" width="13" height="9.5" rx="2"/><path d="M8.5 10V7.75a3.5 3.5 0 0 1 7 0V10"/><path d="M12 14v2"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  calendar: '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M8 3.5v4M16 3.5v4M4 9.5h16"/>',
   inbox: '<path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5Z"/><path d="M3.5 14h4l1.5 2h6l1.5-2h4"/>',
   chest: '<path d="M4.5 9.25h15v9.5h-15z"/><path d="M3.75 7.25h16.5v3.25H3.75z"/><path d="M7 7.25V5.8A2.05 2.05 0 0 1 9.05 3.75h5.9A2.05 2.05 0 0 1 17 5.8v1.45"/><path d="M12 7.25v11.5"/><path d="M8 13h8"/><circle cx="12" cy="13" r="1.65"/>',
   users: '<circle cx="9" cy="9" r="3"/><path d="M3.75 19c.55-3.15 2.3-5 5.25-5s4.7 1.85 5.25 5"/><path d="M15.5 6.75a3 3 0 0 1 0 5.5M15.75 14.25c2.45.3 3.9 1.9 4.4 4.75"/>',
+  user: '<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-3.7 2.8-5.75 6.5-5.75s5.8 2.05 6.5 5.75"/>',
   message: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9.5h8M8 12.5h5"/>',
   questions: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M9.25 9.25a2.5 2.5 0 1 1 3.85 2.1c-.65.4-1.1.8-1.1 1.65"/><path d="M12 15.35h.01"/>',
   'questions-list': '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9h4.25M8 12h3"/><path d="M15.1 8.35a1.55 1.55 0 1 1 2.25 1.38c-.42.28-.72.55-.72 1.12"/><path d="M16.62 13.1h.01"/>',
@@ -137,17 +140,20 @@ const DEFAULT_GENERAL_SETTINGS = {
   statsToolbox: true,
   galleryAvatars: true,
   deleteOldArchives: false,
-  bigPictureMode: false
+  bigPictureMode: false,
+  quietMode: false
 };
 const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
   en: 'en-US',
-  de: 'de-DE'
+  de: 'de-DE',
+  hu: 'hu-HU'
 };
 const TTS_LANGUAGE_PREFIXES = {
   pl: /^pl\b/i,
   en: /^en\b/i,
-  de: /^de\b/i
+  de: /^de\b/i,
+  hu: /^hu\b/i
 };
 const MAX_SPEECH_QUEUE = 8;
 const VULGAR_SPEECH_PATTERNS = [
@@ -314,12 +320,14 @@ const I18N = {
     'notes.format.quote': 'Cytat',
     'notes.format.list': 'Lista',
     'settings.title': 'Ustawienia',
-    'settings.tabs.general': 'Ogólne',
+    'settings.subtitle': 'Dostosuj działanie i wygląd aplikacji.',
+    'settings.reset': 'Przywróć domyślne',
+    'settings.tabs.general': 'Czat i archiwa',
     'settings.tabs.appearance': 'Wygląd',
-    'settings.tabs.accessibility': 'Dostępność',
+    'settings.tabs.accessibility': 'Audio',
     'settings.tabs.system': 'System',
-    'settings.tabs.redeem': 'Zrealizuj kod',
-    'settings.general.note': 'Ogólne ustawienia aplikacji.',
+    'settings.tabs.redeem': 'Kody',
+    'settings.general.note': 'Ustawienia czatu, archiwów i trybu Big Picture.',
     'settings.general.multiplierNotifications': 'Powiadomienia o mnożnikach',
     'settings.general.statsToolbox': 'Przybornik statystyk',
     'settings.general.galleryAvatars': 'Awatary z galerii',
@@ -376,6 +384,7 @@ const I18N = {
     'settings.system.language.pl': 'Polski',
     'settings.system.language.en': 'Angielski',
     'settings.system.language.de': 'Niemiecki',
+    'settings.system.language.hu': 'Węgierski',
     'settings.system.timeFormat': 'Format czasu',
     'settings.system.timeFormat.auto': 'Automatyczny (wykrywa czas w systemie)',
     'settings.system.timeFormat.12': '12-godzinny',
@@ -713,12 +722,14 @@ const I18N = {
     'notes.format.quote': 'Quote',
     'notes.format.list': 'List',
     'settings.title': 'Settings',
-    'settings.tabs.general': 'General',
+    'settings.subtitle': 'Adjust how the application works and looks.',
+    'settings.reset': 'Restore defaults',
+    'settings.tabs.general': 'Chat and archives',
     'settings.tabs.appearance': 'Appearance',
-    'settings.tabs.accessibility': 'Accessibility',
+    'settings.tabs.accessibility': 'Audio',
     'settings.tabs.system': 'System',
-    'settings.tabs.redeem': 'Redeem code',
-    'settings.general.note': 'General application settings.',
+    'settings.tabs.redeem': 'Codes',
+    'settings.general.note': 'Chat, archive and Big Picture settings.',
     'settings.general.multiplierNotifications': 'Multiplier notifications',
     'settings.general.statsToolbox': 'Statistics toolbox',
     'settings.general.galleryAvatars': 'Gallery avatars',
@@ -775,6 +786,7 @@ const I18N = {
     'settings.system.language.pl': 'Polish',
     'settings.system.language.en': 'English',
     'settings.system.language.de': 'German',
+    'settings.system.language.hu': 'Hungarian',
     'settings.system.timeFormat': 'Time format',
     'settings.system.timeFormat.auto': 'Automatic (detect system time)',
     'settings.system.timeFormat.12': '12-hour',
@@ -1111,12 +1123,14 @@ const I18N = {
     'notes.format.quote': 'Zitat',
     'notes.format.list': 'Liste',
     'settings.title': 'Einstellungen',
-    'settings.tabs.general': 'Allgemein',
+    'settings.subtitle': 'Passe Verhalten und Aussehen der Anwendung an.',
+    'settings.reset': 'Standards wiederherstellen',
+    'settings.tabs.general': 'Chat und Archive',
     'settings.tabs.appearance': 'Aussehen',
-    'settings.tabs.accessibility': 'Barrierefreiheit',
+    'settings.tabs.accessibility': 'Audio',
     'settings.tabs.system': 'System',
-    'settings.tabs.redeem': 'Code einlösen',
-    'settings.general.note': 'Allgemeine Anwendungseinstellungen.',
+    'settings.tabs.redeem': 'Codes',
+    'settings.general.note': 'Einstellungen für Chat, Archive und Big Picture.',
     'settings.general.multiplierNotifications': 'Multiplikator-Benachrichtigungen',
     'settings.general.statsToolbox': 'Statistik-Werkzeugleiste',
     'settings.general.galleryAvatars': 'Avatare aus der Galerie',
@@ -1173,6 +1187,7 @@ const I18N = {
     'settings.system.language.pl': 'Polnisch',
     'settings.system.language.en': 'Englisch',
     'settings.system.language.de': 'Deutsch',
+    'settings.system.language.hu': 'Ungarisch',
     'settings.system.timeFormat': 'Zeitformat',
     'settings.system.timeFormat.auto': 'Automatisch (Systemzeit erkennen)',
     'settings.system.timeFormat.12': '12-Stunden',
@@ -1363,6 +1378,174 @@ const I18N = {
   }
 };
 
+// Hungarian uses the complete English dictionary as a safe fallback while
+// the common application chrome and settings use native Hungarian labels.
+I18N.hu = {
+  ...I18N.en,
+  'settings.title': 'Beállítások',
+  'settings.subtitle': 'Az alkalmazás működésének és megjelenésének beállítása.',
+  'settings.reset': 'Alapértelmezések visszaállítása',
+  'app.tagline': '\u00c9l\u0151 chat k\u00f6vet\u00e9se \u00e9s kezel\u00e9se val\u00f3s id\u0151ben.',
+  'app.tagline': 'Élő chat követése és kezelése valós időben.',
+  'nav.chatbox': 'Chatbox',
+  'nav.archive': 'Archívum',
+  'nav.boxes': 'Ládák',
+  'nav.about': 'A programról',
+  'filters.chat': 'Csevegés',
+  'filters.like': 'Kedvelések',
+  'filters.gift': 'Ajándékok',
+  'filters.box': 'Ládák',
+  'filters.repost': 'Újraküldések',
+  'filters.share': 'Megosztások',
+  'filters.member': 'Csatlakozások',
+  'nav.archive': 'Archívum',
+  'nav.boxes': 'Ládák',
+  'nav.about': 'A programról',
+  'nav.settings': 'Beállítások',
+  'settings.tabs.general': 'Chat és archívumok',
+  'settings.tabs.appearance': 'Megjelenés',
+  'settings.tabs.accessibility': 'Hang',
+  'settings.tabs.system': 'Rendszer',
+  'settings.tabs.redeem': 'Kódok',
+  'settings.general.note': 'A chat, az archívumok és a Big Picture beállításai.',
+  'settings.general.deleteOldArchives': '7 napnál régebbi archívumok törlése',
+  'settings.general.bigPicture': 'Big Picture (teljes képernyő)',
+  'settings.accessibility.readAloud': 'Chat felolvasása',
+  'settings.accessibility.volume': 'Az üzenetek felolvasási hangereje',
+  'settings.system.language': 'Program nyelve',
+  'settings.system.language.hu': 'Magyar',
+  'radio.title': 'Rádió',
+  'radio.note': 'Hallgasd a kiválasztott állomást chatelés közben.',
+  'notes.title': 'Jegyzetek',
+  'coins.title': 'Érmék',
+  'achievements.title': 'Eredmények',
+  'czester.title': 'Czester asszisztens',
+  'about.tabs.program': 'A programról',
+  'about.tabs.news': 'Újdonságok',
+  'about.tabs.faq': 'GYIK',
+  'about.news.version': 'Programverzió',
+  'about.news.changes.title': 'Változások:',
+  'about.faq.title': 'GYIK',
+  'settings.general.multiplierNotifications': 'Szorzó értesítések',
+  'settings.general.statsToolbox': 'Statisztikai eszköztár',
+  'settings.general.galleryAvatars': 'Avatargaléria',
+  'settings.appearance.chatStyle': 'Csevegési stílus',
+  'settings.appearance.theme': 'Téma',
+  'settings.appearance.appAppearance': 'Alkalmazás megjelenése',
+  'settings.chatStyle.compact.name': 'Kompakt',
+  'settings.chatStyle.compact.description': 'Alapértelmezett TikTok-üzenetstílus.',
+  'settings.chatStyle.spacious.name': 'Tágas',
+  'settings.chatStyle.spacious.description': 'Átláthatóbb üzenet-elrendezés.',
+  'settings.chatStyle.modern.name': 'Modern',
+  'settings.chatStyle.modern.description': 'Modern, buborékos csevegési stílus.',
+  'settings.theme.roseBlack.description': 'Az alkalmazás alapértelmezett színei.',
+  'settings.theme.whiteTitanium.description': 'Világos megjelenés fehér titán árnyalatokkal.',
+  'settings.theme.chillSerwis.description': 'Nyugodt, laza megjelenés.',
+  'settings.theme.roseGlass.description': 'Lágyabb, finomabb téma.',
+  'settings.theme.lazarskieRejony.description': 'Félig átlátszó, sötétszürke-kék stílus neon kiemelésekkel.',
+  'settings.theme.miamiVice.description': 'Pasztell Miami-színek a GTA Vice City hangulatában.',
+  'settings.appAppearance.default.description': 'A fejléc, az oldalsáv, az ablakok és a gombok jelenlegi elrendezése.',
+  'settings.appAppearance.decorative.description': 'Elegáns, modern alkalmazáselrendezés.',
+  'settings.appAppearance.retroKb2.description': 'Könnyű, régi blogos K2-elrendezés.',
+  'settings.accessibility.tts': 'Üzenetek felolvasása',
+  'settings.accessibility.skipVulgarNicknames': 'Trágár becenevek kihagyása',
+  'settings.accessibility.skipVulgarMessages': 'Trágár üzenetek kihagyása',
+  'settings.accessibility.skipSpamMessages': 'Spamüzenetek kihagyása',
+  'settings.accessibility.voice': 'Hang',
+  'settings.accessibility.rate': 'Sebesség',
+  'settings.accessibility.delay': 'Csevegés késleltetése',
+  'settings.system.note': 'Rendszerinformációk és beállítások.',
+  'settings.system.autoLaunch': 'A Czatbox TT automatikus megnyitása a számítógép indításakor',
+  'settings.system.runInBackground': 'A program indítása a háttérben',
+  'settings.system.minimizeToTray': 'A Czatbox TT minimalizálása a tálcára az X megnyomásakor',
+  'settings.system.timeFormat': 'Időformátum',
+  'settings.system.clearSessionDescription': 'TikTok-bejelentkezési vagy munkamenet-probléma',
+  'settings.system.clearSession': 'TikTok-munkamenet törlése',
+  'settings.system.language.pl': 'Lengyel',
+  'settings.system.language.en': 'Angol',
+  'settings.system.language.de': 'Német',
+  'settings.system.timeFormat.auto': 'Automatikus (rendszeridő)',
+  'settings.system.timeFormat.12': '12 órás',
+  'settings.system.timeFormat.24': '24 órás',
+  'settings.redeem.note': 'Adj meg egy kódot további funkciók feloldásához.',
+  'settings.redeem.codeLabel': 'Aktiváló kód',
+  'about.program.p1': 'A Czatbox TT egy TikTok LIVE-csevegés kezelésére szolgáló alkalmazás. A kiválasztott élő adás üzeneteit külön, jól olvasható ablakban jeleníti meg.',
+  'about.program.p2': 'A TikTokba való bejelentkezés után a program betölti a kiválasztott LIVE-készítő csevegését, és rendezett formában jeleníti meg. Szűrheted az eseménytípusokat és testre szabhatod a megjelenést.',
+  'about.program.how': 'Hogyan működik a program:',
+  'about.program.how.p1': 'Indítás után a felhasználó bejelentkezik a TikTokba. A munkamenet felismerésekor az alkalmazás csatlakozik a kiválasztott élő adáshoz, és a csevegést eseménylistaként tölti be.',
+  'about.program.how.p2': 'Az üzenetek beállított késleltetéssel jeleníthetők meg. Az ajándékok, csatlakozások és kedvelések valós időben érkezhetnek. A szűrő, a stílus, a téma és a késleltetés bármikor módosítható.',
+  'about.program.how.p3': 'A program működése közben minden adásesemény archiválódik. Az adás lezárása vagy váltása után az Archívum lapon visszatérhetsz a korábbi beszélgetésekhez.',
+  'about.news.024.layout': 'Az alkalmazás megjelenésének áttervezése',
+  'about.news.024.launcher': 'Alsó indítópanel ablakokkal',
+  'about.news.024.archives': 'A 7 napnál régebbi archívumok automatikus törlése.',
+  'about.news.024.ttsVolume': 'A TTS-felolvasás hangerejének beállítása.',
+  'about.news.024.icon': 'Új alkalmazásikon.',
+  'about.news.024.bigPicture': 'Big Picture mód bevezetése.',
+  'about.news.024.about': 'Az A programról lap frissítése.',
+  'settings.title': 'Beállítások',
+  'settings.subtitle': 'Az alkalmazás működésének és megjelenésének beállítása.',
+  'settings.reset': 'Alapértelmezések visszaállítása',
+  'nav.archive': 'Archívum',
+  'nav.boxes': 'Ládák',
+  'nav.about': 'A programról',
+  'filters.chat': 'Csevegés',
+  'filters.like': 'Kedvelések',
+  'filters.gift': 'Ajándékok',
+  'filters.box': 'Ládák',
+  'filters.repost': 'Újraküldések',
+  'filters.share': 'Megosztások',
+  'filters.member': 'Csatlakozások',
+  'about.title': 'A programról',
+  'about.tabs.aria': 'A program lapjai'
+};
+
+// Keep the Big Picture quiet-mode label translated in every supported locale.
+I18N.pl['settings.general.quietMode'] = 'Tryb cichy (wycisz powiadomienia Windows)';
+I18N.en['settings.general.quietMode'] = 'Quiet mode (mute Windows notifications)';
+I18N.de['settings.general.quietMode'] = 'Ruhemodus (Windows-Benachrichtigungen stummschalten)';
+I18N.hu['settings.general.quietMode'] = 'Csendes mód (Windows-értesítések némítása)';
+I18N.hu['creator.panelTitle'] = 'Alkotók';
+I18N.hu['creator.panelNote'] = 'Válassz alkotót, vagy keress élő adást.';
+I18N.hu['statsWidget.title'] = 'Élő statisztikák';
+I18N.hu['statsWidget.viewers'] = 'Nézők a csevegésben';
+I18N.hu['statsWidget.messages'] = 'Elküldött üzenetek';
+I18N.hu['statsWidget.activeHearts'] = 'Elküldött szívek';
+I18N.hu['statsWidget.inactiveHearts'] = 'El nem küldött szívek';
+I18N.hu['statsWidget.dock'] = 'Élő eszközök';
+I18N.hu['statsWidget.expand'] = 'Élő statisztikák megnyitása';
+I18N.hu['statsWidget.collapse'] = 'Élő statisztikák bezárása';
+I18N.hu['status.online'] = 'Online';
+I18N.hu['status.offline'] = 'Offline';
+I18N.hu['event.member.join'] = 'csatlakozott az élő adáshoz';
+I18N.hu['event.gift'] = 'ajándékot küldött: {giftName}{countText}{costText}';
+I18N.hu['event.like'] = 'kedvelte az élő adást (összesen {total} kedvelés)';
+I18N.pl['creator.panelTitle'] = 'Twórcy';
+I18N.pl['creator.panelNote'] = 'Wybierz twórcę lub wyszukaj transmisję.';
+I18N.en['creator.panelTitle'] = 'Creators';
+I18N.en['creator.panelNote'] = 'Choose a creator or search for a live stream.';
+I18N.de['creator.panelTitle'] = 'Creator';
+I18N.de['creator.panelNote'] = 'Wähle einen Creator oder suche nach einem Live.';
+I18N.pl['about.news.025.creators'] = 'Od teraz zapamiętani twórcy i łączenie się są w dolnym pasku launchera.';
+I18N.pl['about.news.025.bigPicture'] = 'Poprawiono Big Picture — krawędzie ramek nie wyglądają już jak poszarpane.';
+I18N.pl['about.news.025.hungarian'] = 'Dodano język węgierski.';
+I18N.pl['about.news.025.translations'] = 'Poprawiono tłumaczenia na inne języki.';
+I18N.pl['about.news.025.widgets'] = 'Poprawiono błąd z przycinkami widgetów przy zmianie na tryb Big Picture.';
+I18N.en['about.news.025.creators'] = 'Saved creators and connections are now available in the bottom launcher bar.';
+I18N.en['about.news.025.bigPicture'] = 'Improved Big Picture: frame edges no longer look jagged.';
+I18N.en['about.news.025.hungarian'] = 'Added Hungarian language support.';
+I18N.en['about.news.025.translations'] = 'Improved translations for other languages.';
+I18N.en['about.news.025.widgets'] = 'Fixed widget stutters when switching to Big Picture mode.';
+I18N.de['about.news.025.creators'] = 'Gespeicherte Creator und Verbindungen sind jetzt in der unteren Launcherleiste verfügbar.';
+I18N.de['about.news.025.bigPicture'] = 'Big Picture verbessert: Rahmenecken wirken nicht mehr ausgefranst.';
+I18N.de['about.news.025.hungarian'] = 'Ungarische Sprache hinzugefügt.';
+I18N.de['about.news.025.translations'] = 'Übersetzungen für weitere Sprachen verbessert.';
+I18N.de['about.news.025.widgets'] = 'Widget-Ruckler beim Wechsel in den Big-Picture-Modus behoben.';
+I18N.hu['about.news.025.creators'] = 'A mentett alkotók és a csatlakozások most az alsó launcherben érhetők el.';
+I18N.hu['about.news.025.bigPicture'] = 'A Big Picture mód javítva: a keretek szélei már nem recések.';
+I18N.hu['about.news.025.hungarian'] = 'Magyar nyelv hozzáadva.';
+I18N.hu['about.news.025.translations'] = 'A többi nyelv fordításai javítva.';
+I18N.hu['about.news.025.widgets'] = 'Javítva a widgetek akadozása Big Picture módra váltáskor.';
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -1406,6 +1589,8 @@ const statsToolboxEl = document.getElementById('statsToolbox');
 const galleryAvatarsEl = document.getElementById('galleryAvatars');
 const deleteOldArchivesEl = document.getElementById('deleteOldArchives');
 const bigPictureModeEl = document.getElementById('bigPictureMode');
+const quietModeEl = document.getElementById('quietMode');
+const resetSettingsButtonEl = document.getElementById('resetSettingsButton');
 const refreshArchiveButton = document.getElementById('refreshArchive');
 const openArchiveFolderButton = document.getElementById('openArchiveFolder');
 const archiveListEl = document.getElementById('archiveList');
@@ -1435,6 +1620,32 @@ const settingsDialogCloseEl = document.getElementById('settingsDialogClose');
 const coinsLauncherEl = document.getElementById('coinsLauncher');
 const coinsDialogBackdropEl = document.getElementById('coinsDialogBackdrop');
 const coinsDialogCloseEl = document.getElementById('coinsDialogClose');
+const creatorLauncherEl = document.getElementById('creatorLauncher');
+const creatorLauncherPanelEl = document.getElementById('creatorLauncherPanel');
+const creatorLauncherPanelContentEl = document.getElementById('creatorLauncherPanelContent');
+const creatorLauncherPanelCloseEl = document.getElementById('creatorLauncherPanelClose');
+const creatorPickerEl = document.querySelector('.creator-picker');
+const recentCreatorsColumnEl = document.querySelector('.recent-creators-column');
+
+if (creatorLauncherPanelContentEl) {
+  if (creatorPickerEl) creatorLauncherPanelContentEl.appendChild(creatorPickerEl);
+  if (recentCreatorsColumnEl) creatorLauncherPanelContentEl.appendChild(recentCreatorsColumnEl);
+}
+
+function setCreatorLauncherOpen(open) {
+  if (!creatorLauncherPanelEl) return;
+  creatorLauncherPanelEl.hidden = !open;
+  creatorLauncherEl?.setAttribute('aria-expanded', String(open));
+  creatorLauncherEl?.setAttribute('data-open', String(open));
+}
+
+creatorLauncherEl?.addEventListener('click', () => {
+  setCreatorLauncherOpen(Boolean(creatorLauncherPanelEl?.hidden));
+});
+creatorLauncherPanelCloseEl?.addEventListener('click', () => setCreatorLauncherOpen(false));
+creatorLauncherPanelEl?.addEventListener('click', (event) => {
+  if (event.target === creatorLauncherPanelEl) setCreatorLauncherOpen(false);
+});
 
 // Wszystkie okna launcherów muszą być dziećmi body. W przeciwnym razie
 // transformacje i siatka głównej aplikacji ograniczają position: fixed.
@@ -1502,6 +1713,15 @@ function getUpdateUiText(key, version = '') {
       download: 'Herunterladen',
       install: 'Aktualisieren',
       error: 'Update konnte nicht geprüft werden'
+    },
+    hu: {
+      available: `Frissítés érhető el${version ? ` ${version}` : ''}`,
+      downloading: 'Frissítés letöltése...',
+      downloaded: 'A frissítés készen áll',
+      installing: 'Frissítés telepítése...',
+      download: 'Letöltés',
+      install: 'Frissítés',
+      error: 'Nem sikerült ellenőrizni a frissítéseket'
     }
   };
   return texts[language] && texts[language][key] ? texts[language][key] : texts.pl[key];
@@ -1799,6 +2019,9 @@ const redeemCodeInput = document.getElementById('redeemCodeInput');
 const redeemCodeButton = document.getElementById('redeemCodeButton');
 const redeemCodeStatus = document.getElementById('redeemCodeStatus');
 const appVersionEl = document.getElementById('appVersion');
+const appTaskbarClockEl = document.getElementById('appTaskbarClock');
+const appTaskbarTimeEl = document.getElementById('appTaskbarTime');
+const appTaskbarDateEl = document.getElementById('appTaskbarDate');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
 const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
 const ttsSkipVulgarMessagesEl = document.getElementById('ttsSkipVulgarMessages');
@@ -1943,6 +2166,32 @@ function formatTime(value) {
   return getTimeFormatter().format(date);
 }
 
+function updateTaskbarClock() {
+  if (!appTaskbarClockEl) {
+    return;
+  }
+  const now = new Date();
+  const date = new Intl.DateTimeFormat(
+    timeFormat === 'auto' ? undefined : (LANGUAGE_LOCALES[appLanguage] || LANGUAGE_LOCALES.pl),
+    { day: '2-digit', month: '2-digit', year: 'numeric' }
+  ).format(now);
+  appTaskbarClockEl.textContent = `${date} · ${formatTime(now)}`;
+}
+
+// Render the taskbar clock as two stacked, icon-labelled values.
+function updateTaskbarClock() {
+  if (!appTaskbarClockEl) return;
+  const now = new Date();
+  const date = new Intl.DateTimeFormat(
+    timeFormat === 'auto' ? undefined : (LANGUAGE_LOCALES[appLanguage] || LANGUAGE_LOCALES.pl),
+    { day: '2-digit', month: '2-digit', year: 'numeric' }
+  ).format(now);
+  if (appTaskbarTimeEl && appTaskbarDateEl) {
+    appTaskbarTimeEl.textContent = formatTime(now);
+    appTaskbarDateEl.textContent = date;
+  }
+}
+
 function loadTtsSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(TTS_SETTINGS_KEY) || '{}');
@@ -1979,7 +2228,8 @@ function normalizeGeneralSettings(value) {
     statsToolbox: next.statsToolbox !== false,
     galleryAvatars: next.galleryAvatars !== false,
     deleteOldArchives: Boolean(next.deleteOldArchives),
-    bigPictureMode: Boolean(next.bigPictureMode)
+    bigPictureMode: Boolean(next.bigPictureMode),
+    quietMode: Boolean(next.quietMode)
   };
 }
 
@@ -4172,6 +4422,10 @@ function applyGeneralSettings() {
   if (bigPictureModeEl) {
     bigPictureModeEl.checked = generalSettings.bigPictureMode;
   }
+  if (quietModeEl) {
+    quietModeEl.checked = generalSettings.bigPictureMode && generalSettings.quietMode;
+    quietModeEl.disabled = !generalSettings.bigPictureMode;
+  }
 
   if (statusStatsEl) {
     statusStatsEl.hidden = !generalSettings.statsToolbox;
@@ -4210,8 +4464,14 @@ async function cleanupArchivesOlderThanSevenDays() {
 function initGeneralSettings() {
   applyGeneralSettings();
   cleanupArchivesOlderThanSevenDays();
+  document.documentElement.dataset.bigPicture = generalSettings.bigPictureMode ? 'true' : 'false';
   if (generalSettings.bigPictureMode) {
-    window.tiktokLive?.setBigPicture?.(true).catch(() => {});
+    window.tiktokLive?.setBigPicture?.(true)
+      .then(() => window.tiktokLive?.setQuietMode?.(generalSettings.quietMode))
+      .catch(() => {});
+  } else {
+    generalSettings.quietMode = false;
+    window.tiktokLive?.setQuietMode?.(false).catch(() => {});
   }
 
   if (multiplierNotificationsEl) {
@@ -4258,6 +4518,28 @@ function initGeneralSettings() {
         generalSettings.bigPictureMode = false;
       }
       bigPictureModeEl.checked = generalSettings.bigPictureMode;
+      document.documentElement.dataset.bigPicture = generalSettings.bigPictureMode ? 'true' : 'false';
+      if (!generalSettings.bigPictureMode) {
+        generalSettings.quietMode = false;
+        if (quietModeEl) {
+          quietModeEl.checked = false;
+          quietModeEl.disabled = true;
+        }
+      } else if (quietModeEl) {
+        quietModeEl.disabled = false;
+      }
+      saveGeneralSettings();
+    });
+  }
+  if (quietModeEl) {
+    quietModeEl.addEventListener('change', async () => {
+      if (!generalSettings.bigPictureMode) {
+        quietModeEl.checked = false;
+        return;
+      }
+      const result = await window.tiktokLive?.setQuietMode?.(quietModeEl.checked).catch(() => null);
+      generalSettings.quietMode = Boolean(result && result.ok && result.enabled);
+      quietModeEl.checked = generalSettings.quietMode;
       saveGeneralSettings();
     });
   }
@@ -4276,6 +4558,27 @@ function initGeneralSettings() {
     });
   });
 }
+
+function resetApplicationSettings() {
+  if (!window.confirm('Przywrócić domyślne ustawienia aplikacji?')) {
+    return;
+  }
+  [
+    TTS_SETTINGS_KEY,
+    CHAT_DELAY_SETTINGS_KEY,
+    CHAT_STYLE_SETTINGS_KEY,
+    CHAT_FILTER_SETTINGS_KEY,
+    ARCHIVE_FILTER_SETTINGS_KEY,
+    APP_THEME_SETTINGS_KEY,
+    APP_APPEARANCE_SETTINGS_KEY,
+    APP_LANGUAGE_SETTINGS_KEY,
+    TIME_FORMAT_SETTINGS_KEY,
+    GENERAL_SETTINGS_KEY
+  ].forEach((key) => localStorage.removeItem(key));
+  window.location.reload();
+}
+
+resetSettingsButtonEl?.addEventListener('click', resetApplicationSettings);
 
 function setOpenRightWidget(target) {
   rightWidgets.forEach((widget) => {
@@ -4448,7 +4751,14 @@ function initSystemSettings() {
 }
 
 function initFirstRunLanguageChoice() {
-  if (!firstRunLanguageEl || localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)) {
+  if (!firstRunLanguageEl) {
+    return;
+  }
+
+  const currentVersion = state.appVersion || '0.2.5';
+  const languageChosen = localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY);
+  const versionChosen = localStorage.getItem(APP_LANGUAGE_VERSION_KEY);
+  if (languageChosen && versionChosen === currentVersion) {
     return;
   }
 
@@ -4459,9 +4769,22 @@ function initFirstRunLanguageChoice() {
         ? button.dataset.firstLanguage
         : DEFAULT_SYSTEM_SETTINGS.language;
       firstRunLanguageEl.hidden = true;
+      localStorage.setItem(APP_LANGUAGE_VERSION_KEY, state.appVersion || '0.2.5');
       await updateSystemSettings({ language });
     });
   });
+}
+
+function checkLanguageChoiceForVersion() {
+  if (!firstRunLanguageEl) {
+    return;
+  }
+  const currentVersion = state.appVersion || '0.2.5';
+  if (localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)
+    && localStorage.getItem(APP_LANGUAGE_VERSION_KEY) === currentVersion) {
+    return;
+  }
+  initFirstRunLanguageChoice();
 }
 
 function formatDelaySeconds(delayMs) {
@@ -5083,6 +5406,7 @@ function renderBattleBannerFromState() {
 }
 
 function updateStatus() {
+  updateTaskbarClock();
   const statusText = getConnectionStatusText();
   const delayText = formatDelaySeconds(chatDelayMs);
   const queueText = formatCounter(queue.length);
@@ -7267,6 +7591,7 @@ window.tiktokLive.onState((nextState) => {
   const wasOffline = isOfflineConnectionState(state);
   const wasOnline = isOnlineConnectionState(state);
   state = nextState;
+  checkLanguageChoiceForVersion();
   const isNowOffline = isOfflineConnectionState(state);
   if (isOnlineConnectionState(state) && (!wasOnline || state.creatorId !== previousCreatorId || !czesterCurrentLiveSessionKey)) {
     const sessionCreator = normalizeCreatorHandle(getCreatorUsernameFromState()) || String(state.creatorId || 'creator');
@@ -8667,6 +8992,7 @@ initFirstRunLanguageChoice();
 initTextToSpeech();
 startRevealTimer();
 setInterval(updateStatus, 5000);
+setInterval(updateTaskbarClock, 1000);
 setInterval(checkHondaOnlinePresence, HONDA_ONLINE_CHECK_INTERVAL_MS);
 setActiveSettingsTab(activeSettingsTab);
 setActiveAboutTab(activeAboutTab);
