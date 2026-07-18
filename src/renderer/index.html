@@ -27,11 +27,15 @@
             <span class="ui-icon-slot" data-ui-icon="refresh" aria-hidden="true"></span>
           </button>
         </div>
+        <div class="talarki-counter" id="talarkiCounter" aria-label="Talarki" title="Talarki">
+          <strong id="talarkiValue">0</strong><span class="ui-icon-slot" data-ui-icon="coin" aria-hidden="true"></span>
+        </div>
       </header>
 
       <aside class="recent-creators-column" aria-label="Ostatni twórcy" data-i18n-aria-label="recentCreators.aria">
         <section class="recent-creators-strip" id="recentCreatorsStrip" hidden>
           <button class="recent-creators-nav" id="recentCreatorsPrev" type="button" data-direction="-1" aria-label="Poprzedni twórcy" hidden>&uarr;</button>
+          <div class="favorite-creators-row" id="favoriteCreatorsRow" hidden></div>
           <div class="recent-creators-carousel" id="recentCreatorsCarousel"></div>
           <button class="recent-creators-nav" id="recentCreatorsNext" type="button" data-direction="1" aria-label="Następni twórcy" hidden>&darr;</button>
         </section>
@@ -249,23 +253,23 @@
             <h2 class="settings-heading" data-i18n="settings.tabs.general">Czat i archiwa</h2>
             <div class="settings-list">
               <label class="setting-row" for="statsToolbox">
-                <span>Przybornik statystyk</span>
+                <span><strong>Przybornik statystyk</strong><small class="setting-description">Włącza widgety ze statystykami po prawej stronie ekranu.</small></span>
                 <input class="setting-toggle" type="checkbox" id="statsToolbox">
               </label>
               <label class="setting-row" for="galleryAvatars">
-                <span>Awatary z galerii</span>
+                <span><strong>Awatary z galerii</strong><small class="setting-description">Używa lokalnych obrazków zamiast awatarów użytkowników przy słabszym łączu.</small></span>
                 <input class="setting-toggle" type="checkbox" id="galleryAvatars">
               </label>
               <label class="setting-row" for="deleteOldArchives">
-                <span>Wyczyść archiwa starsze niż 7 dni</span>
+                <span><strong>Wyczyść archiwa starsze niż 7 dni</strong><small class="setting-description">Czyści zapisane czaty LIVE, aby program działał sprawniej.</small></span>
                 <input class="setting-toggle" type="checkbox" id="deleteOldArchives">
               </label>
               <label class="setting-row" for="bigPictureMode">
-                <span>Big Picture (pełny ekran)</span>
+                <span><strong>Big Picture (pełny ekran)</strong><small class="setting-description">Włącza pełny tryb ekranowy aplikacji.</small></span>
                 <input class="setting-toggle" type="checkbox" id="bigPictureMode">
               </label>
               <label class="setting-row" for="quietMode">
-                <span data-i18n="settings.general.quietMode">Tryb cichy (wycisz powiadomienia Windows)</span>
+                <span><strong data-i18n="settings.general.quietMode">Tryb cichy (wycisz powiadomienia Windows)</strong><small class="setting-description">Działa w trybie Big Picture, aby powiadomienia nie zakłócały pracy.</small></span>
                 <input class="setting-toggle" type="checkbox" id="quietMode" disabled>
               </label>
               <section class="setting-section chat-delay-section">
@@ -284,7 +288,12 @@
             </div>
           </section>
           <section class="settings-panel" data-settings-panel="appearance" hidden>
-            <section class="setting-section appearance-chat-style-section" data-retro-kb2-hidden>
+            <nav class="appearance-settings-tabs settings-tabs" role="tablist" aria-label="Ustawienia wyglądu">
+              <button class="settings-tab" type="button" role="tab" data-appearance-subtab="chat-style" data-i18n="settings.appearance.chatStyle">Styl czatu:</button>
+              <button class="settings-tab" type="button" role="tab" data-appearance-subtab="theme" data-i18n="settings.appearance.theme">Motyw:</button>
+              <button class="settings-tab" type="button" role="tab" data-appearance-subtab="app-appearance" data-i18n="settings.appearance.appAppearance">Wygląd aplikacji:</button>
+            </nav>
+            <section class="setting-section appearance-chat-style-section" data-appearance-subpanel="chat-style" data-retro-kb2-hidden>
               <h2 class="settings-heading">Styl czatu:</h2>
               <div class="settings-list choice-list">
                 <label class="setting-choice" for="chatStyleCompact">
@@ -310,7 +319,7 @@
                 </label>
               </div>
             </section>
-            <section class="setting-section appearance-theme-section" data-retro-kb2-hidden>
+            <section class="setting-section appearance-theme-section" data-appearance-subpanel="theme" data-retro-kb2-hidden>
               <h2 class="settings-heading">Motyw:</h2>
               <div class="settings-list choice-list">
                 <label class="setting-choice" for="themeRoseBlack">
@@ -361,9 +370,16 @@
                     <small>Pastelowe odcienie Miami inspirowane klimatem GTA Vice City.</small>
                   </span>
                 </label>
+                <label class="setting-choice theme-choice-locked" for="themeDzikaGalaktyka" data-locked="true">
+                  <input type="radio" id="themeDzikaGalaktyka" name="appTheme" value="dzika-galaktyka">
+                  <span>
+                    <span class="theme-title-row"><strong>Dzika galaktyka</strong><span class="theme-lock-badge"><span data-ui-icon="lock" aria-hidden="true"></span><span>Zablokowany</span></span></span>
+                    <small>Galaktyczne odcienie, mgławice i estetyka Frutiger Aero.</small>
+                  </span>
+                </label>
               </div>
             </section>
-            <section class="setting-section appearance-app-section">
+            <section class="setting-section appearance-app-section" data-appearance-subpanel="app-appearance">
               <h2 class="settings-heading">Wygląd aplikacji:</h2>
               <div class="settings-list choice-list">
                 <label class="setting-choice" for="appAppearanceStandard">
@@ -397,34 +413,34 @@
             <h2 class="settings-heading">Audio i czytanie wiadomości</h2>
             <div class="settings-list">
               <label class="setting-row" for="ttsEnabled">
-                <span>Czytaj czat na głos</span>
+                <span><strong>Czytaj czat na głos</strong><small class="setting-description">Czyta na głos pojawiające się wiadomości na czacie.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsEnabled">
               </label>
               <label class="setting-row" for="ttsSkipVulgarNicknames">
-                <span>Pomijaj wulgarne nicki</span>
+                <span><strong>Pomijaj wulgarne nicki</strong><small class="setting-description">Pomija obraźliwe słowa w nicku.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarNicknames">
               </label>
               <label class="setting-row" for="ttsSkipVulgarMessages">
-                <span>Pomijaj wulgarne wiadomości</span>
+                <span><strong>Pomijaj wulgarne wiadomości</strong><small class="setting-description">TTS nie czyta wulgarnych wiadomości.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarMessages">
               </label>
               <label class="setting-row" for="ttsSkipSpamMessages">
-                <span>Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)</span>
+                <span><strong>Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)</strong><small class="setting-description">Pomija powtarzalne wiadomości spamowe.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipSpamMessages">
               </label>
               <label class="setting-row" for="ttsVoice">
-                <span>Głos</span>
+                <span><strong>Głos</strong><small class="setting-description">Wybierz pasujący głos.</small></span>
                 <select class="setting-select" id="ttsVoice"></select>
               </label>
               <label class="setting-row" for="ttsRate">
-                <span>Tempo</span>
+                <span><strong>Tempo</strong><small class="setting-description">Ustawia tempo czytania wiadomości TTS.</small></span>
                 <span class="setting-range">
                   <input type="range" id="ttsRate" min="0.7" max="1.3" step="0.1" value="1">
                   <output id="ttsRateValue">1.0x</output>
                 </span>
               </label>
               <label class="setting-row" for="ttsVolume">
-                <span>Głośność czytania wiadomości</span>
+                <span><strong>Głośność czytania wiadomości</strong><small class="setting-description">Dostosuj głośność czytanych wiadomości.</small></span>
                 <span class="setting-range">
                   <input type="range" id="ttsVolume" min="0" max="1" step="0.05" value="1">
                   <output id="ttsVolumeValue">100%</output>
@@ -436,19 +452,19 @@
             <p class="page-note" data-i18n="settings.system.note">Informacje i ustawienia systemowe.</p>
             <div class="settings-list">
               <label class="setting-row" for="systemAutoLaunch">
-                <span data-i18n="settings.system.autoLaunch">Automatycznie otwieraj Czatbox TT po uruchomieniu komputera</span>
+                <span><strong data-i18n="settings.system.autoLaunch">Automatycznie otwieraj Czatbox TT po uruchomieniu komputera</strong><small class="setting-description">Program automatycznie włącza się po uruchomieniu komputera.</small></span>
                 <input class="setting-toggle" type="checkbox" id="systemAutoLaunch">
               </label>
               <label class="setting-row" for="systemRunInBackground">
-                <span data-i18n="settings.system.runInBackground">Uruchom program w tle by nie przeszkadzał</span>
+                <span><strong data-i18n="settings.system.runInBackground">Uruchom program w tle, by nie przeszkadzał</strong><small class="setting-description">Program działa w zasobniku systemu, a wiadomości TTS nadal są czytane.</small></span>
                 <input class="setting-toggle" type="checkbox" id="systemRunInBackground">
               </label>
               <label class="setting-row" for="systemMinimizeToTray">
-                <span data-i18n="settings.system.minimizeToTray">Minimalizuj Czatbox TT do zasobnika systemowego po klikniÄ™ciu X</span>
+                <span><strong data-i18n="settings.system.minimizeToTray">Minimalizuj Czatbox TT do zasobnika systemowego po kliknięciu X</strong><small class="setting-description">Program nie wyłącza się, tylko minimalizuje do zasobnika.</small></span>
                 <input class="setting-toggle" type="checkbox" id="systemMinimizeToTray">
               </label>
               <label class="setting-row" for="appLanguage">
-                <span data-i18n="settings.system.language">Wybierz jÄ™zyk aplikacji</span>
+                <span><strong data-i18n="settings.system.language">Wybierz język aplikacji</strong><small class="setting-description">Wybierz język, którym chcesz posługiwać się w programie.</small></span>
                 <select class="setting-select" id="appLanguage">
                   <option value="pl" data-i18n="settings.system.language.pl">Polski</option>
                   <option value="en" data-i18n="settings.system.language.en">Angielski</option>
@@ -457,7 +473,7 @@
                 </select>
               </label>
               <label class="setting-row" for="timeFormat">
-                <span data-i18n="settings.system.timeFormat">Format czasu</span>
+                <span><strong data-i18n="settings.system.timeFormat">Format czasu</strong><small class="setting-description">Określa format wyświetlania czasu i strefy czasowej.</small></span>
                 <select class="setting-select" id="timeFormat">
                   <option value="auto" data-i18n="settings.system.timeFormat.auto">Automatyczny (wykrywa czas w systemie)</option>
                   <option value="12" data-i18n="settings.system.timeFormat.12">12-godzinny</option>
@@ -465,7 +481,7 @@
                 </select>
               </label>
               <div class="setting-row">
-                <span data-i18n="settings.system.clearSessionDescription">Problem z logowaniem lub sesją TikTok</span>
+                <span><strong data-i18n="settings.system.clearSessionDescription">Problem z logowaniem lub sesją TikTok</strong><small class="setting-description">Czyści lokalnie informacje o działaniu programu i sesji.</small></span>
                 <button class="page-action" type="button" id="clearTikTokSession" data-i18n="settings.system.clearSession">Wyczyść sesję TikTok</button>
               </div>
             </div>
@@ -583,30 +599,6 @@
         </section>
         </div>
 
-        <div class="widget-dialog-backdrop" id="coinsDialogBackdrop" hidden>
-        <section class="widget-dialog coins-dialog page-view coins-view" id="coinsDialog" role="dialog" aria-modal="true" aria-labelledby="coinsDialogTitle">
-          <header class="radio-dialog-header">
-            <div>
-              <h1 id="coinsDialogTitle" data-i18n="coins.title">Monetki</h1>
-              <p class="page-note" data-i18n="coins.note">Wesprzyj rozwój programu, kupując monetki TikTok z rabatem.</p>
-            </div>
-            <button class="radio-dialog-close" id="coinsDialogClose" type="button" aria-label="Zamknij monetki" title="Zamknij monetki">×</button>
-          </header>
-          <article class="coins-card">
-            <span class="coins-card-icon" data-ui-icon="coin" aria-hidden="true"></span>
-            <div class="coins-card-copy">
-              <h2 data-i18n="coins.cardTitle">Wsparcie przez monetki TikTok</h2>
-              <p data-i18n="coins.description">Możesz wesprzeć autora programu, kupując monetki na stronie TikToka z 25% rabatem przez kod ZD3TKFBV.</p>
-              <p class="coins-code-row">
-                <span data-i18n="coins.codeLabel">Kod rabatowy:</span>
-                <strong>ZD3TKFBV</strong>
-              </p>
-              <a class="page-action coins-link" href="https://www.tiktok.com/coin?rc=ZD3TKFBV" data-external-url="https://www.tiktok.com/coin?rc=ZD3TKFBV" rel="noreferrer" data-i18n="coins.link">Przejdź do TikToka</a>
-            </div>
-          </article>
-        </section>
-        </div>
-
         <section class="view-panel page-view boxes-view" data-view="boxes" hidden>
           <div class="page-header">
             <div>
@@ -718,22 +710,34 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title"><span data-i18n="about.news.version">Wersja programu</span> <span id="appVersion">0.2.5</span>:</h2>
+                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.2.6</span></h2>
+
+                  <p data-i18n="about.news.026.intro">Tym razem aktualizacja jest naprawdę potężna, od systemu ekonomii i sklepu z motywami i grami, po poprawki tłumaczeń. Starałem się zawrzeć większość sugestii z ostatnich 2 tygodni. Mam nadzieję, że sprostałem - jeżeli tak poleć program dalej swoim znajomym - dziękuję!</p>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.025.creators">Od teraz zapamiętani twórcy i łączenie się są w dolnym pasku launchera.</li>
-                    <li data-i18n="about.news.025.bigPicture">Poprawiono Big Picture — krawędzie ramek nie wyglądają już jak poszarpane.</li>
-                    <li data-i18n="about.news.025.hungarian">Dodano język węgierski.</li>
-                    <li data-i18n="about.news.025.translations">Poprawiono tłumaczenia na inne języki.</li>
-                    <li data-i18n="about.news.025.widgets">Poprawiono błąd z przycinkami widgetów przy zmianie na tryb Big Picture.</li>
+                    <li data-i18n="about.news.026.economy">System Talarków i nagrody za osiągnięcia oraz aktywność na LIVE.</li>
+                    <li data-i18n="about.news.026.shop">Sklep z podglądem i kupowaniem motywów.</li>
+                    <li data-i18n="about.news.026.themes">Motywy Miami Vice i Dzika galaktyka.</li>
+                    <li data-i18n="about.news.026.brickers">Możliwość kupienia gry Brikers za 1500 Talarków.</li>
+                    <li data-i18n="about.news.026.piper">Dwa wbudowane głosy Piper: Halina i Mr. Drwina.</li>
+                    <li data-i18n="about.news.026.tts">Poprawione filtrowanie tekstu TTS.</li>
+                    <li data-i18n="about.news.026.viewers">Panel aktywnych widzów LIVE.</li>
+                    <li data-i18n="about.news.026.avatars">Pamięć awatarów oraz awatar Enigmy jako zapasowy.</li>
+                    <li data-i18n="about.news.026.favorites">Mechanika ulubionych twórców.</li>
+                    <li data-i18n="about.news.026.savedCreators">Rozszerzona lista zapamiętanych twórców.</li>
+                    <li data-i18n="about.news.026.settingsDescriptions">Opisy funkcji w ustawieniach.</li>
+                    <li data-i18n="about.news.026.launcher">Poprawki skalowania i wyglądu okien launchera.</li>
+                    <li data-i18n="about.news.026.bigPicture">Poprawki Big Picture.</li>
+                    <li data-i18n="about.news.026.updater">Poprawki powiadomień aktualizatora.</li>
+                    <li data-i18n="about.news.026.stats">Poprawki liczenia TAPEK oraz udostępnień.</li>
+                    <li data-i18n="about.news.026.roles">Oznaczenia moderatorów i superfanów przy nickach.</li>
+                    <li data-i18n="about.news.026.polish">Liczne poprawki tłumaczeń, układu, ramek i responsywności.</li>
                   </ul>
 
-                  <h3 data-i18n="about.news.next.title">Co dalej:</h3>
+                  <h3 data-i18n="about.news.next.title">Co dalej?</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.next.achievements">Rozbudowa osiągnięć.</li>
-                    <li data-i18n="about.news.next.ai">Dodatkowe funkcje AI w programie.</li>
-                    <li data-i18n="about.news.next.fixes">Dźwięki dla giftów od xxx wartości monet.</li>
+                    <li data-i18n="about.news.026.next">To tajemnicza tajemnica!</li>
                   </ul>
                 </div>
               </div>
@@ -802,6 +806,9 @@
           <button class="creator-launcher" id="creatorLauncher" type="button" aria-label="Otwórz twórców" title="Twórcy" aria-haspopup="dialog" aria-controls="creatorLauncherPanel">
             <span class="launcher-icon" data-ui-icon="user" aria-hidden="true"></span>
           </button>
+          <button class="viewers-launcher" id="viewersLauncher" type="button" aria-label="Pokaż widzów" title="Widzowie" aria-haspopup="dialog" aria-controls="viewersDialog">
+            <span class="launcher-icon" data-ui-icon="users" aria-hidden="true"></span>
+          </button>
           <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz radio" title="Otwórz radio" aria-haspopup="dialog" aria-controls="radioDialog">
             <span class="launcher-icon" id="radioLauncherIcon" data-ui-icon="broadcast" aria-hidden="true"></span>
           </button>
@@ -814,9 +821,10 @@
           <button class="settings-launcher" id="settingsLauncher" type="button" aria-label="Otwórz ustawienia" title="Otwórz ustawienia" aria-haspopup="dialog" aria-controls="settingsDialog">
             <span class="launcher-icon" data-ui-icon="settings" aria-hidden="true"></span>
           </button>
-          <button class="coins-launcher" id="coinsLauncher" type="button" aria-label="Otwórz monetki" title="Otwórz monetki" aria-haspopup="dialog" aria-controls="coinsDialog">
-            <span class="launcher-icon" data-ui-icon="coin" aria-hidden="true"></span>
+          <button class="shop-launcher" id="shopLauncher" type="button" aria-label="Otwórz sklep" title="Sklep" aria-haspopup="dialog" aria-controls="shopDialog">
+            <span class="launcher-icon" data-ui-icon="shopping-bag" aria-hidden="true"></span>
           </button>
+          <button class="tamagotchi-launcher" id="tamagotchiLauncher" type="button" aria-label="Otwórz Tamagotchi" title="Tamagochi" aria-haspopup="dialog" aria-controls="tamagotchiDialog" hidden><span class="launcher-icon" data-ui-icon="dinosaur" aria-hidden="true"></span></button>
           <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
             <span class="launcher-icon" data-ui-icon="chat" aria-hidden="true"></span>
             <span class="czester-launcher-badge" aria-hidden="true"></span>
@@ -829,6 +837,20 @@
       </footer>
     </main>
 
+    <div class="widget-dialog-backdrop" id="shopDialogBackdrop" hidden>
+      <section class="widget-dialog shop-dialog" id="shopDialog" role="dialog" aria-modal="true" aria-labelledby="shopDialogTitle">
+        <header class="radio-dialog-header"><div><h1 id="shopDialogTitle" data-i18n="shop.title">Sklep</h1><p class="page-note" data-i18n="shop.note">Wymieniaj Talarki na dodatki do programu.</p></div><button class="radio-dialog-close" id="shopDialogClose" type="button" aria-label="Zamknij sklep">×</button></header>
+        <div class="settings-tabs shop-tabs" role="tablist"><button class="settings-tab" data-shop-tab="themes" data-active="true" data-i18n="shop.themes">Motywy</button><button class="settings-tab" data-shop-tab="other" data-i18n="shop.other">Inne</button></div>
+        <section class="shop-items" data-shop-panel="themes"><article class="shop-item"><div><h2>Miami Vice</h2><p>Pastelowy motyw inspirowany GTA Vice City.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="miami-vice" type="button">Podgląd</button><button class="page-action" id="shopMiamiPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Dzika galaktyka</h2><p>Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="dzika-galaktyka" type="button">Podgląd</button><button class="page-action" id="shopWildGalaxyPurchase" type="button">Kup za 1000 Talarków</button></div></article></section><section class="shop-items" data-shop-panel="other" hidden><article class="shop-item"><div><h2>Gra Brikers</h2><p>Opiekuj się Brikersem, dbaj o jego potrzeby i zdobywaj Talarki za sprzątanie kupek.</p></div><button class="page-action" id="shopBrikersPurchase" type="button">Kup za 1500 Talarków</button></article></section>
+      </section>
+    </div>
+    <div class="widget-dialog-backdrop" id="tamagotchiDialogBackdrop" hidden>
+      <section class="widget-dialog tamagotchi-dialog" id="tamagotchiDialog" role="dialog" aria-modal="true" aria-labelledby="tamagotchiTitle">
+        <header class="radio-dialog-header"><div><h1 id="tamagotchiTitle">Brikers</h1></div><button class="radio-dialog-close" id="tamagotchiClose" type="button" aria-label="Zamknij Tamagotchi">×</button></header>
+        <div class="tamagotchi-body" id="tamagotchiBody"></div>
+      </section>
+    </div>
+
     <section class="creator-launcher-panel" id="creatorLauncherPanel" role="dialog" aria-label="Twórcy" hidden>
       <div class="creator-launcher-panel-header">
         <div><h1 data-i18n="creator.panelTitle">Twórcy</h1><p data-i18n="creator.panelNote">Wybierz twórcę lub wyszukaj transmisję.</p></div>
@@ -836,6 +858,12 @@
       </div>
       <div class="creator-launcher-panel-content" id="creatorLauncherPanelContent"></div>
     </section>
+    <div class="widget-dialog-backdrop" id="viewersDialogBackdrop" hidden>
+      <section class="widget-dialog" id="viewersDialog" role="dialog" aria-modal="true" aria-labelledby="viewersDialogTitle">
+        <div class="creator-launcher-panel-header"><div><h1 id="viewersDialogTitle">Widzowie</h1><p>Osoby widoczne w ostatniej aktualizacji listy widzów.</p></div><button class="radio-dialog-close" id="viewersDialogClose" type="button" aria-label="Zamknij widzów">×</button></div>
+        <div class="creator-launcher-panel-content" id="viewersDialogContent"></div>
+      </section>
+    </div>
 
     <div class="radio-dialog-backdrop" id="radioDialogBackdrop" hidden>
       <section class="radio-dialog" id="radioDialog" role="dialog" aria-modal="true" aria-labelledby="radioDialogTitle">

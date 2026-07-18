@@ -1,6 +1,7 @@
 ﻿const fs = require('node:fs');
 const path = require('node:path');
 const { execFile, spawn } = require('node:child_process');
+const readline = require('node:readline');
 const { app, BaseWindow, WebContentsView, dialog, ipcMain, Menu, Tray, session, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
@@ -35,6 +36,25 @@ const AVATAR_EXTENSIONS = new Set(['.gif', '.jpg', '.jpeg', '.png', '.webp']);
 const HONDA_UNIQUE_ID = 'grzegorzpawemisiu';
 const HONDA_JOIN_TEXT = 'Honda wjechała na rejony.';
 const APP_VERSION = app.getVersion();
+const PIPER_RESOURCE_DIR = app.isPackaged
+  ? path.join(process.resourcesPath, 'piper')
+  : path.join(app.getAppPath(), 'resources', 'piper');
+const PIPER_EXECUTABLE = path.join(PIPER_RESOURCE_DIR, 'piper-tts.exe');
+const piperServers = new Map();
+
+function getPiperServer(model) {
+  const key = path.basename(model);
+  if (piperServers.has(key)) return piperServers.get(key);
+  const child = spawn(PIPER_EXECUTABLE, ['--server', '--model', model], { windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'] });
+  const pending = new Map();
+  const rl = readline.createInterface({ input: child.stdout });
+  rl.on('line', (line) => { try { const msg = JSON.parse(line); const job = pending.get(msg.id); if (job) { pending.delete(msg.id); job(msg); } } catch {} });
+  const server = { child, pending, nextId: 1 };
+  child.on('exit', () => { for (const job of pending.values()) job({ ok: false, error: 'piper-exited' }); pending.clear(); piperServers.delete(key); });
+  server.request = (text, output) => new Promise((resolve) => { const id = String(server.nextId++); pending.set(id, resolve); child.stdin.write(`${JSON.stringify({ id, text, output })}\n`); });
+  piperServers.set(key, server);
+  return server;
+}
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const CZESTER_SUPPORT_URL = 'https://www.tiktok.com/support';
 const CZESTER_SUPPORT_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -494,6 +514,7 @@ const OAUTH_HOSTS = [
 
 let mainWindow;
 let latestRoomStats = { viewerCount: 0 };
+let latestViewerList = [];
 let shellView;
 let loginView;
 let tiktokSession;
@@ -838,6 +859,7 @@ function resetChatBuffers() {
   seenMessageKeys.clear();
   likeTotalsByUser.clear();
   latestRoomStats = { viewerCount: 0 };
+  latestViewerList = [];
   liveUserDirectory.clear();
   superFanUsers.clear();
   currentCreatorLiveUserId = '';
@@ -3923,8 +3945,7 @@ function getLikeEventCount(data) {
     'tapCount',
     'tap_count',
     'tapCnt',
-    'tap_cnt',
-    'count'
+    'tap_cnt'
   ];
 
   for (const key of directKeys) {
@@ -3962,12 +3983,10 @@ function formatSocialEvent(data, forcedKind) {
     });
   }
 
-  const shareCount = getShareAudienceCount(data);
-  const countText = shareCount > 0 ? ` (👥 ${shareCount})` : '';
-  const text = `↩️ udostępnia live${countText}`;
+  const text = '↩️ udostępnia LIVE';
   return createDisplayEvent(data, 'share', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
     textKey: 'event.share',
-    shareCount
+    shareCount: 0
   });
 }
 
@@ -3985,6 +4004,7 @@ function createDisplayEvent(data, kind, user, text, archiveText, extra = {}) {
     kind,
     authorName: user.nickname,
     uniqueId: user.uniqueId,
+    avatar: user.avatar || '',
     isModerator,
     isSuperFan,
     text: normalizeMessageText(text),
@@ -4265,7 +4285,7 @@ function getEventUser(data) {
     || registered && registered.nickname
     || (data && data.nickname)
     || uniqueId;
-  return { uniqueId: String(uniqueId), nickname: String(nickname) };
+  return { uniqueId: String(uniqueId), nickname: String(nickname), avatar: getRawUserAvatar(user) || registered?.avatar || '' };
 }
 
 function getSocialKind(data) {
@@ -4415,7 +4435,9 @@ function isSuperFanEvent(data, user = getEventUser(data)) {
 }
 
 function markSuperFanUser(data) {
-  getSuperFanUserKeys(data).forEach((key) => superFanUsers.add(key));
+  getSuperFanUserCandidates(data).forEach((candidate) => {
+    getSuperFanUserKeys(candidate).forEach((key) => superFanUsers.add(key));
+  });
 }
 
 function isKnownSuperFanUser(value) {
@@ -4428,13 +4450,37 @@ function hasSuperFanBadgeMarker(value) {
   }
 
   const badgeSources = [
+    value.badge,
     value.badges,
     value.badgeList,
     value.userBadges,
     value.userBadgeList,
-    value.badgeImageList
+    value.badgeImageList,
+    value.badgeInfo,
+    value.privilegeLogExtra
   ];
   return badgeSources.some((source) => hasSuperFanSignalValue(source, 5));
+}
+
+function getSuperFanUserCandidates(value) {
+  if (!value || typeof value !== 'object') {
+    return [];
+  }
+
+  const candidates = [value, value.user];
+  const textContainers = [value.content, value.commonBarrageContent];
+  textContainers.forEach((container) => {
+    const pieces = container && Array.isArray(container.pieces) ? container.pieces : [];
+    pieces.forEach((piece) => {
+      candidates.push(
+        piece && piece.user,
+        piece && piece.userValue,
+        piece && piece.userValue && piece.userValue.user
+      );
+    });
+  });
+
+  return candidates.filter((candidate) => candidate && typeof candidate === 'object');
 }
 
 function getSuperFanUserKeys(value) {
@@ -4495,12 +4541,19 @@ function hasSuperFanSignalValue(value, depth) {
 
   const signalKeys = new Set([
     'type',
+    'key',
+    'eventName',
     'displayType',
     'display_type',
+    'scene',
+    'subType',
     'label',
     'defaultPattern',
     'pattern',
-    'content'
+    'content',
+    'commonBarrageContent',
+    'badge',
+    'privilegeLogExtra'
   ]);
 
   return Object.entries(value).some(([key, item]) => (
@@ -4585,6 +4638,12 @@ function sendRoomStats(data) {
     return;
   }
   latestRoomStats = { viewerCount };
+  const topViewers = Array.isArray(data?.topViewers) ? data.topViewers : [];
+  latestViewerList = topViewers.map((entry) => {
+    const user = entry?.user || entry;
+    const avatar = user?.avatar || user?.avatarThumb || user?.avatar_thumb?.urlList?.[0] || user?.avatar_thumb?.url_list?.[0] || '';
+    return { username: user?.uniqueId || user?.unique_id || user?.displayId || user?.display_id || '', nickname: user?.nickname || user?.displayName || user?.uniqueId || user?.unique_id || '', avatar };
+  }).filter((entry) => entry.username || entry.nickname);
   sendToShell('shell:room-stats', latestRoomStats);
 }
 
@@ -6750,6 +6809,43 @@ function handleShell(channel, handler) {
 }
 
 function installIpc() {
+  handleShell('shell:get-current-viewers', async () => {
+    const seenViewerKeys = new Set();
+    const directoryViewers = [...liveUserDirectory.values()]
+      .filter((user) => user && user.id && !isCurrentCreatorIdentity(user.nickname))
+      .map((user) => ({ username: user.displayId || user.id, nickname: user.nickname || user.displayId || user.id, avatar: user.avatar || '', aliases: user.aliases || [] }))
+      .filter((viewer) => {
+        const keys = [viewer.username, viewer.nickname].filter(Boolean).map((value) => String(value).replace(/^@/, '').trim().toLowerCase());
+        if (keys.some((key) => seenViewerKeys.has(key))) return false;
+        keys.forEach((key) => seenViewerKeys.add(key));
+        return true;
+      });
+    const merged = [...directoryViewers, ...latestViewerList];
+    const viewers = [];
+    const mergedKeys = new Set();
+    for (const viewer of merged) {
+      const keys = [viewer?.username, viewer?.nickname, ...(viewer?.aliases || [])]
+        .filter(Boolean)
+        .map((value) => String(value).replace(/^@/, '').trim().toLowerCase());
+      if (!keys.length || keys.some((key) => mergedKeys.has(key))) continue;
+      keys.forEach((key) => mergedKeys.add(key));
+      viewers.push({ ...viewer, avatar: viewer.avatar || '' });
+    }
+    return { ok: true, viewers, viewerCount: latestRoomStats.viewerCount || 0, observedCount: viewers.length, complete: false };
+  });
+  handleShell('shell:synthesize-piper', async ({ text, voice, lengthScale }) => {
+    if (!fs.existsSync(PIPER_EXECUTABLE)) return { ok: false, error: 'piper-unavailable' };
+    const safeVoice = String(voice || 'pl_PL-justyna_wg_glos-medium').replace(/[^a-zA-Z0-9_-]/g, '');
+    const model = path.join(PIPER_RESOURCE_DIR, `${safeVoice}.onnx`);
+    if (!fs.existsSync(model)) return { ok: false, error: 'piper-voice-unavailable' };
+    const output = path.join(app.getPath('temp'), `czatbox-tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
+    return new Promise((resolve) => {
+      execFile(PIPER_EXECUTABLE, ['--model', model, '--output', output, '--text', String(text || ''), '--length-scale', String(Math.max(0.7, Number(lengthScale) || 1.1))], { windowsHide: true, timeout: 30000 }, (error) => {
+        if (error || !fs.existsSync(output)) return resolve({ ok: false, error: error?.message || 'piper-failed' });
+        try { resolve({ ok: true, audio: fs.readFileSync(output).toString('base64') }); } finally { fs.rmSync(output, { force: true }); }
+      });
+    });
+  });
   handleShell('shell:start-live', async () => {
     await showChatMode();
     return { ok: true };
@@ -7027,6 +7123,16 @@ function configureAutoUpdates() {
     downloadedUpdateInfo = null;
     publishUpdateState('available', info, `Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
     setUpdateMessage(`Dostępna aktualizacja ${info && info.version ? info.version : ''}`.trim());
+  });
+
+  // electron-updater emits this event when the installed version is current.
+  // Clear any stale error banner from a previous failed check instead of
+  // leaving a misleading "Pobierz" action visible.
+  autoUpdater.on('update-not-available', (info) => {
+    latestUpdateInfo = null;
+    downloadedUpdateInfo = null;
+    updateInstallInProgress = false;
+    publishUpdateState('current', info || null, 'Program jest aktualny.');
   });
 
   autoUpdater.on('update-downloaded', async (info) => {

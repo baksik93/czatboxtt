@@ -1,4 +1,5 @@
 const TTS_SETTINGS_KEY = 'czatbox.tts.settings';
+const TALARKI_KEY = 'czatbox.talarki';
 const CHAT_DELAY_SETTINGS_KEY = 'czatbox.chat.delay';
 const CHAT_STYLE_SETTINGS_KEY = 'czatbox.chat.style';
 const CHAT_FILTER_SETTINGS_KEY = 'czatbox.chat.filters';
@@ -9,6 +10,7 @@ const APP_LANGUAGE_SETTINGS_KEY = 'czatbox.app.language';
 const TIME_FORMAT_SETTINGS_KEY = 'czatbox.time.format';
 const GENERAL_SETTINGS_KEY = 'czatbox.general.settings';
 const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
+const FAVORITE_CREATORS_KEY = 'czatbox.favorite.creators';
 const CZESTER_MEMORY_KEY = 'czatbox.czester.memory';
 const ACHIEVEMENTS_KEY = 'czatbox.achievements';
 const REDEEMED_FEATURES_KEY = 'czatbox.redeemed.features';
@@ -18,8 +20,11 @@ const COINS_PROMO_INTERVAL_MS = 30 * 60 * 1000;
 const DEFAULT_CHAT_DELAY_MS = 1800;
 const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
 const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
-const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice'];
+const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'dzika-galaktyka'];
+const WILD_GALAXY_STORE_CODE = 'STORE_WILD_GALAXY';
+const DEV_TALARKI_CODE = 'CZTT DEV 50K 2026';
 const MAX_VISIBLE_MESSAGES = 800;
+const MAX_FAVORITE_CREATORS = 12;
 const DEFAULT_EVENT_FILTERS = ['chat', 'like', 'gift', 'box', 'repost', 'share', 'member'];
 const APP_APPEARANCES = ['standard', 'ozdobny', 'retro-kb2'];
 const APP_LANGUAGES = ['pl', 'en', 'de', 'hu'];
@@ -40,6 +45,7 @@ const HONDA_REDEEM_CODE = '10FDBF47H0NDA250';
 const OLLAMA_REDEEM_CODE = '19BM9ARV9IN1K4M4';
 const BOXES_REDEEM_CODE = '1THU3GS6TO7OL6S2';
 const MIAMI_VICE_REDEEM_CODE = 'LEAVEME0ALONE173';
+const TALARKI_BONUS_CODE = 'AEZAKMI1GO23BENG';
 const OLLAMA_PROMPT_DECLINED_KEY = 'czatbox.czester.ollamaPromptDeclined';
 const CZESTER_AVATAR_SRC = './assets/czester-avatar.svg';
 const CZESTER_USER_AVATAR_KEY = 'czatbox.czester.userAvatar';
@@ -63,31 +69,36 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'first-login',
     icon: '🪄',
     titleKey: 'achievements.firstLogin.title',
-    descriptionKey: 'achievements.firstLogin.description'
+    descriptionKey: 'achievements.firstLogin.description',
+    talarki: 10
   },
   {
     id: 'kama-10-connections',
     icon: '🏠',
     titleKey: 'achievements.kamaConnections.title',
-    descriptionKey: 'achievements.kamaConnections.description'
+    descriptionKey: 'achievements.kamaConnections.description',
+    talarki: 100
   },
   {
     id: 'ten-creators',
     icon: '🚀',
     titleKey: 'achievements.tenCreators.title',
-    descriptionKey: 'achievements.tenCreators.description'
+    descriptionKey: 'achievements.tenCreators.description',
+    talarki: 100
   },
   {
     id: 'first-note',
     icon: '📝',
     titleKey: 'achievements.firstNote.title',
-    descriptionKey: 'achievements.firstNote.description'
+    descriptionKey: 'achievements.firstNote.description',
+    talarki: 10
   },
   {
     id: 'retro-kb2',
     icon: '💾',
     titleKey: 'achievements.retroKb2.title',
-    descriptionKey: 'achievements.retroKb2.description'
+    descriptionKey: 'achievements.retroKb2.description',
+    talarki: 100
   }
 ];
 const UI_ICONS = {
@@ -99,6 +110,7 @@ const UI_ICONS = {
   chest: '<path d="M4.5 9.25h15v9.5h-15z"/><path d="M3.75 7.25h16.5v3.25H3.75z"/><path d="M7 7.25V5.8A2.05 2.05 0 0 1 9.05 3.75h5.9A2.05 2.05 0 0 1 17 5.8v1.45"/><path d="M12 7.25v11.5"/><path d="M8 13h8"/><circle cx="12" cy="13" r="1.65"/>',
   users: '<circle cx="9" cy="9" r="3"/><path d="M3.75 19c.55-3.15 2.3-5 5.25-5s4.7 1.85 5.25 5"/><path d="M15.5 6.75a3 3 0 0 1 0 5.5M15.75 14.25c2.45.3 3.9 1.9 4.4 4.75"/>',
   user: '<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-3.7 2.8-5.75 6.5-5.75s5.8 2.05 6.5 5.75"/>',
+  'shopping-bag': '<path d="M5 8.5h14l1 11H4l1-11Z"/><path d="M9 8.5V6a3 3 0 0 1 6 0v2.5"/>',
   message: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9.5h8M8 12.5h5"/>',
   questions: '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M9.25 9.25a2.5 2.5 0 1 1 3.85 2.1c-.65.4-1.1.8-1.1 1.65"/><path d="M12 15.35h.01"/>',
   'questions-list': '<path d="M5.5 5.5h13A1.5 1.5 0 0 1 20 7v8a1.5 1.5 0 0 1-1.5 1.5H10L6 19v-2.5h-.5A1.5 1.5 0 0 1 4 15V7a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8 9h4.25M8 12h3"/><path d="M15.1 8.35a1.55 1.55 0 1 1 2.25 1.38c-.42.28-.72.55-.72 1.12"/><path d="M16.62 13.1h.01"/>',
@@ -114,10 +126,18 @@ const UI_ICONS = {
   fog: '<path d="M4 8.5h11M8 12h12M3 15.5h12M7 19h13"/><path d="M16.5 8.5H20M3 12h2"/>',
   hammer: '<path d="m13.5 5.5 5 5M12 7l3.5-3.5 4 4L16 11l-4-4Z"/><path d="m13.5 9.5-8 9a1.4 1.4 0 0 1-2-2l9-8"/>',
   crown: '<path d="M4.75 17.5h14.5l-1.1-8.3-4 3.4L12 5.5l-2.15 7.1-4-3.4-1.1 8.3Z"/><path d="M6.25 20h11.5"/>',
+  star: '<path d="m12 3.8 2.55 5.16 5.7.83-4.12 4.02.97 5.68L12 16.8l-5.1 2.69.97-5.68-4.12-4.02 5.7-.83L12 3.8Z"/>',
   snowflake: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="m9.5 5.5 2.5 2 2.5-2M9.5 18.5l2.5-2 2.5 2M5 10.5l3-.5.5-3M19 13.5l-3 .5-.5 3M5 13.5l3 .5.5 3M19 10.5l-3-.5-.5-3"/>',
   zap: '<path d="M13 2.75 5.5 13h6L11 21.25 18.5 11h-6L13 2.75Z"/>',
   sparkle: '<path d="M12 3.5c.6 3.1 2.4 4.9 5.5 5.5-3.1.6-4.9 2.4-5.5 5.5-.6-3.1-2.4-4.9-5.5-5.5 3.1-.6 4.9-2.4 5.5-5.5Z"/><path d="M18.5 14.5c.3 1.6 1.2 2.5 2.8 2.8-1.6.3-2.5 1.2-2.8 2.8-.3-1.6-1.2-2.5-2.8-2.8 1.6-.3 2.5-1.2 2.8-2.8Z"/>',
   coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
+  dinosaur: '<path d="M5 18v-5.5a6.5 6.5 0 0 1 6.5-6.5h3a4.5 4.5 0 0 1 4.5 4.5V13h-4v3.5M8 18h3M15 18h3M18 10h2.5M8 9h.01"/>',
+  apple: '<path d="M12 8c-3-2-6 .5-6 4.5S8.5 19 12 19s6-2.5 6-6.5S15 6 12 8Z"/><path d="M12 7c0-2 1.5-3 3-3M12 5c-1.5-1.5-3-1.5-4-1"/>',
+  cake: '<path d="M5 11h14v8H5zM4 11h16M8 7v4M12 7v4M16 7v4"/><path d="M8 7a2 2 0 1 1 4 0 2 2 0 1 1 4 0"/>',
+  syringe: '<path d="m14 4 6 6M12 6l6 6M4 20l7-7M7 17l-3 3M11 9l4 4"/>',
+  shower: '<path d="M4 8h10a5 5 0 0 1 5 5v1M4 8V5a2 2 0 0 1 4 0v3M16 16h.01M13 16h.01M10 16h.01M7 16h.01"/>',
+  broom: '<path d="m16 4 4 4M5 20l11-11M3 21h6"/>',
+  bed: '<path d="M4 18v-6M4 15h16v3M7 12V9h4a3 3 0 0 1 3 3M20 18v3M4 21v-3"/>',
   folder: '<path d="M3.5 7.5h6l1.7 2H20a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5h5l1.5 2H20"/>',
   refresh: '<path d="M19 8a7.5 7.5 0 1 0 .35 7"/><path d="M19 4.5V8h-3.5"/>',
   settings: '<circle cx="12" cy="12" r="3.25"/><path d="M9.8 3.8h4.4l.65 2.15 1.75 1 2.2-.55 2.2 3.8-1.55 1.6v2l1.55 1.6-2.2 3.8-2.2-.55-1.75 1-.65 2.15H9.8l-.65-2.15-1.75-1-2.2.55L3 15.4l1.55-1.6v-2L3 10.2l2.2-3.8 2.2.55 1.75-1 .65-2.15Z"/>',
@@ -545,7 +565,7 @@ const I18N = {
     'event.audience': ' dla (👥 {count})',
     'event.like': 'polubił(a) LIVE (łącznie {total} polubień)',
     'event.repost': '🔁 repostował live',
-    'event.share': '↩️ udostępnia live{countText}',
+    'event.share': '↩️ udostępnia LIVE',
     'battle.multiplier': 'BITWA: ZA CHWILĘ MNOŻNIK X{multiplier}',
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Bitwa zakończona',
@@ -946,7 +966,7 @@ const I18N = {
     'event.audience': ' for (👥 {count})',
     'event.like': 'liked the LIVE ({total} likes total)',
     'event.repost': '🔁 reposted the live',
-    'event.share': '↩️ shares the live{countText}',
+    'event.share': '↩️ shares the LIVE',
     'battle.multiplier': 'BATTLE: MULTIPLIER X{multiplier} SOON',
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle finished',
@@ -1347,7 +1367,7 @@ const I18N = {
     'event.audience': ' für (👥 {count})',
     'event.like': 'hat den LIVE geliked (insgesamt {total} Likes)',
     'event.repost': '🔁 hat den Live repostet',
-    'event.share': '↩️ teilt den Live{countText}',
+    'event.share': '↩️ teilt den LIVE',
     'battle.multiplier': 'BATTLE: GLEICH MULTIPLIKATOR X{multiplier}',
     'battle.effectAlert': '{effect}: {name}',
     'battle.finished': 'Battle beendet',
@@ -1519,12 +1539,29 @@ I18N.hu['status.offline'] = 'Offline';
 I18N.hu['event.member.join'] = 'csatlakozott az élő adáshoz';
 I18N.hu['event.gift'] = 'ajándékot küldött: {giftName}{countText}{costText}';
 I18N.hu['event.like'] = 'kedvelte az élő adást (összesen {total} kedvelés)';
+I18N.hu['event.share'] = '↩️ megosztotta az élő adást';
+I18N.pl['settings.redeem.unlockedTalarki'] = 'Kod developerski przyjęty. Dodano 50000 Talarków.';
+I18N.en['settings.redeem.unlockedTalarki'] = 'Developer code accepted. 50,000 Talarki added.';
+I18N.de['settings.redeem.unlockedTalarki'] = 'Entwicklercode akzeptiert. 50.000 Talarki wurden hinzugefügt.';
+I18N.hu['settings.redeem.unlockedTalarki'] = 'Fejlesztői kód elfogadva. 50 000 Talarki hozzáadva.';
 I18N.pl['creator.panelTitle'] = 'Twórcy';
 I18N.pl['creator.panelNote'] = 'Wybierz twórcę lub wyszukaj transmisję.';
 I18N.en['creator.panelTitle'] = 'Creators';
 I18N.en['creator.panelNote'] = 'Choose a creator or search for a live stream.';
 I18N.de['creator.panelTitle'] = 'Creator';
 I18N.de['creator.panelNote'] = 'Wähle einen Creator oder suche nach einem Live.';
+I18N.pl['economy.talarki'] = 'Talarki'; I18N.pl['shop.title'] = 'Sklep'; I18N.pl['shop.note'] = 'Wymieniaj Talarki na dodatki do programu.'; I18N.pl['shop.themes'] = 'Motywy'; I18N.pl['shop.other'] = 'Inne';
+I18N.en['economy.talarki'] = 'Talarki'; I18N.en['shop.title'] = 'Shop'; I18N.en['shop.note'] = 'Exchange Talarki for application extras.'; I18N.en['shop.themes'] = 'Themes'; I18N.en['shop.other'] = 'Other';
+I18N.de['economy.talarki'] = 'Talarki'; I18N.de['shop.title'] = 'Shop'; I18N.de['shop.note'] = 'Tausche Talarki gegen Extras.'; I18N.de['shop.themes'] = 'Themes'; I18N.de['shop.other'] = 'Sonstiges';
+I18N.hu['economy.talarki'] = 'Talarki'; I18N.hu['shop.title'] = 'Bolt'; I18N.hu['shop.note'] = 'Váltsd be a Talarkit alkalmazáskiegészítőkre.'; I18N.hu['shop.themes'] = 'Témák'; I18N.hu['shop.other'] = 'Egyéb';
+I18N.pl['talarki.title'] = 'Talarki'; I18N.pl['talarki.description'] = 'Wewnętrzny system ekonomii, który wprowadza nagrody za używanie programu.'; I18N.pl['talarki.rewards'] = 'Za zdobywane osiągnięcia otrzymujemy Talarki, które możemy wykorzystać na motywy i inne dodatki w sklepie. Za każdą minutę z połączonym twórcą dostajemy jedną monetkę, a w trybie Big Picture — dwie.';
+I18N.en['talarki.title'] = 'Talarki'; I18N.en['talarki.description'] = 'An internal economy system that rewards active use of the program.'; I18N.en['talarki.rewards'] = 'Achievements reward Talarki, which can be exchanged for themes and other extras in the shop. You earn one coin per minute connected to a creator, or two coins per minute in Big Picture mode.';
+I18N.de['talarki.title'] = 'Talarki'; I18N.de['talarki.description'] = 'Ein internes Wirtschaftssystem, das die Nutzung des Programms belohnt.'; I18N.de['talarki.rewards'] = 'Für Erfolge erhalten wir Talarki, die wir im Shop gegen Themes und andere Extras eintauschen können. Pro Minute mit einem verbundenen Creator gibt es eine Münze, im Big-Picture-Modus zwei.';
+I18N.hu['talarki.title'] = 'Talarki'; I18N.hu['talarki.description'] = 'Belső gazdasági rendszer, amely jutalmazza a program használatát.'; I18N.hu['talarki.rewards'] = 'A teljesítményekért Talarkit kapunk, amelyeket a boltban témákra és más extrákra válthatunk. A csatlakoztatott alkotóval töltött minden percért egy, Big Picture módban két érmét kapsz.';
+I18N.pl['settings.theme.dzikaGalaktyka.name'] = 'Dzika galaktyka'; I18N.pl['settings.theme.dzikaGalaktyka.description'] = 'Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.';
+I18N.en['settings.theme.dzikaGalaktyka.name'] = 'Wild Galaxy'; I18N.en['settings.theme.dzikaGalaktyka.description'] = 'Galaxy tones, nebula effects and Frutiger Aero aesthetics.';
+I18N.de['settings.theme.dzikaGalaktyka.name'] = 'Wilde Galaxie'; I18N.de['settings.theme.dzikaGalaktyka.description'] = 'Galaktische Farben, Nebeleffekte und Frutiger-Aero-Ästhetik.';
+I18N.hu['settings.theme.dzikaGalaktyka.name'] = 'Vad galaxis'; I18N.hu['settings.theme.dzikaGalaktyka.description'] = 'Galaktikus árnyalatok, ködhatások és Frutiger Aero esztétika.';
 I18N.pl['about.news.025.creators'] = 'Od teraz zapamiętani twórcy i łączenie się są w dolnym pasku launchera.';
 I18N.pl['about.news.025.bigPicture'] = 'Poprawiono Big Picture — krawędzie ramek nie wyglądają już jak poszarpane.';
 I18N.pl['about.news.025.hungarian'] = 'Dodano język węgierski.';
@@ -1546,6 +1583,98 @@ I18N.hu['about.news.025.hungarian'] = 'Magyar nyelv hozzáadva.';
 I18N.hu['about.news.025.translations'] = 'A többi nyelv fordításai javítva.';
 I18N.hu['about.news.025.widgets'] = 'Javítva a widgetek akadozása Big Picture módra váltáskor.';
 
+Object.assign(I18N.pl, {
+  'about.news.next.title': 'Co dalej?',
+  'about.news.026.intro': 'Tym razem aktualizacja jest naprawdę potężna, od systemu ekonomii i sklepu z motywami i grami, po poprawki tłumaczeń. Starałem się zawrzeć większość sugestii z ostatnich 2 tygodni. Mam nadzieję, że sprostałem - jeżeli tak poleć program dalej swoim znajomym - dziękuję!',
+  'about.news.026.economy': 'System Talarków i nagrody za osiągnięcia oraz aktywność na LIVE.',
+  'about.news.026.shop': 'Sklep z podglądem i kupowaniem motywów.',
+  'about.news.026.themes': 'Motywy Miami Vice i Dzika galaktyka.',
+  'about.news.026.brickers': 'Możliwość kupienia gry Brikers za 1500 Talarków.',
+  'about.news.026.piper': 'Dwa wbudowane głosy Piper: Halina i Mr. Drwina.',
+  'about.news.026.tts': 'Poprawione filtrowanie tekstu TTS.',
+  'about.news.026.viewers': 'Panel aktywnych widzów LIVE.',
+  'about.news.026.avatars': 'Pamięć awatarów oraz awatar Enigmy jako zapasowy.',
+  'about.news.026.favorites': 'Mechanika ulubionych twórców.',
+  'about.news.026.savedCreators': 'Rozszerzona lista zapamiętanych twórców.',
+  'about.news.026.settingsDescriptions': 'Opisy funkcji w ustawieniach.',
+  'about.news.026.launcher': 'Poprawki skalowania i wyglądu okien launchera.',
+  'about.news.026.bigPicture': 'Poprawki Big Picture.',
+  'about.news.026.updater': 'Poprawki powiadomień aktualizatora.',
+  'about.news.026.stats': 'Poprawki liczenia TAPEK oraz udostępnień.',
+  'about.news.026.roles': 'Oznaczenia moderatorów i superfanów przy nickach.',
+  'about.news.026.polish': 'Liczne poprawki tłumaczeń, układu, ramek i responsywności.',
+  'about.news.026.next': 'To tajemnicza tajemnica!'
+});
+
+Object.assign(I18N.en, {
+  'about.news.next.title': 'What comes next?',
+  'about.news.026.intro': 'This update is truly huge: from the economy system and a shop with themes and games to translation improvements. I tried to include most suggestions from the last two weeks. I hope I delivered — if so, please recommend the program to your friends. Thank you!',
+  'about.news.026.economy': 'Talarki economy with rewards for achievements and LIVE activity.',
+  'about.news.026.shop': 'A shop where themes can be previewed and purchased.',
+  'about.news.026.themes': 'Miami Vice and Wild Galaxy themes.',
+  'about.news.026.brickers': 'The Brikers game can be purchased for 1,500 Talarki.',
+  'about.news.026.piper': 'Two built-in Piper voices: Halina and Mr. Drwina.',
+  'about.news.026.tts': 'Improved TTS text filtering.',
+  'about.news.026.viewers': 'Active LIVE viewers panel.',
+  'about.news.026.avatars': 'Avatar memory with the Enigma avatar as a fallback.',
+  'about.news.026.favorites': 'Favourite creators system.',
+  'about.news.026.savedCreators': 'Expanded list of remembered creators.',
+  'about.news.026.settingsDescriptions': 'Descriptions of functions in Settings.',
+  'about.news.026.launcher': 'Launcher window scaling and appearance improvements.',
+  'about.news.026.bigPicture': 'Big Picture improvements.',
+  'about.news.026.updater': 'Updater notification improvements.',
+  'about.news.026.stats': 'Corrections to TAPEK and share counting.',
+  'about.news.026.roles': 'Moderator and Super Fan markers next to nicknames.',
+  'about.news.026.polish': 'Numerous translation, layout, frame and responsiveness improvements.',
+  'about.news.026.next': 'That is a mysterious mystery!'
+});
+
+Object.assign(I18N.de, {
+  'about.news.next.title': 'Wie geht es weiter?',
+  'about.news.026.intro': 'Dieses Update ist wirklich riesig: vom Wirtschaftssystem und einem Shop mit Themes und Spielen bis hin zu verbesserten Übersetzungen. Ich habe versucht, die meisten Vorschläge der letzten zwei Wochen umzusetzen. Ich hoffe, es ist mir gelungen — wenn ja, empfehlt das Programm bitte euren Freunden. Danke!',
+  'about.news.026.economy': 'Talarki-Wirtschaftssystem mit Belohnungen für Erfolge und LIVE-Aktivität.',
+  'about.news.026.shop': 'Shop zum Ansehen und Kaufen von Themes.',
+  'about.news.026.themes': 'Die Themes Miami Vice und Wilde Galaxie.',
+  'about.news.026.brickers': 'Das Spiel Brikers kann für 1.500 Talarki gekauft werden.',
+  'about.news.026.piper': 'Zwei integrierte Piper-Stimmen: Halina und Mr. Drwina.',
+  'about.news.026.tts': 'Verbesserte Filterung von TTS-Texten.',
+  'about.news.026.viewers': 'Panel der aktiven LIVE-Zuschauer.',
+  'about.news.026.avatars': 'Avatar-Speicher mit dem Enigma-Avatar als Ersatz.',
+  'about.news.026.favorites': 'System für bevorzugte Creator.',
+  'about.news.026.savedCreators': 'Erweiterte Liste gespeicherter Creator.',
+  'about.news.026.settingsDescriptions': 'Beschreibungen der Funktionen in den Einstellungen.',
+  'about.news.026.launcher': 'Verbesserungen an Skalierung und Aussehen der Launcher-Fenster.',
+  'about.news.026.bigPicture': 'Verbesserungen an Big Picture.',
+  'about.news.026.updater': 'Verbesserungen an den Benachrichtigungen des Updaters.',
+  'about.news.026.stats': 'Korrekturen bei der Zählung von TAPEK und geteilten LIVE-Streams.',
+  'about.news.026.roles': 'Kennzeichnungen für Moderatoren und Superfans neben den Namen.',
+  'about.news.026.polish': 'Zahlreiche Verbesserungen an Übersetzungen, Layout, Rahmen und Responsivität.',
+  'about.news.026.next': 'Das bleibt ein geheimnisvolles Geheimnis!'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.next.title': 'Mi következik?',
+  'about.news.026.intro': 'Ez a frissítés valóban hatalmas: a gazdasági rendszertől és a témákat, valamint játékokat kínáló bolttól egészen a fordítások javításáig. Igyekeztem beépíteni az elmúlt két hét legtöbb javaslatát. Remélem, sikerült — ha igen, ajánld a programot az ismerőseidnek is. Köszönöm!',
+  'about.news.026.economy': 'Talarki gazdasági rendszer jutalmakkal a teljesítményekért és az ÉLŐ aktivitásért.',
+  'about.news.026.shop': 'Bolt a témák előnézetéhez és megvásárlásához.',
+  'about.news.026.themes': 'Miami Vice és Vad galaxis témák.',
+  'about.news.026.brickers': 'A Brikers játék 1500 Talarkiért vásárolható meg.',
+  'about.news.026.piper': 'Két beépített Piper-hang: Halina és Mr. Drwina.',
+  'about.news.026.tts': 'Javított TTS-szövegszűrés.',
+  'about.news.026.viewers': 'Aktív ÉLŐ nézők panelje.',
+  'about.news.026.avatars': 'Avatarok helyi megjegyzése, tartalékként az Enigma avatarral.',
+  'about.news.026.favorites': 'Kedvenc alkotók rendszere.',
+  'about.news.026.savedCreators': 'Kibővített lista a megjegyzett alkotókról.',
+  'about.news.026.settingsDescriptions': 'A funkciók leírásai a Beállításokban.',
+  'about.news.026.launcher': 'A launcher ablakainak méretezési és megjelenési javításai.',
+  'about.news.026.bigPicture': 'Big Picture-javítások.',
+  'about.news.026.updater': 'A frissítő értesítéseinek javításai.',
+  'about.news.026.stats': 'A TAPEK és a megosztások számlálásának javításai.',
+  'about.news.026.roles': 'Moderátori és szuperrajongói jelölések a nevek mellett.',
+  'about.news.026.polish': 'Számos fordítási, elrendezési, keret- és reszponzivitási javítás.',
+  'about.news.026.next': 'Ez egy titokzatos titok!'
+});
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -1564,6 +1693,7 @@ const creatorInput = document.getElementById('creatorInput');
 const creatorRefreshButton = document.getElementById('creatorRefresh');
 const creatorSuggestions = document.getElementById('creatorSuggestions');
 const recentCreatorsStrip = document.getElementById('recentCreatorsStrip');
+const favoriteCreatorsRow = document.getElementById('favoriteCreatorsRow');
 const recentCreatorsCarousel = document.getElementById('recentCreatorsCarousel');
 const recentCreatorsPrev = document.getElementById('recentCreatorsPrev');
 const recentCreatorsNext = document.getElementById('recentCreatorsNext');
@@ -1579,6 +1709,8 @@ const sidebarButtons = Array.from(document.querySelectorAll('[data-section]'));
 const viewPanels = Array.from(document.querySelectorAll('[data-view]'));
 const settingsTabs = Array.from(document.querySelectorAll('[data-settings-tab]'));
 const settingsPanels = Array.from(document.querySelectorAll('[data-settings-panel]'));
+const appearanceSubtabs = Array.from(document.querySelectorAll('[data-appearance-subtab]'));
+const appearanceSubpanels = Array.from(document.querySelectorAll('[data-appearance-subpanel]'));
 const aboutTabs = Array.from(document.querySelectorAll('[data-about-tab]'));
 const aboutPanels = Array.from(document.querySelectorAll('[data-about-panel]'));
 const chatStyleInputs = Array.from(document.querySelectorAll('input[name="chatStyle"]'));
@@ -1617,13 +1749,238 @@ const achievementsDialogCloseEl = document.getElementById('achievementsDialogClo
 const settingsLauncherEl = document.getElementById('settingsLauncher');
 const settingsDialogBackdropEl = document.getElementById('settingsDialogBackdrop');
 const settingsDialogCloseEl = document.getElementById('settingsDialogClose');
-const coinsLauncherEl = document.getElementById('coinsLauncher');
-const coinsDialogBackdropEl = document.getElementById('coinsDialogBackdrop');
-const coinsDialogCloseEl = document.getElementById('coinsDialogClose');
+const talarkiValueEl = document.getElementById('talarkiValue');
+const shopLauncherEl = document.getElementById('shopLauncher');
+const shopDialogBackdropEl = document.getElementById('shopDialogBackdrop');
+const shopDialogCloseEl = document.getElementById('shopDialogClose');
+const shopMiamiPurchaseEl = document.getElementById('shopMiamiPurchase');
+const shopWildGalaxyPurchaseEl = document.getElementById('shopWildGalaxyPurchase');
+const shopBrikersPurchaseEl = document.getElementById('shopBrikersPurchase');
+let shopPreviewTheme = '';
+const tamagotchiLauncherEl = document.getElementById('tamagotchiLauncher');
+const tamagotchiDialogBackdropEl = document.getElementById('tamagotchiDialogBackdrop');
+const tamagotchiDialogCloseEl = document.getElementById('tamagotchiClose');
+const tamagotchiBodyEl = document.getElementById('tamagotchiBody');
+let tamagotchiInstructionsOpen = false;
+const TAMAGOTCHI_KEY = 'czatbox.tamagotchi.v1';
+const TAMAGOTCHI_PLAY_COOLDOWN_MS = 20 * 60 * 1000;
+let talarki = Math.max(0, Math.min(100000, Number(localStorage.getItem(TALARKI_KEY)) || 0));
+
+const defaultTamagotchi = { hatched: false, hunger: 10, fun: 10, hygiene: 10, health: 10, energy: 10, poop: 0, sleeping: false, lastTick: Date.now(), lastConnection: 0, lastPlayAt: 0, spamDebt: 0 };
+let tamagotchi = (() => { try { return { ...defaultTamagotchi, ...(JSON.parse(localStorage.getItem(TAMAGOTCHI_KEY) || '{}')) }; } catch { return { ...defaultTamagotchi }; } })();
+// Czas poza uruchomioną aplikacją nie jest czasem aktywnej opieki.
+tamagotchi.lastTick = Date.now();
+if (tamagotchi.hatched && [tamagotchi.hunger, tamagotchi.fun, tamagotchi.hygiene, tamagotchi.health, tamagotchi.energy].every((value) => Number(value) === 0)) { tamagotchi.hunger = 10; tamagotchi.fun = 10; tamagotchi.hygiene = 10; tamagotchi.health = 10; tamagotchi.energy = 10; }
+if (!localStorage.getItem(TAMAGOTCHI_KEY)) saveTamagotchi();
+function saveTamagotchi() { localStorage.setItem(TAMAGOTCHI_KEY, JSON.stringify(tamagotchi)); }
+function clampPet(value) { return Math.max(0, Math.min(10, Number(value) || 0)); }
+function notifyPetNeed(text) { if (typeof notifyCzester === 'function') notifyCzester('tamagotchi', text, { animate: false }); }
+function tickTamagotchi() {
+  if (!isBrikersGameUnlocked()) return;
+  const now = Date.now(); const cycles = Math.floor((now - Number(tamagotchi.lastTick || now)) / 1200000);
+  if (!tamagotchi.hatched) return;
+  if (cycles < 1) { if (tamagotchiDialogBackdropEl && !tamagotchiDialogBackdropEl.hidden) renderTamagotchi(); return; }
+  const connected = isOnlineConnectionState(state);
+  if (tamagotchi.sleeping) { tamagotchi.energy = clampPet(tamagotchi.energy + cycles); tamagotchi.hunger = clampPet(tamagotchi.hunger - cycles); tamagotchi.fun = clampPet(tamagotchi.fun - cycles); }
+  if (connected && !tamagotchi.sleeping) { tamagotchi.fun = clampPet(tamagotchi.fun + cycles); tamagotchi.hunger = clampPet(tamagotchi.hunger - cycles); tamagotchi.energy = clampPet(tamagotchi.energy - cycles); tamagotchi.hygiene = clampPet(tamagotchi.hygiene - cycles); }
+  const zeroNeeds = [tamagotchi.hunger, tamagotchi.fun, tamagotchi.hygiene, tamagotchi.energy].filter((value) => value <= 0).length;
+  if (!tamagotchi.sleeping && zeroNeeds >= 3) tamagotchi.health = clampPet(tamagotchi.health - (2 * cycles));
+  if (!tamagotchi.sleeping && tamagotchi.poop > 0) { tamagotchi.hygiene = clampPet(tamagotchi.hygiene - cycles); tamagotchi.health = clampPet(tamagotchi.health - cycles); }
+  tamagotchi.poop = Math.max(tamagotchi.poop, Math.floor((10 - tamagotchi.hunger) / 3));
+  if (tamagotchi.hunger <= 2) notifyPetNeed('Brikers jest głodny. Możesz kupić mu jabłko albo babeczkę w jego oknie.');
+  if (tamagotchi.hygiene <= 0 && tamagotchi.poop > 0) notifyPetNeed('Brikers potrzebuje sprzątania.');
+  if (tamagotchi.energy <= 2) notifyPetNeed('Brikers jest zmęczony. Wyślij go spać.');
+  if (tamagotchi.health <= 2) notifyPetNeed('Brikers ma słabe zdrowie. Potrzebuje zastrzyku.');
+  tamagotchi.lastTick = now; saveTamagotchi(); renderTamagotchi();
+}
+setInterval(tickTamagotchi, 60000);
+function spendPetCoins(amount) { if (talarki < amount) return false; talarki -= amount; localStorage.setItem(TALARKI_KEY, String(talarki)); updateTalarkiUi(); return true; }
+function renderTamagotchiInstructions() {
+  if (!tamagotchiBodyEl) return;
+  tamagotchiBodyEl.innerHTML = `<section class="tamagotchi-instructions" aria-labelledby="tamagotchiInstructionsTitle">
+    <div class="tamagotchi-instructions-header"><div><h2 id="tamagotchiInstructionsTitle">Jak opiekować się Brikersem?</h2><p>Dbaj o jego potrzeby, aby wszystkie wartości były jak najbliżej 10/10.</p></div><button class="tamagotchi-guide-back" type="button"><span data-ui-icon="dinosaur"></span><span>Wróć do gry</span></button></div>
+    <div class="tamagotchi-guide-grid">
+      <article><h3>Połącz się z transmisją</h3><p>Gdy Brikers nie śpi, połączenie z twórcą odnawia zabawę. Co 20 minut maleją wtedy głód, higiena i energia.</p></article>
+      <article><h3>Nakarm Brikersa</h3><p>Jabłko odnawia 1 punkt głodu i kosztuje 3 Talarki. Babeczka odnawia 2 punkty i kosztuje 6 Talarków.</p></article>
+      <article><h3>Sen i energia</h3><p>Użyj Łóżka, aby Brikers zasnął. Podczas snu energia rośnie, a głód i zabawa maleją. Pozostałe przyciski są wtedy zablokowane, dopóki go nie obudzisz.</p></article>
+      <article><h3>Higiena i kupki</h3><p>Prysznic odnawia higienę do pełna. Kupkę sprzątasz, klikając ją bezpośrednio na planszy. Za każdą posprzątaną kupkę dostajesz 1 Talarek.</p></article>
+      <article><h3>Zdrowie</h3><p>Brak opieki i spam wykryty na czacie mogą obniżać zdrowie. Strzykawka odnawia je do pełna i kosztuje 100 Talarków.</p></article>
+      <article><h3>Zapisywanie gry</h3><p>Stan Brikersa zapisuje się automatycznie na komputerze. Potrzeby nie spadają, gdy program jest wyłączony.</p></article>
+    </div>
+  </section>`;
+  hydrateUiIcons(tamagotchiBodyEl);
+  tamagotchiBodyEl.querySelector('.tamagotchi-guide-back')?.addEventListener('click', () => { tamagotchiInstructionsOpen = false; renderTamagotchi(); });
+}
+function renderTamagotchi() {
+  if (!tamagotchiBodyEl) return;
+  if (tamagotchiInstructionsOpen) { renderTamagotchiInstructions(); return; }
+  if (!tamagotchi.hatched) { tamagotchiBodyEl.innerHTML = '<button class="tamagotchi-egg" id="tamagotchiEgg" type="button" aria-label="Wykluj jajko"><span>🥚</span><strong>Naciśnij jajko, aby je wykluć</strong></button>'; document.getElementById('tamagotchiEgg')?.addEventListener('click', () => { tamagotchi.hatched = true; tamagotchi.lastTick = Date.now(); saveTamagotchi(); renderTamagotchi(); }); return; }
+  const petSprite = tamagotchi.sleeping ? 'assets/brikers-sleeping.png?v=1' : 'assets/brikers-user.png?v=brikers-simple-v1';
+  tamagotchiBodyEl.innerHTML = `<div class="tamagotchi-stage"><div class="tamagotchi-dino" aria-label="Brikers"><img class="pet-rat-image${tamagotchi.sleeping ? ' sleeping' : ''}" src="${petSprite}" alt="Brikers${tamagotchi.sleeping ? ' śpi' : ''}" /></div><div class="tamagotchi-status"><div>Głód <b>${tamagotchi.hunger}/10</b><button data-pet-action="apple">Jabłko · 3</button><button data-pet-action="cake">Babeczka · 6</button></div><div>Zabawa <b>${tamagotchi.fun}/10</b></div><div>Higiena <b>${tamagotchi.hygiene}/10</b></div><div>Zdrowie <b>${tamagotchi.health}/10</b><button data-pet-action="heal">Zastrzyk · 100</button></div><div>Energia <b>${tamagotchi.energy}/10</b><button data-pet-action="sleep">Sen</button></div></div></div>`;
+  const meters = document.createElement('div'); meters.className = 'pet-meters-overlay';
+  const meter = (type, value, side, name, extra = '') => { const box = document.createElement('div'); box.className = `pet-meter ${side} ${extra}`; box.title = `${name}: ${value}/10`; box.setAttribute('aria-label', `${name}: ${value}/10`); const icon = `assets/pet-need-${type}.png?v=3`; box.innerHTML = `<img class="pet-meter-icon" src="${icon}" alt="" draggable="false" /><span>${name}</span><div class="pet-meter-pips">${Array.from({ length: 10 }, (_, index) => `<i class="${index < value ? 'on' : ''}"></i>`).join('')}</div><b>${value}/10</b>`; return box; };
+  const leftStack = document.createElement('div'); leftStack.className = 'meter-stack';
+  const rightStack = document.createElement('div'); rightStack.className = 'meter-stack meter-stack-right';
+  leftStack.append(meter('health', tamagotchi.health, 'left', 'Zdrowie', 'health-meter'), meter('hunger', tamagotchi.hunger, 'left', 'Głód'));
+  rightStack.append(meter('hygiene', tamagotchi.hygiene, 'right', 'Higiena'), meter('energy', tamagotchi.energy, 'right', 'Energia'));
+  leftStack.append(meter('fun', tamagotchi.fun, 'left', 'Zabawa'));
+  meters.append(leftStack, rightStack);
+  const stage = tamagotchiBodyEl.querySelector('.tamagotchi-stage');
+  stage?.prepend(meters);
+  if (stage && tamagotchi.poop > 0) { const poop = document.createElement('div'); poop.className = 'tamagotchi-poops'; poop.innerHTML = Array.from({ length: tamagotchi.poop }, () => '<button type="button" data-pet-action="clean" title="Sprzątnij kupkę i odbierz 1 Talarek"><img src="assets/pet-poop.png?v=1" alt="Kupka" /></button>').join(''); stage.append(poop); }
+  const actionBar = document.createElement('div'); actionBar.className = 'tamagotchi-action-bar';
+  actionBar.innerHTML = `<button data-pet-action="apple" title="Jabłko — 3 Talarki"><span data-ui-icon="apple"></span><span>Jabłko · 3</span><span data-ui-icon="coin"></span></button><button data-pet-action="cake" title="Babeczka — 6 Talarków"><span data-ui-icon="cake"></span><span>Babeczka · 6</span><span data-ui-icon="coin"></span></button><button data-pet-action="heal" title="Strzykawka — 100 Talarków"><span data-ui-icon="syringe"></span><span>Strzykawka · 100</span><span data-ui-icon="coin"></span></button><button data-pet-action="shower" title="Prysznic — odnawia higienę"><span data-ui-icon="shower"></span><span>Prysznic</span></button><button data-pet-action="sleep" title="${tamagotchi.sleeping ? 'Obudź Brikersa' : 'Energia rośnie, a zabawa spada podczas snu'}"><span data-ui-icon="bed"></span><span>${tamagotchi.sleeping ? 'Obudź' : 'Łóżko'}</span></button><button class="tamagotchi-instructions-button" data-pet-action="instructions" title="Otwórz instrukcję gry"><span data-ui-icon="questions"></span><span>Instrukcja</span></button>`;
+  tamagotchiBodyEl.append(actionBar);
+  hydrateUiIcons(actionBar);
+  const playButton = actionBar.querySelector('[data-pet-action="play"]');
+  const playCooldownLeft = Math.max(0, TAMAGOTCHI_PLAY_COOLDOWN_MS - (Date.now() - Number(tamagotchi.lastPlayAt || 0)));
+  if (playButton) { playButton.disabled = tamagotchi.sleeping || tamagotchi.fun >= 10 || tamagotchi.energy <= 0 || playCooldownLeft > 0; playButton.title = tamagotchi.sleeping ? 'Brikers śpi' : tamagotchi.energy <= 0 ? 'Brikers nie ma energii — najpierw połóż go spać' : tamagotchi.fun >= 10 ? 'Zabawa jest już pełna' : playCooldownLeft > 0 ? `Następna zabawa za ${Math.ceil(playCooldownLeft / 60000)} min` : 'Dodaje 1 punkt zabawy i zmniejsza Głód, Higienę oraz Energię o 1'; }
+  tamagotchiBodyEl.querySelectorAll('[data-pet-action]').forEach((button) => { if (tamagotchi.sleeping && !['sleep', 'instructions'].includes(button.dataset.petAction)) { button.disabled = true; button.title = 'Brikers śpi — najpierw go obudź'; } });
+  tamagotchiBodyEl.querySelectorAll('[data-pet-action]').forEach((button) => button.addEventListener('click', () => {
+    const action = button.dataset.petAction;
+    if (action === 'instructions') { tamagotchiInstructionsOpen = true; renderTamagotchi(); return; }
+    if (tamagotchi.sleeping && action !== 'sleep') return;
+    if (action === 'apple' && spendPetCoins(3)) tamagotchi.hunger = clampPet(tamagotchi.hunger + 1);
+    if (action === 'cake' && spendPetCoins(6)) tamagotchi.hunger = clampPet(tamagotchi.hunger + 2);
+    if (action === 'play' && !tamagotchi.sleeping && tamagotchi.fun < 10 && tamagotchi.energy > 0 && Date.now() - Number(tamagotchi.lastPlayAt || 0) >= TAMAGOTCHI_PLAY_COOLDOWN_MS) { tamagotchi.fun = clampPet(tamagotchi.fun + 1); tamagotchi.energy = clampPet(tamagotchi.energy - 1); tamagotchi.hunger = clampPet(tamagotchi.hunger - 1); tamagotchi.hygiene = clampPet(tamagotchi.hygiene - 1); tamagotchi.lastPlayAt = Date.now(); }
+    if (action === 'clean' && tamagotchi.poop > 0) { tamagotchi.poop -= 1; tamagotchi.hygiene = clampPet(tamagotchi.hygiene + 1); talarki = Math.min(100000, talarki + 1); localStorage.setItem(TALARKI_KEY, String(talarki)); updateTalarkiUi(); }
+    if (action === 'shower') tamagotchi.hygiene = 10;
+    if (action === 'heal' && spendPetCoins(100)) tamagotchi.health = 10;
+    if (action === 'sleep') { tamagotchi.sleeping = !tamagotchi.sleeping; tamagotchi.lastTick = Date.now(); }
+    saveTamagotchi(); renderTamagotchi();
+  }));
+}
+function setTamagotchiOpen(open) { if (open && !isBrikersGameUnlocked()) return; if (tamagotchiDialogBackdropEl) tamagotchiDialogBackdropEl.hidden = !open; if (!open) tamagotchiInstructionsOpen = false; if (open) { tickTamagotchi(); renderTamagotchi(); } }
+tamagotchiLauncherEl?.addEventListener('click', () => setTamagotchiOpen(Boolean(tamagotchiDialogBackdropEl?.hidden)));
+tamagotchiDialogCloseEl?.addEventListener('click', () => setTamagotchiOpen(false));
+tamagotchiDialogBackdropEl?.addEventListener('click', (event) => { if (event.target === tamagotchiDialogBackdropEl) setTamagotchiOpen(false); });
+
+function awardConnectionTalarki() {
+  if (!isOnlineConnectionState(state)) {
+    return;
+  }
+  const amount = document.documentElement.dataset.bigPicture === 'true' ? 2 : 1;
+  const next = Math.min(100000, talarki + amount);
+  if (next === talarki) return;
+  talarki = next;
+  localStorage.setItem(TALARKI_KEY, String(talarki));
+  updateTalarkiUi();
+}
+
+setInterval(awardConnectionTalarki, 60000);
+
+function updateTalarkiUi() {
+  if (talarkiValueEl) talarkiValueEl.textContent = String(talarki);
+  if (shopMiamiPurchaseEl) {
+    const unlocked = isAppThemeUnlocked('miami-vice');
+    shopMiamiPurchaseEl.disabled = unlocked || talarki < 1000;
+    shopMiamiPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
+  }
+  if (shopWildGalaxyPurchaseEl) {
+    const unlocked = isAppThemeUnlocked('dzika-galaktyka');
+    shopWildGalaxyPurchaseEl.disabled = unlocked || talarki < 1000;
+    shopWildGalaxyPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
+  }
+  if (shopBrikersPurchaseEl) {
+    const unlocked = isBrikersGameUnlocked();
+    shopBrikersPurchaseEl.disabled = unlocked || talarki < 1500;
+    shopBrikersPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1500 Talarków';
+  }
+  if (tamagotchiLauncherEl) tamagotchiLauncherEl.hidden = !isBrikersGameUnlocked();
+}
+function setShopOpen(open) {
+  if (shopDialogBackdropEl) shopDialogBackdropEl.hidden = !open;
+  shopLauncherEl?.setAttribute('aria-expanded', String(open));
+  if (!open && shopPreviewTheme) { shopPreviewTheme = ''; applyAppearanceSettings(); document.querySelectorAll('[data-theme-preview]').forEach((button) => { button.textContent = 'Podgląd'; }); }
+}
+shopLauncherEl?.addEventListener('click', () => setShopOpen(Boolean(shopDialogBackdropEl?.hidden)));
+shopDialogCloseEl?.addEventListener('click', () => setShopOpen(false));
+shopDialogBackdropEl?.addEventListener('click', (event) => { if (event.target === shopDialogBackdropEl) setShopOpen(false); });
+shopMiamiPurchaseEl?.addEventListener('click', () => {
+  if (isAppThemeUnlocked('miami-vice') || talarki < 1000) return;
+  talarki -= 1000;
+  localStorage.setItem(TALARKI_KEY, String(talarki));
+  redeemedFeatures.miamiViceTheme = true;
+  saveRedeemedFeatures();
+  syncLockedThemeChoice('themeMiamiVice', true);
+  updateTalarkiUi();
+});
+shopWildGalaxyPurchaseEl?.addEventListener('click', () => {
+  if (isAppThemeUnlocked('dzika-galaktyka') || talarki < 1000) return;
+  talarki -= 1000;
+  localStorage.setItem(TALARKI_KEY, String(talarki));
+  redeemedFeatures.wildGalaxyTheme = true;
+  saveRedeemedFeatures();
+  syncLockedThemeChoice('themeDzikaGalaktyka', true);
+  updateTalarkiUi();
+});
+shopBrikersPurchaseEl?.addEventListener('click', () => {
+  if (isBrikersGameUnlocked() || talarki < 1500) return;
+  talarki -= 1500;
+  localStorage.setItem(TALARKI_KEY, String(talarki));
+  redeemedFeatures.brickersGame = true;
+  saveRedeemedFeatures();
+  updateTalarkiUi();
+});
+document.querySelectorAll('[data-theme-preview]').forEach((button) => button.addEventListener('click', () => {
+  const theme = button.dataset.themePreview;
+  if (!APP_THEMES.includes(theme)) return;
+  const stopping = shopPreviewTheme === theme;
+  shopPreviewTheme = stopping ? '' : theme;
+  if (stopping) applyAppearanceSettings(); else document.documentElement.dataset.theme = theme;
+  document.querySelectorAll('[data-theme-preview]').forEach((item) => { item.textContent = item.dataset.themePreview === shopPreviewTheme ? 'Zakończ podgląd' : 'Podgląd'; });
+}));
+document.querySelectorAll('[data-shop-tab]').forEach((tab) => tab.addEventListener('click', () => {
+  const target = tab.dataset.shopTab;
+  document.querySelectorAll('[data-shop-tab]').forEach((item) => item.dataset.active = String(item === tab));
+  document.querySelectorAll('[data-shop-panel]').forEach((panel) => { panel.hidden = panel.dataset.shopPanel !== target; });
+}));
 const creatorLauncherEl = document.getElementById('creatorLauncher');
 const creatorLauncherPanelEl = document.getElementById('creatorLauncherPanel');
 const creatorLauncherPanelContentEl = document.getElementById('creatorLauncherPanelContent');
 const creatorLauncherPanelCloseEl = document.getElementById('creatorLauncherPanelClose');
+const viewersLauncherEl = document.getElementById('viewersLauncher');
+const viewersDialogBackdropEl = document.getElementById('viewersDialogBackdrop');
+const viewersDialogCloseEl = document.getElementById('viewersDialogClose');
+const viewersDialogContentEl = document.getElementById('viewersDialogContent');
+const viewersRefreshButtonEl = document.getElementById('viewersRefreshButton');
+const viewersCountLabelEl = document.getElementById('viewersCountLabel');
+const viewersObservedLabelEl = document.getElementById('viewersObservedLabel');
+
+async function openCurrentViewers() {
+  if (!viewersDialogBackdropEl || !viewersDialogContentEl) return;
+  const refreshToken = ++viewerRefreshToken;
+  viewersDialogContentEl.classList.add('viewers-refreshing');
+  viewersDialogContentEl.replaceChildren();
+  const result = await window.tiktokLive?.getCurrentViewers?.();
+  if (refreshToken !== viewerRefreshToken) return;
+  const viewers = result?.viewers || [];
+  if (viewersCountLabelEl) viewersCountLabelEl.textContent = String(result?.viewerCount ?? liveViewerCount ?? 0);
+  if (viewersObservedLabelEl) viewersObservedLabelEl.textContent = String(result?.observedCount ?? viewers.length);
+  mergeViewerAvatars(viewers);
+  if (!viewers.length) {
+    viewersDialogContentEl.textContent = 'Brak listy widzów w ostatniej aktualizacji.';
+  } else {
+    const list = document.createElement('div');
+    list.className = 'viewers-grid';
+    viewers.forEach((viewer) => {
+      const item = document.createElement('div'); item.className = 'recent-creator-card viewer-card';
+      const avatar = document.createElement('span'); avatar.className = 'recent-creator-avatar';
+      if (viewer.avatar) { const image = document.createElement('img'); image.src = viewer.avatar; image.alt = ''; avatar.appendChild(image); }
+      else avatar.textContent = (viewer.nickname || viewer.username || '?').trim().charAt(0).toUpperCase();
+      const name = document.createElement('span'); name.className = 'recent-creator-name'; name.textContent = viewer.nickname || viewer.username;
+      item.append(avatar, name);
+      list.appendChild(item);
+    });
+    viewersDialogContentEl.appendChild(list);
+  }
+  viewersDialogContentEl.classList.remove('viewers-refreshing');
+  viewersDialogBackdropEl.hidden = false;
+}
+viewersLauncherEl?.addEventListener('click', openCurrentViewers);
+viewersRefreshButtonEl?.addEventListener('click', openCurrentViewers);
+viewersDialogCloseEl?.addEventListener('click', () => { viewersDialogBackdropEl.hidden = true; });
+viewersDialogBackdropEl?.addEventListener('click', (event) => { if (event.target === viewersDialogBackdropEl) viewersDialogBackdropEl.hidden = true; });
 const creatorPickerEl = document.querySelector('.creator-picker');
 const recentCreatorsColumnEl = document.querySelector('.recent-creators-column');
 
@@ -1653,7 +2010,7 @@ creatorLauncherPanelEl?.addEventListener('click', (event) => {
   notesDialogBackdropEl,
   achievementsDialogBackdropEl,
   settingsDialogBackdropEl,
-  coinsDialogBackdropEl
+  viewersDialogBackdropEl
 ].filter(Boolean).forEach((backdrop) => document.body.appendChild(backdrop));
 const newNoteButton = document.getElementById('newNoteButton');
 const editNoteButton = document.getElementById('editNoteButton');
@@ -1734,7 +2091,9 @@ function syncUpdateAction(update = null) {
   const status = update && update.status ? update.status : 'idle';
   const version = update && update.version ? update.version : '';
   const progress = Math.max(0, Math.min(100, Number(update && update.progress) || 0));
-  const visible = ['available', 'downloading', 'downloaded', 'installing', 'error'].includes(status);
+  // Błędy automatycznego sprawdzania (brak internetu, chwilowy GitHub/Tik.Tools)
+  // nie są akcją aktualizacji i nie mogą wyświetlać przycisku „Pobierz”.
+  const visible = ['available', 'downloading', 'downloaded', 'installing'].includes(status);
   appUpdateActionEl.hidden = !visible;
   appUpdateActionEl.dataset.state = status;
   if (appUpdateCopyEl) {
@@ -2045,6 +2404,36 @@ const firstRunLanguageButtons = Array.from(document.querySelectorAll('[data-firs
 const queue = [];
 const visibleMessages = [];
 const userAvatars = new Map();
+const liveViewerAvatars = new Map();
+let viewerRefreshToken = 0;
+const VIEWER_AVATAR_CACHE_KEY = 'czatbox.viewer.avatars.v1';
+
+function loadViewerAvatarCache() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(VIEWER_AVATAR_CACHE_KEY) || '{}');
+    Object.entries(saved).forEach(([key, value]) => { if (typeof value === 'string' && value) liveViewerAvatars.set(key, value); });
+  } catch { /* corrupted cache is safely ignored */ }
+}
+
+function saveViewerAvatarCache() {
+  try {
+    localStorage.setItem(VIEWER_AVATAR_CACHE_KEY, JSON.stringify(Object.fromEntries(liveViewerAvatars)));
+  } catch { /* storage limits must not interrupt chat */ }
+}
+
+function mergeViewerAvatars(viewers) {
+  let changed = false;
+  (viewers || []).forEach((viewer) => {
+    if (!viewer?.avatar) return;
+    [viewer.username, viewer.nickname, ...(viewer.aliases || [])].filter(Boolean).forEach((name) => {
+      const key = String(name).trim().toLowerCase();
+      if (liveViewerAvatars.get(key) !== viewer.avatar) { liveViewerAvatars.set(key, viewer.avatar); changed = true; }
+    });
+  });
+  if (changed) saveViewerAvatarCache();
+}
+
+loadViewerAvatarCache();
 const renderedMessageElements = new Map();
 const queuedMessagesById = new Map();
 const visibleMessagesById = new Map();
@@ -2107,6 +2496,7 @@ let liveViewerCount = 0;
 let appearanceBroadcastChannel = null;
 let chatMessageCount = 0;
 let recentCreators = loadRecentCreators();
+let favoriteCreators = loadFavoriteCreators();
 let recentCreatorMeta = loadRecentCreatorMeta();
 let czesterMemory = loadCzesterMemory();
 let czesterSpamBuckets = new Map();
@@ -2126,6 +2516,7 @@ let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
 let achievementsState = loadAchievementsState();
 let redeemedFeatures = loadRedeemedFeatures();
+updateTalarkiUi();
 let lastHondaOnlineAlertAt = 0;
 let battleScorebarState = null;
 let battleScorebarTimer = null;
@@ -2314,6 +2705,9 @@ function loadStoredRedeemCodes() {
     if (saved.miamiViceTheme && !codes.includes(MIAMI_VICE_REDEEM_CODE)) {
       codes.push(MIAMI_VICE_REDEEM_CODE);
     }
+    if (saved.wildGalaxyTheme && !codes.includes(WILD_GALAXY_STORE_CODE)) {
+      codes.push(WILD_GALAXY_STORE_CODE);
+    }
     return codes;
   } catch {
     return [];
@@ -2322,7 +2716,10 @@ function loadStoredRedeemCodes() {
 
 function isAppThemeUnlocked(theme) {
   if (theme === 'miami-vice') {
-    return loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+    return isMiamiViceThemeUnlocked();
+  }
+  if (theme === 'dzika-galaktyka') {
+    return isWildGalaxyThemeUnlocked();
   }
   return true;
 }
@@ -2348,6 +2745,7 @@ function saveAppAppearance() {
 function createDefaultAchievementsState() {
   return {
     unlocked: {},
+    talarkiRewards: [],
     creatorConnections: {},
     uniqueCreators: []
   };
@@ -2364,12 +2762,14 @@ function normalizeAchievementsState(value) {
     ? value.creatorConnections
     : {};
   const uniqueCreators = Array.isArray(value.uniqueCreators) ? value.uniqueCreators : [];
+  const talarkiRewards = Array.isArray(value.talarkiRewards) ? value.talarkiRewards : [];
 
   return {
     unlocked: Object.fromEntries(
       Object.entries(unlocked)
         .filter(([id, unlockedAt]) => ACHIEVEMENT_DEFINITIONS.some((achievement) => achievement.id === id) && typeof unlockedAt === 'string')
     ),
+    talarkiRewards: Array.from(new Set(talarkiRewards.filter((id) => ACHIEVEMENT_DEFINITIONS.some((achievement) => achievement.id === id)))),
     creatorConnections: Object.fromEntries(
       Object.entries(creatorConnections)
         .map(([handle, count]) => [normalizeCreatorHandle(handle), Math.max(0, Number(count) || 0)])
@@ -2400,6 +2800,8 @@ function loadRedeemedFeatures() {
       ollamaPrompt: Boolean(saved.ollamaPrompt) || codes.includes(OLLAMA_REDEEM_CODE),
       boxesPanel: Boolean(saved.boxesPanel) || codes.includes(BOXES_REDEEM_CODE),
       miamiViceTheme: Boolean(saved.miamiViceTheme) || codes.includes(MIAMI_VICE_REDEEM_CODE),
+      wildGalaxyTheme: Boolean(saved.wildGalaxyTheme) || codes.includes(WILD_GALAXY_STORE_CODE),
+      brickersGame: Boolean(saved.brickersGame),
       codes
     };
   } catch {
@@ -2408,6 +2810,8 @@ function loadRedeemedFeatures() {
       ollamaPrompt: false,
       boxesPanel: false,
       miamiViceTheme: false,
+      wildGalaxyTheme: false,
+      brickersGame: false,
       codes: []
     };
   }
@@ -2438,7 +2842,25 @@ function isBoxesPanelUnlocked() {
 }
 
 function isMiamiViceThemeUnlocked() {
-  return Boolean(redeemedFeatures.miamiViceTheme) || loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+  try {
+    const saved = JSON.parse(localStorage.getItem(REDEEMED_FEATURES_KEY) || '{}');
+    return Boolean(saved.miamiViceTheme) || loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+  } catch {
+    return loadStoredRedeemCodes().includes(MIAMI_VICE_REDEEM_CODE);
+  }
+}
+
+function isWildGalaxyThemeUnlocked() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REDEEMED_FEATURES_KEY) || '{}');
+    return Boolean(saved.wildGalaxyTheme) || loadStoredRedeemCodes().includes(WILD_GALAXY_STORE_CODE);
+  } catch {
+    return loadStoredRedeemCodes().includes(WILD_GALAXY_STORE_CODE);
+  }
+}
+
+function isBrikersGameUnlocked() {
+  return Boolean(redeemedFeatures?.brickersGame);
 }
 
 function syncLockedThemeChoice(inputId, unlocked) {
@@ -2464,6 +2886,7 @@ function syncRedeemedFeatureNavigation() {
   const boxesPanel = viewPanels.find((panel) => panel.dataset.view === 'boxes');
   const unlocked = isBoxesPanelUnlocked();
   const miamiUnlocked = isMiamiViceThemeUnlocked();
+  const wildGalaxyUnlocked = isWildGalaxyThemeUnlocked();
 
   if (boxesButton) {
     boxesButton.hidden = !unlocked;
@@ -2477,6 +2900,7 @@ function syncRedeemedFeatureNavigation() {
 
 
   syncLockedThemeChoice('themeMiamiVice', miamiUnlocked);
+  syncLockedThemeChoice('themeDzikaGalaktyka', wildGalaxyUnlocked);
   if (!miamiUnlocked && appTheme === 'miami-vice') {
     appTheme = 'rose-black';
     saveAppTheme();
@@ -2527,7 +2951,9 @@ function redeemEnteredCode() {
   if (normalized !== HONDA_REDEEM_CODE
     && normalized !== OLLAMA_REDEEM_CODE
     && normalized !== BOXES_REDEEM_CODE
-    && normalized !== MIAMI_VICE_REDEEM_CODE) {
+    && normalized !== MIAMI_VICE_REDEEM_CODE
+    && normalized !== TALARKI_BONUS_CODE
+    && normalized !== normalizeRedeemCode(DEV_TALARKI_CODE)) {
     setRedeemCodeStatus(t('settings.redeem.invalid'), 'error');
     return;
   }
@@ -2544,6 +2970,16 @@ function redeemEnteredCode() {
   if (normalized === MIAMI_VICE_REDEEM_CODE) {
     redeemedFeatures.miamiViceTheme = true;
   }
+  if (normalized === TALARKI_BONUS_CODE) {
+    talarki = Math.min(100000, talarki + 1000);
+    localStorage.setItem(TALARKI_KEY, String(talarki));
+    updateTalarkiUi();
+  }
+  if (normalized === normalizeRedeemCode(DEV_TALARKI_CODE)) {
+    talarki = Math.min(100000, talarki + 50000);
+    localStorage.setItem(TALARKI_KEY, String(talarki));
+    updateTalarkiUi();
+  }
   redeemedFeatures.codes = Array.from(new Set([...(redeemedFeatures.codes || []), normalized]));
   saveRedeemedFeatures();
   redeemCodeInput.value = '';
@@ -2554,6 +2990,10 @@ function redeemEnteredCode() {
         ? t('settings.redeem.unlockedBoxes')
         : normalized === MIAMI_VICE_REDEEM_CODE
           ? t('settings.redeem.unlockedMiamiVice')
+        : normalized === TALARKI_BONUS_CODE
+          ? 'Kod przyjęty. Dodano 1000 Talarków.'
+          : normalized === normalizeRedeemCode(DEV_TALARKI_CODE)
+            ? t('settings.redeem.unlockedTalarki')
           : t('settings.redeem.unlocked'),
     'success'
   );
@@ -2597,10 +3037,37 @@ function unlockAchievement(id) {
   }
 
   achievementsState.unlocked[id] = new Date().toISOString();
+  const reward = ACHIEVEMENT_DEFINITIONS.find((achievement) => achievement.id === id)?.talarki || 0;
+  if (reward && !achievementsState.talarkiRewards.includes(id)) {
+    talarki = Math.min(100000, talarki + reward);
+    localStorage.setItem(TALARKI_KEY, String(talarki));
+    achievementsState.talarkiRewards.push(id);
+    updateTalarkiUi();
+  }
   saveAchievementsState();
   renderAchievements();
   return true;
 }
+
+function migrateTalarkiAchievementRewards() {
+  let changed = false;
+  ACHIEVEMENT_DEFINITIONS.forEach((achievement) => {
+    if (!achievementsState.unlocked[achievement.id] || achievementsState.talarkiRewards.includes(achievement.id)) return;
+    const reward = Number(achievement.talarki) || 0;
+    if (reward > 0) {
+      talarki = Math.min(100000, talarki + reward);
+      achievementsState.talarkiRewards.push(achievement.id);
+      changed = true;
+    }
+  });
+  if (changed) {
+    localStorage.setItem(TALARKI_KEY, String(talarki));
+    saveAchievementsState();
+    updateTalarkiUi();
+  }
+}
+
+migrateTalarkiAchievementRewards();
 
 function renderAchievements() {
   if (!achievementsListEl) {
@@ -2823,6 +3290,33 @@ function loadRecentCreators() {
 
 function saveRecentCreators() {
   localStorage.setItem(RECENT_CREATORS_KEY, JSON.stringify(recentCreators.slice(0, MAX_RECENT_CREATORS)));
+}
+
+function loadFavoriteCreators() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAVORITE_CREATORS_KEY) || '[]');
+    return Array.isArray(saved)
+      ? Array.from(new Set(saved.map(normalizeCreatorHandle).filter(Boolean))).slice(0, MAX_FAVORITE_CREATORS)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveFavoriteCreators() {
+  localStorage.setItem(FAVORITE_CREATORS_KEY, JSON.stringify(favoriteCreators.slice(0, MAX_FAVORITE_CREATORS)));
+}
+
+function toggleFavoriteCreator(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  if (!normalized) return;
+  if (favoriteCreators.includes(normalized)) {
+    favoriteCreators = favoriteCreators.filter((item) => item !== normalized);
+  } else if (favoriteCreators.length < MAX_FAVORITE_CREATORS) {
+    favoriteCreators = [...favoriteCreators, normalized];
+  }
+  saveFavoriteCreators();
+  renderRecentCreatorsCarousel();
 }
 
 function loadRecentCreatorMeta() {
@@ -4184,6 +4678,9 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     element.textContent = t(element.dataset.i18n);
   });
+  document.querySelectorAll('.appearance-settings-tabs [data-appearance-subtab]').forEach((element) => {
+    element.textContent = element.textContent.replace(/:\s*$/, '');
+  });
   document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
     element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
   });
@@ -4241,10 +4738,10 @@ function applyI18n() {
     ['.settings-tab[data-settings-tab="redeem"]', 'settings.tabs.redeem'],
     ['.settings-panel[data-settings-panel="general"] .page-note', 'settings.general.note'],
     ['label[for="multiplierNotifications"] > span', 'settings.general.multiplierNotifications'],
-    ['label[for="statsToolbox"] > span', 'settings.general.statsToolbox'],
-    ['label[for="galleryAvatars"] > span', 'settings.general.galleryAvatars'],
-    ['label[for="deleteOldArchives"] > span', 'settings.general.deleteOldArchives'],
-    ['label[for="bigPictureMode"] > span', 'settings.general.bigPicture'],
+    ['label[for="statsToolbox"] > span > strong', 'settings.general.statsToolbox'],
+    ['label[for="galleryAvatars"] > span > strong', 'settings.general.galleryAvatars'],
+    ['label[for="deleteOldArchives"] > span > strong', 'settings.general.deleteOldArchives'],
+    ['label[for="bigPictureMode"] > span > strong', 'settings.general.bigPicture'],
     ['.appearance-chat-style-section .settings-heading', 'settings.appearance.chatStyle'],
     ['.appearance-theme-section .settings-heading', 'settings.appearance.theme'],
     ['.appearance-app-section .settings-heading', 'settings.appearance.appAppearance'],
@@ -4264,6 +4761,9 @@ function applyI18n() {
     ['#themeMiamiVice + span strong', 'settings.theme.miamiVice.name'],
     ['#themeMiamiVice + span small', 'settings.theme.miamiVice.description'],
     ['#themeMiamiVice + span .theme-lock-badge span:last-child', 'settings.theme.locked'],
+    ['#themeDzikaGalaktyka + span strong', 'settings.theme.dzikaGalaktyka.name'],
+    ['#themeDzikaGalaktyka + span small', 'settings.theme.dzikaGalaktyka.description'],
+    ['#themeDzikaGalaktyka + span .theme-lock-badge span:last-child', 'settings.theme.locked'],
     ['#appAppearanceStandard + span strong', 'settings.appAppearance.default.name'],
     ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
     ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
@@ -4271,13 +4771,13 @@ function applyI18n() {
     ['#appAppearanceRetroKb2 + span strong', 'settings.appAppearance.retroKb2.name'],
     ['#appAppearanceRetroKb2 + span small', 'settings.appAppearance.retroKb2.description'],
     ['.settings-panel[data-settings-panel="accessibility"] > .settings-heading', 'settings.accessibility.tts'],
-    ['label[for="ttsEnabled"] > span', 'settings.accessibility.readAloud'],
-    ['label[for="ttsSkipVulgarNicknames"] > span', 'settings.accessibility.skipVulgarNicknames'],
-    ['label[for="ttsSkipVulgarMessages"] > span', 'settings.accessibility.skipVulgarMessages'],
-    ['label[for="ttsSkipSpamMessages"] > span', 'settings.accessibility.skipSpamMessages'],
-    ['label[for="ttsVoice"] > span', 'settings.accessibility.voice'],
-    ['label[for="ttsRate"] > span', 'settings.accessibility.rate'],
-    ['label[for="ttsVolume"] > span', 'settings.accessibility.volume'],
+    ['label[for="ttsEnabled"] > span > strong', 'settings.accessibility.readAloud'],
+    ['label[for="ttsSkipVulgarNicknames"] > span > strong', 'settings.accessibility.skipVulgarNicknames'],
+    ['label[for="ttsSkipVulgarMessages"] > span > strong', 'settings.accessibility.skipVulgarMessages'],
+    ['label[for="ttsSkipSpamMessages"] > span > strong', 'settings.accessibility.skipSpamMessages'],
+    ['label[for="ttsVoice"] > span > strong', 'settings.accessibility.voice'],
+    ['label[for="ttsRate"] > span > strong', 'settings.accessibility.rate'],
+    ['label[for="ttsVolume"] > span > strong', 'settings.accessibility.volume'],
     ['.chat-delay-section .settings-heading', 'settings.accessibility.delay'],
     ['.settings-panel[data-settings-panel="redeem"] .page-note', 'settings.redeem.note'],
     ['label[for="redeemCodeInput"] > span:first-child', 'settings.redeem.codeLabel'],
@@ -4825,6 +5325,35 @@ function playNextSpeech() {
     return;
   }
 
+  // Use the bundled Piper voice for Polish when available; browser speech remains
+  // the fallback for other languages or older installations.
+  if (appLanguage === 'pl' && window.tiktokLive?.synthesizePiper) {
+    const text = speechQueue.shift();
+    speechPlaying = true;
+    const voice = ttsSettings.voiceURI && /justyna|jarvis|meski|zenski/i.test(ttsSettings.voiceURI)
+      ? `pl_PL-${ttsSettings.voiceURI.match(/justyna|jarvis|meski|zenski/i)[0]}_wg_glos-medium`
+      : 'pl_PL-justyna_wg_glos-medium';
+    window.tiktokLive.synthesizePiper(text, voice, 1.1).then((result) => {
+      if (!result?.ok) throw new Error(result?.error || 'piper');
+      const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
+      audio.volume = clampSpeechVolume(ttsSettings.volume);
+      audio.onended = () => { speechPlaying = false; playNextSpeech(); };
+      audio.onerror = () => { speechPlaying = false; playNextSpeech(); };
+      audio.play().catch(() => { speechPlaying = false; playNextSpeech(); });
+    }).catch(() => {
+      speechPlaying = false;
+      // Never silently switch a Polish Piper selection to a Windows voice.
+      // Drop only the failed item and continue with the next queued message.
+      playNextSpeech();
+    });
+    return;
+  }
+  playNextSpeechWithBrowser();
+}
+
+function playNextSpeechWithBrowser() {
+  if (!canUseSpeech() || speechPlaying || !ttsSettings.enabled || !speechQueue.length) return;
+
   const utterance = new SpeechSynthesisUtterance(speechQueue.shift());
   const voice = getSelectedVoice();
   if (voice) {
@@ -4929,7 +5458,7 @@ function getSpeechText(message) {
   }
 
   const author = sanitizeSpeechText(message.authorName);
-  return author ? `${author} ${text}` : text;
+  return author ? `${author} pisze ${text}` : text;
 }
 
 function shouldReadMessage(message) {
@@ -4973,12 +5502,14 @@ function syncTtsVoices() {
     });
 
   const selected = ttsSettings.voiceURI;
-  const options = [
-    new Option(t('settings.accessibility.systemVoice'), ''),
-    ...speechVoices.map((voice) => new Option(`${voice.name} (${voice.lang})`, voice.voiceURI))
-  ];
+  const piperOptions = [
+      ['pl_PL-justyna_wg_glos-medium', 'Halina'],
+      ['pl_PL-jarvis_wg_glos-medium', 'Mr. Drwina']
+    ].map(([value, label]) => new Option(label, value));
+  const piperValues = ['pl_PL-justyna_wg_glos-medium', 'pl_PL-jarvis_wg_glos-medium'];
+  const options = [...piperOptions];
   ttsVoiceEl.replaceChildren(...options);
-  ttsVoiceEl.value = speechVoices.some((voice) => voice.voiceURI === selected) ? selected : '';
+  ttsVoiceEl.value = piperValues.includes(selected) ? selected : piperValues[0];
 }
 
 function syncTtsControls() {
@@ -5578,14 +6109,40 @@ function scrollRecentCreators(direction) {
 }
 
 function renderRecentCreatorsCarousel() {
-  if (!recentCreatorsStrip || !recentCreatorsCarousel) {
+  if (!recentCreatorsStrip || !recentCreatorsCarousel || !favoriteCreatorsRow) {
     return;
   }
 
   const creators = getOrderedRecentCreators();
+  const favorites = favoriteCreators.filter((handle) => creators.includes(handle) || recentCreators.includes(handle));
 
-  document.documentElement.dataset.recentCreators = creators.length ? 'true' : 'false';
-  recentCreatorsStrip.hidden = creators.length === 0;
+  document.documentElement.dataset.recentCreators = creators.length || favorites.length ? 'true' : 'false';
+  recentCreatorsStrip.hidden = creators.length === 0 && favorites.length === 0;
+  favoriteCreatorsRow.hidden = favorites.length === 0;
+  favoriteCreatorsRow.replaceChildren();
+  favorites.forEach((handle) => {
+    const creator = findCreatorByHandle(handle);
+    const button = document.createElement('button');
+    button.className = 'recent-creator-card favorite-creator-card';
+    button.type = 'button';
+    button.dataset.active = String(getCurrentCreatorHandle() === handle);
+    button.title = `@${handle}`;
+    button.addEventListener('click', () => selectRecentCreator(handle));
+    const star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'favorite-creator-star';
+    star.dataset.active = 'true';
+    star.appendChild(createUiIcon('star'));
+    star.title = 'Usuń z ulubionych';
+    star.addEventListener('click', (event) => { event.preventDefault(); event.stopImmediatePropagation(); toggleFavoriteCreator(handle); });
+    const avatar = document.createElement('span');
+    avatar.className = 'recent-creator-avatar';
+    if (creator && creator.avatar) {
+      const image = document.createElement('img'); image.src = creator.avatar; image.alt = ''; image.loading = 'lazy'; avatar.appendChild(image);
+    } else avatar.textContent = getCreatorInitial(handle, creator);
+    const name = document.createElement('span'); name.className = 'recent-creator-name'; name.textContent = (creator ? getCreatorDisplayName(creator) : handle).replace(/^@/, '');
+    button.append(star, avatar, name); favoriteCreatorsRow.appendChild(button);
+  });
   if (!creators.length) {
     recentCreatorsCarousel.replaceChildren();
     updateRecentCreatorsNav();
@@ -5627,7 +6184,14 @@ function renderRecentCreatorsCarousel() {
     name.className = 'recent-creator-name';
     name.textContent = label.replace(/^@/, '');
 
-    button.append(avatar, name);
+    const star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'favorite-creator-star';
+    star.dataset.active = String(favoriteCreators.includes(handle));
+    star.appendChild(createUiIcon('star'));
+    star.title = favoriteCreators.includes(handle) ? 'Usuń z ulubionych' : 'Dodaj do ulubionych';
+    star.addEventListener('click', (event) => { event.preventDefault(); event.stopImmediatePropagation(); toggleFavoriteCreator(handle); });
+    button.append(star, avatar, name);
     fragment.appendChild(button);
   });
 
@@ -6295,12 +6859,15 @@ function assignAvatarForJoin(message) {
 
 function getAvatarForMessage(message) {
   const key = getAvatarKey(message);
+  if (!generalSettings.galleryAvatars && !key) {
+    return './assets/enigma-avatar.png';
+  }
   if (!key) {
     return '';
   }
 
   if (!generalSettings.galleryAvatars) {
-    return '';
+    return message.avatar || liveViewerAvatars.get(key) || './assets/enigma-avatar.png';
   }
 
   if (!avatarImages.length) {
@@ -6558,6 +7125,7 @@ function inspectCzesterSpam(message) {
   }
 
   czesterSpamAlerts.set(bucketKey, now);
+  if (tamagotchi?.hatched && now - Number(tamagotchi.spamDebt || 0) >= 1200000) { tamagotchi.health = clampPet(tamagotchi.health - 1); tamagotchi.spamDebt = now; saveTamagotchi(); renderTamagotchi(); }
   updateCzesterViewerProfile(message, { spam: true });
   const author = String(message.authorName || message.uniqueId || authorKey).trim();
   notifyCzester('spam-alert', t('czester.notice.spam', {
@@ -7242,10 +7810,7 @@ function getMessageDisplayText(message) {
   }
 
   if (message.textKey === 'event.share') {
-    const shareCount = Number(message.shareCount) || 0;
-    return t('event.share', {
-      countText: shareCount > 0 ? ` (👥 ${shareCount})` : ''
-    });
+    return t('event.share');
   }
 
   return t(message.textKey);
@@ -7321,7 +7886,7 @@ function renderMessageElement(message) {
 
   const authorName = typeof message.authorName === 'string' ? message.authorName.trim() : '';
   if (authorName) {
-    const avatarSrc = getAvatarForMessage(message);
+    const avatarSrc = getAvatarForMessage(message) || './assets/enigma-avatar.png';
     const author = document.createElement('span');
     author.className = 'message-author';
     author.textContent = authorName;
@@ -7797,6 +8362,30 @@ settingsTabs.forEach((button) => {
     setActiveSettingsTab(button.dataset.settingsTab);
   });
 });
+
+function setActiveAppearanceSubtab(tab) {
+  const nextTab = appearanceSubpanels.some((panel) => panel.dataset.appearanceSubpanel === tab)
+    ? tab
+    : 'chat-style';
+
+  appearanceSubtabs.forEach((button) => {
+    const isActive = button.dataset.appearanceSubtab === nextTab;
+    button.dataset.active = String(isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  appearanceSubpanels.forEach((panel) => {
+    panel.hidden = panel.dataset.appearanceSubpanel !== nextTab;
+  });
+}
+
+appearanceSubtabs.forEach((button) => {
+  button.addEventListener('click', () => {
+    setActiveAppearanceSubtab(button.dataset.appearanceSubtab);
+  });
+});
+
+setActiveAppearanceSubtab('chat-style');
 
 function setActiveAboutTab(tab) {
   const requestedPanel = aboutPanels.find((panel) => panel.dataset.aboutPanel === tab);
@@ -8706,18 +9295,6 @@ settingsDialogBackdropEl?.addEventListener('click', (event) => {
   }
 });
 
-coinsLauncherEl?.addEventListener('click', () => {
-  setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, Boolean(coinsDialogBackdropEl?.hidden));
-});
-coinsDialogCloseEl?.addEventListener('click', () => {
-  setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
-});
-coinsDialogBackdropEl?.addEventListener('click', (event) => {
-  if (event.target === coinsDialogBackdropEl) {
-    setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
-  }
-});
-
 window.addEventListener('resize', () => {
   if (czesterPanelEl && !czesterPanelEl.hidden) {
     positionCzesterPanel();
@@ -8740,9 +9317,6 @@ window.addEventListener('keydown', (event) => {
   }
   if (event.key === 'Escape' && settingsDialogBackdropEl && !settingsDialogBackdropEl.hidden) {
     setWidgetDialogOpen(settingsDialogBackdropEl, settingsLauncherEl, settingsDialogCloseEl, false);
-  }
-  if (event.key === 'Escape' && coinsDialogBackdropEl && !coinsDialogBackdropEl.hidden) {
-    setWidgetDialogOpen(coinsDialogBackdropEl, coinsLauncherEl, coinsDialogCloseEl, false);
   }
 });
 
@@ -8869,6 +9443,11 @@ if (typeof window.tiktokLive.onRoomStats === 'function') {
     const nextViewerCount = Math.max(0, Number(stats && stats.viewerCount) || 0);
     liveViewerCount = nextViewerCount;
     updateStatus();
+    if (viewersCountLabelEl) viewersCountLabelEl.textContent = String(nextViewerCount);
+    window.tiktokLive.getCurrentViewers?.().then((result) => {
+      mergeViewerAvatars(result?.viewers || []);
+    }).catch(() => {});
+    if (viewersDialogBackdropEl && !viewersDialogBackdropEl.hidden) openCurrentViewers();
   });
 }
 
