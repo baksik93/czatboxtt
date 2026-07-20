@@ -50,10 +50,41 @@ function getPiperServer(model) {
   const rl = readline.createInterface({ input: child.stdout });
   rl.on('line', (line) => { try { const msg = JSON.parse(line); const job = pending.get(msg.id); if (job) { pending.delete(msg.id); job(msg); } } catch {} });
   const server = { child, pending, nextId: 1 };
-  child.on('exit', () => { for (const job of pending.values()) job({ ok: false, error: 'piper-exited' }); pending.clear(); piperServers.delete(key); });
-  server.request = (text, output) => new Promise((resolve) => { const id = String(server.nextId++); pending.set(id, resolve); child.stdin.write(`${JSON.stringify({ id, text, output })}\n`); });
+  const rejectPending = (error) => {
+    for (const job of pending.values()) job({ ok: false, error });
+    pending.clear();
+    piperServers.delete(key);
+  };
+  child.on('error', () => rejectPending('piper-error'));
+  child.on('exit', () => rejectPending('piper-exited'));
+  server.request = (text, output) => new Promise((resolve) => {
+    const id = String(server.nextId++);
+    const timeout = setTimeout(() => {
+      pending.delete(id);
+      resolve({ ok: false, error: 'piper-timeout' });
+    }, 30000);
+    pending.set(id, (result) => {
+      clearTimeout(timeout);
+      resolve(result);
+    });
+    try {
+      child.stdin.write(`${JSON.stringify({ id, text, output })}\n`);
+    } catch {
+      clearTimeout(timeout);
+      pending.delete(id);
+      resolve({ ok: false, error: 'piper-write-failed' });
+    }
+  });
   piperServers.set(key, server);
   return server;
+}
+
+function stopPiperServers() {
+  for (const server of piperServers.values()) {
+    try { server.child.stdin.end(); } catch {}
+    try { server.child.kill(); } catch {}
+  }
+  piperServers.clear();
 }
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const CZESTER_SUPPORT_URL = 'https://www.tiktok.com/support';
@@ -3065,6 +3096,9 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      // Brikers, Talarki i pozostałe zegary aplikacji muszą działać także,
+      // gdy główne okno jest zminimalizowane albo ukryte w zasobniku.
+      backgroundThrottling: false,
       sandbox: false,
       devTools: true
     }
@@ -6839,12 +6873,25 @@ function installIpc() {
     const model = path.join(PIPER_RESOURCE_DIR, `${safeVoice}.onnx`);
     if (!fs.existsSync(model)) return { ok: false, error: 'piper-voice-unavailable' };
     const output = path.join(app.getPath('temp'), `czatbox-tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
-    return new Promise((resolve) => {
-      execFile(PIPER_EXECUTABLE, ['--model', model, '--output', output, '--text', String(text || ''), '--length-scale', String(Math.max(0.7, Number(lengthScale) || 1.1))], { windowsHide: true, timeout: 30000 }, (error) => {
-        if (error || !fs.existsSync(output)) return resolve({ ok: false, error: error?.message || 'piper-failed' });
-        try { resolve({ ok: true, audio: fs.readFileSync(output).toString('base64') }); } finally { fs.rmSync(output, { force: true }); }
-      });
-    });
+    try {
+      // Keep the selected model loaded between messages. Starting a fresh
+      // piper-tts.exe for every line caused the several-second start delay.
+      const result = await getPiperServer(model).request(String(text || ''), output);
+      if (!result?.ok || !fs.existsSync(output)) return { ok: false, error: result?.error || 'piper-failed' };
+      return { ok: true, audio: fs.readFileSync(output).toString('base64') };
+    } catch (error) {
+      return { ok: false, error: error?.message || 'piper-failed' };
+    } finally {
+      try { fs.rmSync(output, { force: true }); } catch {}
+    }
+  });
+  handleShell('shell:warm-piper', async ({ voice }) => {
+    if (!fs.existsSync(PIPER_EXECUTABLE)) return { ok: false, error: 'piper-unavailable' };
+    const safeVoice = String(voice || 'pl_PL-justyna_wg_glos-medium').replace(/[^a-zA-Z0-9_-]/g, '');
+    const model = path.join(PIPER_RESOURCE_DIR, `${safeVoice}.onnx`);
+    if (!fs.existsSync(model)) return { ok: false, error: 'piper-voice-unavailable' };
+    getPiperServer(model);
+    return { ok: true };
   });
   handleShell('shell:start-live', async () => {
     await showChatMode();
@@ -7310,6 +7357,7 @@ app.on('activate', () => {
 
 app.on('before-quit', () => {
   setQuietNotifications(false).catch(() => {});
+  stopPiperServers();
   isQuitting = true;
 });
 

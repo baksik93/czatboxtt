@@ -11532,14 +11532,14 @@ body.radio-dialog-open { overflow: hidden; }
 .tamagotchi-dialog .radio-dialog-header { flex: 0 0 84px; box-sizing: border-box; min-height: 84px; padding: 22px !important; border-bottom: 1px solid var(--dropdown-border) !important; background: transparent !important; }
 .tamagotchi-egg-icon { position: relative; display: inline-block; width: 17px; height: 21px; border: 2px solid currentColor; border-radius: 50% 50% 48% 48%; box-sizing: border-box; transform: scale(.72); }
 .tamagotchi-egg-icon::after { content: ''; position: absolute; left: 3px; right: 3px; bottom: 4px; height: 2px; border-radius: 2px; background: currentColor; opacity: .65; }
-.tamagotchi-body { flex: 1 1 auto; min-height: 0; padding: 22px; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; box-sizing: border-box; }
+.tamagotchi-body { flex: 1 1 auto; min-height: 0; padding: 22px; overflow: hidden; display: block; box-sizing: border-box; }
 .tamagotchi-egg { display: grid; place-items: center; gap: 14px; width: 100%; height: 100%; min-height: 360px; border: 0; background: transparent; color: var(--dropdown-text); cursor: pointer; font: inherit; }
 .tamagotchi-egg span { font-size: 108px; filter: drop-shadow(0 10px 18px rgba(255, 215, 80, .35)); animation: tamagotchiEggPulse 1.8s ease-in-out infinite; }
 .tamagotchi-egg strong { font-size: 16px; }
 @keyframes tamagotchiEggPulse { 50% { transform: translateY(-8px) rotate(2deg) scale(1.04); } }
-.tamagotchi-stage { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: 24px; flex: 1 1 auto; min-height: 0; padding: 24px; border: 1px solid #4b7042; border-radius: 12px; background: #dcebcf; box-sizing: border-box; overflow: hidden; isolation: isolate; }
+.tamagotchi-stage { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: 24px; width: 100%; height: 100%; min-height: 0; padding: 24px; border: 1px solid #4b7042; border-radius: 12px; background: #dcebcf; box-sizing: border-box; overflow: hidden; isolation: isolate; }
 .tamagotchi-stage::before { content: ''; position: absolute; inset: 0; z-index: -2; background: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 28px, rgba(117,157,105,.13) 28px 56px), repeating-linear-gradient(0deg, rgba(59,104,50,.08) 0 2px, transparent 2px 4px), #dcebcf; image-rendering: pixelated; }
-.tamagotchi-stage::after { content: ''; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; height: 18%; min-height: 58px; border-top: 4px solid #496f3e; background: repeating-linear-gradient(135deg, transparent 0 12px, rgba(35,79,32,.45) 12px 18px), repeating-linear-gradient(45deg, #5c894b 0 10px, #3f7039 10px 20px); box-shadow: inset 0 8px 0 rgba(196,221,177,.45); }
+.tamagotchi-stage::after { content: ''; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; height: 18%; min-height: 66px; border-top: 4px solid #496f3e; background: repeating-linear-gradient(135deg, transparent 0 12px, rgba(35,79,32,.45) 12px 18px), repeating-linear-gradient(45deg, #5c894b 0 10px, #3f7039 10px 20px); box-shadow: inset 0 8px 0 rgba(196,221,177,.45); }
 .pet-meters-overlay { position: absolute; inset: 16px 16px auto; display: grid; grid-template-columns: auto auto; align-items: start; justify-content: space-between; gap: 18px; pointer-events: auto; }
 .meter-stack { display: grid; grid-auto-rows: 24px; align-self: start; align-content: start; justify-items: stretch; gap: 6px; padding: 8px; border: 2px solid #315f31; border-radius: 6px; background: rgba(220,235,207,.86); box-shadow: 3px 3px 0 rgba(49,95,49,.3); }
 .meter-stack-right { justify-items: stretch; }
@@ -11551,14 +11551,13 @@ body.radio-dialog-open { overflow: hidden; }
 .pet-meter-pips { display: grid; grid-template-columns: repeat(10, 8px); gap: 2px; }
 .pet-meter-pips i { display: block; width: 8px; height: 8px; box-sizing: border-box; border: 1px solid #789668; background: #c5d7b4; opacity: .72; }
 .pet-meter-pips i.on { border-color: #204a1d; background: #4f7d3f; box-shadow: inset 0 0 0 1px #70965a; opacity: 1; }
-.tamagotchi-action-bar { display: flex; flex-direction: column; flex: 0 0 auto; align-self: stretch; justify-content: flex-start; gap: 10px; margin: 0; padding: 12px; border: 1px solid var(--dropdown-border); border-radius: 10px; background: var(--dropdown-surface); }
-.tamagotchi-action-bar button { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--dropdown-border); border-radius: 8px; background: var(--dropdown-hover-bg); color: var(--dropdown-text); cursor: pointer; font: inherit; }
-.tamagotchi-action-bar button:hover { background: var(--dropdown-active-bg); }
+.tamagotchi-action-bar { position: absolute; z-index: 6; left: 12px; right: 12px; bottom: 10px; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; margin: 0; padding: 7px 9px; border: 2px solid #274f28; border-radius: 6px; background: repeating-linear-gradient(135deg, rgba(218,235,197,.2) 0 8px, rgba(33,79,31,.16) 8px 14px), #5c894b; box-shadow: 3px 3px 0 rgba(32,74,29,.35), inset 0 2px 0 rgba(220,235,207,.42); box-sizing: border-box; }
+.tamagotchi-action-bar button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; min-height: 34px; padding: 6px 9px; border: 1px solid #204a1d; border-radius: 4px; background: #dcebcf; color: #204a1d; box-shadow: inset 0 -2px 0 rgba(49,95,49,.25); cursor: pointer; font: inherit; }
+.tamagotchi-action-bar button:hover { background: #eef6df; }
 .tamagotchi-action-bar button:disabled { opacity: .45; cursor: not-allowed; }
-.tamagotchi-action-bar button span { font-size: 12px; font-weight: 700; }
-.tamagotchi-action-bar .ui-icon { width: 19px; height: 19px; color: var(--dropdown-active-text); stroke-width: 2.3; flex: 0 0 19px; }
-.tamagotchi-action-bar button { min-width: 150px; justify-content: flex-start; }
-.tamagotchi-action-bar .tamagotchi-instructions-button { margin-top: auto; }
+.tamagotchi-action-bar button span { font-size: 11px; font-weight: 800; white-space: nowrap; }
+.tamagotchi-action-bar .ui-icon { width: 17px; height: 17px; color: #204a1d; stroke-width: 2.3; flex: 0 0 17px; }
+.tamagotchi-action-bar .tamagotchi-instructions-button { margin: 0 0 0 3px; }
 .tamagotchi-instructions { grid-column: 1 / -1; min-width: 0; min-height: 0; padding: 20px; border: 1px solid var(--dropdown-border); border-radius: 12px; background: var(--dropdown-surface); color: var(--dropdown-text); overflow: auto; }
 .tamagotchi-instructions-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--dropdown-border); }
 .tamagotchi-instructions h2 { margin: 0 0 5px; font-size: 22px; }
@@ -11569,14 +11568,14 @@ body.radio-dialog-open { overflow: hidden; }
 .tamagotchi-guide-back .ui-icon { width: 19px; height: 19px; }
 .tamagotchi-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 16px; }
 .tamagotchi-guide-grid article { padding: 14px; border: 1px solid var(--dropdown-border); border-radius: 9px; background: color-mix(in srgb, var(--dropdown-hover-bg) 68%, transparent); }
-.tamagotchi-poops { position: absolute; left: 58%; bottom: max(18%, 58px); display: flex; align-items: flex-end; gap: 6px; z-index: 3; transform: translateX(-50%); }
+.tamagotchi-poops { position: absolute; left: 58%; bottom: max(18%, 66px); display: flex; align-items: flex-end; gap: 6px; z-index: 3; transform: translateX(-50%); }
 .tamagotchi-poops button { display: grid; place-items: end center; width: 36px; height: 34px; padding: 0; border: 0; background: transparent; cursor: pointer; filter: drop-shadow(0 3px 0 rgba(36,80,30,.4)); }
 .tamagotchi-poops button:hover { transform: translateY(-2px); }
 .tamagotchi-poops img { display: block; width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; pointer-events: none; }
 .fun-meter { justify-self: stretch; }
 .pet-meter.left,
 .pet-meter.right { justify-self: stretch; text-align: left; }
-.tamagotchi-dino { position: absolute; inset: 0; bottom: max(18%, 58px); display: grid; place-items: end center; padding: 0; box-sizing: border-box; min-height: 280px; animation: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 6px 0 rgba(36,80,30,.45)); }
+.tamagotchi-dino { position: absolute; inset: 0; bottom: max(18%, 66px); display: grid; place-items: end center; padding: 0; box-sizing: border-box; min-height: 280px; animation: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 6px 0 rgba(36,80,30,.45)); }
 .pet-rat-image { display: block; width: auto; height: clamp(145px, 21vh, 165px); image-rendering: auto; filter: none; transform: none; animation: none; }
 .pet-rat-image.sleeping { width: auto; height: clamp(95px, 15vh, 118px); }
 .pet-rat { position: relative; width: 230px; height: 190px; image-rendering: pixelated; }
@@ -11597,7 +11596,7 @@ body.radio-dialog-open { overflow: hidden; }
 .tamagotchi-status b { color: var(--dropdown-active-text); }
 .tamagotchi-status button { padding: 6px 9px; border: 1px solid var(--dropdown-border); border-radius: 8px; background: var(--dropdown-hover-bg); color: var(--dropdown-text); cursor: pointer; }
 .tamagotchi-status button:hover { background: var(--dropdown-active-bg); }
-@media (max-width: 700px) { .tamagotchi-body { display: flex; flex-direction: column; } .tamagotchi-stage { min-height: 0; } .tamagotchi-action-bar { flex-direction: row; flex-wrap: wrap; justify-content: center; } .tamagotchi-action-bar .tamagotchi-instructions-button { margin-top: 0; } .tamagotchi-guide-grid { grid-template-columns: 1fr; } .tamagotchi-instructions-header { flex-direction: column; } .tamagotchi-dino { min-height: 160px; bottom: max(18%, 58px); padding: 0; } .pet-rat-image { width: auto; height: clamp(125px, 20vh, 150px); } .tamagotchi-status > div { grid-template-columns: 1fr auto; } }
+@media (max-width: 700px) { .tamagotchi-body { display: flex; flex-direction: column; } .tamagotchi-stage { min-height: 0; } .tamagotchi-action-bar { left: 6px; right: 6px; bottom: 6px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px; padding: 5px; } .tamagotchi-action-bar button { min-height: 29px; padding: 4px 6px; } .tamagotchi-action-bar button span { font-size: 9px; } .tamagotchi-action-bar .tamagotchi-instructions-button { margin: 0; } .tamagotchi-guide-grid { grid-template-columns: 1fr; } .tamagotchi-instructions-header { flex-direction: column; } .tamagotchi-dino { min-height: 160px; bottom: max(18%, 66px); padding: 0; } .pet-rat-image { width: auto; height: clamp(125px, 20vh, 150px); } .tamagotchi-status > div { grid-template-columns: 1fr auto; } }
 @media (max-width: 700px) { .pet-meters-overlay { inset: 8px 8px auto; gap: 6px; } .meter-stack { gap: 4px; padding: 5px; } .pet-meter { grid-template-columns: 18px 44px 78px 28px; gap: 3px; font-size: 8px; } .pet-meter > b { font-size: 8px; } .pet-meter-icon { width: 18px; height: 18px; } .pet-meter-pips { grid-template-columns: repeat(10, 6px); gap: 2px; } .pet-meter-pips i { width: 6px; height: 7px; } }
 .shop-empty-state { display: grid; place-items: center; min-height: 280px; color: var(--dropdown-muted); font-weight: 700; }
 .shop-items { padding: 22px; }
@@ -11938,4 +11937,494 @@ html[data-big-picture="true"] .section-nav,
 html[data-big-picture="true"] .filters,
 html[data-big-picture="true"] .app-bottom-taskbar {
   border-radius: 14px !important;
+}
+
+.achievement-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #f4c84b;
+}
+.achievement-reward .ui-icon { width: 15px; height: 15px; }
+
+/* Świat Brikersa: kolory pochodzą z planszy gry. Reguły zmieniają wyłącznie
+   warstwę wizualną, aby zachować geometrię każdego wariantu aplikacji. */
+:root[data-theme="swiat-brikersa"] {
+  --text: #173b18;
+  --muted: #55734d;
+  --surface-muted: #d4e5c6;
+  --dropdown-bg: #e4f0d7;
+  --dropdown-surface: #d7e8c9;
+  --dropdown-text: #21481f;
+  --dropdown-muted: #5a7852;
+  --dropdown-border: #416e38;
+  --dropdown-hover-bg: #c9dfb9;
+  --dropdown-active-bg: #416f38;
+  --dropdown-active-border: #294f27;
+  --dropdown-active-text: #f3f8e9;
+  --dropdown-shadow: 0 10px 0 rgba(38, 78, 31, .14);
+  --czester-accent: #416f38;
+  --czester-muted: #55734d;
+  --czester-surface-bg: #e4f0d7;
+  --czester-text: #173b18;
+}
+
+:root[data-theme="swiat-brikersa"][data-app-appearance="ozdobny"] {
+  --glass-surface: rgba(220, 235, 207, .9);
+  --glass-surface-strong: rgba(228, 240, 215, .96);
+  --glass-surface-soft: rgba(79, 126, 65, .1);
+  --glass-border: rgba(48, 91, 42, .42);
+  --glass-border-strong: rgba(36, 77, 33, .62);
+  --glass-shadow: 0 16px 36px rgba(32, 72, 29, .2);
+  --glass-accent: #5f8b4c;
+  --glass-accent-strong: #315f2d;
+  --glass-highlight: rgba(89, 139, 73, .14);
+  --glass-backdrop: repeating-linear-gradient(135deg, #416f38 0 8px, #527f43 8px 16px);
+  --glass-control-text: #21481f;
+  --glass-control-hover-text: #173b18;
+  --glass-control-active-text: #f3f8e9;
+  --glass-control-border: rgba(48, 91, 42, .42);
+  --glass-control-bg: rgba(228, 240, 215, .9);
+  --glass-control-hover-bg: rgba(198, 220, 181, .96);
+  --glass-control-active-bg: #416f38;
+  --glass-control-active-border: #294f27;
+  --glass-control-active-shadow: inset 0 0 0 1px rgba(235, 246, 224, .28);
+  --glass-sidebar-button-bg: linear-gradient(180deg, #dcebcf, #c7ddb7);
+  --glass-sidebar-button-hover-bg: linear-gradient(180deg, #e8f2de, #d2e5c4);
+  --glass-sidebar-button-active-bg: linear-gradient(180deg, #527f43, #315f2d);
+}
+
+:root[data-theme="swiat-brikersa"] body,
+:root[data-theme="swiat-brikersa"] .chat-app {
+  color: #1d431d;
+  background:
+    repeating-linear-gradient(90deg, rgba(54, 102, 45, .08) 0 14px, rgba(255, 255, 255, .08) 14px 28px),
+    #dcebcf !important;
+}
+
+:root[data-theme="swiat-brikersa"] .chat-header,
+:root[data-theme="swiat-brikersa"] .section-nav,
+:root[data-theme="swiat-brikersa"] .filters,
+:root[data-theme="swiat-brikersa"] .app-bottom-taskbar,
+:root[data-theme="swiat-brikersa"] .sidebar,
+:root[data-theme="swiat-brikersa"] .content,
+:root[data-theme="swiat-brikersa"] .view-panel,
+:root[data-theme="swiat-brikersa"] .page-view,
+:root[data-theme="swiat-brikersa"] .chat-view,
+:root[data-theme="swiat-brikersa"] .messages,
+:root[data-theme="swiat-brikersa"] .widget-dialog,
+:root[data-theme="swiat-brikersa"] .launcher-dialog,
+:root[data-theme="swiat-brikersa"] .settings-dialog,
+:root[data-theme="swiat-brikersa"] .radio-dialog,
+:root[data-theme="swiat-brikersa"] .creator-launcher-panel,
+:root[data-theme="swiat-brikersa"] .shop-dialog,
+:root[data-theme="swiat-brikersa"] .tamagotchi-dialog {
+  color: #21481f;
+  border-color: #3f6d36 !important;
+  background-color: rgba(226, 240, 213, .96) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5), 0 5px 0 rgba(38, 78, 31, .18);
+}
+
+:root[data-theme="swiat-brikersa"] .chat-header,
+:root[data-theme="swiat-brikersa"] .section-nav,
+:root[data-theme="swiat-brikersa"] .filters,
+:root[data-theme="swiat-brikersa"] .app-bottom-taskbar {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.12) 0 7px, rgba(31,72,27,.07) 7px 14px),
+    #72985b !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message,
+:root[data-theme="swiat-brikersa"] .setting-row,
+:root[data-theme="swiat-brikersa"] .setting-choice,
+:root[data-theme="swiat-brikersa"] .shop-item,
+:root[data-theme="swiat-brikersa"] .achievement-card,
+:root[data-theme="swiat-brikersa"] .about-content,
+:root[data-theme="swiat-brikersa"] .archive-row,
+:root[data-theme="swiat-brikersa"] .creator-grid-frame,
+:root[data-theme="swiat-brikersa"] .viewers-grid-frame {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: rgba(239, 247, 229, .86) !important;
+}
+
+:root[data-theme="swiat-brikersa"] .title,
+:root[data-theme="swiat-brikersa"] h1,
+:root[data-theme="swiat-brikersa"] h2,
+:root[data-theme="swiat-brikersa"] h3,
+:root[data-theme="swiat-brikersa"] strong,
+:root[data-theme="swiat-brikersa"] .message-author,
+:root[data-theme="swiat-brikersa"] .achievement-title {
+  color: #183d18 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .tagline,
+:root[data-theme="swiat-brikersa"] .page-note,
+:root[data-theme="swiat-brikersa"] small,
+:root[data-theme="swiat-brikersa"] .message-time,
+:root[data-theme="swiat-brikersa"] .achievement-description {
+  color: #55734d !important;
+}
+
+:root[data-theme="swiat-brikersa"] button,
+:root[data-theme="swiat-brikersa"] .sidebar-button,
+:root[data-theme="swiat-brikersa"] .filter-button,
+:root[data-theme="swiat-brikersa"] .settings-tab,
+:root[data-theme="swiat-brikersa"] .page-action,
+:root[data-theme="swiat-brikersa"] input,
+:root[data-theme="swiat-brikersa"] select,
+:root[data-theme="swiat-brikersa"] textarea {
+  color: #21481f !important;
+  border-color: #47753e !important;
+  background-color: #d7e8c9 !important;
+}
+
+:root[data-theme="swiat-brikersa"] button:hover,
+:root[data-theme="swiat-brikersa"] .sidebar-button:hover,
+:root[data-theme="swiat-brikersa"] .filter-button:hover,
+:root[data-theme="swiat-brikersa"] .settings-tab:hover,
+:root[data-theme="swiat-brikersa"] .page-action:hover,
+:root[data-theme="swiat-brikersa"] [data-active="true"] {
+  color: #f3f8e9 !important;
+  background-color: #426f38 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .achievement-reward {
+  color: #315f27 !important;
+}
+
+:root[data-theme="swiat-brikersa"] * {
+  scrollbar-color: #537f45 #dcebcf;
+}
+:root[data-theme="swiat-brikersa"] *::-webkit-scrollbar-track { background: #dcebcf; }
+:root[data-theme="swiat-brikersa"] *::-webkit-scrollbar-thumb {
+  background: #537f45;
+  border: 2px solid #dcebcf;
+}
+
+/* Końcowa blokada palety. Jest celowo na końcu arkusza: stare motywy, role
+   użytkowników i wariant Ozdobny mają własne !important i nie mogą przeciekać. */
+:root[data-theme="swiat-brikersa"] .widget-dialog,
+:root[data-theme="swiat-brikersa"] .widget-dialog-header,
+:root[data-theme="swiat-brikersa"] .widget-dialog-content,
+:root[data-theme="swiat-brikersa"] .settings-panel,
+:root[data-theme="swiat-brikersa"] .setting-section,
+:root[data-theme="swiat-brikersa"] .settings-list,
+:root[data-theme="swiat-brikersa"] .choice-list,
+:root[data-theme="swiat-brikersa"] .shop-items,
+:root[data-theme="swiat-brikersa"] .radio-station,
+:root[data-theme="swiat-brikersa"] .czester-panel,
+:root[data-theme="swiat-brikersa"] .right-widget-panel,
+:root[data-theme="swiat-brikersa"] .creator-launcher-panel-content {
+  color: #21481f !important;
+  border-color: #416e38 !important;
+  background: #e4f0d7 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .settings-panel .setting-choice,
+:root[data-theme="swiat-brikersa"] .settings-panel .setting-row,
+:root[data-theme="swiat-brikersa"] .settings-panel .setting-section {
+  color: #21481f !important;
+  border-color: #82a873 !important;
+  background: transparent !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message,
+:root[data-theme="swiat-brikersa"][data-chat-style="compact"] .message,
+:root[data-theme="swiat-brikersa"][data-chat-style="spacious"] .message,
+:root[data-theme="swiat-brikersa"][data-chat-style="testowy"] .message {
+  color: #21481f !important;
+  border-color: #85a978 !important;
+  background: rgba(239, 247, 229, .92) !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message-body,
+:root[data-theme="swiat-brikersa"] .message-text,
+:root[data-theme="swiat-brikersa"] .message-content,
+:root[data-theme="swiat-brikersa"] .message-event,
+:root[data-theme="swiat-brikersa"] .message-inline-time,
+:root[data-theme="swiat-brikersa"] .message-time {
+  color: #315a2d !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message-author,
+:root[data-theme="swiat-brikersa"] .message-super-fan .message-author {
+  color: #315f2d !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message-moderator .message-author,
+:root[data-theme="swiat-brikersa"] .message-moderator.message-super-fan .message-author {
+  color: #173f1b !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message-role-badge[data-role="moderator"] {
+  color: #173f1b !important;
+  border-color: #315f2d !important;
+  background: #c9dfb9 !important;
+  box-shadow: none !important;
+}
+:root[data-theme="swiat-brikersa"] .message-role-badge[data-role="superfan"] {
+  color: #527a35 !important;
+  border-color: #6d934d !important;
+  background: #e0edc9 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .message-avatar,
+:root[data-theme="swiat-brikersa"] .creator-avatar,
+:root[data-theme="swiat-brikersa"] .viewer-avatar,
+:root[data-theme="swiat-brikersa"] .recent-creator-avatar {
+  border-color: #527f43 !important;
+  box-shadow: 0 0 0 2px rgba(228, 240, 215, .86) !important;
+}
+
+:root[data-theme="swiat-brikersa"] .section-nav .sidebar-button,
+:root[data-theme="swiat-brikersa"] .filter-button,
+:root[data-theme="swiat-brikersa"] .settings-tab,
+:root[data-theme="swiat-brikersa"][data-app-appearance] .section-nav .sidebar-button,
+:root[data-theme="swiat-brikersa"][data-app-appearance] .filter-button,
+:root[data-theme="swiat-brikersa"][data-app-appearance] .settings-tab {
+  color: #315a2d !important;
+  border-color: #527f43 !important;
+  background: #dcebcf !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .section-nav .sidebar-button[data-active="true"],
+:root[data-theme="swiat-brikersa"] .filter-button[data-active="true"],
+:root[data-theme="swiat-brikersa"] .settings-tab[data-active="true"],
+:root[data-theme="swiat-brikersa"][data-app-appearance] .section-nav .sidebar-button[data-active="true"],
+:root[data-theme="swiat-brikersa"][data-app-appearance] .filter-button[data-active="true"],
+:root[data-theme="swiat-brikersa"][data-app-appearance] .settings-tab[data-active="true"] {
+  color: #f3f8e9 !important;
+  border-color: #294f27 !important;
+  background: #416f38 !important;
+  box-shadow: inset 0 0 0 1px rgba(239, 247, 229, .18) !important;
+}
+
+:root[data-theme="swiat-brikersa"] input[type="radio"],
+:root[data-theme="swiat-brikersa"] input[type="checkbox"] {
+  accent-color: #416f38 !important;
+}
+
+:root[data-theme="swiat-brikersa"] input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  padding: 0 !important;
+  border: 2px solid #416f38 !important;
+  border-radius: 50%;
+  background: #eff7e5 !important;
+  box-shadow: inset 0 0 0 3px #eff7e5 !important;
+}
+:root[data-theme="swiat-brikersa"] input[type="radio"]:checked {
+  background: #416f38 !important;
+}
+:root[data-theme="swiat-brikersa"] input::placeholder,
+:root[data-theme="swiat-brikersa"] textarea::placeholder {
+  color: #6b8763 !important;
+  opacity: 1;
+}
+
+:root[data-theme="swiat-brikersa"] ::selection {
+  color: #f3f8e9;
+  background: #416f38;
+}
+
+:root[data-theme="swiat-brikersa"] .status[data-state="offline"],
+:root[data-theme="swiat-brikersa"] .status[data-state="online"] {
+  color: #315a2d !important;
+}
+
+/* Karty osób nie są kafelkami. Globalna paleta przycisków nie może tworzyć
+   prostokątnych pól pod twórcami ani widzami. Stan aktywny pozostaje widoczny
+   wyłącznie na okrągłym awatarze i znaczniku ulubionych. */
+:root[data-theme="swiat-brikersa"] .recent-creator-card,
+:root[data-theme="swiat-brikersa"] .recent-creator-card:hover,
+:root[data-theme="swiat-brikersa"] .recent-creator-card:focus-visible,
+:root[data-theme="swiat-brikersa"] .recent-creator-card[data-active="true"],
+:root[data-theme="swiat-brikersa"] .recent-creator-card[data-status="online"],
+:root[data-theme="swiat-brikersa"] .viewer-card,
+:root[data-theme="swiat-brikersa"] .viewer-card:hover,
+:root[data-theme="swiat-brikersa"] .viewer-card:focus-visible {
+  color: #315a2d !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .recent-creator-card:hover .recent-creator-avatar,
+:root[data-theme="swiat-brikersa"] .recent-creator-card:focus-visible .recent-creator-avatar,
+:root[data-theme="swiat-brikersa"] .recent-creator-card[data-active="true"] .recent-creator-avatar {
+  border-color: #315f2d !important;
+  box-shadow: 0 0 0 3px rgba(65, 111, 56, .2) !important;
+}
+
+:root[data-theme="swiat-brikersa"] .recent-creator-name {
+  color: #315a2d !important;
+  background: transparent !important;
+}
+
+/* Świat Brikersa — kompletna paleta Notatek i Archiwum. Bazowe widoki mają
+   ciemne powierzchnie wpisane na sztywno, dlatego każda warstwa otrzymuje tu
+   jawny odpowiednik z zielonej palety gry. */
+:root[data-theme="swiat-brikersa"] .archive-view,
+:root[data-theme="swiat-brikersa"] .notes-view,
+:root[data-theme="swiat-brikersa"] #notesDialog,
+:root[data-theme="swiat-brikersa"] .archive-workspace,
+:root[data-theme="swiat-brikersa"] .notes-workspace {
+  color: #21481f !important;
+  background: #e4f0d7 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-toolbar,
+:root[data-theme="swiat-brikersa"] .archive-session-header,
+:root[data-theme="swiat-brikersa"] .archive-filters,
+:root[data-theme="swiat-brikersa"] #notesDialog .notes-actions-toolbar {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .12) 0 7px, rgba(49, 95, 45, .06) 7px 14px),
+    #cfe3bf !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-browser,
+:root[data-theme="swiat-brikersa"] #notesDialog .archive-browser {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: #dcebcf !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-detail,
+:root[data-theme="swiat-brikersa"] .archive-session,
+:root[data-theme="swiat-brikersa"] .archive-messages,
+:root[data-theme="swiat-brikersa"] #notesDialog .notes-detail {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: #e4f0d7 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-summary {
+  border-color: #789d66 !important;
+  background: #dcebcf !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-summary article,
+:root[data-theme="swiat-brikersa"] .archive-row,
+:root[data-theme="swiat-brikersa"] #notesDialog .archive-row {
+  color: #21481f !important;
+  border-color: #9ab88a !important;
+  background: #d2e3c6 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-row:hover,
+:root[data-theme="swiat-brikersa"] #notesDialog .archive-row:hover {
+  color: #173b18 !important;
+  border-color: #527f43 !important;
+  background: #c2d9b3 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-row[data-active="true"],
+:root[data-theme="swiat-brikersa"] #notesDialog .archive-row[data-active="true"] {
+  color: #f3f8e9 !important;
+  border-color: #294f27 !important;
+  background: #416f38 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-row[data-active="true"] .archive-name,
+:root[data-theme="swiat-brikersa"] .archive-row[data-active="true"] .archive-meta,
+:root[data-theme="swiat-brikersa"] .archive-row[data-active="true"] time,
+:root[data-theme="swiat-brikersa"] .archive-row[data-active="true"] .archive-count {
+  color: #f3f8e9 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-title,
+:root[data-theme="swiat-brikersa"] .archive-name,
+:root[data-theme="swiat-brikersa"] .archive-detail-empty strong,
+:root[data-theme="swiat-brikersa"] .archive-session-heading h1 {
+  color: #173b18 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-status,
+:root[data-theme="swiat-brikersa"] .archive-meta,
+:root[data-theme="swiat-brikersa"] .archive-row time,
+:root[data-theme="swiat-brikersa"] .archive-count,
+:root[data-theme="swiat-brikersa"] .archive-empty,
+:root[data-theme="swiat-brikersa"] .archive-detail-empty,
+:root[data-theme="swiat-brikersa"] .archive-session-heading p,
+:root[data-theme="swiat-brikersa"] .archive-summary small,
+:root[data-theme="swiat-brikersa"] .archive-filter-empty,
+:root[data-theme="swiat-brikersa"] .note-meta {
+  color: #55734d !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-row-icon,
+:root[data-theme="swiat-brikersa"] .archive-session-avatar,
+:root[data-theme="swiat-brikersa"] .archive-detail-empty-icon,
+:root[data-theme="swiat-brikersa"] .archive-summary article > .ui-icon {
+  color: #315f2d !important;
+  border-color: #789d66 !important;
+  background: #c2d9b3 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] #notesDialog .note-title-input,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-content-input,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-preview {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: #edf6e3 !important;
+  color-scheme: light !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] #notesDialog .note-format-toolbar {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: #c7daba !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] #notesDialog .note-format-button {
+  color: #21481f !important;
+  border-color: #789d66 !important;
+  background: #e4f0d7 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] #notesDialog .note-format-button:hover,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-format-button:focus-visible,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-format-button[data-active="true"] {
+  color: #f3f8e9 !important;
+  border-color: #294f27 !important;
+  background: #416f38 !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-search {
+  color: #55734d !important;
+  border-color: #789d66 !important;
+  background: #edf6e3 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-search:focus-within,
+:root[data-theme="swiat-brikersa"] .note-title-input:focus,
+:root[data-theme="swiat-brikersa"] .note-content-input:focus {
+  border-color: #315f2d !important;
+  box-shadow: 0 0 0 2px rgba(65, 111, 56, .16) !important;
+}
+
+:root[data-theme="swiat-brikersa"] .archive-list,
+:root[data-theme="swiat-brikersa"] .archive-messages,
+:root[data-theme="swiat-brikersa"] #notesDialog .notes-detail,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-content-input,
+:root[data-theme="swiat-brikersa"] #notesDialog .note-preview {
+  scrollbar-color: #537f45 #dcebcf !important;
 }

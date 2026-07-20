@@ -17,11 +17,13 @@ const REDEEMED_FEATURES_KEY = 'czatbox.redeemed.features';
 const COINS_REFERRAL_CODE = 'ZD3TKFBV';
 const COINS_REFERRAL_URL = 'https://www.tiktok.com/coin?rc=ZD3TKFBV';
 const COINS_PROMO_INTERVAL_MS = 30 * 60 * 1000;
-const DEFAULT_CHAT_DELAY_MS = 1800;
+const DEFAULT_CHAT_DELAY_MS = 500;
 const CHAT_DELAY_OPTIONS = [500, 800, 1000, 1500, 1800, 2200, 2800];
+const CHAT_DELAY_DEFAULT_MIGRATION_KEY = 'czatbox.chat.delay.default.500.v1';
 const CHAT_STYLES = ['compact', 'spacious', 'testowy'];
-const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'dzika-galaktyka'];
+const APP_THEMES = ['rose-black', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'dzika-galaktyka', 'swiat-brikersa'];
 const WILD_GALAXY_STORE_CODE = 'STORE_WILD_GALAXY';
+const RADIO_ACHIEVEMENT_TARGET_MS = 20 * 60 * 1000;
 const DEV_TALARKI_CODE = 'CZTT DEV 50K 2026';
 const MAX_VISIBLE_MESSAGES = 800;
 const MAX_FAVORITE_CREATORS = 12;
@@ -99,6 +101,20 @@ const ACHIEVEMENT_DEFINITIONS = [
     titleKey: 'achievements.retroKb2.title',
     descriptionKey: 'achievements.retroKb2.description',
     talarki: 100
+  },
+  {
+    id: 'true-friend',
+    icon: '🐾',
+    titleKey: 'achievements.trueFriend.title',
+    descriptionKey: 'achievements.trueFriend.description',
+    talarki: 100
+  },
+  {
+    id: 'telegraphist',
+    icon: '📻',
+    titleKey: 'achievements.telegraphist.title',
+    descriptionKey: 'achievements.telegraphist.description',
+    talarki: 100
   }
 ];
 const UI_ICONS = {
@@ -175,7 +191,9 @@ const TTS_LANGUAGE_PREFIXES = {
   de: /^de\b/i,
   hu: /^hu\b/i
 };
-const MAX_SPEECH_QUEUE = 8;
+// Keep TTS close to the live chat. A long backlog made Piper read messages
+// that were already several lines behind during active transmissions.
+const MAX_SPEECH_QUEUE = 2;
 const VULGAR_SPEECH_PATTERNS = [
   /\b(?:kurw\w*|chuj\w*|huj\w*|jeb\w*|pierd\w*|wypierd\w*|spierd\w*|skurw\w*|zjeb\w*)\b/u,
   /\b(?:cwel\w*|kutas\w*|cip\w*|dziwk\w*)\b/u
@@ -1562,6 +1580,18 @@ I18N.pl['settings.theme.dzikaGalaktyka.name'] = 'Dzika galaktyka'; I18N.pl['sett
 I18N.en['settings.theme.dzikaGalaktyka.name'] = 'Wild Galaxy'; I18N.en['settings.theme.dzikaGalaktyka.description'] = 'Galaxy tones, nebula effects and Frutiger Aero aesthetics.';
 I18N.de['settings.theme.dzikaGalaktyka.name'] = 'Wilde Galaxie'; I18N.de['settings.theme.dzikaGalaktyka.description'] = 'Galaktische Farben, Nebeleffekte und Frutiger-Aero-Ästhetik.';
 I18N.hu['settings.theme.dzikaGalaktyka.name'] = 'Vad galaxis'; I18N.hu['settings.theme.dzikaGalaktyka.description'] = 'Galaktikus árnyalatok, ködhatások és Frutiger Aero esztétika.';
+I18N.pl['settings.theme.swiatBrikersa.name'] = 'Świat Brikersa'; I18N.pl['settings.theme.swiatBrikersa.description'] = 'Pikselowy, zielony motyw inspirowany światem gry Brikers.';
+I18N.en['settings.theme.swiatBrikersa.name'] = "Brikers' World"; I18N.en['settings.theme.swiatBrikersa.description'] = 'A pixel-art green theme inspired by the Brikers game world.';
+I18N.de['settings.theme.swiatBrikersa.name'] = 'Brikers Welt'; I18N.de['settings.theme.swiatBrikersa.description'] = 'Ein grünes Pixelmotiv, inspiriert von der Spielwelt von Brikers.';
+I18N.hu['settings.theme.swiatBrikersa.name'] = 'Brikers világa'; I18N.hu['settings.theme.swiatBrikersa.description'] = 'A Brikers játék világából ihletett zöld pixelgrafikus téma.';
+I18N.pl['achievements.trueFriend.title'] = 'Prawdziwy przyjaciel'; I18N.pl['achievements.trueFriend.description'] = 'Kup grę Tamagotchi z Brikersem.';
+I18N.pl['achievements.telegraphist.title'] = 'Telegrafista'; I18N.pl['achievements.telegraphist.description'] = 'Włącz radio i słuchaj go przez 20 minut.';
+I18N.en['achievements.trueFriend.title'] = 'True Friend'; I18N.en['achievements.trueFriend.description'] = 'Buy the Brikers Tamagotchi game.';
+I18N.en['achievements.telegraphist.title'] = 'Telegraphist'; I18N.en['achievements.telegraphist.description'] = 'Turn on the radio and listen for 20 minutes.';
+I18N.de['achievements.trueFriend.title'] = 'Wahrer Freund'; I18N.de['achievements.trueFriend.description'] = 'Kaufe das Tamagotchi-Spiel mit Brikers.';
+I18N.de['achievements.telegraphist.title'] = 'Telegrafist'; I18N.de['achievements.telegraphist.description'] = 'Schalte das Radio ein und höre 20 Minuten lang zu.';
+I18N.hu['achievements.trueFriend.title'] = 'Igazi barát'; I18N.hu['achievements.trueFriend.description'] = 'Vásárold meg a Brikers Tamagotchi játékot.';
+I18N.hu['achievements.telegraphist.title'] = 'Távírász'; I18N.hu['achievements.telegraphist.description'] = 'Kapcsold be a rádiót, és hallgasd 20 percig.';
 I18N.pl['about.news.025.creators'] = 'Od teraz zapamiętani twórcy i łączenie się są w dolnym pasku launchera.';
 I18N.pl['about.news.025.bigPicture'] = 'Poprawiono Big Picture — krawędzie ramek nie wyglądają już jak poszarpane.';
 I18N.pl['about.news.025.hungarian'] = 'Dodano język węgierski.';
@@ -1675,6 +1705,62 @@ Object.assign(I18N.hu, {
   'about.news.026.next': 'Ez egy titokzatos titok!'
 });
 
+Object.assign(I18N.pl, {
+  'about.news.027.intro': 'Ta aktualizacja skupia się na usprawnieniu działania programu, rozbudowie Brikersa oraz poprawieniu wyglądu aplikacji. Dodaliśmy także nowy motyw, osiągnięcia i udoskonalenia TTS.',
+  'about.news.027.theme': 'Dodano motyw „Świat Brikersa”.',
+  'about.news.027.brickers': 'Rozbudowano grę Brikers i poprawiono działanie jego potrzeb.',
+  'about.news.027.achievements': 'Dodano nowe osiągnięcia oraz nagrody w Talarkach.',
+  'about.news.027.ttsSpeed': 'Przyspieszono działanie wbudowanych głosów TTS.',
+  'about.news.027.ttsVolume': 'Zwiększono maksymalną głośność czytania wiadomości.',
+  'about.news.027.chatDelay': 'Zmniejszono opóźnienie wyświetlania czatu.',
+  'about.news.027.windows': 'Poprawiono wygląd Notatek, Archiwum i pozostałych okien.',
+  'about.news.027.background': 'Poprawiono działanie programu po zminimalizowaniu.',
+  'about.news.027.fixes': 'Wprowadzono liczne poprawki wizualne i techniczne.',
+  'about.news.027.next': 'To tajemnicza tajemnica!'
+});
+
+Object.assign(I18N.en, {
+  'about.news.027.intro': 'This update focuses on improving performance, expanding Brikers and polishing the application interface. It also adds a new theme, achievements and TTS improvements.',
+  'about.news.027.theme': 'Added the Brikers World theme.',
+  'about.news.027.brickers': 'Expanded the Brikers game and improved its needs system.',
+  'about.news.027.achievements': 'Added new achievements and Talarki rewards.',
+  'about.news.027.ttsSpeed': 'Improved the response time of the built-in TTS voices.',
+  'about.news.027.ttsVolume': 'Increased the maximum message-reading volume.',
+  'about.news.027.chatDelay': 'Reduced the chat display delay.',
+  'about.news.027.windows': 'Improved the appearance of Notes, Archive and other windows.',
+  'about.news.027.background': 'Improved application behavior when minimized.',
+  'about.news.027.fixes': 'Added numerous visual and technical fixes.',
+  'about.news.027.next': 'That is a mysterious mystery!'
+});
+
+Object.assign(I18N.de, {
+  'about.news.027.intro': 'Dieses Update verbessert die Leistung, erweitert Brikers und verfeinert die Oberfläche. Außerdem kommen ein neues Theme, Erfolge und TTS-Verbesserungen hinzu.',
+  'about.news.027.theme': 'Das Theme „Brikers Welt“ wurde hinzugefügt.',
+  'about.news.027.brickers': 'Das Brikers-Spiel und sein Bedürfnissystem wurden erweitert.',
+  'about.news.027.achievements': 'Neue Erfolge und Talarki-Belohnungen wurden hinzugefügt.',
+  'about.news.027.ttsSpeed': 'Die Reaktionszeit der integrierten TTS-Stimmen wurde verbessert.',
+  'about.news.027.ttsVolume': 'Die maximale Lautstärke beim Vorlesen wurde erhöht.',
+  'about.news.027.chatDelay': 'Die Verzögerung der Chat-Anzeige wurde verringert.',
+  'about.news.027.windows': 'Das Aussehen von Notizen, Archiv und weiteren Fenstern wurde verbessert.',
+  'about.news.027.background': 'Das Verhalten der Anwendung im minimierten Zustand wurde verbessert.',
+  'about.news.027.fixes': 'Zahlreiche visuelle und technische Korrekturen wurden vorgenommen.',
+  'about.news.027.next': 'Das bleibt ein geheimnisvolles Geheimnis!'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.027.intro': 'Ez a frissítés a program működésének javítására, a Brikers bővítésére és a felület finomítására összpontosít. Új témát, teljesítményeket és TTS-fejlesztéseket is tartalmaz.',
+  'about.news.027.theme': 'Megérkezett a Brikers világa téma.',
+  'about.news.027.brickers': 'Bővült a Brikers játék, és javult a szükségletek működése.',
+  'about.news.027.achievements': 'Új teljesítmények és Talarki-jutalmak kerültek a programba.',
+  'about.news.027.ttsSpeed': 'Gyorsabban reagálnak a beépített TTS-hangok.',
+  'about.news.027.ttsVolume': 'Nőtt az üzenetfelolvasás maximális hangereje.',
+  'about.news.027.chatDelay': 'Csökkent a csevegés megjelenítési késleltetése.',
+  'about.news.027.windows': 'Javult a Jegyzetek, az Archívum és a többi ablak megjelenése.',
+  'about.news.027.background': 'Javult a program működése minimalizált állapotban.',
+  'about.news.027.fixes': 'Számos vizuális és technikai javítás készült.',
+  'about.news.027.next': 'Ez egy titokzatos titok!'
+});
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -1755,6 +1841,7 @@ const shopDialogBackdropEl = document.getElementById('shopDialogBackdrop');
 const shopDialogCloseEl = document.getElementById('shopDialogClose');
 const shopMiamiPurchaseEl = document.getElementById('shopMiamiPurchase');
 const shopWildGalaxyPurchaseEl = document.getElementById('shopWildGalaxyPurchase');
+const shopBrikersWorldPurchaseEl = document.getElementById('shopBrikersWorldPurchase');
 const shopBrikersPurchaseEl = document.getElementById('shopBrikersPurchase');
 let shopPreviewTheme = '';
 const tamagotchiLauncherEl = document.getElementById('tamagotchiLauncher');
@@ -1781,7 +1868,9 @@ function tickTamagotchi() {
   if (!tamagotchi.hatched) return;
   if (cycles < 1) { if (tamagotchiDialogBackdropEl && !tamagotchiDialogBackdropEl.hidden) renderTamagotchi(); return; }
   const connected = isOnlineConnectionState(state);
-  if (tamagotchi.sleeping) { tamagotchi.energy = clampPet(tamagotchi.energy + cycles); tamagotchi.hunger = clampPet(tamagotchi.hunger - cycles); tamagotchi.fun = clampPet(tamagotchi.fun - cycles); }
+  // Pełna regeneracja energii od 0 trwa teraz maksymalnie 100 minut,
+  // zamiast wcześniejszych 200 minut.
+  if (tamagotchi.sleeping) { tamagotchi.energy = clampPet(tamagotchi.energy + (cycles * 2)); tamagotchi.hunger = clampPet(tamagotchi.hunger - cycles); tamagotchi.fun = clampPet(tamagotchi.fun - cycles); }
   if (connected && !tamagotchi.sleeping) { tamagotchi.fun = clampPet(tamagotchi.fun + cycles); tamagotchi.hunger = clampPet(tamagotchi.hunger - cycles); tamagotchi.energy = clampPet(tamagotchi.energy - cycles); tamagotchi.hygiene = clampPet(tamagotchi.hygiene - cycles); }
   const zeroNeeds = [tamagotchi.hunger, tamagotchi.fun, tamagotchi.hygiene, tamagotchi.energy].filter((value) => value <= 0).length;
   if (!tamagotchi.sleeping && zeroNeeds >= 3) tamagotchi.health = clampPet(tamagotchi.health - (2 * cycles));
@@ -1794,6 +1883,12 @@ function tickTamagotchi() {
   tamagotchi.lastTick = now; saveTamagotchi(); renderTamagotchi();
 }
 setInterval(tickTamagotchi, 60000);
+// Po przywróceniu okna natychmiast nadrób pełne 20-minutowe cykle.
+// Jest to zabezpieczenie niezależne od wyłączenia backgroundThrottling w Electronie.
+window.addEventListener('focus', tickTamagotchi);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) tickTamagotchi();
+});
 function spendPetCoins(amount) { if (talarki < amount) return false; talarki -= amount; localStorage.setItem(TALARKI_KEY, String(talarki)); updateTalarkiUi(); return true; }
 function renderTamagotchiInstructions() {
   if (!tamagotchiBodyEl) return;
@@ -1802,8 +1897,8 @@ function renderTamagotchiInstructions() {
     <div class="tamagotchi-guide-grid">
       <article><h3>Połącz się z transmisją</h3><p>Gdy Brikers nie śpi, połączenie z twórcą odnawia zabawę. Co 20 minut maleją wtedy głód, higiena i energia.</p></article>
       <article><h3>Nakarm Brikersa</h3><p>Jabłko odnawia 1 punkt głodu i kosztuje 3 Talarki. Babeczka odnawia 2 punkty i kosztuje 6 Talarków.</p></article>
-      <article><h3>Sen i energia</h3><p>Użyj Łóżka, aby Brikers zasnął. Podczas snu energia rośnie, a głód i zabawa maleją. Pozostałe przyciski są wtedy zablokowane, dopóki go nie obudzisz.</p></article>
-      <article><h3>Higiena i kupki</h3><p>Prysznic odnawia higienę do pełna. Kupkę sprzątasz, klikając ją bezpośrednio na planszy. Za każdą posprzątaną kupkę dostajesz 1 Talarek.</p></article>
+      <article><h3>Sen i energia</h3><p>Użyj Łóżka, aby Brikers zasnął. Podczas snu energia rośnie o 2 punkty co 20 minut, a głód i zabawa maleją. Pozostałe przyciski są wtedy zablokowane, dopóki go nie obudzisz.</p></article>
+      <article><h3>Higiena i kupki</h3><p>Prysznic kosztuje 50 Talarków i odnawia higienę do pełna. Kupkę sprzątasz, klikając ją bezpośrednio na planszy. Za każdą posprzątaną kupkę dostajesz 1 Talarek.</p></article>
       <article><h3>Zdrowie</h3><p>Brak opieki i spam wykryty na czacie mogą obniżać zdrowie. Strzykawka odnawia je do pełna i kosztuje 100 Talarków.</p></article>
       <article><h3>Zapisywanie gry</h3><p>Stan Brikersa zapisuje się automatycznie na komputerze. Potrzeby nie spadają, gdy program jest wyłączony.</p></article>
     </div>
@@ -1829,13 +1924,26 @@ function renderTamagotchi() {
   stage?.prepend(meters);
   if (stage && tamagotchi.poop > 0) { const poop = document.createElement('div'); poop.className = 'tamagotchi-poops'; poop.innerHTML = Array.from({ length: tamagotchi.poop }, () => '<button type="button" data-pet-action="clean" title="Sprzątnij kupkę i odbierz 1 Talarek"><img src="assets/pet-poop.png?v=1" alt="Kupka" /></button>').join(''); stage.append(poop); }
   const actionBar = document.createElement('div'); actionBar.className = 'tamagotchi-action-bar';
-  actionBar.innerHTML = `<button data-pet-action="apple" title="Jabłko — 3 Talarki"><span data-ui-icon="apple"></span><span>Jabłko · 3</span><span data-ui-icon="coin"></span></button><button data-pet-action="cake" title="Babeczka — 6 Talarków"><span data-ui-icon="cake"></span><span>Babeczka · 6</span><span data-ui-icon="coin"></span></button><button data-pet-action="heal" title="Strzykawka — 100 Talarków"><span data-ui-icon="syringe"></span><span>Strzykawka · 100</span><span data-ui-icon="coin"></span></button><button data-pet-action="shower" title="Prysznic — odnawia higienę"><span data-ui-icon="shower"></span><span>Prysznic</span></button><button data-pet-action="sleep" title="${tamagotchi.sleeping ? 'Obudź Brikersa' : 'Energia rośnie, a zabawa spada podczas snu'}"><span data-ui-icon="bed"></span><span>${tamagotchi.sleeping ? 'Obudź' : 'Łóżko'}</span></button><button class="tamagotchi-instructions-button" data-pet-action="instructions" title="Otwórz instrukcję gry"><span data-ui-icon="questions"></span><span>Instrukcja</span></button>`;
-  tamagotchiBodyEl.append(actionBar);
+  actionBar.innerHTML = `<button data-pet-action="apple" title="Jabłko — 3 Talarki"><span data-ui-icon="apple"></span><span>Jabłko · 3</span><span data-ui-icon="coin"></span></button><button data-pet-action="cake" title="Babeczka — 6 Talarków"><span data-ui-icon="cake"></span><span>Babeczka · 6</span><span data-ui-icon="coin"></span></button><button data-pet-action="heal" title="Strzykawka — 100 Talarków"><span data-ui-icon="syringe"></span><span>Strzykawka · 100</span><span data-ui-icon="coin"></span></button><button data-pet-action="shower" title="Prysznic — 50 Talarków, odnawia higienę"><span data-ui-icon="shower"></span><span>Prysznic · 50</span><span data-ui-icon="coin"></span></button><button data-pet-action="sleep" title="${tamagotchi.sleeping ? 'Obudź Brikersa' : 'Energia rośnie o 2 punkty co 20 minut snu'}"><span data-ui-icon="bed"></span><span>${tamagotchi.sleeping ? 'Obudź' : 'Łóżko'}</span></button><button class="tamagotchi-instructions-button" data-pet-action="instructions" title="Otwórz instrukcję gry"><span data-ui-icon="questions"></span><span>Instrukcja</span></button>`;
+  stage?.append(actionBar);
   hydrateUiIcons(actionBar);
   const playButton = actionBar.querySelector('[data-pet-action="play"]');
   const playCooldownLeft = Math.max(0, TAMAGOTCHI_PLAY_COOLDOWN_MS - (Date.now() - Number(tamagotchi.lastPlayAt || 0)));
   if (playButton) { playButton.disabled = tamagotchi.sleeping || tamagotchi.fun >= 10 || tamagotchi.energy <= 0 || playCooldownLeft > 0; playButton.title = tamagotchi.sleeping ? 'Brikers śpi' : tamagotchi.energy <= 0 ? 'Brikers nie ma energii — najpierw połóż go spać' : tamagotchi.fun >= 10 ? 'Zabawa jest już pełna' : playCooldownLeft > 0 ? `Następna zabawa za ${Math.ceil(playCooldownLeft / 60000)} min` : 'Dodaje 1 punkt zabawy i zmniejsza Głód, Higienę oraz Energię o 1'; }
   tamagotchiBodyEl.querySelectorAll('[data-pet-action]').forEach((button) => { if (tamagotchi.sleeping && !['sleep', 'instructions'].includes(button.dataset.petAction)) { button.disabled = true; button.title = 'Brikers śpi — najpierw go obudź'; } });
+  const paidActions = {
+    apple: { cost: 3, full: tamagotchi.hunger >= 10 },
+    cake: { cost: 6, full: tamagotchi.hunger >= 10 },
+    heal: { cost: 100, full: tamagotchi.health >= 10 },
+    shower: { cost: 50, full: tamagotchi.hygiene >= 10 }
+  };
+  Object.entries(paidActions).forEach(([action, details]) => {
+    const button = actionBar.querySelector(`[data-pet-action="${action}"]`);
+    if (!button || tamagotchi.sleeping) return;
+    button.disabled = details.full || talarki < details.cost;
+    if (details.full) button.title = 'Ta potrzeba jest już pełna';
+    else if (talarki < details.cost) button.title = `Potrzebujesz ${details.cost} Talarków`;
+  });
   tamagotchiBodyEl.querySelectorAll('[data-pet-action]').forEach((button) => button.addEventListener('click', () => {
     const action = button.dataset.petAction;
     if (action === 'instructions') { tamagotchiInstructionsOpen = true; renderTamagotchi(); return; }
@@ -1844,7 +1952,7 @@ function renderTamagotchi() {
     if (action === 'cake' && spendPetCoins(6)) tamagotchi.hunger = clampPet(tamagotchi.hunger + 2);
     if (action === 'play' && !tamagotchi.sleeping && tamagotchi.fun < 10 && tamagotchi.energy > 0 && Date.now() - Number(tamagotchi.lastPlayAt || 0) >= TAMAGOTCHI_PLAY_COOLDOWN_MS) { tamagotchi.fun = clampPet(tamagotchi.fun + 1); tamagotchi.energy = clampPet(tamagotchi.energy - 1); tamagotchi.hunger = clampPet(tamagotchi.hunger - 1); tamagotchi.hygiene = clampPet(tamagotchi.hygiene - 1); tamagotchi.lastPlayAt = Date.now(); }
     if (action === 'clean' && tamagotchi.poop > 0) { tamagotchi.poop -= 1; tamagotchi.hygiene = clampPet(tamagotchi.hygiene + 1); talarki = Math.min(100000, talarki + 1); localStorage.setItem(TALARKI_KEY, String(talarki)); updateTalarkiUi(); }
-    if (action === 'shower') tamagotchi.hygiene = 10;
+    if (action === 'shower' && tamagotchi.hygiene < 10 && spendPetCoins(50)) tamagotchi.hygiene = 10;
     if (action === 'heal' && spendPetCoins(100)) tamagotchi.health = 10;
     if (action === 'sleep') { tamagotchi.sleeping = !tamagotchi.sleeping; tamagotchi.lastTick = Date.now(); }
     saveTamagotchi(); renderTamagotchi();
@@ -1881,6 +1989,11 @@ function updateTalarkiUi() {
     shopWildGalaxyPurchaseEl.disabled = unlocked || talarki < 1000;
     shopWildGalaxyPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
   }
+  if (shopBrikersWorldPurchaseEl) {
+    const unlocked = isAppThemeUnlocked('swiat-brikersa');
+    shopBrikersWorldPurchaseEl.disabled = unlocked || talarki < 1000;
+    shopBrikersWorldPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
+  }
   if (shopBrikersPurchaseEl) {
     const unlocked = isBrikersGameUnlocked();
     shopBrikersPurchaseEl.disabled = unlocked || talarki < 1500;
@@ -1914,12 +2027,22 @@ shopWildGalaxyPurchaseEl?.addEventListener('click', () => {
   syncLockedThemeChoice('themeDzikaGalaktyka', true);
   updateTalarkiUi();
 });
+shopBrikersWorldPurchaseEl?.addEventListener('click', () => {
+  if (isAppThemeUnlocked('swiat-brikersa') || talarki < 1000) return;
+  talarki -= 1000;
+  localStorage.setItem(TALARKI_KEY, String(talarki));
+  redeemedFeatures.brickersWorldTheme = true;
+  saveRedeemedFeatures();
+  syncLockedThemeChoice('themeSwiatBrikersa', true);
+  updateTalarkiUi();
+});
 shopBrikersPurchaseEl?.addEventListener('click', () => {
   if (isBrikersGameUnlocked() || talarki < 1500) return;
   talarki -= 1500;
   localStorage.setItem(TALARKI_KEY, String(talarki));
   redeemedFeatures.brickersGame = true;
   saveRedeemedFeatures();
+  unlockAchievement('true-friend');
   updateTalarkiUi();
 });
 document.querySelectorAll('[data-theme-preview]').forEach((button) => button.addEventListener('click', () => {
@@ -2040,6 +2163,27 @@ const updateProgressBarEl = document.getElementById('updateProgressBar');
 const updateProgressPercentEl = document.getElementById('updateProgressPercent');
 let activeRadioAudio = null;
 let radioFloatingOpen = false;
+let radioListeningStartedAt = 0;
+
+function flushRadioAchievementProgress(force = false) {
+  if (!radioListeningStartedAt || !activeRadioAudio) return;
+  const isPlaying = !activeRadioAudio.paused && !activeRadioAudio.ended;
+  if (!force && !isPlaying) return;
+  const now = Date.now();
+  const elapsed = Math.max(0, now - radioListeningStartedAt);
+  achievementsState.radioListeningMs = Math.min(
+    RADIO_ACHIEVEMENT_TARGET_MS,
+    Math.max(0, Number(achievementsState.radioListeningMs) || 0) + elapsed
+  );
+  radioListeningStartedAt = isPlaying ? now : 0;
+  saveAchievementsState();
+  if (achievementsState.radioListeningMs >= RADIO_ACHIEVEMENT_TARGET_MS) {
+    unlockAchievement('telegraphist');
+  }
+}
+
+setInterval(() => flushRadioAchievementProgress(false), 5000);
+window.addEventListener('beforeunload', () => flushRadioAchievementProgress(true));
 
 function getUpdateUiText(key, version = '') {
   const language = appLanguage || 'pl';
@@ -2256,7 +2400,9 @@ function initRadioPlayers() {
     if (audio.dataset.radioPlayBound !== 'true') {
       audio.dataset.radioPlayBound = 'true';
       audio.addEventListener('play', () => {
+        flushRadioAchievementProgress(false);
         activeRadioAudio = audio;
+        radioListeningStartedAt = Date.now();
         if (radioFloatingNameEl) {
           radioFloatingNameEl.textContent = audio.dataset.radioName || 'Radio';
         }
@@ -2280,6 +2426,8 @@ function initRadioPlayers() {
         if (activeRadioAudio !== audio) {
           return;
         }
+        flushRadioAchievementProgress(true);
+        radioListeningStartedAt = 0;
         if (radioFloatingStatusEl) {
           radioFloatingStatusEl.textContent = 'Wstrzymano';
         }
@@ -2293,6 +2441,7 @@ function initRadioPlayers() {
 }
 
 function stopRadioPlayers() {
+  flushRadioAchievementProgress(true);
   radioAudioElements.forEach((audio) => {
     audio.pause();
     const hls = radioHlsInstances.get(audio);
@@ -2305,6 +2454,7 @@ function stopRadioPlayers() {
     audio.dataset.radioInitialized = 'false';
   });
   activeRadioAudio = null;
+  radioListeningStartedAt = 0;
   radioFloatingOpen = false;
   updateRadioFloatingVisibility();
 }
@@ -2402,6 +2552,7 @@ const firstRunLanguageEl = document.getElementById('firstRunLanguage');
 const firstRunLanguageButtons = Array.from(document.querySelectorAll('[data-first-language]'));
 
 const queue = [];
+const queuedMessageRevealAt = new WeakMap();
 const visibleMessages = [];
 const userAvatars = new Map();
 const liveViewerAvatars = new Map();
@@ -2457,6 +2608,9 @@ let speechVoices = [];
 let ttsSettings = loadTtsSettings();
 let chatDelayMs = loadChatDelayMs();
 let chatStyle = loadChatStyle();
+// Zakupy muszą zostać odczytane przed motywem. Motywy sklepowe sprawdzają
+// odblokowanie już podczas startu renderera.
+let redeemedFeatures = loadRedeemedFeatures();
 let appTheme = loadAppTheme();
 let appAppearance = loadAppAppearance();
 let generalSettings = loadGeneralSettings();
@@ -2464,7 +2618,8 @@ let systemSettings = loadSystemSettings();
 let appLanguage = systemSettings.language;
 let timeFormat = systemSettings.timeFormat;
 let speechPlaying = false;
-let revealTimer;
+let currentPiperAudio = null;
+let currentPiperAudioContext = null;
 let revealFallbackTimer;
 let syncedCreatorSuggestionsKey = '';
 let battleBannerTimer;
@@ -2515,7 +2670,6 @@ let lastSubmittedCreator = '';
 let creatorSuggestionItems = [];
 let activeCreatorSuggestionIndex = -1;
 let achievementsState = loadAchievementsState();
-let redeemedFeatures = loadRedeemedFeatures();
 updateTalarkiUi();
 let lastHondaOnlineAlertAt = 0;
 let battleScorebarState = null;
@@ -2643,12 +2797,22 @@ function getChatDelayIndex(delayMs) {
 }
 
 function loadChatDelayMs() {
-  const saved = Number(localStorage.getItem(CHAT_DELAY_SETTINGS_KEY));
+  const rawSaved = localStorage.getItem(CHAT_DELAY_SETTINGS_KEY);
+  const saved = Number(rawSaved);
+  if (rawSaved === null) {
+    return DEFAULT_CHAT_DELAY_MS;
+  }
+  if (saved === 1800 && localStorage.getItem(CHAT_DELAY_DEFAULT_MIGRATION_KEY) !== '1') {
+    localStorage.setItem(CHAT_DELAY_SETTINGS_KEY, String(DEFAULT_CHAT_DELAY_MS));
+    localStorage.setItem(CHAT_DELAY_DEFAULT_MIGRATION_KEY, '1');
+    return DEFAULT_CHAT_DELAY_MS;
+  }
   return CHAT_DELAY_OPTIONS[getChatDelayIndex(saved)];
 }
 
 function saveChatDelayMs() {
   localStorage.setItem(CHAT_DELAY_SETTINGS_KEY, String(chatDelayMs));
+  localStorage.setItem(CHAT_DELAY_DEFAULT_MIGRATION_KEY, '1');
 }
 
 function loadChatStyle() {
@@ -2721,6 +2885,9 @@ function isAppThemeUnlocked(theme) {
   if (theme === 'dzika-galaktyka') {
     return isWildGalaxyThemeUnlocked();
   }
+  if (theme === 'swiat-brikersa') {
+    return isBrikersWorldThemeUnlocked();
+  }
   return true;
 }
 
@@ -2747,7 +2914,8 @@ function createDefaultAchievementsState() {
     unlocked: {},
     talarkiRewards: [],
     creatorConnections: {},
-    uniqueCreators: []
+    uniqueCreators: [],
+    radioListeningMs: 0
   };
 }
 
@@ -2775,7 +2943,8 @@ function normalizeAchievementsState(value) {
         .map(([handle, count]) => [normalizeCreatorHandle(handle), Math.max(0, Number(count) || 0)])
         .filter(([handle]) => Boolean(handle))
     ),
-    uniqueCreators: Array.from(new Set(uniqueCreators.map(normalizeCreatorHandle).filter(Boolean)))
+    uniqueCreators: Array.from(new Set(uniqueCreators.map(normalizeCreatorHandle).filter(Boolean))),
+    radioListeningMs: Math.max(0, Math.min(RADIO_ACHIEVEMENT_TARGET_MS, Number(value.radioListeningMs) || 0))
   };
 }
 
@@ -2801,6 +2970,7 @@ function loadRedeemedFeatures() {
       boxesPanel: Boolean(saved.boxesPanel) || codes.includes(BOXES_REDEEM_CODE),
       miamiViceTheme: Boolean(saved.miamiViceTheme) || codes.includes(MIAMI_VICE_REDEEM_CODE),
       wildGalaxyTheme: Boolean(saved.wildGalaxyTheme) || codes.includes(WILD_GALAXY_STORE_CODE),
+      brickersWorldTheme: Boolean(saved.brickersWorldTheme),
       brickersGame: Boolean(saved.brickersGame),
       codes
     };
@@ -2811,6 +2981,7 @@ function loadRedeemedFeatures() {
       boxesPanel: false,
       miamiViceTheme: false,
       wildGalaxyTheme: false,
+      brickersWorldTheme: false,
       brickersGame: false,
       codes: []
     };
@@ -2863,6 +3034,10 @@ function isBrikersGameUnlocked() {
   return Boolean(redeemedFeatures?.brickersGame);
 }
 
+function isBrikersWorldThemeUnlocked() {
+  return Boolean(redeemedFeatures?.brickersWorldTheme);
+}
+
 function syncLockedThemeChoice(inputId, unlocked) {
   const input = document.getElementById(inputId);
   const choice = input ? input.closest('.setting-choice') : null;
@@ -2887,6 +3062,7 @@ function syncRedeemedFeatureNavigation() {
   const unlocked = isBoxesPanelUnlocked();
   const miamiUnlocked = isMiamiViceThemeUnlocked();
   const wildGalaxyUnlocked = isWildGalaxyThemeUnlocked();
+  const brickersWorldUnlocked = isBrikersWorldThemeUnlocked();
 
   if (boxesButton) {
     boxesButton.hidden = !unlocked;
@@ -2901,7 +3077,10 @@ function syncRedeemedFeatureNavigation() {
 
   syncLockedThemeChoice('themeMiamiVice', miamiUnlocked);
   syncLockedThemeChoice('themeDzikaGalaktyka', wildGalaxyUnlocked);
-  if (!miamiUnlocked && appTheme === 'miami-vice') {
+  syncLockedThemeChoice('themeSwiatBrikersa', brickersWorldUnlocked);
+  if ((!miamiUnlocked && appTheme === 'miami-vice')
+    || (!wildGalaxyUnlocked && appTheme === 'dzika-galaktyka')
+    || (!brickersWorldUnlocked && appTheme === 'swiat-brikersa')) {
     appTheme = 'rose-black';
     saveAppTheme();
     if (typeof applyAppearanceSettings === 'function') {
@@ -3068,6 +3247,8 @@ function migrateTalarkiAchievementRewards() {
 }
 
 migrateTalarkiAchievementRewards();
+if (isBrikersGameUnlocked()) unlockAchievement('true-friend');
+if (achievementsState.radioListeningMs >= RADIO_ACHIEVEMENT_TARGET_MS) unlockAchievement('telegraphist');
 
 function renderAchievements() {
   if (!achievementsListEl) {
@@ -3102,12 +3283,17 @@ function renderAchievements() {
     description.className = 'achievement-description';
     description.textContent = t(achievement.descriptionKey);
 
-    copy.append(title, description);
+    const reward = document.createElement('span');
+    reward.className = 'achievement-reward';
+    reward.innerHTML = `<span data-ui-icon="coin" aria-hidden="true"></span><span>${achievement.talarki} Talarków</span>`;
+
+    copy.append(title, description, reward);
     card.append(image, copy);
     fragment.appendChild(card);
   });
 
   achievementsListEl.appendChild(fragment);
+  hydrateUiIcons(achievementsListEl);
 }
 
 function trackLoggedInAchievement(nextState) {
@@ -4764,6 +4950,9 @@ function applyI18n() {
     ['#themeDzikaGalaktyka + span strong', 'settings.theme.dzikaGalaktyka.name'],
     ['#themeDzikaGalaktyka + span small', 'settings.theme.dzikaGalaktyka.description'],
     ['#themeDzikaGalaktyka + span .theme-lock-badge span:last-child', 'settings.theme.locked'],
+    ['#themeSwiatBrikersa + span strong', 'settings.theme.swiatBrikersa.name'],
+    ['#themeSwiatBrikersa + span small', 'settings.theme.swiatBrikersa.description'],
+    ['#themeSwiatBrikersa + span .theme-lock-badge span:last-child', 'settings.theme.locked'],
     ['#appAppearanceStandard + span strong', 'settings.appAppearance.default.name'],
     ['#appAppearanceStandard + span small', 'settings.appAppearance.default.description'],
     ['#appAppearanceDecorative + span strong', 'settings.appAppearance.decorative.name'],
@@ -5302,15 +5491,84 @@ function clampSpeechRate(value) {
 
 function clampSpeechVolume(value) {
   const volume = Number(value);
-  return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 1;
+  return Number.isFinite(volume) ? Math.min(2, Math.max(0, volume)) : 1;
 }
 
 function stopSpeech() {
   speechQueue.length = 0;
   speechPlaying = false;
+  if (currentPiperAudio) {
+    currentPiperAudio.pause();
+    currentPiperAudio.src = '';
+    currentPiperAudio = null;
+  }
+  if (currentPiperAudioContext) {
+    currentPiperAudioContext.close().catch(() => {});
+    currentPiperAudioContext = null;
+  }
   if (canUseSpeech()) {
     window.speechSynthesis.cancel();
   }
+}
+
+function getSelectedPiperVoice() {
+  return ['pl_PL-justyna_wg_glos-medium', 'pl_PL-jarvis_wg_glos-medium'].includes(ttsSettings.voiceURI)
+    ? ttsSettings.voiceURI
+    : 'pl_PL-justyna_wg_glos-medium';
+}
+
+function warmSelectedPiperVoice() {
+  if (appLanguage === 'pl' && window.tiktokLive?.warmPiper) {
+    window.tiktokLive.warmPiper(getSelectedPiperVoice()).catch(() => {});
+  }
+}
+
+function playPiperAudio(base64, onFinished) {
+  const audio = new Audio(`data:audio/wav;base64,${base64}`);
+  const volume = clampSpeechVolume(ttsSettings.volume);
+  let finished = false;
+  currentPiperAudio = audio;
+
+  const cleanup = () => {
+    if (currentPiperAudio === audio) currentPiperAudio = null;
+    const context = currentPiperAudioContext;
+    currentPiperAudioContext = null;
+    if (context) context.close().catch(() => {});
+  };
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    cleanup();
+    onFinished();
+  };
+
+  audio.onended = finish;
+  audio.onerror = finish;
+
+  if (volume <= 1) {
+    audio.volume = volume;
+  } else {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const context = new AudioContextClass();
+      const source = context.createMediaElementSource(audio);
+      const gain = context.createGain();
+      const compressor = context.createDynamicsCompressor();
+      gain.gain.value = volume;
+      compressor.threshold.value = -10;
+      compressor.knee.value = 8;
+      compressor.ratio.value = 5;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.2;
+      source.connect(gain).connect(compressor).connect(context.destination);
+      currentPiperAudioContext = context;
+      context.resume().catch(() => {});
+    } else {
+      audio.volume = 1;
+    }
+  }
+
+  audio.play().catch(finish);
 }
 
 function getSelectedVoice() {
@@ -5330,16 +5588,10 @@ function playNextSpeech() {
   if (appLanguage === 'pl' && window.tiktokLive?.synthesizePiper) {
     const text = speechQueue.shift();
     speechPlaying = true;
-    const voice = ttsSettings.voiceURI && /justyna|jarvis|meski|zenski/i.test(ttsSettings.voiceURI)
-      ? `pl_PL-${ttsSettings.voiceURI.match(/justyna|jarvis|meski|zenski/i)[0]}_wg_glos-medium`
-      : 'pl_PL-justyna_wg_glos-medium';
+    const voice = getSelectedPiperVoice();
     window.tiktokLive.synthesizePiper(text, voice, 1.1).then((result) => {
       if (!result?.ok) throw new Error(result?.error || 'piper');
-      const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
-      audio.volume = clampSpeechVolume(ttsSettings.volume);
-      audio.onended = () => { speechPlaying = false; playNextSpeech(); };
-      audio.onerror = () => { speechPlaying = false; playNextSpeech(); };
-      audio.play().catch(() => { speechPlaying = false; playNextSpeech(); });
+      playPiperAudio(result.audio, () => { speechPlaying = false; playNextSpeech(); });
     }).catch(() => {
       speechPlaying = false;
       // Never silently switch a Polish Piper selection to a Windows voice.
@@ -5364,7 +5616,9 @@ function playNextSpeechWithBrowser() {
   }
 
   utterance.rate = clampSpeechRate(ttsSettings.rate);
-  utterance.volume = clampSpeechVolume(ttsSettings.volume);
+  // Web Speech only accepts 0..1. Values above 100% are available for Piper,
+  // where Web Audio applies an actual gain stage.
+  utterance.volume = Math.min(1, clampSpeechVolume(ttsSettings.volume));
   utterance.onend = () => {
     speechPlaying = false;
     playNextSpeech();
@@ -5560,6 +5814,7 @@ function syncChatDelayControls() {
 function initTextToSpeech() {
   syncTtsControls();
   syncTtsVoices();
+  warmSelectedPiperVoice();
 
   if (canUseSpeech()) {
     window.speechSynthesis.addEventListener('voiceschanged', () => {
@@ -5600,6 +5855,7 @@ function initTextToSpeech() {
     ttsVoiceEl.addEventListener('change', () => {
       ttsSettings.voiceURI = ttsVoiceEl.value;
       saveTtsSettings();
+      warmSelectedPiperVoice();
     });
   }
 
@@ -8083,25 +8339,33 @@ function revealNextMessage() {
   clearTimeout(revealFallbackTimer);
   revealFallbackTimer = null;
 
-  if (!queue.length) {
-    updateStatus();
-    return;
+  const now = Date.now();
+  while (queue.length) {
+    const message = queue[0];
+    const revealAt = queuedMessageRevealAt.get(message) || now;
+    if (revealAt > now) {
+      break;
+    }
+    queue.shift();
+    queuedMessageRevealAt.delete(message);
+    const idKey = getMessageIdKey(message);
+    if (idKey) {
+      queuedMessagesById.delete(idKey);
+    }
+    showMessageNow(message, true);
   }
-
-  const message = queue.shift();
-  const idKey = getMessageIdKey(message);
-  if (idKey) {
-    queuedMessagesById.delete(idKey);
-  }
-  showMessageNow(message, true);
+  updateStatus();
   scheduleRevealFallback();
 }
 
 function startRevealTimer() {
-  clearInterval(revealTimer);
+  clearTimeout(revealFallbackTimer);
+  revealFallbackTimer = null;
   const safeDelay = CHAT_DELAY_OPTIONS.includes(Number(chatDelayMs)) ? Number(chatDelayMs) : DEFAULT_CHAT_DELAY_MS;
   chatDelayMs = safeDelay;
-  revealTimer = setInterval(revealNextMessage, safeDelay);
+  const revealAt = Date.now() + safeDelay;
+  queue.forEach((message) => queuedMessageRevealAt.set(message, revealAt));
+  scheduleRevealFallback();
 }
 
 function scheduleRevealFallback() {
@@ -8109,8 +8373,9 @@ function scheduleRevealFallback() {
     return;
   }
 
-  const safeDelay = CHAT_DELAY_OPTIONS.includes(Number(chatDelayMs)) ? Number(chatDelayMs) : DEFAULT_CHAT_DELAY_MS;
-  revealFallbackTimer = setTimeout(revealNextMessage, safeDelay);
+  const nextMessage = queue[0];
+  const revealAt = queuedMessageRevealAt.get(nextMessage) || Date.now();
+  revealFallbackTimer = setTimeout(revealNextMessage, Math.max(0, revealAt - Date.now()));
 }
 
 async function submitCreatorInput() {
@@ -9529,6 +9794,8 @@ window.tiktokLive.onChatMessage((message) => {
   }
 
   if ((message.kind || 'chat') === 'chat') {
+    const safeDelay = CHAT_DELAY_OPTIONS.includes(Number(chatDelayMs)) ? Number(chatDelayMs) : DEFAULT_CHAT_DELAY_MS;
+    queuedMessageRevealAt.set(message, Date.now() + safeDelay);
     queue.push(message);
     if (messageIdKey) {
       queuedMessagesById.set(messageIdKey, message);

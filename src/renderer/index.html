@@ -56,7 +56,7 @@
               <button class="filter-button" type="button" data-filter="gift" data-active="true">Prezenty</button>
               <button class="filter-button" type="button" data-filter="box" data-active="true">Skrzyneczki</button>
               <button class="filter-button" type="button" data-filter="repost" data-active="true">Reposty</button>
-              <button class="filter-button" type="button" data-filter="share" data-active="true">UdostÄ™pnienia</button>
+              <button class="filter-button" type="button" data-filter="share" data-active="true">Udostępnienia</button>
               <button class="filter-button" type="button" data-filter="member" data-active="true">Dołączenia</button>
             </div>
             <div class="status" id="status">
@@ -219,7 +219,7 @@
                   <button class="filter-button" type="button" data-archive-filter="gift" data-active="true">Prezenty</button>
                   <button class="filter-button" type="button" data-archive-filter="box" data-active="true">Skrzyneczki</button>
                   <button class="filter-button" type="button" data-archive-filter="repost" data-active="true">Reposty</button>
-                  <button class="filter-button" type="button" data-archive-filter="share" data-active="true">UdostÄ™pnienia</button>
+                  <button class="filter-button" type="button" data-archive-filter="share" data-active="true">Udostępnienia</button>
                   <button class="filter-button" type="button" data-archive-filter="member" data-active="true">Dołączenia</button>
                 </section>
 
@@ -276,11 +276,11 @@
                 <h2 class="settings-heading">Opóźnienie czatu</h2>
                 <label class="setting-row setting-row-stacked chat-delay-control" for="chatDelay">
                   <span class="setting-range">
-                    <input type="range" id="chatDelay" min="0" max="6" step="1" value="4" list="chatDelaySteps">
+                    <input type="range" id="chatDelay" min="0" max="6" step="1" value="0" list="chatDelaySteps">
                     <datalist id="chatDelaySteps">
                       <option value="0" label="0.5s"></option><option value="1" label="0.8s"></option><option value="2" label="1.0s"></option><option value="3" label="1.5s"></option><option value="4" label="1.8s"></option><option value="5" label="2.2s"></option><option value="6" label="2.8s"></option>
                     </datalist>
-                    <output id="chatDelayValue">1.8s</output>
+                    <output id="chatDelayValue">0.5s</output>
                     <span class="setting-range-marks" aria-hidden="true"><span>0.5s</span><span>0.8s</span><span>1.0s</span><span>1.5s</span><span>1.8s</span><span>2.2s</span><span>2.8s</span></span>
                   </span>
                 </label>
@@ -377,6 +377,13 @@
                     <small>Galaktyczne odcienie, mgławice i estetyka Frutiger Aero.</small>
                   </span>
                 </label>
+                <label class="setting-choice theme-choice-locked" for="themeSwiatBrikersa" data-locked="true">
+                  <input type="radio" id="themeSwiatBrikersa" name="appTheme" value="swiat-brikersa">
+                  <span>
+                    <span class="theme-title-row"><strong>Świat Brikersa</strong><span class="theme-lock-badge"><span data-ui-icon="lock" aria-hidden="true"></span><span>Zablokowany</span></span></span>
+                    <small>Pikselowy, zielony motyw inspirowany światem gry Brikers.</small>
+                  </span>
+                </label>
               </div>
             </section>
             <section class="setting-section appearance-app-section" data-appearance-subpanel="app-appearance">
@@ -442,7 +449,7 @@
               <label class="setting-row" for="ttsVolume">
                 <span><strong>Głośność czytania wiadomości</strong><small class="setting-description">Dostosuj głośność czytanych wiadomości.</small></span>
                 <span class="setting-range">
-                  <input type="range" id="ttsVolume" min="0" max="1" step="0.05" value="1">
+                  <input type="range" id="ttsVolume" min="0" max="2" step="0.05" value="1">
                   <output id="ttsVolumeValue">100%</output>
                 </span>
               </label>
@@ -710,34 +717,26 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.2.6</span></h2>
+                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.2.7</span></h2>
 
-                  <p data-i18n="about.news.026.intro">Tym razem aktualizacja jest naprawdę potężna, od systemu ekonomii i sklepu z motywami i grami, po poprawki tłumaczeń. Starałem się zawrzeć większość sugestii z ostatnich 2 tygodni. Mam nadzieję, że sprostałem - jeżeli tak poleć program dalej swoim znajomym - dziękuję!</p>
+                  <p data-i18n="about.news.027.intro">Ta aktualizacja skupia się na usprawnieniu działania programu, rozbudowie Brikersa oraz poprawieniu wyglądu aplikacji. Dodaliśmy także nowy motyw, osiągnięcia i udoskonalenia TTS.</p>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.026.economy">System Talarków i nagrody za osiągnięcia oraz aktywność na LIVE.</li>
-                    <li data-i18n="about.news.026.shop">Sklep z podglądem i kupowaniem motywów.</li>
-                    <li data-i18n="about.news.026.themes">Motywy Miami Vice i Dzika galaktyka.</li>
-                    <li data-i18n="about.news.026.brickers">Możliwość kupienia gry Brikers za 1500 Talarków.</li>
-                    <li data-i18n="about.news.026.piper">Dwa wbudowane głosy Piper: Halina i Mr. Drwina.</li>
-                    <li data-i18n="about.news.026.tts">Poprawione filtrowanie tekstu TTS.</li>
-                    <li data-i18n="about.news.026.viewers">Panel aktywnych widzów LIVE.</li>
-                    <li data-i18n="about.news.026.avatars">Pamięć awatarów oraz awatar Enigmy jako zapasowy.</li>
-                    <li data-i18n="about.news.026.favorites">Mechanika ulubionych twórców.</li>
-                    <li data-i18n="about.news.026.savedCreators">Rozszerzona lista zapamiętanych twórców.</li>
-                    <li data-i18n="about.news.026.settingsDescriptions">Opisy funkcji w ustawieniach.</li>
-                    <li data-i18n="about.news.026.launcher">Poprawki skalowania i wyglądu okien launchera.</li>
-                    <li data-i18n="about.news.026.bigPicture">Poprawki Big Picture.</li>
-                    <li data-i18n="about.news.026.updater">Poprawki powiadomień aktualizatora.</li>
-                    <li data-i18n="about.news.026.stats">Poprawki liczenia TAPEK oraz udostępnień.</li>
-                    <li data-i18n="about.news.026.roles">Oznaczenia moderatorów i superfanów przy nickach.</li>
-                    <li data-i18n="about.news.026.polish">Liczne poprawki tłumaczeń, układu, ramek i responsywności.</li>
+                    <li data-i18n="about.news.027.theme">Dodano motyw „Świat Brikersa”.</li>
+                    <li data-i18n="about.news.027.brickers">Rozbudowano grę Brikers i poprawiono działanie jego potrzeb.</li>
+                    <li data-i18n="about.news.027.achievements">Dodano nowe osiągnięcia oraz nagrody w Talarkach.</li>
+                    <li data-i18n="about.news.027.ttsSpeed">Przyspieszono działanie wbudowanych głosów TTS.</li>
+                    <li data-i18n="about.news.027.ttsVolume">Zwiększono maksymalną głośność czytania wiadomości.</li>
+                    <li data-i18n="about.news.027.chatDelay">Zmniejszono opóźnienie wyświetlania czatu.</li>
+                    <li data-i18n="about.news.027.windows">Poprawiono wygląd Notatek, Archiwum i pozostałych okien.</li>
+                    <li data-i18n="about.news.027.background">Poprawiono działanie programu po zminimalizowaniu.</li>
+                    <li data-i18n="about.news.027.fixes">Wprowadzono liczne poprawki wizualne i techniczne.</li>
                   </ul>
 
                   <h3 data-i18n="about.news.next.title">Co dalej?</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.026.next">To tajemnicza tajemnica!</li>
+                    <li data-i18n="about.news.027.next">To tajemnicza tajemnica!</li>
                   </ul>
                 </div>
               </div>
@@ -841,7 +840,7 @@
       <section class="widget-dialog shop-dialog" id="shopDialog" role="dialog" aria-modal="true" aria-labelledby="shopDialogTitle">
         <header class="radio-dialog-header"><div><h1 id="shopDialogTitle" data-i18n="shop.title">Sklep</h1><p class="page-note" data-i18n="shop.note">Wymieniaj Talarki na dodatki do programu.</p></div><button class="radio-dialog-close" id="shopDialogClose" type="button" aria-label="Zamknij sklep">×</button></header>
         <div class="settings-tabs shop-tabs" role="tablist"><button class="settings-tab" data-shop-tab="themes" data-active="true" data-i18n="shop.themes">Motywy</button><button class="settings-tab" data-shop-tab="other" data-i18n="shop.other">Inne</button></div>
-        <section class="shop-items" data-shop-panel="themes"><article class="shop-item"><div><h2>Miami Vice</h2><p>Pastelowy motyw inspirowany GTA Vice City.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="miami-vice" type="button">Podgląd</button><button class="page-action" id="shopMiamiPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Dzika galaktyka</h2><p>Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="dzika-galaktyka" type="button">Podgląd</button><button class="page-action" id="shopWildGalaxyPurchase" type="button">Kup za 1000 Talarków</button></div></article></section><section class="shop-items" data-shop-panel="other" hidden><article class="shop-item"><div><h2>Gra Brikers</h2><p>Opiekuj się Brikersem, dbaj o jego potrzeby i zdobywaj Talarki za sprzątanie kupek.</p></div><button class="page-action" id="shopBrikersPurchase" type="button">Kup za 1500 Talarków</button></article></section>
+        <section class="shop-items" data-shop-panel="themes"><article class="shop-item"><div><h2>Miami Vice</h2><p>Pastelowy motyw inspirowany GTA Vice City.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="miami-vice" type="button">Podgląd</button><button class="page-action" id="shopMiamiPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Dzika galaktyka</h2><p>Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="dzika-galaktyka" type="button">Podgląd</button><button class="page-action" id="shopWildGalaxyPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Świat Brikersa</h2><p>Pikselowy, zielony motyw inspirowany światem gry Brikers.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="swiat-brikersa" type="button">Podgląd</button><button class="page-action" id="shopBrikersWorldPurchase" type="button">Kup za 1000 Talarków</button></div></article></section><section class="shop-items" data-shop-panel="other" hidden><article class="shop-item"><div><h2>Gra Brikers</h2><p>Opiekuj się Brikersem, dbaj o jego potrzeby i zdobywaj Talarki za sprzątanie kupek.</p></div><button class="page-action" id="shopBrikersPurchase" type="button">Kup za 1500 Talarków</button></article></section>
       </section>
     </div>
     <div class="widget-dialog-backdrop" id="tamagotchiDialogBackdrop" hidden>

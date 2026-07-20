@@ -26,6 +26,7 @@ const api = {
   setBigPicture: (enabled) => ipcRenderer.invoke('shell:set-big-picture', enabled),
   setQuietMode: (enabled) => ipcRenderer.invoke('shell:set-quiet-mode', enabled),
   synthesizePiper: (text, voice, lengthScale) => ipcRenderer.invoke('shell:synthesize-piper', { text, voice, lengthScale }),
+  warmPiper: (voice) => ipcRenderer.invoke('shell:warm-piper', { voice }),
   getCurrentViewers: () => ipcRenderer.invoke('shell:get-current-viewers'),
   checkForUpdates: () => ipcRenderer.invoke('shell:check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('shell:download-update'),
