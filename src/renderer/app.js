@@ -1821,6 +1821,38 @@ Object.assign(I18N.hu, {
   'about.news.029.next': 'Ez egy titokzatos titok!'
 });
 
+Object.assign(I18N.pl, {
+  'about.news.030.intro': 'Aktualizacja naprawcza usuwająca problem zgłoszony przez testerów po wydaniu 0.2.9.',
+  'about.news.030.languageFix': 'Naprawiono błąd wersji 0.2.9, który po aktualizacji mógł wyrzucać użytkowników z programu podczas wyboru języka.',
+  'about.news.030.languageInit': 'Okno wyboru języka jest teraz uruchamiane tylko raz i dopiero po prawidłowym odczytaniu wersji aplikacji.',
+  'about.news.030.languageSave': 'Zabezpieczono zapis języka przed wielokrotnym kliknięciem i równoczesnym przetwarzaniem kilku zmian.',
+  'about.news.030.next': 'To tajemnicza tajemnica!'
+});
+
+Object.assign(I18N.en, {
+  'about.news.030.intro': 'A corrective update addressing the issue reported by testers after version 0.2.9.',
+  'about.news.030.languageFix': 'Fixed a version 0.2.9 issue that could close the application after an update while the user selected a language.',
+  'about.news.030.languageInit': 'The language selection window is now initialized only once and only after the application version has been read correctly.',
+  'about.news.030.languageSave': 'Language saving is now protected against repeated clicks and simultaneous processing of multiple changes.',
+  'about.news.030.next': 'That is a mysterious mystery!'
+});
+
+Object.assign(I18N.de, {
+  'about.news.030.intro': 'Ein Korrekturupdate für das von Testern nach Version 0.2.9 gemeldete Problem.',
+  'about.news.030.languageFix': 'Ein Fehler aus Version 0.2.9 wurde behoben, durch den sich die Anwendung nach einem Update bei der Sprachauswahl schließen konnte.',
+  'about.news.030.languageInit': 'Das Fenster zur Sprachauswahl wird jetzt nur einmal und erst nach dem korrekten Einlesen der Anwendungsversion initialisiert.',
+  'about.news.030.languageSave': 'Das Speichern der Sprache ist jetzt gegen wiederholte Klicks und die gleichzeitige Verarbeitung mehrerer Änderungen geschützt.',
+  'about.news.030.next': 'Das bleibt ein geheimnisvolles Geheimnis!'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.030.intro': 'Javítófrissítés a tesztelők által a 0.2.9-es verzió után jelzett problémára.',
+  'about.news.030.languageFix': 'Javítva lett a 0.2.9-es verzió hibája, amely miatt frissítés után a nyelvválasztás közben bezáródhatott az alkalmazás.',
+  'about.news.030.languageInit': 'A nyelvválasztó ablak mostantól csak egyszer, az alkalmazás verziójának helyes beolvasása után inicializálódik.',
+  'about.news.030.languageSave': 'A nyelv mentése védett lett a többszöri kattintás és több módosítás egyidejű feldolgozása ellen.',
+  'about.news.030.next': 'Ez egy titokzatos titok!'
+});
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -2686,6 +2718,8 @@ let syncedCreatorSuggestionsKey = '';
 let battleBannerTimer;
 let coinsPromoTimer = null;
 let coinsPromoCreatorKey = '';
+let firstRunLanguageChoiceInitialized = false;
+let firstRunLanguageChoiceBusy = false;
 let activeSection = 'chatbox';
 let activeSettingsTab = 'general';
 let activeAboutTab = 'program';
@@ -5540,26 +5574,49 @@ function initSystemSettings() {
 }
 
 function initFirstRunLanguageChoice() {
-  if (!firstRunLanguageEl) {
+  if (!firstRunLanguageEl || !state.appVersion) {
     return;
   }
 
-  const currentVersion = state.appVersion || '0.2.5';
+  const currentVersion = state.appVersion;
   const languageChosen = localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY);
   const versionChosen = localStorage.getItem(APP_LANGUAGE_VERSION_KEY);
   if (languageChosen && versionChosen === currentVersion) {
+    firstRunLanguageEl.hidden = true;
     return;
   }
 
   firstRunLanguageEl.hidden = false;
+  if (firstRunLanguageChoiceInitialized) {
+    return;
+  }
+  firstRunLanguageChoiceInitialized = true;
+
   firstRunLanguageButtons.forEach((button) => {
     button.addEventListener('click', async () => {
+      if (firstRunLanguageChoiceBusy || !state.appVersion) {
+        return;
+      }
+
       const language = APP_LANGUAGES.includes(button.dataset.firstLanguage)
         ? button.dataset.firstLanguage
         : DEFAULT_SYSTEM_SETTINGS.language;
-      firstRunLanguageEl.hidden = true;
-      localStorage.setItem(APP_LANGUAGE_VERSION_KEY, state.appVersion || '0.2.5');
-      await updateSystemSettings({ language });
+      const selectedVersion = state.appVersion;
+      firstRunLanguageChoiceBusy = true;
+      firstRunLanguageButtons.forEach((item) => {
+        item.disabled = true;
+      });
+
+      try {
+        await updateSystemSettings({ language });
+        localStorage.setItem(APP_LANGUAGE_VERSION_KEY, selectedVersion);
+        firstRunLanguageEl.hidden = true;
+      } finally {
+        firstRunLanguageChoiceBusy = false;
+        firstRunLanguageButtons.forEach((item) => {
+          item.disabled = false;
+        });
+      }
     });
   });
 }
@@ -5568,7 +5625,10 @@ function checkLanguageChoiceForVersion() {
   if (!firstRunLanguageEl) {
     return;
   }
-  const currentVersion = state.appVersion || '0.2.5';
+  const currentVersion = state.appVersion;
+  if (!currentVersion) {
+    return;
+  }
   if (localStorage.getItem(APP_LANGUAGE_SETTINGS_KEY)
     && localStorage.getItem(APP_LANGUAGE_VERSION_KEY) === currentVersion) {
     return;
