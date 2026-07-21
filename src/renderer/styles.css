@@ -263,10 +263,10 @@ body {
   position: relative;
 }
 
-.favorite-creator-star {
+.favorite-creator-star,
+.remove-creator-button {
   position: absolute;
   top: -2px;
-  left: 7px;
   z-index: 2;
   display: grid;
   place-items: center;
@@ -281,11 +281,28 @@ body {
   cursor: pointer;
 }
 
-.favorite-creator-star .ui-icon {
+.favorite-creator-star {
+  left: 7px;
+}
+
+.remove-creator-button {
+  right: 7px;
+}
+
+.favorite-creator-star .ui-icon,
+.remove-creator-button .ui-icon {
   width: 13px;
   height: 13px;
   fill: transparent;
   stroke: currentColor;
+}
+
+.remove-creator-button:hover,
+.remove-creator-button:focus-visible {
+  border-color: #ff667f;
+  color: #ff667f;
+  background: color-mix(in srgb, #ff667f 18%, var(--dropdown-bg));
+  outline: none;
 }
 
 .favorite-creator-star[data-active="true"] {

@@ -423,6 +423,10 @@
                 <span><strong>Czytaj czat na głos</strong><small class="setting-description">Czyta na głos pojawiające się wiadomości na czacie.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsEnabled">
               </label>
+              <label class="setting-row" for="ttsRolesOnly">
+                <span><strong data-i18n="settings.accessibility.rolesOnly">Czytaj tylko wiadomości moderatorów i superfanów</strong><small class="setting-description" data-i18n="settings.accessibility.rolesOnlyDescription">TTS czyta wyłącznie wiadomości osób z czerwonym lub złotym nickiem.</small></span>
+                <input class="setting-toggle" type="checkbox" id="ttsRolesOnly">
+              </label>
               <label class="setting-row" for="ttsSkipVulgarNicknames">
                 <span><strong>Pomijaj wulgarne nicki</strong><small class="setting-description">Pomija obraźliwe słowa w nicku.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarNicknames">
@@ -717,26 +721,24 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.2.7</span></h2>
+                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.2.9</span></h2>
 
-                  <p data-i18n="about.news.027.intro">Ta aktualizacja skupia się na usprawnieniu działania programu, rozbudowie Brikersa oraz poprawieniu wyglądu aplikacji. Dodaliśmy także nowy motyw, osiągnięcia i udoskonalenia TTS.</p>
+                  <p data-i18n="about.news.029.intro">Ta aktualizacja rozwija ustawienia TTS, poprawia odczytywanie wiadomości i dodaje możliwość porządkowania listy zapamiętanych twórców.</p>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.027.theme">Dodano motyw „Świat Brikersa”.</li>
-                    <li data-i18n="about.news.027.brickers">Rozbudowano grę Brikers i poprawiono działanie jego potrzeb.</li>
-                    <li data-i18n="about.news.027.achievements">Dodano nowe osiągnięcia oraz nagrody w Talarkach.</li>
-                    <li data-i18n="about.news.027.ttsSpeed">Przyspieszono działanie wbudowanych głosów TTS.</li>
-                    <li data-i18n="about.news.027.ttsVolume">Zwiększono maksymalną głośność czytania wiadomości.</li>
-                    <li data-i18n="about.news.027.chatDelay">Zmniejszono opóźnienie wyświetlania czatu.</li>
-                    <li data-i18n="about.news.027.windows">Poprawiono wygląd Notatek, Archiwum i pozostałych okien.</li>
-                    <li data-i18n="about.news.027.background">Poprawiono działanie programu po zminimalizowaniu.</li>
-                    <li data-i18n="about.news.027.fixes">Wprowadzono liczne poprawki wizualne i techniczne.</li>
+                    <li data-i18n="about.news.029.roles">Dodano opcję czytania przez TTS wyłącznie wiadomości moderatorów i superfanów.</li>
+                    <li data-i18n="about.news.029.command">Dodano komendę „.69”, pozwalającą pozostałym widzom wysłać pojedynczą wiadomość do odczytania przez TTS.</li>
+                    <li data-i18n="about.news.029.polish">Poprawiono obsługę polskich znaków w głosach Halina i Mr. Drwina.</li>
+                    <li data-i18n="about.news.029.symbols">Poprawiono filtrowanie emoji, znaków towarowych i innych symboli błędnie odczytywanych przez TTS.</li>
+                    <li data-i18n="about.news.029.delete">Dodano możliwość usuwania zapamiętanych twórców z panelu „Twórcy”.</li>
+                    <li data-i18n="about.news.029.cleanup">Usuwanie twórcy czyści również jego zapisane dane, status ulubionego i ranking częstych połączeń.</li>
+                    <li data-i18n="about.news.029.translations">Dodano tłumaczenia nowych funkcji na język angielski, niemiecki i węgierski.</li>
                   </ul>
 
                   <h3 data-i18n="about.news.next.title">Co dalej?</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.027.next">To tajemnicza tajemnica!</li>
+                    <li data-i18n="about.news.029.next">To tajemnicza tajemnica!</li>
                   </ul>
                 </div>
               </div>

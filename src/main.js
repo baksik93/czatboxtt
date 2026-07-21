@@ -42,10 +42,20 @@ const PIPER_RESOURCE_DIR = app.isPackaged
 const PIPER_EXECUTABLE = path.join(PIPER_RESOURCE_DIR, 'piper-tts.exe');
 const piperServers = new Map();
 
+function stringifyPiperRequest(value) {
+  // Keep the server transport ASCII-only. The Windows Piper server can
+  // misinterpret raw non-ASCII bytes from stdin (for example Polish ć),
+  // while JSON Unicode escapes are decoded back to the original text.
+  return JSON.stringify(value).replace(/[\u007f-\uffff]/g, (character) =>
+    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  );
+}
+
 function getPiperServer(model) {
   const key = path.basename(model);
   if (piperServers.has(key)) return piperServers.get(key);
   const child = spawn(PIPER_EXECUTABLE, ['--server', '--model', model], { windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'] });
+  child.stdin.setDefaultEncoding('utf8');
   const pending = new Map();
   const rl = readline.createInterface({ input: child.stdout });
   rl.on('line', (line) => { try { const msg = JSON.parse(line); const job = pending.get(msg.id); if (job) { pending.delete(msg.id); job(msg); } } catch {} });
@@ -68,7 +78,7 @@ function getPiperServer(model) {
       resolve(result);
     });
     try {
-      child.stdin.write(`${JSON.stringify({ id, text, output })}\n`);
+      child.stdin.write(`${stringifyPiperRequest({ id, text, output })}\n`, 'utf8');
     } catch {
       clearTimeout(timeout);
       pending.delete(id);

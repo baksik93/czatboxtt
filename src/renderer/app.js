@@ -228,6 +228,7 @@ const I18N = {
     'recentCreators.aria': 'Ostatni twórcy',
     'recentCreators.online': 'Wybrany',
     'recentCreators.offline': 'Niewybrany',
+    'recentCreators.delete': 'Usuń twórcę z listy',
     'achievements.title': 'Osiągnięcia',
     'achievements.note': 'Odblokowane osiągnięcia za aktywność w programie.',
     'achievements.emptyTitle': 'Brak odblokowanych osiągnięć.',
@@ -401,6 +402,8 @@ const I18N = {
     'settings.accessibility.skipVulgarNicknames': 'Pomijaj wulgarne nicki',
     'settings.accessibility.skipVulgarMessages': 'Pomijaj wulgarne wiadomości',
     'settings.accessibility.skipSpamMessages': 'Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)',
+    'settings.accessibility.rolesOnly': 'Czytaj tylko wiadomości moderatorów i superfanów',
+    'settings.accessibility.rolesOnlyDescription': 'TTS czyta wyłącznie wiadomości osób z czerwonym lub złotym nickiem.',
     'settings.accessibility.voice': 'Głos',
     'settings.accessibility.systemVoice': 'Systemowy',
     'settings.accessibility.rate': 'Tempo',
@@ -630,6 +633,7 @@ const I18N = {
     'recentCreators.aria': 'Recent creators',
     'recentCreators.online': 'Selected',
     'recentCreators.offline': 'Not selected',
+    'recentCreators.delete': 'Remove creator from the list',
     'achievements.title': 'Achievements',
     'achievements.note': 'Unlocked achievements for activity in the app.',
     'achievements.emptyTitle': 'No unlocked achievements yet.',
@@ -803,6 +807,8 @@ const I18N = {
     'settings.accessibility.skipVulgarNicknames': 'Skip vulgar nicknames',
     'settings.accessibility.skipVulgarMessages': 'Skip vulgar messages',
     'settings.accessibility.skipSpamMessages': 'Skip spam messages (follow for follow, obs, etc.)',
+    'settings.accessibility.rolesOnly': 'Read messages from moderators and superfans only',
+    'settings.accessibility.rolesOnlyDescription': 'TTS reads only messages from people with a red or gold nickname.',
     'settings.accessibility.voice': 'Voice',
     'settings.accessibility.systemVoice': 'System',
     'settings.accessibility.rate': 'Rate',
@@ -1031,6 +1037,7 @@ const I18N = {
     'recentCreators.aria': 'Letzte Creator',
     'recentCreators.online': 'Ausgewählt',
     'recentCreators.offline': 'Nicht ausgewählt',
+    'recentCreators.delete': 'Creator aus der Liste entfernen',
     'achievements.title': 'Erfolge',
     'achievements.note': 'Freigeschaltete Erfolge für Aktivität in der App.',
     'achievements.emptyTitle': 'Noch keine Erfolge freigeschaltet.',
@@ -1204,6 +1211,8 @@ const I18N = {
     'settings.accessibility.skipVulgarNicknames': 'Vulgäre Nicknames überspringen',
     'settings.accessibility.skipVulgarMessages': 'Vulgäre Nachrichten überspringen',
     'settings.accessibility.skipSpamMessages': 'Spam-Nachrichten überspringen (Follow for Follow usw.)',
+    'settings.accessibility.rolesOnly': 'Nur Nachrichten von Moderatoren und Superfans vorlesen',
+    'settings.accessibility.rolesOnlyDescription': 'TTS liest nur Nachrichten von Personen mit rotem oder goldenem Namen vor.',
     'settings.accessibility.voice': 'Stimme',
     'settings.accessibility.systemVoice': 'System',
     'settings.accessibility.rate': 'Tempo',
@@ -1420,6 +1429,7 @@ const I18N = {
 // the common application chrome and settings use native Hungarian labels.
 I18N.hu = {
   ...I18N.en,
+  'recentCreators.delete': 'Alkotó eltávolítása a listáról',
   'settings.title': 'Beállítások',
   'settings.subtitle': 'Az alkalmazás működésének és megjelenésének beállítása.',
   'settings.reset': 'Alapértelmezések visszaállítása',
@@ -1489,6 +1499,8 @@ I18N.hu = {
   'settings.accessibility.skipVulgarNicknames': 'Trágár becenevek kihagyása',
   'settings.accessibility.skipVulgarMessages': 'Trágár üzenetek kihagyása',
   'settings.accessibility.skipSpamMessages': 'Spamüzenetek kihagyása',
+  'settings.accessibility.rolesOnly': 'Csak moderátorok és szuperrajongók üzeneteinek felolvasása',
+  'settings.accessibility.rolesOnlyDescription': 'A TTS csak a piros vagy arany nevű személyek üzeneteit olvassa fel.',
   'settings.accessibility.voice': 'Hang',
   'settings.accessibility.rate': 'Sebesség',
   'settings.accessibility.delay': 'Csevegés késleltetése',
@@ -1759,6 +1771,54 @@ Object.assign(I18N.hu, {
   'about.news.027.background': 'Javult a program működése minimalizált állapotban.',
   'about.news.027.fixes': 'Számos vizuális és technikai javítás készült.',
   'about.news.027.next': 'Ez egy titokzatos titok!'
+});
+
+Object.assign(I18N.pl, {
+  'about.news.029.intro': 'Ta aktualizacja rozwija ustawienia TTS, poprawia odczytywanie wiadomości i dodaje możliwość porządkowania listy zapamiętanych twórców.',
+  'about.news.029.roles': 'Dodano opcję czytania przez TTS wyłącznie wiadomości moderatorów i superfanów.',
+  'about.news.029.command': 'Dodano komendę „.69”, pozwalającą pozostałym widzom wysłać pojedynczą wiadomość do odczytania przez TTS.',
+  'about.news.029.polish': 'Poprawiono obsługę polskich znaków w głosach Halina i Mr. Drwina.',
+  'about.news.029.symbols': 'Poprawiono filtrowanie emoji, znaków towarowych i innych symboli błędnie odczytywanych przez TTS.',
+  'about.news.029.delete': 'Dodano możliwość usuwania zapamiętanych twórców z panelu „Twórcy”.',
+  'about.news.029.cleanup': 'Usuwanie twórcy czyści również jego zapisane dane, status ulubionego i ranking częstych połączeń.',
+  'about.news.029.translations': 'Dodano tłumaczenia nowych funkcji na język angielski, niemiecki i węgierski.',
+  'about.news.029.next': 'To tajemnicza tajemnica!'
+});
+
+Object.assign(I18N.en, {
+  'about.news.029.intro': 'This update expands the TTS settings, improves message reading and adds tools for organizing remembered creators.',
+  'about.news.029.roles': 'Added an option for TTS to read only messages from moderators and superfans.',
+  'about.news.029.command': 'Added the “.69” command, allowing other viewers to submit a single message for TTS reading.',
+  'about.news.029.polish': 'Improved Polish character handling in the Halina and Mr. Drwina voices.',
+  'about.news.029.symbols': 'Improved filtering of emoji, trademark signs and other symbols incorrectly read by TTS.',
+  'about.news.029.delete': 'Added the ability to remove remembered creators from the Creators panel.',
+  'about.news.029.cleanup': 'Removing a creator also clears their saved data, favorite status and frequent-connection ranking.',
+  'about.news.029.translations': 'Added English, German and Hungarian translations for the new features.',
+  'about.news.029.next': 'That is a mysterious mystery!'
+});
+
+Object.assign(I18N.de, {
+  'about.news.029.intro': 'Dieses Update erweitert die TTS-Einstellungen, verbessert das Vorlesen von Nachrichten und erleichtert das Verwalten gespeicherter Creator.',
+  'about.news.029.roles': 'TTS kann nun wahlweise nur Nachrichten von Moderatoren und Superfans vorlesen.',
+  'about.news.029.command': 'Der Befehl „.69“ erlaubt anderen Zuschauern, eine einzelne Nachricht von TTS vorlesen zu lassen.',
+  'about.news.029.polish': 'Die Verarbeitung polnischer Zeichen durch Halina und Mr. Drwina wurde verbessert.',
+  'about.news.029.symbols': 'Die Filterung von Emojis, Markenzeichen und anderen von TTS falsch vorgelesenen Symbolen wurde verbessert.',
+  'about.news.029.delete': 'Gespeicherte Creator können nun im Creator-Fenster gelöscht werden.',
+  'about.news.029.cleanup': 'Beim Löschen werden auch gespeicherte Daten, Favoritenstatus und die Rangliste häufiger Verbindungen bereinigt.',
+  'about.news.029.translations': 'Für die neuen Funktionen wurden englische, deutsche und ungarische Übersetzungen ergänzt.',
+  'about.news.029.next': 'Das bleibt ein geheimnisvolles Geheimnis!'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.029.intro': 'Ez a frissítés kibővíti a TTS beállításait, javítja az üzenetek felolvasását, és segít rendezni a megjegyzett alkotók listáját.',
+  'about.news.029.roles': 'A TTS mostantól beállítható úgy, hogy csak a moderátorok és szuperrajongók üzeneteit olvassa fel.',
+  'about.news.029.command': 'A „.69” paranccsal a többi néző is elküldhet egyetlen, TTS által felolvasandó üzenetet.',
+  'about.news.029.polish': 'Javult a lengyel karakterek kezelése a Halina és Mr. Drwina hangoknál.',
+  'about.news.029.symbols': 'Javult az emojik, védjegyjelek és a TTS által hibásan felolvasott egyéb szimbólumok szűrése.',
+  'about.news.029.delete': 'A megjegyzett alkotók mostantól törölhetők az Alkotók panelen.',
+  'about.news.029.cleanup': 'Az alkotó törlése eltávolítja a mentett adatokat, a kedvenc státuszt és a gyakori kapcsolódások rangsorát is.',
+  'about.news.029.translations': 'Az új funkciók angol, német és magyar fordítást kaptak.',
+  'about.news.029.next': 'Ez egy titokzatos titok!'
 });
 
 const statusEl = document.getElementById('status');
@@ -2532,6 +2592,7 @@ const appTaskbarClockEl = document.getElementById('appTaskbarClock');
 const appTaskbarTimeEl = document.getElementById('appTaskbarTime');
 const appTaskbarDateEl = document.getElementById('appTaskbarDate');
 const ttsEnabledEl = document.getElementById('ttsEnabled');
+const ttsRolesOnlyEl = document.getElementById('ttsRolesOnly');
 const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
 const ttsSkipVulgarMessagesEl = document.getElementById('ttsSkipVulgarMessages');
 const ttsSkipSpamMessagesEl = document.getElementById('ttsSkipSpamMessages');
@@ -2745,6 +2806,7 @@ function loadTtsSettings() {
       voiceURI: typeof saved.voiceURI === 'string' ? saved.voiceURI : '',
       rate: Number(saved.rate) || 1,
       volume: Number.isFinite(Number(saved.volume)) ? Number(saved.volume) : 1,
+      rolesOnly: Boolean(saved.rolesOnly),
       skipVulgarNicknames: Boolean(saved.skipVulgarNicknames),
       skipVulgarMessages: Boolean(saved.skipVulgarMessages),
       skipSpamMessages: Boolean(saved.skipSpamMessages)
@@ -2755,6 +2817,7 @@ function loadTtsSettings() {
       voiceURI: '',
       rate: 1,
       volume: 1,
+      rolesOnly: false,
       skipVulgarNicknames: false,
       skipVulgarMessages: false,
       skipSpamMessages: false
@@ -3503,6 +3566,41 @@ function toggleFavoriteCreator(handle) {
   }
   saveFavoriteCreators();
   renderRecentCreatorsCarousel();
+}
+
+function removeRememberedCreator(handle) {
+  const normalized = normalizeCreatorHandle(handle);
+  if (!normalized) return;
+
+  recentCreators = recentCreators.filter((item) => item !== normalized);
+  favoriteCreators = favoriteCreators.filter((item) => item !== normalized);
+  delete recentCreatorMeta[normalized];
+  if (czesterMemory && czesterMemory.creatorUsage) {
+    delete czesterMemory.creatorUsage[normalized];
+  }
+
+  saveRecentCreators();
+  saveFavoriteCreators();
+  saveRecentCreatorMeta();
+  saveCzesterMemory();
+  renderRecentCreatorsCarousel();
+  renderCreatorSuggestions();
+  syncCreatorOptions(state.creators);
+}
+
+function createRemoveCreatorButton(handle) {
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'remove-creator-button';
+  remove.appendChild(createUiIcon('trash'));
+  remove.title = t('recentCreators.delete');
+  remove.setAttribute('aria-label', `${t('recentCreators.delete')}: @${handle}`);
+  remove.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    removeRememberedCreator(handle);
+  });
+  return remove;
 }
 
 function loadRecentCreatorMeta() {
@@ -4961,6 +5059,8 @@ function applyI18n() {
     ['#appAppearanceRetroKb2 + span small', 'settings.appAppearance.retroKb2.description'],
     ['.settings-panel[data-settings-panel="accessibility"] > .settings-heading', 'settings.accessibility.tts'],
     ['label[for="ttsEnabled"] > span > strong', 'settings.accessibility.readAloud'],
+    ['label[for="ttsRolesOnly"] > span > strong', 'settings.accessibility.rolesOnly'],
+    ['label[for="ttsRolesOnly"] > span > small', 'settings.accessibility.rolesOnlyDescription'],
     ['label[for="ttsSkipVulgarNicknames"] > span > strong', 'settings.accessibility.skipVulgarNicknames'],
     ['label[for="ttsSkipVulgarMessages"] > span > strong', 'settings.accessibility.skipVulgarMessages'],
     ['label[for="ttsSkipSpamMessages"] > span > strong', 'settings.accessibility.skipSpamMessages'],
@@ -5637,7 +5737,10 @@ function sanitizeSpeechText(value) {
     return '';
   }
 
+  // Strip symbols before compatibility normalization. NFKC can expand a
+  // symbol into ordinary letters that a later symbol filter cannot detect.
   return value
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{S}]/gu, ' ')
     .normalize('NFKC')
     .replace(/\[[\p{L}\p{N}_ -]{1,40}\]/gu, ' ')
     .replace(/:[a-z0-9_+-]+:/gi, ' ')
@@ -5685,8 +5788,27 @@ function containsSpamSpeech(value) {
   return normalized ? matchesAnyPattern(normalized, SPAM_SPEECH_PATTERNS) : false;
 }
 
+function hasSpeechOverrideCommand(value) {
+  return typeof value === 'string' && /^\s*\.69(?:\s+|$)/u.test(value);
+}
+
+function stripSpeechOverrideCommand(value) {
+  return typeof value === 'string'
+    ? value.replace(/^\s*\.69(?:\s+|$)/u, '').trimStart()
+    : '';
+}
+
 function shouldSkipSpeechMessage(message) {
   if (!message) {
+    return true;
+  }
+
+  if (
+    ttsSettings.rolesOnly
+    && !message.isModerator
+    && !message.isSuperFan
+    && !hasSpeechOverrideCommand(message.text)
+  ) {
     return true;
   }
 
@@ -5706,7 +5828,7 @@ function shouldSkipSpeechMessage(message) {
 }
 
 function getSpeechText(message) {
-  const text = sanitizeSpeechText(message.text);
+  const text = sanitizeSpeechText(stripSpeechOverrideCommand(message.text));
   if (!text || !/[\p{L}\p{N}]/u.test(text)) {
     return '';
   }
@@ -5773,6 +5895,7 @@ function syncTtsControls() {
     ttsEnabledEl.disabled = !supported;
   }
   [
+    [ttsRolesOnlyEl, 'rolesOnly'],
     [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
     [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
     [ttsSkipSpamMessagesEl, 'skipSpamMessages']
@@ -5835,6 +5958,7 @@ function initTextToSpeech() {
   }
 
   [
+    [ttsRolesOnlyEl, 'rolesOnly'],
     [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
     [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
     [ttsSkipSpamMessagesEl, 'skipSpamMessages']
@@ -6397,7 +6521,8 @@ function renderRecentCreatorsCarousel() {
       const image = document.createElement('img'); image.src = creator.avatar; image.alt = ''; image.loading = 'lazy'; avatar.appendChild(image);
     } else avatar.textContent = getCreatorInitial(handle, creator);
     const name = document.createElement('span'); name.className = 'recent-creator-name'; name.textContent = (creator ? getCreatorDisplayName(creator) : handle).replace(/^@/, '');
-    button.append(star, avatar, name); favoriteCreatorsRow.appendChild(button);
+    button.append(star, createRemoveCreatorButton(handle), avatar, name);
+    favoriteCreatorsRow.appendChild(button);
   });
   if (!creators.length) {
     recentCreatorsCarousel.replaceChildren();
@@ -6447,7 +6572,7 @@ function renderRecentCreatorsCarousel() {
     star.appendChild(createUiIcon('star'));
     star.title = favoriteCreators.includes(handle) ? 'Usuń z ulubionych' : 'Dodaj do ulubionych';
     star.addEventListener('click', (event) => { event.preventDefault(); event.stopImmediatePropagation(); toggleFavoriteCreator(handle); });
-    button.append(star, avatar, name);
+    button.append(star, createRemoveCreatorButton(handle), avatar, name);
     fragment.appendChild(button);
   });
 
