@@ -1970,6 +1970,34 @@ Object.assign(I18N.hu, {
   'about.news.031.next': 'Ez egy titokzatos titok!'
 });
 
+Object.assign(I18N.pl, {
+  'about.news.032.viewersPanel': 'Poprawiono panel Widzowie przy dużej liczbie osób.',
+  'about.news.032.viewersGrid': 'Poprawiono odstępy i czytelność siatki widzów.',
+  'about.news.032.multipliers': 'Usprawniono wyświetlanie informacji o mnożnikach.',
+  'about.news.032.notifications': 'Poprawiono niezawodność toastów i archiwum powiadomień.'
+});
+
+Object.assign(I18N.en, {
+  'about.news.032.viewersPanel': 'Improved the Viewers panel when many people are present.',
+  'about.news.032.viewersGrid': 'Improved spacing and readability of the viewers grid.',
+  'about.news.032.multipliers': 'Improved the display of multiplier information.',
+  'about.news.032.notifications': 'Improved the reliability of notification toasts and notification history.'
+});
+
+Object.assign(I18N.de, {
+  'about.news.032.viewersPanel': 'Das Zuschauerfenster wurde bei einer großen Anzahl von Personen verbessert.',
+  'about.news.032.viewersGrid': 'Abstände und Lesbarkeit des Zuschauerrasters wurden verbessert.',
+  'about.news.032.multipliers': 'Die Anzeige von Multiplikatorinformationen wurde verbessert.',
+  'about.news.032.notifications': 'Die Zuverlässigkeit von Benachrichtigungen und dem Benachrichtigungsverlauf wurde verbessert.'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.032.viewersPanel': 'Javult a Nézők panel működése nagy létszám esetén.',
+  'about.news.032.viewersGrid': 'Javult a nézői rács térköze és olvashatósága.',
+  'about.news.032.multipliers': 'Javult a szorzókról szóló információk megjelenítése.',
+  'about.news.032.notifications': 'Megbízhatóbbá váltak az értesítések és az értesítési előzmények.'
+});
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -2291,7 +2319,8 @@ async function openCurrentViewers() {
       const avatar = document.createElement('span'); avatar.className = 'recent-creator-avatar';
       if (viewer.avatar) { const image = document.createElement('img'); image.src = viewer.avatar; image.alt = ''; avatar.appendChild(image); }
       else avatar.textContent = (viewer.nickname || viewer.username || '?').trim().charAt(0).toUpperCase();
-      const name = document.createElement('span'); name.className = 'recent-creator-name'; name.textContent = viewer.nickname || viewer.username;
+      const viewerName = viewer.nickname || viewer.username || 'Widz';
+      const name = document.createElement('span'); name.className = 'recent-creator-name'; name.textContent = viewerName; name.title = viewerName;
       item.append(avatar, name);
       list.appendChild(item);
     });
@@ -5140,14 +5169,15 @@ function handleCzesterBattleAlert(alert) {
     && multiplier > 1
   );
   if (isMultiplierAlert && generalSettings.multiplierNotifications) {
+    const alertId = String(alert.alertId || '').trim();
     enqueueProgramToast({
       type: 'multiplier',
       title: t('programToast.multiplier.title'),
       message: t('czester.notice.multiplier', { multiplier }),
       icon: 'zap',
       duration: 8000,
-      dedupeKey: `multiplier:${multiplier}`,
-      dedupeMs: 8000,
+      dedupeKey: alertId ? `multiplier:${alertId}` : `multiplier:${multiplier}`,
+      dedupeMs: alertId ? 60000 : 8000,
       priority: true
     });
   }

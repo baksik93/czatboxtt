@@ -572,8 +572,8 @@ let reconnectAttemptCount = 0;
 let reconnectBlockedUntil = 0;
 let battleActive = false;
 let battleScorebarAwaitingNextStart = false;
-let lastBattleAlertKey = '';
-let lastBattleAlertAt = 0;
+const recentBattleMultiplierAlerts = new Map();
+const BATTLE_MULTIPLIER_DEDUPE_MS = 60000;
 let lastBattleScoreAlertKey = '';
 let lastBattleScoreAlertAt = 0;
 let lastBattleTaskProgressAlertKey = '';
@@ -3527,7 +3527,6 @@ async function connectLiveChat() {
       }
 
       handleBattleMessage(data, creator);
-      emitBattleMultiplierFromEvent(data);
     });
 
     connection.on(WebcastEvent.LINK_MIC_ARMIES, (data) => {
@@ -3536,7 +3535,6 @@ async function connectLiveChat() {
       }
 
       handleBattleArmies(data, creator);
-      emitBattleMultiplierFromEvent(data);
     });
 
     connection.on(WebcastEvent.LINK_MIC_BATTLE_TASK, (data) => {
@@ -3545,7 +3543,7 @@ async function connectLiveChat() {
       }
 
       handleBattleTask(data);
-      emitBattleMultiplierFromEvent(data);
+      emitBattleTaskMultiplier(data);
     });
 
     if (WebcastEvent.BOOST_CARD) {
@@ -3557,6 +3555,17 @@ async function connectLiveChat() {
         handleBattleBoostCard(data);
       });
     }
+
+    // Newer TikTok schemas expose PK power-up cards as battleItemCard.
+    // Keep this listener beside the legacy boostCard event so a connector update
+    // cannot silently remove multiplier notifications again.
+    connection.on('battleItemCard', (data) => {
+      if (!eventBelongsToActiveConnection(connection, creator)) {
+        return;
+      }
+
+      handleBattleBoostCard(data);
+    });
 
     if (WebcastEvent.SUPER_FAN) {
       connection.on(WebcastEvent.SUPER_FAN, (data) => {
@@ -6205,17 +6214,35 @@ function addBattleTaskContributor(userId) {
 }
 
 function handleBattleBoostCard(data) {
-  if (!battleActive && !battleState.active) {
+  let cardMultiplier = emitBattleMultiplierFromEvent(data, { source: 'item-card', primary: true });
+
+  if (!cardMultiplier && ['success', 'reward'].includes(battleState.task && battleState.task.status)) {
+    const taskMultiplier = normalizeMultiplier(battleState.task.rewardMultiple);
+    if (taskMultiplier === 2 || taskMultiplier === 3) {
+      sendBattleAlert(taskMultiplier, data, { source: 'item-card', primary: true });
+      cardMultiplier = taskMultiplier;
+    }
+  }
+
+  if (!battleActive && !battleState.active && !cardMultiplier) {
     return;
   }
 
-  const cards = data && data.cards || [];
+  const cards = Array.isArray(data && data.cards) && data.cards.length
+    ? data.cards
+    : [data];
   const detected = cards
-    .map((card) => detectBattleEffectType(card && (card.mCardId || card.cardId || card.taskId)))
+    .map((card) => detectBattleEffectType([
+      card && card.effect,
+      card && card.iconKey,
+      card && card.mCardId,
+      card && card.cardId,
+      card && card.taskId
+    ].filter(Boolean).join(' ')))
     .find((type) => type !== 'effect');
   if (detected) {
     setTemporaryBattlePhase('booster');
-    sendBattleEventAlert('booster-card', { effectType: detected });
+    sendBattleEventAlert('booster-card', { effectType: detected, multiplier: cardMultiplier || 0 });
     publishBattleState();
   }
 }
@@ -6454,8 +6481,7 @@ function finishBattleState(data, status = 'finished') {
   battleState.rewards = battleState.rewards.filter((reward) => reward.type !== 'freeze');
   battleActive = false;
   battleScorebarAwaitingNextStart = true;
-  lastBattleAlertKey = '';
-  lastBattleAlertAt = 0;
+  recentBattleMultiplierAlerts.clear();
 
   if (!battleState.winnerSideId && battleState.sides.length) {
     const ranked = [...battleState.sides].sort((left, right) => right.score - left.score);
@@ -6491,22 +6517,23 @@ function finishBattleState(data, status = 'finished') {
   battleState.endsAt = '';
 }
 
-function emitBattleMultiplierFromEvent(data) {
+function emitBattleMultiplierFromEvent(data, options = {}) {
   const multiplier = getBattleMultiplier(data);
   if (multiplier !== 2 && multiplier !== 3) {
-    return;
+    return 0;
   }
 
-  sendBattleAlert(multiplier);
+  sendBattleAlert(multiplier, data, options);
+  return multiplier;
 }
 
 function getBattleMultiplier(data) {
-  const direct = normalizeMultiplier(
-    data && data.matchInfo && (
-      data.matchInfo.multiplierValue
-      || data.matchInfo.critical
-    )
-  );
+  const direct = normalizeMultiplier(data && (
+    data.multiplier
+    || data.multiplierValue
+    || data.rewardMultiple
+    || data.matchInfo && (data.matchInfo.multiplier || data.matchInfo.multiplierValue)
+  ));
   if (direct) {
     return direct;
   }
@@ -6519,9 +6546,22 @@ function findMultiplier(value, depth) {
     return 0;
   }
 
-  const candidate = normalizeMultiplier(value.multiplierValue || value.rewardMultiple);
+  const candidate = normalizeMultiplier(value.multiplier || value.multiplierValue || value.rewardMultiple);
   if (candidate) {
     return candidate;
+  }
+
+  const descriptiveValue = [
+    value.effect,
+    value.iconKey,
+    value.cardKey,
+    value.mCardId,
+    value.cardId,
+    value.taskId
+  ].filter((entry) => typeof entry === 'string').join(' ');
+  const descriptiveMatch = descriptiveValue.match(/(?:booster|boost|multiplier|bonus)[_\s:-]*x?([23])\b|\bx([23])\b/i);
+  if (descriptiveMatch) {
+    return normalizeMultiplier(descriptiveMatch[1] || descriptiveMatch[2]);
   }
 
   for (const child of Object.values(value)) {
@@ -6547,22 +6587,96 @@ function normalizeMultiplier(value) {
   return Math.round(numeric);
 }
 
-function sendBattleAlert(multiplier) {
-  const now = Date.now();
-  const key = `x${multiplier}`;
-  if (lastBattleAlertKey === key && now - lastBattleAlertAt < 8000) {
-    return;
+function emitBattleTaskMultiplier(data) {
+  const type = Number(data && (data.taskMessageType ?? data.battleTaskMessageType));
+  const settle = data && (data.taskSettle || data.settle);
+  const reward = data && (data.reward || data.rewardSettle);
+  const settledSuccessfully = type === 2 && settle && [0, 2].includes(Number(settle.result));
+  const rewardActivated = type === 3 && reward && Number(reward.status) === 0;
+  if (!settledSuccessfully && !rewardActivated) {
+    return 0;
   }
 
-  lastBattleAlertKey = key;
-  lastBattleAlertAt = now;
+  const multiplier = getBattleMultiplier(data)
+    || normalizeMultiplier(battleState.task && battleState.task.rewardMultiple);
+  if (multiplier !== 2 && multiplier !== 3) {
+    return 0;
+  }
+
+  sendBattleAlert(multiplier, data, { source: 'battle-task', primary: true });
+  return multiplier;
+}
+
+function getBattleMultiplierAlertId(data, multiplier, source) {
+  const messageId = normalizeBattleId(getMessageId(data));
+  const battleId = getBattleId(data) || normalizeBattleId(data && data.battleId) || battleState.battleId || 'battle';
+  const activation = normalizeBattleId(data && (
+    data.activatedAtSec
+    || data.endsAtSec
+    || data.startTime
+    || data.timestamp
+  ));
+  if (messageId) {
+    return `${battleId}:${source}:${messageId}:${multiplier}`;
+  }
+  if (activation) {
+    return `${battleId}:${source}:${activation}:${multiplier}`;
+  }
+  return `${battleId}:${source}:${multiplier}:${Math.floor(Date.now() / 3000)}`;
+}
+
+function sendBattleAlert(multiplier, data = {}, options = {}) {
+  const now = Date.now();
+  const source = String(options.source || 'fallback');
+  const alertId = getBattleMultiplierAlertId(data, multiplier, source);
+
+  for (const [key, entry] of recentBattleMultiplierAlerts) {
+    if (now - Number(entry && entry.timestamp || 0) > BATTLE_MULTIPLIER_DEDUPE_MS) {
+      recentBattleMultiplierAlerts.delete(key);
+    }
+  }
+  if (recentBattleMultiplierAlerts.has(alertId)) {
+    return false;
+  }
+
+  const recentEquivalentPrimary = [...recentBattleMultiplierAlerts.values()].some((entry) => (
+    options.primary
+    && entry.primary
+    && entry.multiplier === multiplier
+    && now - entry.timestamp < 12000
+  ));
+  if (recentEquivalentPrimary) {
+    return false;
+  }
+
+  // The task-settle/card event is the authoritative activation signal. If it
+  // was already handled, ignore a delayed copy carried by a generic battle
+  // frame instead of showing the toast after the multiplier has started.
+  if (!options.primary) {
+    const recentPrimary = [...recentBattleMultiplierAlerts.values()].some((entry) => (
+      entry.primary
+      && entry.multiplier === multiplier
+      && now - entry.timestamp < 15000
+    ));
+    if (recentPrimary) {
+      return false;
+    }
+  }
+
+  recentBattleMultiplierAlerts.set(alertId, {
+    multiplier,
+    primary: Boolean(options.primary),
+    timestamp: now
+  });
   sendToShell('shell:battle-alert', {
+    alertId,
     multiplier,
     textKey: 'battle.multiplier',
     tone: 'battle',
     uppercase: true,
     text: `BITWA: ZA CHWILĘ MNOŻNIK X${multiplier}`
   });
+  return true;
 }
 
 function sendHondaJoinAlert() {
