@@ -147,6 +147,7 @@ const UI_ICONS = {
   zap: '<path d="M13 2.75 5.5 13h6L11 21.25 18.5 11h-6L13 2.75Z"/>',
   sparkle: '<path d="M12 3.5c.6 3.1 2.4 4.9 5.5 5.5-3.1.6-4.9 2.4-5.5 5.5-.6-3.1-2.4-4.9-5.5-5.5 3.1-.6 4.9-2.4 5.5-5.5Z"/><path d="M18.5 14.5c.3 1.6 1.2 2.5 2.8 2.8-1.6.3-2.5 1.2-2.8 2.8-.3-1.6-1.2-2.5-2.8-2.8 1.6-.3 2.5-1.2 2.8-2.8Z"/>',
   coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
+  bell: '<path d="M6.5 16.5h11l-1.25-2V10a4.25 4.25 0 0 0-8.5 0v4.5l-1.25 2Z"/><path d="M10 19a2.25 2.25 0 0 0 4 0"/>',
   dinosaur: '<path d="M5 18v-5.5a6.5 6.5 0 0 1 6.5-6.5h3a4.5 4.5 0 0 1 4.5 4.5V13h-4v3.5M8 18h3M15 18h3M18 10h2.5M8 9h.01"/>',
   apple: '<path d="M12 8c-3-2-6 .5-6 4.5S8.5 19 12 19s6-2.5 6-6.5S15 6 12 8Z"/><path d="M12 7c0-2 1.5-3 3-3M12 5c-1.5-1.5-3-1.5-4-1"/>',
   cake: '<path d="M5 11h14v8H5zM4 11h16M8 7v4M12 7v4M16 7v4"/><path d="M8 7a2 2 0 1 1 4 0 2 2 0 1 1 4 0"/>',
@@ -290,6 +291,16 @@ const I18N = {
     'czester.notice.creatorFavorite': 'Podsunąłem wyżej twórcę @{creator}, bo często do niego wracasz.',
     'czester.notice.spam': 'Wykryłem możliwy spam: {author} wysłał(a) tę samą wiadomość {count} razy w 5 sekund.',
     'czester.notice.superfanJoin': 'Dołącza superfan {name}.',
+    'programToast.multiplier.title': 'Mnożnik w bitwie',
+    'programToast.freeze.title': 'Zamrożenie twórcy',
+    'programToast.freeze.body': 'W bitwie zamrożono: {target}.',
+    'programToast.moderator.title': 'Moderator dołączył',
+    'programToast.moderator.body': 'Do czatu dołącza moderator {name}.',
+    'programToast.superfan.title': 'Superfan dołączył',
+    'programToast.superfan.body': 'Do czatu dołącza superfan {name}.',
+    'programToast.history.title': 'Powiadomienia LIVE',
+    'programToast.history.note': 'Historia z bieżącej transmisji.',
+    'programToast.history.empty': 'Brak powiadomień podczas tego LIVE.',
     'czester.notice.connection': 'Zapamiętałem to połączenie. Im częściej wracasz do twórcy, tym wyżej będzie na liście.',
     'czester.ai.title': 'Lokalny mózg Czestera',
     'czester.ai.checking': 'Sprawdzam pakiet lokalny...',
@@ -400,6 +411,8 @@ const I18N = {
     'settings.accessibility.tts': 'Wiadomości TTS:',
     'settings.accessibility.readAloud': 'Czytaj czat na głos',
     'settings.accessibility.skipVulgarNicknames': 'Pomijaj wulgarne nicki',
+    'settings.accessibility.skipSpamNicknames': 'Pomijaj spamowe nicki',
+    'settings.accessibility.skipSpamNicknamesDescription': 'Pomija nicki złożone głównie z ozdobników, emoji i nietypowych znaków.',
     'settings.accessibility.skipVulgarMessages': 'Pomijaj wulgarne wiadomości',
     'settings.accessibility.skipSpamMessages': 'Pomijaj spamowe wiadomości (obs za obs, ob, oddam obs itd.)',
     'settings.accessibility.rolesOnly': 'Czytaj tylko wiadomości moderatorów i superfanów',
@@ -555,6 +568,7 @@ const I18N = {
     'battle.stage.missionBy': 'Cel: {names}',
     'battle.stage.rewards': 'Nagrody: {rewards}',
     'status.connecting': 'Łączę...',
+    'status.waitingCreator': 'Wybierz twórcę',
     'status.online': 'Online',
     'status.offline': 'Offline',
     'status.reconnecting': 'Ponawiam...',
@@ -695,6 +709,16 @@ const I18N = {
     'czester.notice.creatorFavorite': 'I moved @{creator} higher because you often return to this creator.',
     'czester.notice.spam': 'Possible spam detected: {author} sent the same message {count} times in 5 seconds.',
     'czester.notice.superfanJoin': 'Superfan {name} joined.',
+    'programToast.multiplier.title': 'Battle multiplier',
+    'programToast.freeze.title': 'Creator frozen',
+    'programToast.freeze.body': 'Frozen in battle: {target}.',
+    'programToast.moderator.title': 'Moderator joined',
+    'programToast.moderator.body': 'Moderator {name} joined the chat.',
+    'programToast.superfan.title': 'Superfan joined',
+    'programToast.superfan.body': 'Superfan {name} joined the chat.',
+    'programToast.history.title': 'LIVE notifications',
+    'programToast.history.note': 'History from the current stream.',
+    'programToast.history.empty': 'No notifications during this LIVE.',
     'czester.notice.connection': 'I saved this connection. The more often you return to a creator, the higher they will appear.',
     'czester.ai.title': 'Czester local brain',
     'czester.ai.checking': 'Checking local package...',
@@ -805,6 +829,8 @@ const I18N = {
     'settings.accessibility.tts': 'Message TTS:',
     'settings.accessibility.readAloud': 'Read chat aloud',
     'settings.accessibility.skipVulgarNicknames': 'Skip vulgar nicknames',
+    'settings.accessibility.skipSpamNicknames': 'Skip spam nicknames',
+    'settings.accessibility.skipSpamNicknamesDescription': 'Skips nicknames made mostly of decorations, emoji and unusual characters.',
     'settings.accessibility.skipVulgarMessages': 'Skip vulgar messages',
     'settings.accessibility.skipSpamMessages': 'Skip spam messages (follow for follow, obs, etc.)',
     'settings.accessibility.rolesOnly': 'Read messages from moderators and superfans only',
@@ -959,6 +985,7 @@ const I18N = {
     'battle.stage.missionBy': 'Goal: {names}',
     'battle.stage.rewards': 'Rewards: {rewards}',
     'status.connecting': 'Connecting...',
+    'status.waitingCreator': 'Choose a creator',
     'status.online': 'Online',
     'status.offline': 'Offline',
     'status.reconnecting': 'Retrying...',
@@ -1099,6 +1126,16 @@ const I18N = {
     'czester.notice.creatorFavorite': 'Ich habe @{creator} höher gesetzt, weil du oft zu diesem Creator zurückkehrst.',
     'czester.notice.spam': 'Möglicher Spam erkannt: {author} hat dieselbe Nachricht {count} Mal in 5 Sekunden gesendet.',
     'czester.notice.superfanJoin': 'Superfan {name} tritt bei.',
+    'programToast.multiplier.title': 'Battle-Multiplikator',
+    'programToast.freeze.title': 'Creator eingefroren',
+    'programToast.freeze.body': 'Im Battle eingefroren: {target}.',
+    'programToast.moderator.title': 'Moderator beigetreten',
+    'programToast.moderator.body': 'Moderator {name} ist dem Chat beigetreten.',
+    'programToast.superfan.title': 'Superfan beigetreten',
+    'programToast.superfan.body': 'Superfan {name} ist dem Chat beigetreten.',
+    'programToast.history.title': 'LIVE-Benachrichtigungen',
+    'programToast.history.note': 'Verlauf des aktuellen Streams.',
+    'programToast.history.empty': 'Keine Benachrichtigungen während dieses LIVE.',
     'czester.notice.connection': 'Ich habe diese Verbindung gespeichert. Je öfter du zu einem Creator zurückkehrst, desto höher erscheint er.',
     'czester.ai.title': 'Lokales Gehirn von Czester',
     'czester.ai.checking': 'Lokales Paket wird geprüft...',
@@ -1209,6 +1246,8 @@ const I18N = {
     'settings.accessibility.tts': 'Nachrichten-TTS:',
     'settings.accessibility.readAloud': 'Chat laut vorlesen',
     'settings.accessibility.skipVulgarNicknames': 'Vulgäre Nicknames überspringen',
+    'settings.accessibility.skipSpamNicknames': 'Spam-Nicknames überspringen',
+    'settings.accessibility.skipSpamNicknamesDescription': 'Überspringt Nicknames, die überwiegend aus Verzierungen, Emojis und ungewöhnlichen Zeichen bestehen.',
     'settings.accessibility.skipVulgarMessages': 'Vulgäre Nachrichten überspringen',
     'settings.accessibility.skipSpamMessages': 'Spam-Nachrichten überspringen (Follow for Follow usw.)',
     'settings.accessibility.rolesOnly': 'Nur Nachrichten von Moderatoren und Superfans vorlesen',
@@ -1363,6 +1402,7 @@ const I18N = {
     'battle.stage.missionBy': 'Ziel: {names}',
     'battle.stage.rewards': 'Belohnungen: {rewards}',
     'status.connecting': 'Verbinde...',
+    'status.waitingCreator': 'Creator auswählen',
     'status.online': 'Online',
     'status.offline': 'Offline',
     'status.reconnecting': 'Erneuter Versuch...',
@@ -1474,7 +1514,17 @@ I18N.hu = {
   'about.news.version': 'Programverzió',
   'about.news.changes.title': 'Változások:',
   'about.faq.title': 'GYIK',
-  'settings.general.multiplierNotifications': 'Szorzó értesítések',
+    'settings.general.multiplierNotifications': 'Szorzó értesítések',
+    'programToast.multiplier.title': 'Csataszorzó',
+    'programToast.freeze.title': 'Alkotó lefagyasztva',
+    'programToast.freeze.body': 'A csatában lefagyasztva: {target}.',
+    'programToast.moderator.title': 'Moderátor csatlakozott',
+    'programToast.moderator.body': '{name} moderátor csatlakozott a csevegéshez.',
+    'programToast.superfan.title': 'Szuperrajongó csatlakozott',
+    'programToast.superfan.body': '{name} szuperrajongó csatlakozott a csevegéshez.',
+    'programToast.history.title': 'LIVE értesítések',
+    'programToast.history.note': 'Az aktuális közvetítés előzményei.',
+    'programToast.history.empty': 'Nincs értesítés ezen a LIVE-on.',
   'settings.general.statsToolbox': 'Statisztikai eszköztár',
   'settings.general.galleryAvatars': 'Avatargaléria',
   'settings.appearance.chatStyle': 'Csevegési stílus',
@@ -1497,6 +1547,8 @@ I18N.hu = {
   'settings.appAppearance.retroKb2.description': 'Könnyű, régi blogos K2-elrendezés.',
   'settings.accessibility.tts': 'Üzenetek felolvasása',
   'settings.accessibility.skipVulgarNicknames': 'Trágár becenevek kihagyása',
+  'settings.accessibility.skipSpamNicknames': 'Spam jellegű becenevek kihagyása',
+  'settings.accessibility.skipSpamNicknamesDescription': 'Kihagyja a főként díszítőelemekből, emojikból és szokatlan karakterekből álló beceneveket.',
   'settings.accessibility.skipVulgarMessages': 'Trágár üzenetek kihagyása',
   'settings.accessibility.skipSpamMessages': 'Spamüzenetek kihagyása',
   'settings.accessibility.rolesOnly': 'Csak moderátorok és szuperrajongók üzeneteinek felolvasása',
@@ -1566,6 +1618,7 @@ I18N.hu['statsWidget.expand'] = 'Élő statisztikák megnyitása';
 I18N.hu['statsWidget.collapse'] = 'Élő statisztikák bezárása';
 I18N.hu['status.online'] = 'Online';
 I18N.hu['status.offline'] = 'Offline';
+I18N.hu['status.waitingCreator'] = 'Válassz alkotót';
 I18N.hu['event.member.join'] = 'csatlakozott az élő adáshoz';
 I18N.hu['event.gift'] = 'ajándékot küldött: {giftName}{countText}{costText}';
 I18N.hu['event.like'] = 'kedvelte az élő adást (összesen {total} kedvelés)';
@@ -1853,6 +1906,70 @@ Object.assign(I18N.hu, {
   'about.news.030.next': 'Ez egy titokzatos titok!'
 });
 
+Object.assign(I18N.pl, {
+  'about.news.031.intro': 'Aktualizacja skupia się na powiadomieniach LIVE, dokładniejszym zliczaniu tapnięć, usprawnieniach TTS oraz poprawkach wyglądu aplikacji.',
+  'about.news.031.toasts': 'Dodano toasty powiadomień dla mnożników bitewnych, zamrożeń, moderatorów i superfanów.',
+  'about.news.031.history': 'Dodano historię powiadomień z bieżącej transmisji LIVE.',
+  'about.news.031.backgrounds': 'Powiadomienia otrzymały animowane tła dopasowane kolorystycznie do rodzaju wydarzenia.',
+  'about.news.031.multiplier': 'Poprawiono szybkość i dokładność wyświetlania informacji o mnożnikach.',
+  'about.news.031.taps': 'Poprawiono zliczanie tapnięć, w tym serie tapnięć i działanie statystyk po zminimalizowaniu programu.',
+  'about.news.031.tts': 'Dodano w TTS opcję pomijania spamowych i nadmiernie ozdobionych nicków.',
+  'about.news.031.manualCreator': 'Program po uruchomieniu nie łączy się już automatycznie z ostatnim twórcą — czeka na wybór użytkownika.',
+  'about.news.031.roles': 'Poprawiono rozpoznawanie dołączeń moderatorów i superfanów.',
+  'about.news.031.decorativeBars': 'Poprawiono wygląd belek nawigacji i filtrów w wyglądzie „Ozdobnym”.',
+  'about.news.031.decorativeWidgets': 'Widgety statystyk w wyglądzie „Ozdobnym” są teraz przypięte do prawej krawędzi aplikacji.',
+  'about.news.031.other': 'Wprowadzono dodatkowe poprawki wyglądu, stabilności oraz responsywności interfejsu.',
+  'about.news.031.next': 'To tajemnicza tajemnica!'
+});
+
+Object.assign(I18N.en, {
+  'about.news.031.intro': 'This update focuses on LIVE notifications, more accurate tap counting, TTS improvements and visual refinements.',
+  'about.news.031.toasts': 'Added notification toasts for battle multipliers, freezes, moderators and superfans.',
+  'about.news.031.history': 'Added a notification history for the current LIVE session.',
+  'about.news.031.backgrounds': 'Notifications now use animated backgrounds whose colours match the event type.',
+  'about.news.031.multiplier': 'Improved the speed and accuracy of battle multiplier notifications.',
+  'about.news.031.taps': 'Improved tap counting, including tap streaks and statistics while the application is minimized.',
+  'about.news.031.tts': 'Added a TTS option to skip spammy and excessively decorated nicknames.',
+  'about.news.031.manualCreator': 'The application no longer reconnects to the last creator at startup and waits for the user to choose one.',
+  'about.news.031.roles': 'Improved detection of moderators and superfans joining a LIVE.',
+  'about.news.031.decorativeBars': 'Improved the navigation and filter bars in the Decorative appearance.',
+  'about.news.031.decorativeWidgets': 'Statistics widgets in the Decorative appearance are now attached to the right edge of the application.',
+  'about.news.031.other': 'Added further visual, stability and interface responsiveness improvements.',
+  'about.news.031.next': 'That is a mysterious mystery!'
+});
+
+Object.assign(I18N.de, {
+  'about.news.031.intro': 'Dieses Update konzentriert sich auf LIVE-Benachrichtigungen, eine genauere Tap-Zählung, TTS-Verbesserungen und visuelle Korrekturen.',
+  'about.news.031.toasts': 'Benachrichtigungs-Toasts für Kampfmultiplikatoren, Einfrierungen, Moderatoren und Superfans wurden hinzugefügt.',
+  'about.news.031.history': 'Ein Benachrichtigungsverlauf für die aktuelle LIVE-Übertragung wurde hinzugefügt.',
+  'about.news.031.backgrounds': 'Benachrichtigungen verwenden jetzt animierte Hintergründe, deren Farben zur Ereignisart passen.',
+  'about.news.031.multiplier': 'Geschwindigkeit und Genauigkeit der Anzeige von Multiplikatoren wurden verbessert.',
+  'about.news.031.taps': 'Die Tap-Zählung wurde verbessert, einschließlich Tap-Serien und Statistiken bei minimierter Anwendung.',
+  'about.news.031.tts': 'Eine TTS-Option zum Überspringen von Spam- und übermäßig verzierten Nicknamen wurde hinzugefügt.',
+  'about.news.031.manualCreator': 'Beim Start verbindet sich die Anwendung nicht mehr automatisch mit dem letzten Creator, sondern wartet auf die Auswahl des Benutzers.',
+  'about.news.031.roles': 'Die Erkennung beitretender Moderatoren und Superfans wurde verbessert.',
+  'about.news.031.decorativeBars': 'Navigations- und Filterleisten in der dekorativen Ansicht wurden verbessert.',
+  'about.news.031.decorativeWidgets': 'Statistik-Widgets in der dekorativen Ansicht sind jetzt am rechten Rand der Anwendung befestigt.',
+  'about.news.031.other': 'Weitere Verbesserungen an Darstellung, Stabilität und Reaktionsfähigkeit der Oberfläche wurden vorgenommen.',
+  'about.news.031.next': 'Das bleibt ein geheimnisvolles Geheimnis!'
+});
+
+Object.assign(I18N.hu, {
+  'about.news.031.intro': 'A frissítés a LIVE-értesítésekre, a pontosabb koppintásszámlálásra, a TTS fejlesztéseire és a megjelenés javítására összpontosít.',
+  'about.news.031.toasts': 'Értesítési toastok kerültek be a csataszorzókhoz, fagyasztásokhoz, moderátorokhoz és szuperrajongókhoz.',
+  'about.news.031.history': 'Értesítési előzmények kerültek be az aktuális LIVE-közvetítéshez.',
+  'about.news.031.backgrounds': 'Az értesítések mostantól az esemény típusához illő, animált hátteret használnak.',
+  'about.news.031.multiplier': 'Gyorsabb és pontosabb lett a szorzókról szóló információk megjelenítése.',
+  'about.news.031.taps': 'Javult a koppintások számlálása, beleértve a sorozatokat és a minimalizált alkalmazás melletti statisztikákat.',
+  'about.news.031.tts': 'A TTS új beállítást kapott a spam jellegű és túlzottan díszített becenevek kihagyására.',
+  'about.news.031.manualCreator': 'Indításkor az alkalmazás már nem kapcsolódik automatikusan az utolsó alkotóhoz, hanem megvárja a felhasználó választását.',
+  'about.news.031.roles': 'Javult a LIVE-hoz csatlakozó moderátorok és szuperrajongók felismerése.',
+  'about.news.031.decorativeBars': 'Javult a navigációs és szűrősávok megjelenése a Díszített nézetben.',
+  'about.news.031.decorativeWidgets': 'A Díszített nézet statisztikai widgetjei mostantól az alkalmazás jobb széléhez igazodnak.',
+  'about.news.031.other': 'További megjelenési, stabilitási és felületi reszponzivitási javítások készültek.',
+  'about.news.031.next': 'Ez egy titokzatos titok!'
+});
+
 const statusEl = document.getElementById('status');
 const statusConnectionEl = document.getElementById('statusConnection');
 const statusDelayEl = document.getElementById('statusDelay');
@@ -2082,9 +2199,9 @@ function updateTalarkiUi() {
     shopWildGalaxyPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
   }
   if (shopBrikersWorldPurchaseEl) {
-    const unlocked = isAppThemeUnlocked('swiat-brikersa');
-    shopBrikersWorldPurchaseEl.disabled = unlocked || talarki < 1000;
-    shopBrikersWorldPurchaseEl.textContent = unlocked ? 'Odblokowano' : 'Kup za 1000 Talarków';
+    shopBrikersWorldPurchaseEl.disabled = true;
+    shopBrikersWorldPurchaseEl.setAttribute('aria-disabled', 'true');
+    shopBrikersWorldPurchaseEl.textContent = 'Niedostępny';
   }
   if (shopBrikersPurchaseEl) {
     const unlocked = isBrikersGameUnlocked();
@@ -2117,15 +2234,6 @@ shopWildGalaxyPurchaseEl?.addEventListener('click', () => {
   redeemedFeatures.wildGalaxyTheme = true;
   saveRedeemedFeatures();
   syncLockedThemeChoice('themeDzikaGalaktyka', true);
-  updateTalarkiUi();
-});
-shopBrikersWorldPurchaseEl?.addEventListener('click', () => {
-  if (isAppThemeUnlocked('swiat-brikersa') || talarki < 1000) return;
-  talarki -= 1000;
-  localStorage.setItem(TALARKI_KEY, String(talarki));
-  redeemedFeatures.brickersWorldTheme = true;
-  saveRedeemedFeatures();
-  syncLockedThemeChoice('themeSwiatBrikersa', true);
   updateTalarkiUi();
 });
 shopBrikersPurchaseEl?.addEventListener('click', () => {
@@ -2623,9 +2731,157 @@ const appVersionEl = document.getElementById('appVersion');
 const appTaskbarClockEl = document.getElementById('appTaskbarClock');
 const appTaskbarTimeEl = document.getElementById('appTaskbarTime');
 const appTaskbarDateEl = document.getElementById('appTaskbarDate');
+const programToastEl = document.getElementById('programToast');
+const programToastIconEl = document.getElementById('programToastIcon');
+const programToastTitleEl = document.getElementById('programToastTitle');
+const programToastMessageEl = document.getElementById('programToastMessage');
+const programToastCloseEl = document.getElementById('programToastClose');
+const toastHistoryLauncherEl = document.getElementById('toastHistoryLauncher');
+const toastHistoryPanelEl = document.getElementById('toastHistoryPanel');
+const toastHistoryCloseEl = document.getElementById('toastHistoryClose');
+const toastHistoryTitleEl = document.getElementById('toastHistoryTitle');
+const toastHistoryNoteEl = document.getElementById('toastHistoryNote');
+const toastHistoryListEl = document.getElementById('toastHistoryList');
+const toastHistoryEmptyEl = document.getElementById('toastHistoryEmpty');
+const programToastQueue = [];
+const programToastHistory = [];
+const programToastRecentKeys = new Map();
+let activeProgramToast = null;
+let programToastTimer = null;
+let programToastHideTimer = null;
+
+function wasProgramToastRecentlyQueued(key, ttlMs = 30000) {
+  const normalizedKey = String(key || '').trim();
+  if (!normalizedKey) {
+    return false;
+  }
+  const now = Date.now();
+  for (const [storedKey, storedAt] of programToastRecentKeys.entries()) {
+    if (now - storedAt > 10 * 60 * 1000) {
+      programToastRecentKeys.delete(storedKey);
+    }
+  }
+  const previous = Number(programToastRecentKeys.get(normalizedKey) || 0);
+  if (previous && now - previous < ttlMs) {
+    return true;
+  }
+  programToastRecentKeys.set(normalizedKey, now);
+  return false;
+}
+
+function renderNextProgramToast() {
+  if (activeProgramToast || !programToastQueue.length || !programToastEl) {
+    return;
+  }
+  activeProgramToast = programToastQueue.shift();
+  const toast = activeProgramToast;
+  programToastEl.dataset.type = toast.type || 'info';
+  programToastTitleEl.textContent = toast.title || '';
+  programToastMessageEl.textContent = toast.message || '';
+  programToastIconEl.replaceChildren(createUiIcon(toast.icon || 'message'));
+  programToastEl.hidden = false;
+  requestAnimationFrame(() => programToastEl.classList.add('is-visible'));
+  programToastTimer = window.setTimeout(() => dismissProgramToast(), toast.duration || 7000);
+}
+
+function renderProgramToastHistory() {
+  if (!toastHistoryListEl || !toastHistoryEmptyEl) {
+    return;
+  }
+  if (toastHistoryTitleEl) toastHistoryTitleEl.textContent = t('programToast.history.title');
+  if (toastHistoryNoteEl) toastHistoryNoteEl.textContent = t('programToast.history.note');
+  toastHistoryEmptyEl.textContent = t('programToast.history.empty');
+  toastHistoryListEl.replaceChildren();
+  toastHistoryEmptyEl.hidden = programToastHistory.length > 0;
+  const fragment = document.createDocumentFragment();
+  programToastHistory.slice().reverse().forEach((toast) => {
+    const item = document.createElement('article');
+    item.className = 'toast-history-item';
+    item.dataset.type = toast.type || 'info';
+    const icon = document.createElement('span');
+    icon.className = 'toast-history-item-icon';
+    icon.appendChild(createUiIcon(toast.icon || 'message'));
+    const copy = document.createElement('div');
+    copy.className = 'toast-history-item-copy';
+    const heading = document.createElement('strong');
+    heading.textContent = toast.title || '';
+    const message = document.createElement('p');
+    message.textContent = toast.message || '';
+    copy.append(heading, message);
+    const time = document.createElement('time');
+    time.dateTime = new Date(toast.createdAt).toISOString();
+    time.textContent = formatTime(toast.createdAt);
+    item.append(icon, copy, time);
+    fragment.appendChild(item);
+  });
+  toastHistoryListEl.appendChild(fragment);
+}
+
+function setProgramToastHistoryOpen(open) {
+  if (!toastHistoryPanelEl) return;
+  const nextOpen = Boolean(open);
+  if (nextOpen) renderProgramToastHistory();
+  toastHistoryPanelEl.hidden = !nextOpen;
+  toastHistoryLauncherEl?.setAttribute('aria-expanded', String(nextOpen));
+  toastHistoryLauncherEl?.setAttribute('data-open', String(nextOpen));
+  document.body.classList.toggle('toast-history-open', nextOpen);
+}
+
+function resetProgramToastHistory({ close = true } = {}) {
+  programToastHistory.length = 0;
+  programToastQueue.length = 0;
+  programToastRecentKeys.clear();
+  renderProgramToastHistory();
+  if (activeProgramToast) dismissProgramToast();
+  if (close) setProgramToastHistoryOpen(false);
+}
+
+function enqueueProgramToast({ type = 'info', title = '', message = '', icon = 'message', duration = 7000, dedupeKey = '', dedupeMs = 30000, priority = false } = {}) {
+  const cleanMessage = String(message || '').trim();
+  if (!cleanMessage || (dedupeKey && wasProgramToastRecentlyQueued(dedupeKey, dedupeMs))) {
+    return;
+  }
+  const toast = { type, title: String(title || '').trim(), message: cleanMessage, icon, duration, createdAt: Date.now() };
+  if (isOnlineConnectionState(state) || (state.mode === 'chat' && state.creatorId)) {
+    programToastHistory.push(toast);
+    renderProgramToastHistory();
+  }
+  if (priority) {
+    window.clearTimeout(programToastTimer);
+    window.clearTimeout(programToastHideTimer);
+    if (activeProgramToast && programToastEl) {
+      programToastEl.classList.remove('is-visible');
+      programToastEl.hidden = true;
+      activeProgramToast = null;
+    }
+    programToastQueue.unshift(toast);
+  } else {
+    programToastQueue.push(toast);
+  }
+  renderNextProgramToast();
+}
+
+function dismissProgramToast() {
+  if (!programToastEl || !activeProgramToast) {
+    return;
+  }
+  window.clearTimeout(programToastTimer);
+  window.clearTimeout(programToastHideTimer);
+  programToastEl.classList.remove('is-visible');
+  programToastHideTimer = window.setTimeout(() => {
+    programToastEl.hidden = true;
+    activeProgramToast = null;
+    renderNextProgramToast();
+  }, 180);
+}
+
+programToastCloseEl?.addEventListener('click', dismissProgramToast);
+toastHistoryLauncherEl?.addEventListener('click', () => setProgramToastHistoryOpen(Boolean(toastHistoryPanelEl?.hidden)));
+toastHistoryCloseEl?.addEventListener('click', () => setProgramToastHistoryOpen(false));
 const ttsEnabledEl = document.getElementById('ttsEnabled');
 const ttsRolesOnlyEl = document.getElementById('ttsRolesOnly');
 const ttsSkipVulgarNicknamesEl = document.getElementById('ttsSkipVulgarNicknames');
+const ttsSkipSpamNicknamesEl = document.getElementById('ttsSkipSpamNicknames');
 const ttsSkipVulgarMessagesEl = document.getElementById('ttsSkipVulgarMessages');
 const ttsSkipSpamMessagesEl = document.getElementById('ttsSkipSpamMessages');
 const ttsVoiceEl = document.getElementById('ttsVoice');
@@ -2842,6 +3098,7 @@ function loadTtsSettings() {
       volume: Number.isFinite(Number(saved.volume)) ? Number(saved.volume) : 1,
       rolesOnly: Boolean(saved.rolesOnly),
       skipVulgarNicknames: Boolean(saved.skipVulgarNicknames),
+      skipSpamNicknames: Boolean(saved.skipSpamNicknames),
       skipVulgarMessages: Boolean(saved.skipVulgarMessages),
       skipSpamMessages: Boolean(saved.skipSpamMessages)
     };
@@ -2853,6 +3110,7 @@ function loadTtsSettings() {
       volume: 1,
       rolesOnly: false,
       skipVulgarNicknames: false,
+      skipSpamNicknames: false,
       skipVulgarMessages: false,
       skipSpamMessages: false
     };
@@ -4022,7 +4280,7 @@ function resetCzesterLiveAnalysis() {
 }
 
 function recordCzesterLiveAnalysisMessage(message) {
-  if (!message || message.czesterOnly) {
+  if (!message || message.programNotificationOnly) {
     return;
   }
   const kind = message.kind || 'chat';
@@ -4876,33 +5134,47 @@ function handleCzesterBattleAlert(alert) {
     return;
   }
 
-  const multiplier = Number(alert.multiplier);
+  const multiplier = Math.max(0, Math.round(Number(alert.multiplier) || 0));
   const isMultiplierAlert = (
     (alert.textKey === 'battle.multiplier' || alert.tone === 'battle')
-    && (multiplier === 2 || multiplier === 3)
+    && multiplier > 1
   );
-  if (isMultiplierAlert && generalSettings.multiplierNotifications && shouldShowCzesterBattleNotice(`multiplier:${multiplier}`, 30000)) {
-    notifyCzester('battle-multiplier', t('czester.notice.multiplier', { multiplier }), {
-      animate: false,
-      variant: 'multiplier',
-      payload: { multiplier, key: `multiplier:${multiplier}` }
+  if (isMultiplierAlert && generalSettings.multiplierNotifications) {
+    enqueueProgramToast({
+      type: 'multiplier',
+      title: t('programToast.multiplier.title'),
+      message: t('czester.notice.multiplier', { multiplier }),
+      icon: 'zap',
+      duration: 8000,
+      dedupeKey: `multiplier:${multiplier}`,
+      dedupeMs: 8000,
+      priority: true
     });
   }
 
-  const isCreatorFreeze = alert.effectType === 'freeze' && alert.targetIsCurrentCreator === true;
+  const isFreezeAlert = alert.effectType === 'freeze';
 
-  if (!isCreatorFreeze) {
+  if (!isFreezeAlert) {
     return;
   }
-  setChatFreezeEffect(true, alert.expiresAt || '');
+  if (alert.targetIsCurrentCreator === true) {
+    setChatFreezeEffect(true, alert.expiresAt || '');
+  }
   if (shouldShowCzesterBattleNotice('creator-freeze', 8000)) {
-    notifyCzester('creator-freeze', t('czester.notice.creatorFreeze'), {
-      animate: false,
-      variant: 'freeze',
-      payload: {
-        key: 'creator-freeze',
-        expiresAt: alert.expiresAt || ''
-      }
+    const target = Array.isArray(alert.targetNames) && alert.targetNames.length
+      ? alert.targetNames.join(', ')
+      : 'LIVE';
+    enqueueProgramToast({
+      type: 'freeze',
+      title: t('programToast.freeze.title'),
+      message: alert.targetIsCurrentCreator === true
+        ? t('czester.notice.creatorFreeze')
+        : t('programToast.freeze.body', { target }),
+      icon: 'snowflake',
+      duration: 8000,
+      dedupeKey: `creator-freeze:${target}:${alert.expiresAt || 'active'}`,
+      dedupeMs: 8000,
+      priority: true
     });
   }
 }
@@ -5096,6 +5368,8 @@ function applyI18n() {
     ['label[for="ttsRolesOnly"] > span > strong', 'settings.accessibility.rolesOnly'],
     ['label[for="ttsRolesOnly"] > span > small', 'settings.accessibility.rolesOnlyDescription'],
     ['label[for="ttsSkipVulgarNicknames"] > span > strong', 'settings.accessibility.skipVulgarNicknames'],
+    ['label[for="ttsSkipSpamNicknames"] > span > strong', 'settings.accessibility.skipSpamNicknames'],
+    ['label[for="ttsSkipSpamNicknames"] > span > small', 'settings.accessibility.skipSpamNicknamesDescription'],
     ['label[for="ttsSkipVulgarMessages"] > span > strong', 'settings.accessibility.skipVulgarMessages'],
     ['label[for="ttsSkipSpamMessages"] > span > strong', 'settings.accessibility.skipSpamMessages'],
     ['label[for="ttsVoice"] > span > strong', 'settings.accessibility.voice'],
@@ -5848,6 +6122,41 @@ function containsSpamSpeech(value) {
   return normalized ? matchesAnyPattern(normalized, SPAM_SPEECH_PATTERNS) : false;
 }
 
+function isSpamSpeechNickname(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return false;
+  }
+
+  const characters = Array.from(value.normalize('NFC')).filter(
+    (character) => !/[\s._@\-]/u.test(character)
+  );
+  if (!characters.length) {
+    return false;
+  }
+
+  let readableCharacters = 0;
+  let decorativeCharacters = 0;
+  characters.forEach((character) => {
+    if (/[\p{Script=Latin}\p{N}]/u.test(character)) {
+      readableCharacters += 1;
+      return;
+    }
+    if (
+      /[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{S}\p{M}]/u.test(character)
+    ) {
+      decorativeCharacters += 1;
+    }
+  });
+
+  const classifiedCharacters = readableCharacters + decorativeCharacters;
+  return decorativeCharacters >= 4
+    && classifiedCharacters > 0
+    && (
+      decorativeCharacters / classifiedCharacters >= 0.5
+      || decorativeCharacters >= readableCharacters + 2
+    );
+}
+
 function hasSpeechOverrideCommand(value) {
   return typeof value === 'string' && /^\s*\.69(?:\s+|$)/u.test(value);
 }
@@ -5873,6 +6182,10 @@ function shouldSkipSpeechMessage(message) {
   }
 
   if (ttsSettings.skipVulgarNicknames && containsVulgarSpeech(message.authorName)) {
+    return true;
+  }
+
+  if (ttsSettings.skipSpamNicknames && isSpamSpeechNickname(message.authorName)) {
     return true;
   }
 
@@ -5957,6 +6270,7 @@ function syncTtsControls() {
   [
     [ttsRolesOnlyEl, 'rolesOnly'],
     [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
+    [ttsSkipSpamNicknamesEl, 'skipSpamNicknames'],
     [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
     [ttsSkipSpamMessagesEl, 'skipSpamMessages']
   ].forEach(([input, key]) => {
@@ -6020,6 +6334,7 @@ function initTextToSpeech() {
   [
     [ttsRolesOnlyEl, 'rolesOnly'],
     [ttsSkipVulgarNicknamesEl, 'skipVulgarNicknames'],
+    [ttsSkipSpamNicknamesEl, 'skipSpamNicknames'],
     [ttsSkipVulgarMessagesEl, 'skipVulgarMessages'],
     [ttsSkipSpamMessagesEl, 'skipSpamMessages']
   ].forEach(([input, key]) => {
@@ -6073,6 +6388,9 @@ function initTextToSpeech() {
 }
 
 function getConnectionStatusText() {
+  if (state.connectionStatus === 'idle') {
+    return t('status.waitingCreator');
+  }
   if (state.connectionStatus === 'online') {
     return t('status.online');
   }
@@ -6115,6 +6433,8 @@ function isOfflineConnectionState(value) {
 
   return value.mode === 'chat'
     && (
+      value.connectionStatus === 'offline'
+      ||
       combined.includes('offline')
       || combined.includes('zakonczony')
     );
@@ -6126,7 +6446,7 @@ function isOnlineConnectionState(value) {
   const combined = `${lastMessage} ${source}`.toLowerCase();
 
   return value.mode === 'chat'
-    && (combined.includes('polaczono') || source.startsWith('polaczono: room'));
+    && (value.connectionStatus === 'online' || combined.includes('polaczono') || source.startsWith('polaczono: room'));
 }
 
 function formatCounter(value) {
@@ -6345,6 +6665,9 @@ function renderTopTappersPanel() {
 }
 
 function backfillTapStatsFromVisibleMessages() {
+  if (typeof window.tiktokLive.onTapStats === 'function') {
+    return;
+  }
   visibleMessages.forEach((message) => {
     const kind = message && (message.kind || 'chat');
     const total = Number(message && message.total);
@@ -7450,6 +7773,27 @@ function trackTapStats(message) {
   tapTotalsByUser.set(key, current);
 }
 
+function applyTapStatsSnapshot(payload) {
+  const entries = Array.isArray(payload && payload.tappers) ? payload.tappers : [];
+  tapTotalsByUser.clear();
+
+  entries.forEach((entry) => {
+    const taps = Math.max(0, Math.floor(Number(entry && entry.taps) || 0));
+    const key = String(
+      (entry && (entry.key || entry.uniqueId || entry.name)) || ''
+    ).trim().toLowerCase();
+    if (!key || taps <= 0) {
+      return;
+    }
+    tapTotalsByUser.set(key, {
+      name: String((entry && (entry.name || entry.uniqueId)) || key),
+      taps
+    });
+  });
+
+  updateStatus();
+}
+
 function trackActiveUserStats(message) {
   const key = getStatsUserKey(message);
   if (!key) {
@@ -7495,7 +7839,9 @@ function trackIncomingMessageStats(message) {
 
   trackActiveUserStats(message);
   trackModeratorStats(message);
-  trackTapStats(message);
+  if (typeof window.tiktokLive.onTapStats !== 'function') {
+    trackTapStats(message);
+  }
 
   if (message.upsert) {
     return;
@@ -7583,22 +7929,25 @@ function inspectCzesterSpam(message) {
   });
 }
 
-function notifyCzesterSuperFanJoin(message) {
-  if (!message || (message.kind || '') !== 'member' || !message.isSuperFan) {
+function notifyProgramRoleJoin(message) {
+  if (!message || (message.kind || '') !== 'member' || (!message.isSuperFan && !message.isModerator)) {
     return;
   }
   const name = String(message.authorName || message.uniqueId || '').replace(/^@+/, '').trim();
   if (!name) {
     return;
   }
-  const key = normalizeCreatorHandle(message.uniqueId || name) || name.toLowerCase();
-  if (wasCzesterNoticeRecentlyShown('superfan-join', key, 5 * 60 * 1000)) {
-    return;
-  }
-  notifyCzester('superfan-join', t('czester.notice.superfanJoin', { name }), {
-    animate: false,
-    variant: 'superfan',
-    payload: { key, name }
+  const role = message.isSuperFan ? 'superfan' : 'moderator';
+  const userKey = normalizeCreatorHandle(message.uniqueId || name) || name.toLowerCase();
+  enqueueProgramToast({
+    type: role,
+    title: t(`programToast.${role}.title`),
+    message: t(`programToast.${role}.body`, { name }),
+    icon: role === 'superfan' ? 'crown' : 'shield',
+    duration: 7000,
+    dedupeKey: `role-join:${role}:${userKey}`,
+    dedupeMs: 5 * 60 * 1000,
+    priority: role === 'superfan'
   });
 }
 
@@ -8608,6 +8957,10 @@ window.tiktokLive.onState((nextState) => {
   state = nextState;
   checkLanguageChoiceForVersion();
   const isNowOffline = isOfflineConnectionState(state);
+  const creatorChanged = state.creatorId !== previousCreatorId;
+  if (creatorChanged || (isOnlineConnectionState(state) && !wasOnline) || (isNowOffline && wasOnline)) {
+    resetProgramToastHistory({ close: true });
+  }
   if (isOnlineConnectionState(state) && (!wasOnline || state.creatorId !== previousCreatorId || !czesterCurrentLiveSessionKey)) {
     const sessionCreator = normalizeCreatorHandle(getCreatorUsernameFromState()) || String(state.creatorId || 'creator');
     czesterCurrentLiveSessionKey = `${sessionCreator}:${Date.now()}`;
@@ -9901,6 +10254,10 @@ if (typeof window.tiktokLive.onRoomStats === 'function') {
   });
 }
 
+if (typeof window.tiktokLive.onTapStats === 'function') {
+  window.tiktokLive.onTapStats(applyTapStatsSnapshot);
+}
+
 window.tiktokLive.onBattleAlert((alert) => {
   handleCzesterBattleAlert(alert);
   const isMultiplierAlert = alert && (
@@ -9947,14 +10304,14 @@ window.tiktokLive.onChatMessage((message) => {
     trackLiveBox(message);
   }
 
-  if (message.czesterOnly) {
-    notifyCzesterSuperFanJoin(message);
+  if (message.programNotificationOnly) {
+    notifyProgramRoleJoin(message);
     return;
   }
 
   if (message.kind === 'member') {
     assignAvatarForJoin(message);
-    notifyCzesterSuperFanJoin(message);
+    notifyProgramRoleJoin(message);
   }
 
   recordCzesterLiveAnalysisMessage(message);

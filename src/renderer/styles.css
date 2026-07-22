@@ -12445,3 +12445,293 @@ html[data-big-picture="true"] .app-bottom-taskbar {
 :root[data-theme="swiat-brikersa"] #notesDialog .note-preview {
   scrollbar-color: #537f45 #dcebcf !important;
 }
+
+/* Stały toast programu: jedna wielkość i pozycja nad zegarem we wszystkich motywach. */
+.program-toast {
+  --program-toast-accent: color-mix(in srgb, var(--dropdown-active-bg) 65%, #66d9ff);
+  position: fixed;
+  right: 12px;
+  bottom: 44px;
+  z-index: 10080;
+  width: min(360px, calc(100vw - 24px));
+  height: 92px;
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+  color: var(--dropdown-text) !important;
+  border: 1px solid color-mix(in srgb, var(--program-toast-accent) 68%, var(--dropdown-border)) !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dropdown-surface) 96%, var(--dropdown-bg)) !important;
+  box-shadow: var(--dropdown-shadow) !important;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.program-toast::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.program-toast > * {
+  position: relative;
+  z-index: 1;
+}
+
+.program-toast[hidden] { display: none !important; }
+.program-toast.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.program-toast[data-type="multiplier"] {
+  --program-toast-accent: #ff8c8c;
+  background: radial-gradient(circle at 16% 8%, rgba(255,255,255,.26), transparent 34%), linear-gradient(135deg, #8d061f 0%, #d80f37 48%, #ff6647 100%) !important;
+  box-shadow: 0 16px 34px rgba(216,15,55,.35), inset 0 0 20px rgba(255,255,255,.12) !important;
+}
+.program-toast[data-type="moderator"] { --program-toast-accent: #ff526f; }
+.program-toast[data-type="superfan"] {
+  --program-toast-accent: #ffe678;
+  background: radial-gradient(circle at 18% 12%, rgba(255,255,255,.28), transparent 34%), linear-gradient(135deg, #8f5d00 0%, #d99b16 50%, #ffe17a 100%) !important;
+  box-shadow: 0 16px 34px rgba(173,119,14,.34), inset 0 0 18px rgba(255,255,255,.18) !important;
+}
+.program-toast[data-type="freeze"] {
+  --program-toast-accent: #a4e6ff;
+  background: radial-gradient(circle at 18% 14%, rgba(255,255,255,.68), transparent 22%), radial-gradient(circle at 76% 22%, rgba(197,244,255,.48), transparent 27%), linear-gradient(135deg, #075a91 0%, #18a8e8 48%, #b6f2ff 100%) !important;
+  box-shadow: 0 16px 34px rgba(24,168,232,.36), inset 0 0 22px rgba(255,255,255,.36) !important;
+}
+
+.program-toast[data-type="multiplier"]::before {
+  inset: -28% -10% -18%;
+  opacity: 1;
+  background: radial-gradient(ellipse at 16% 100%, rgba(255,236,140,.86) 0 10%, transparent 26%), radial-gradient(ellipse at 39% 100%, rgba(255,155,46,.78) 0 13%, transparent 32%), radial-gradient(ellipse at 64% 100%, rgba(255,229,112,.72) 0 9%, transparent 28%), radial-gradient(ellipse at 84% 100%, rgba(255,107,35,.7) 0 12%, transparent 30%), linear-gradient(0deg, rgba(255,210,78,.22), transparent 58%);
+  mix-blend-mode: screen;
+  animation: czester-flame-flicker 1.35s ease-in-out infinite alternate;
+}
+
+.program-toast[data-type="superfan"]::before {
+  opacity: 1;
+  background: radial-gradient(circle at 18% 22%, rgba(255,245,170,.88) 0 2px, transparent 3px), radial-gradient(circle at 42% 72%, rgba(255,208,67,.82) 0 2px, transparent 3px), radial-gradient(circle at 67% 28%, rgba(255,246,185,.78) 0 2px, transparent 3px), radial-gradient(circle at 82% 66%, rgba(205,128,0,.8) 0 2px, transparent 3px), linear-gradient(115deg, transparent 0 32%, rgba(255,255,255,.2) 42%, transparent 54% 100%);
+  mix-blend-mode: screen;
+  animation: czester-coin-sparkle 2.2s linear infinite;
+}
+
+.program-toast[data-type="freeze"]::before {
+  opacity: 1;
+  background: linear-gradient(115deg, transparent 0 36%, rgba(255,255,255,.34) 42%, transparent 50% 100%), repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 1px, transparent 1px 10px);
+  background-size: 220% 100%, auto;
+  mix-blend-mode: screen;
+  animation: program-toast-freeze 2.4s ease-in-out infinite;
+}
+
+@keyframes program-toast-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes program-toast-freeze {
+  0%, 100% { background-position: 130% 0, 0 0; }
+  50% { background-position: -80% 0, 8px 8px; }
+}
+
+.program-toast[data-type="multiplier"] .program-toast-title,
+.program-toast[data-type="multiplier"] .program-toast-message { color: #fff8f7 !important; }
+.program-toast[data-type="superfan"] .program-toast-title,
+.program-toast[data-type="superfan"] .program-toast-message { color: #251500 !important; }
+.program-toast[data-type="freeze"] .program-toast-title,
+.program-toast[data-type="freeze"] .program-toast-message { color: #042033 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .program-toast::before { animation: none !important; }
+}
+
+.program-toast-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--program-toast-accent) !important;
+  border: 1px solid color-mix(in srgb, var(--program-toast-accent) 58%, var(--dropdown-border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--program-toast-accent) 14%, var(--dropdown-bg)) !important;
+}
+
+.program-toast-icon .ui-icon { width: 24px; height: 24px; }
+.program-toast-copy { min-width: 0; display: grid; gap: 4px; }
+.program-toast-title,
+.program-toast-message { margin: 0; color: var(--dropdown-text) !important; font-family: inherit; }
+.program-toast-title { overflow: hidden; font-size: 14px; font-weight: 700; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.program-toast-message {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--dropdown-muted) !important;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.program-toast-close {
+  align-self: start;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--dropdown-muted) !important;
+  border: 0 !important;
+  border-radius: 7px;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 20px/1 inherit;
+  cursor: pointer;
+}
+
+.program-toast-close:hover,
+.program-toast-close:focus-visible {
+  color: var(--dropdown-text) !important;
+  background: color-mix(in srgb, var(--dropdown-hover-bg) 78%, transparent) !important;
+}
+
+@media (max-width: 480px) {
+  .program-toast { right: 8px; bottom: 40px; width: calc(100vw - 16px); }
+}
+
+/* Historia powiadomień LIVE po prawej stronie dolnego paska. */
+.app-taskbar-clock { right: 52px !important; }
+
+.toast-history-launcher {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transform: translateY(-50%);
+  color: var(--dropdown-muted) !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 9px;
+  background: var(--dropdown-surface) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.toast-history-launcher .ui-icon { width: 18px; height: 18px; }
+.toast-history-launcher:hover,
+.toast-history-launcher:focus-visible,
+.toast-history-launcher[data-open="true"] {
+  color: var(--dropdown-active-text) !important;
+  border-color: var(--dropdown-active-border, var(--dropdown-border)) !important;
+  background: var(--dropdown-active-bg) !important;
+}
+
+.toast-history-panel {
+  position: fixed;
+  right: 12px;
+  bottom: 44px;
+  z-index: 10075;
+  width: min(360px, calc(100vw - 24px));
+  height: min(390px, calc(100vh - 56px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  color: var(--dropdown-text) !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dropdown-surface) 97%, var(--dropdown-bg)) !important;
+  box-shadow: var(--dropdown-shadow) !important;
+}
+
+.toast-history-panel[hidden] { display: none !important; }
+.toast-history-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--dropdown-border);
+}
+.toast-history-header h2,
+.toast-history-header p { margin: 0; font-family: inherit; }
+.toast-history-header h2 { color: var(--dropdown-text) !important; font-size: 16px; line-height: 1.25; }
+.toast-history-header p { margin-top: 3px; color: var(--dropdown-muted) !important; font-size: 11px; font-weight: 400; }
+.toast-history-close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  color: var(--dropdown-muted) !important;
+  border: 0 !important;
+  border-radius: 7px;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 20px/1 inherit;
+  cursor: pointer;
+}
+.toast-history-close:hover,
+.toast-history-close:focus-visible { color: var(--dropdown-text) !important; background: var(--dropdown-hover-bg) !important; }
+.toast-history-list { min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 8px; scrollbar-color: var(--dropdown-active-bg) var(--dropdown-bg); }
+.toast-history-item {
+  --history-accent: var(--dropdown-active-text);
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 68px;
+  padding: 9px;
+  color: var(--dropdown-text) !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 9px;
+  background: var(--dropdown-bg) !important;
+}
+.toast-history-item + .toast-history-item { margin-top: 7px; }
+.toast-history-item[data-type="multiplier"] { --history-accent: #ff526f; }
+.toast-history-item[data-type="moderator"] { --history-accent: #ff526f; }
+.toast-history-item[data-type="superfan"] { --history-accent: #f5c84b; }
+.toast-history-item[data-type="freeze"] { --history-accent: #62cfff; }
+.toast-history-item-icon { width: 34px; height: 34px; display: grid; place-items: center; color: var(--history-accent) !important; border-radius: 8px; background: color-mix(in srgb, var(--history-accent) 13%, var(--dropdown-surface)) !important; }
+.toast-history-item-icon .ui-icon { width: 19px; height: 19px; }
+.toast-history-item-copy { min-width: 0; display: grid; gap: 3px; }
+.toast-history-item-copy strong { overflow: hidden; color: var(--dropdown-text) !important; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.toast-history-item-copy p { margin: 0; overflow: hidden; color: var(--dropdown-muted) !important; font-size: 11px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.toast-history-item time { align-self: start; color: var(--dropdown-muted) !important; font-size: 10px; font-weight: 400; }
+.toast-history-empty { align-self: center; justify-self: center; margin: 0; padding: 20px; color: var(--dropdown-muted) !important; font-size: 12px; text-align: center; }
+.toast-history-open .program-toast { bottom: min(446px, calc(100vh - 104px)); }
+
+@media (max-width: 480px) {
+  .app-taskbar-clock { right: 48px !important; }
+  .toast-history-launcher { right: 7px; width: 30px; height: 30px; }
+  .toast-history-panel { right: 8px; bottom: 40px; width: calc(100vw - 16px); }
+}
+
+/* W wyglądzie ozdobnym nawigacja i aktywny widok są jedną bryłą.
+   Zaokrąglenie zostaje wyłącznie na zewnętrznych narożnikach modułu. */
+:root[data-app-appearance="ozdobny"] .section-nav {
+  border-radius: 17px 17px 0 0 !important;
+}
+
+:root[data-app-appearance="ozdobny"] .content > .view-panel {
+  border-radius: 0 0 17px 17px !important;
+}
+
+:root[data-app-appearance="ozdobny"] .content > .chat-view > .filters {
+  border-radius: 0 !important;
+}
+
+/* Dock statystyk należy do krawędzi okna aplikacji, a nie do wewnętrznej
+   ramki czatu. Pozycjonowanie fixed uniezależnia go od odstępów motywów. */
+:root[data-app-appearance="ozdobny"] .right-widget-dock {
+  position: fixed !important;
+  right: 0 !important;
+}

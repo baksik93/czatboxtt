@@ -431,6 +431,10 @@
                 <span><strong>Pomijaj wulgarne nicki</strong><small class="setting-description">Pomija obraźliwe słowa w nicku.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarNicknames">
               </label>
+              <label class="setting-row" for="ttsSkipSpamNicknames">
+                <span><strong data-i18n="settings.accessibility.skipSpamNicknames">Pomijaj spamowe nicki</strong><small class="setting-description" data-i18n="settings.accessibility.skipSpamNicknamesDescription">Pomija nicki złożone głównie z ozdobników, emoji i nietypowych znaków.</small></span>
+                <input class="setting-toggle" type="checkbox" id="ttsSkipSpamNicknames">
+              </label>
               <label class="setting-row" for="ttsSkipVulgarMessages">
                 <span><strong>Pomijaj wulgarne wiadomości</strong><small class="setting-description">TTS nie czyta wulgarnych wiadomości.</small></span>
                 <input class="setting-toggle" type="checkbox" id="ttsSkipVulgarMessages">
@@ -721,20 +725,28 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.3.0</span></h2>
+                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.3.1</span></h2>
 
-                  <p data-i18n="about.news.030.intro">Aktualizacja naprawcza usuwająca problem zgłoszony przez testerów po wydaniu 0.2.9.</p>
+                  <p data-i18n="about.news.031.intro">Aktualizacja skupia się na powiadomieniach LIVE, dokładniejszym zliczaniu tapnięć, usprawnieniach TTS oraz poprawkach wyglądu aplikacji.</p>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.030.languageFix">Naprawiono błąd wersji 0.2.9, który po aktualizacji mógł wyrzucać użytkowników z programu podczas wyboru języka.</li>
-                    <li data-i18n="about.news.030.languageInit">Okno wyboru języka jest teraz uruchamiane tylko raz i dopiero po prawidłowym odczytaniu wersji aplikacji.</li>
-                    <li data-i18n="about.news.030.languageSave">Zabezpieczono zapis języka przed wielokrotnym kliknięciem i równoczesnym przetwarzaniem kilku zmian.</li>
+                    <li data-i18n="about.news.031.toasts">Dodano toasty powiadomień dla mnożników bitewnych, zamrożeń, moderatorów i superfanów.</li>
+                    <li data-i18n="about.news.031.history">Dodano historię powiadomień z bieżącej transmisji LIVE.</li>
+                    <li data-i18n="about.news.031.backgrounds">Powiadomienia otrzymały animowane tła dopasowane kolorystycznie do rodzaju wydarzenia.</li>
+                    <li data-i18n="about.news.031.multiplier">Poprawiono szybkość i dokładność wyświetlania informacji o mnożnikach.</li>
+                    <li data-i18n="about.news.031.taps">Poprawiono zliczanie tapnięć, w tym serie tapnięć i działanie statystyk po zminimalizowaniu programu.</li>
+                    <li data-i18n="about.news.031.tts">Dodano w TTS opcję pomijania spamowych i nadmiernie ozdobionych nicków.</li>
+                    <li data-i18n="about.news.031.manualCreator">Program po uruchomieniu nie łączy się już automatycznie z ostatnim twórcą — czeka na wybór użytkownika.</li>
+                    <li data-i18n="about.news.031.roles">Poprawiono rozpoznawanie dołączeń moderatorów i superfanów.</li>
+                    <li data-i18n="about.news.031.decorativeBars">Poprawiono wygląd belek nawigacji i filtrów w wyglądzie „Ozdobnym”.</li>
+                    <li data-i18n="about.news.031.decorativeWidgets">Widgety statystyk w wyglądzie „Ozdobnym” są teraz przypięte do prawej krawędzi aplikacji.</li>
+                    <li data-i18n="about.news.031.other">Wprowadzono dodatkowe poprawki wyglądu, stabilności oraz responsywności interfejsu.</li>
                   </ul>
 
                   <h3 data-i18n="about.news.next.title">Co dalej?</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.030.next">To tajemnicza tajemnica!</li>
+                    <li data-i18n="about.news.031.next">To tajemnicza tajemnica!</li>
                   </ul>
                 </div>
               </div>
@@ -831,14 +843,35 @@
           <span class="taskbar-clock-line"><time id="appTaskbarTime"></time><span class="taskbar-clock-icon" data-ui-icon="clock" aria-hidden="true"></span></span>
           <span class="taskbar-clock-line"><time id="appTaskbarDate"></time><span class="taskbar-clock-icon" data-ui-icon="calendar" aria-hidden="true"></span></span>
         </div>
+        <button class="toast-history-launcher" id="toastHistoryLauncher" type="button" aria-label="Historia powiadomień LIVE" title="Historia powiadomień LIVE" aria-haspopup="dialog" aria-controls="toastHistoryPanel" aria-expanded="false">
+          <span data-ui-icon="bell" aria-hidden="true"></span>
+        </button>
       </footer>
     </main>
+
+    <section class="toast-history-panel" id="toastHistoryPanel" role="dialog" aria-labelledby="toastHistoryTitle" hidden>
+      <header class="toast-history-header">
+        <div><h2 id="toastHistoryTitle"></h2><p id="toastHistoryNote"></p></div>
+        <button class="toast-history-close" id="toastHistoryClose" type="button" aria-label="Zamknij historię powiadomień">×</button>
+      </header>
+      <div class="toast-history-list" id="toastHistoryList"></div>
+      <p class="toast-history-empty" id="toastHistoryEmpty"></p>
+    </section>
+
+    <aside class="program-toast" id="programToast" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <span class="program-toast-icon" id="programToastIcon" aria-hidden="true"></span>
+      <div class="program-toast-copy">
+        <strong class="program-toast-title" id="programToastTitle"></strong>
+        <p class="program-toast-message" id="programToastMessage"></p>
+      </div>
+      <button class="program-toast-close" id="programToastClose" type="button" aria-label="Zamknij powiadomienie">×</button>
+    </aside>
 
     <div class="widget-dialog-backdrop" id="shopDialogBackdrop" hidden>
       <section class="widget-dialog shop-dialog" id="shopDialog" role="dialog" aria-modal="true" aria-labelledby="shopDialogTitle">
         <header class="radio-dialog-header"><div><h1 id="shopDialogTitle" data-i18n="shop.title">Sklep</h1><p class="page-note" data-i18n="shop.note">Wymieniaj Talarki na dodatki do programu.</p></div><button class="radio-dialog-close" id="shopDialogClose" type="button" aria-label="Zamknij sklep">×</button></header>
         <div class="settings-tabs shop-tabs" role="tablist"><button class="settings-tab" data-shop-tab="themes" data-active="true" data-i18n="shop.themes">Motywy</button><button class="settings-tab" data-shop-tab="other" data-i18n="shop.other">Inne</button></div>
-        <section class="shop-items" data-shop-panel="themes"><article class="shop-item"><div><h2>Miami Vice</h2><p>Pastelowy motyw inspirowany GTA Vice City.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="miami-vice" type="button">Podgląd</button><button class="page-action" id="shopMiamiPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Dzika galaktyka</h2><p>Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="dzika-galaktyka" type="button">Podgląd</button><button class="page-action" id="shopWildGalaxyPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Świat Brikersa</h2><p>Pikselowy, zielony motyw inspirowany światem gry Brikers.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="swiat-brikersa" type="button">Podgląd</button><button class="page-action" id="shopBrikersWorldPurchase" type="button">Kup za 1000 Talarków</button></div></article></section><section class="shop-items" data-shop-panel="other" hidden><article class="shop-item"><div><h2>Gra Brikers</h2><p>Opiekuj się Brikersem, dbaj o jego potrzeby i zdobywaj Talarki za sprzątanie kupek.</p></div><button class="page-action" id="shopBrikersPurchase" type="button">Kup za 1500 Talarków</button></article></section>
+        <section class="shop-items" data-shop-panel="themes"><article class="shop-item"><div><h2>Miami Vice</h2><p>Pastelowy motyw inspirowany GTA Vice City.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="miami-vice" type="button">Podgląd</button><button class="page-action" id="shopMiamiPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Dzika galaktyka</h2><p>Galaktyczne odcienie, efekty mgławicy i estetyka Frutiger Aero.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="dzika-galaktyka" type="button">Podgląd</button><button class="page-action" id="shopWildGalaxyPurchase" type="button">Kup za 1000 Talarków</button></div></article><article class="shop-item"><div><h2>Świat Brikersa</h2><p>Pikselowy, zielony motyw inspirowany światem gry Brikers.</p></div><div class="shop-item-actions"><button class="page-action shop-preview-button" data-theme-preview="swiat-brikersa" type="button">Podgląd</button><button class="page-action" id="shopBrikersWorldPurchase" type="button" disabled aria-disabled="true">Niedostępny</button></div></article></section><section class="shop-items" data-shop-panel="other" hidden><article class="shop-item"><div><h2>Gra Brikers</h2><p>Opiekuj się Brikersem, dbaj o jego potrzeby i zdobywaj Talarki za sprzątanie kupek.</p></div><button class="page-action" id="shopBrikersPurchase" type="button">Kup za 1500 Talarków</button></article></section>
       </section>
     </div>
     <div class="widget-dialog-backdrop" id="tamagotchiDialogBackdrop" hidden>

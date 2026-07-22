@@ -639,6 +639,7 @@ const recentMessages = [];
 const czesterLiveStyleMessages = [];
 const seenMessageKeys = new Map();
 const likeTotalsByUser = new Map();
+const likeProfilesByUser = new Map();
 const state = {
   mode: 'login',
   connectionStatus: 'idle',
@@ -649,8 +650,8 @@ const state = {
   appVersion: APP_VERSION,
   update: { status: 'idle', version: '', message: '' },
   systemSettings: getPublicSystemSettings(),
-  creatorId: DEFAULT_CREATOR_ID,
-  currentCreator: publicCreator(LIVE_CREATORS[0]),
+  creatorId: '',
+  currentCreator: null,
   creators: LIVE_CREATORS.map(({ id, label, username, avatar, bio }) => ({ id, label, username, avatar, bio })),
   avatarImages: getAvatarImages()
 };
@@ -899,6 +900,8 @@ function resetChatBuffers() {
   czesterStyleCache = null;
   seenMessageKeys.clear();
   likeTotalsByUser.clear();
+  likeProfilesByUser.clear();
+  publishTapStats();
   latestRoomStats = { viewerCount: 0 };
   latestViewerList = [];
   liveUserDirectory.clear();
@@ -980,7 +983,7 @@ function archiveChatMessage(message) {
   sendToShell('shell:chat-message', payload);
 }
 
-function sendCzesterOnlySuperFanJoin(data) {
+function sendProgramSuperFanJoinNotification(data) {
   const user = getEventUser(data);
   const name = normalizeMessageText(user.nickname || user.uniqueId);
   if (!name) {
@@ -996,7 +999,7 @@ function sendCzesterOnlySuperFanJoin(data) {
     uniqueId: normalizeMessageText(user.uniqueId),
     isModerator: false,
     isSuperFan: true,
-    czesterOnly: true
+    programNotificationOnly: true
   });
 }
 
@@ -3129,6 +3132,7 @@ async function createWindow() {
   shellView.webContents.on('did-finish-load', () => {
     publishState();
     publishBattleState();
+    publishTapStats();
   });
 
   mainWindow.on('resize', layoutViews);
@@ -3275,13 +3279,13 @@ async function showChatMode() {
   }
 
   state.mode = 'chat';
-  state.connectionStatus = 'connecting';
-  state.lastMessage = 'Lacze z czatem LIVE';
+  state.connectionStatus = 'idle';
+  state.source = 'oczekiwanie na wybor twórcy';
+  state.lastMessage = 'Wybierz twórcę LIVE';
   resetChatBuffers();
   layoutViews();
   await parkLoginView();
   publishState();
-  await connectLiveChat();
 }
 
 async function showLoginMode() {
@@ -3380,6 +3384,14 @@ function formatRetryClock(timestamp) {
 }
 
 async function connectLiveChat() {
+  if (!state.creatorId || !state.currentCreator || !state.currentCreator.username) {
+    clearTimeout(reconnectTimer);
+    state.connectionStatus = 'idle';
+    state.source = 'oczekiwanie na wybor twórcy';
+    state.lastMessage = 'Wybierz twórcę LIVE';
+    publishState();
+    return;
+  }
   if (isConnecting || (liveConnection && liveConnection.isConnected)) {
     return;
   }
@@ -3440,7 +3452,6 @@ async function connectLiveChat() {
       }
 
       handleBattleGift(data);
-      emitBattleMultiplierFromEvent(data);
       const event = formatGiftEvent(data);
       if (event) {
         archiveChatMessage(event);
@@ -3564,7 +3575,7 @@ async function connectLiveChat() {
         }
 
         markSuperFanUser(data);
-        sendCzesterOnlySuperFanJoin(data);
+        sendProgramSuperFanJoinNotification(data);
       });
     }
 
@@ -3761,6 +3772,14 @@ async function selectCreator(creatorInput) {
 async function refreshCurrentChat() {
   if (state.mode !== 'chat') {
     return { ok: true, skipped: true };
+  }
+
+  if (!state.creatorId || !state.currentCreator || !state.currentCreator.username) {
+    state.connectionStatus = 'idle';
+    state.source = 'oczekiwanie na wybor twórcy';
+    state.lastMessage = 'Wybierz twórcę LIVE';
+    publishState();
+    return { ok: false, error: 'creator-required' };
   }
 
   const creator = getCurrentCreator();
@@ -3961,12 +3980,35 @@ function getBoxEnvelopeId(data) {
   );
 }
 
+function getTapStatsSnapshot() {
+  return Array.from(likeProfilesByUser.values())
+    .filter((entry) => entry && entry.taps > 0)
+    .sort((left, right) => right.taps - left.taps || left.name.localeCompare(right.name))
+    .map((entry) => ({
+      key: entry.key,
+      name: entry.name,
+      uniqueId: entry.uniqueId,
+      taps: entry.taps
+    }));
+}
+
+function publishTapStats() {
+  sendToShell('shell:tap-stats', { tappers: getTapStatsSnapshot() });
+}
+
 function formatLikeEvent(data) {
   const user = getEventUser(data);
   const likeCount = getLikeEventCount(data);
   const key = `${state.creatorId}:${user.uniqueId}`;
   const total = (likeTotalsByUser.get(key) || 0) + likeCount;
   likeTotalsByUser.set(key, total);
+  likeProfilesByUser.set(key, {
+    key,
+    name: user.nickname || user.uniqueId || key,
+    uniqueId: user.uniqueId || '',
+    taps: total
+  });
+  publishTapStats();
 
   const text = `polubił(a) LIVE (łącznie ${total} polubień)`;
   const event = createDisplayEvent(data, 'like', user, text, `${user.nickname} (@${user.uniqueId}) ${text}`, {
@@ -3982,6 +4024,9 @@ function formatLikeEvent(data) {
 function getLikeEventCount(data) {
   const value = data && typeof data === 'object' ? data : {};
   const directKeys = [
+    // tiktok-live-connector 2.4 / tiktok-live-proto v3 exposes the number of
+    // likes bundled in the current WebcastLikeMessage as `count`.
+    'count',
     'likeCount',
     'like_count',
     'likeCnt',
@@ -3994,6 +4039,19 @@ function getLikeEventCount(data) {
 
   for (const key of directKeys) {
     const count = Number(value[key]);
+    if (Number.isFinite(count) && count > 0) {
+      return Math.max(1, Math.floor(count));
+    }
+  }
+
+  const nestedLikeMessages = [
+    value.likeMessage,
+    value.like_message,
+    value.data && value.data.likeMessage,
+    value.data && value.data.like_message
+  ];
+  for (const likeMessage of nestedLikeMessages) {
+    const count = Number(likeMessage && likeMessage.count);
     if (Number.isFinite(count) && count > 0) {
       return Math.max(1, Math.floor(count));
     }
@@ -4419,11 +4477,20 @@ function isModeratorEvent(data) {
   const user = data && data.user || {};
   const userAttr = user.userAttr || {};
   return Boolean(
-    userAttr.isAdmin
+    data && (data.isModerator === true || data.is_moderator === true || data.isAdmin === true)
+    || user.isModerator === true
+    || user.is_moderator === true
+    || user.isAdmin === true
+    || userAttr.isAdmin
     || userAttr.isSuperAdmin
     || userAttr.isChannelAdmin
+    || hasTruthyKey(data, 'isModerator', 6)
+    || hasTruthyKey(data, 'is_moderator', 6)
+    || hasTruthyKey(data, 'isAdmin', 6)
+    || hasTruthyKey(data, 'isChannelAdmin', 6)
     || hasTruthyKey(data, 'isModeratorOfAnchor', 5)
     || hasModeratorBadge(user)
+    || hasModeratorText(data, 6)
   );
 }
 
@@ -7287,6 +7354,13 @@ function reloadCurrentMode() {
     creatorId: state.creatorId,
     reason: 'reload'
   });
+  if (!state.creatorId || !state.currentCreator || !state.currentCreator.username) {
+    state.connectionStatus = 'idle';
+    state.source = 'oczekiwanie na wybor twórcy';
+    state.lastMessage = 'Wybierz twórcę LIVE';
+    publishState();
+    return;
+  }
   state.connectionStatus = 'connecting';
   state.source = 'ponowne laczenie';
   state.lastMessage = `Ponownie lacze z @${getCurrentCreator().username}`;

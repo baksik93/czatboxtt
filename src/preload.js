@@ -51,6 +51,11 @@ const api = {
     ipcRenderer.on('shell:room-stats', listener);
     return () => ipcRenderer.removeListener('shell:room-stats', listener);
   },
+  onTapStats: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('shell:tap-stats', listener);
+    return () => ipcRenderer.removeListener('shell:tap-stats', listener);
+  },
   onBattleAlert: (callback) => {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on('shell:battle-alert', listener);
