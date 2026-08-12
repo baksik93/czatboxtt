@@ -123,16 +123,6 @@
               </button>
             </section>
 
-            <section class="right-widget" data-right-widget="taps" data-expanded="false">
-              <div class="right-widget-panel top-tappers-panel" id="topTappersPanel">
-                <h2 data-i18n="topTappers.title">Top tapnięć</h2>
-                <div id="topTappersContent"></div>
-              </div>
-              <button class="right-widget-tab" type="button" id="topTappersButton" data-widget-target="taps" aria-expanded="false" aria-controls="topTappersPanel">
-                <span class="right-widget-tab-icon" data-ui-icon="heart" aria-hidden="true"></span>
-                <span class="right-widget-tab-text">TAP</span>
-              </button>
-            </section>
           </aside>
         </section>
 
@@ -461,6 +451,26 @@
                   <output id="ttsVolumeValue">100%</output>
                 </span>
               </label>
+              <div class="settings-subsection-heading">
+                <strong data-i18n="settings.giftSounds.sectionTitle">Dźwięki</strong>
+                <small class="setting-description" data-i18n="settings.giftSounds.sectionDescription">Powiadomienia o prezentach według wartości w monetach.</small>
+              </div>
+              <section class="gift-sounds-settings" aria-labelledby="giftSoundsHeading">
+                <div class="gift-sounds-heading">
+                  <span><strong id="giftSoundsHeading" data-i18n="settings.giftSounds.title">Dźwięki prezentów</strong><small class="setting-description" data-i18n="settings.giftSounds.description">Ustal progi wartości prezentów i przypisz im dźwięki. Zadziała najwyższy osiągnięty próg.</small></span>
+                  <span class="gift-sound-limit" id="giftSoundLimit">0/10</span>
+                </div>
+                <div class="gift-sound-add">
+                  <label for="newGiftSoundThreshold" data-i18n="settings.giftSounds.newThreshold">Nowy próg monet</label>
+                  <input id="newGiftSoundThreshold" type="number" min="1" max="99999999" inputmode="numeric" placeholder="Próg monet" data-i18n-placeholder="settings.giftSounds.thresholdPlaceholder">
+                  <button class="page-action" id="addGiftSoundThreshold" type="button" data-i18n="settings.giftSounds.add">Dodaj próg</button>
+                </div>
+                <label class="setting-row gift-volume-row" for="giftSoundVolume">
+                  <span><strong data-i18n="settings.giftSounds.volume">Głośność dźwięków prezentów</strong><small class="setting-description" data-i18n="settings.giftSounds.volumeDescription">Reguluje głośność wszystkich powiadomień prezentowych.</small></span>
+                  <span class="setting-range"><input id="giftSoundVolume" type="range" min="0" max="2" step="0.05" value="1"><output id="giftSoundVolumeValue">100%</output></span>
+                </label>
+                <div id="giftSoundThresholds" class="gift-sound-thresholds"></div>
+              </section>
             </div>
           </section>
           <section class="settings-panel" data-settings-panel="system" hidden>
@@ -715,6 +725,10 @@
                     wcześniejszych rozmów.
                   </p>
                 </section>
+                <section class="about-section about-contact">
+                  <h2 data-i18n="about.contact.title">Kontakt:</h2>
+                  <p data-i18n="about.contact.body">Jeżeli masz pomysł na usprawnienie działania programu bądź jego nowe funkcje, skontaktuj się ze mną bezpośrednio pod e-mailem: czatboxttm@icloud.com</p>
+                </section>
               </div>
             </div>
           </article>
@@ -725,15 +739,27 @@
                   <img src="./assets/baksik-i15pro.png" alt="" loading="lazy" decoding="async">
                 </figure>
                 <div class="about-faq-copy">
-                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.3.2</span></h2>
+                  <h2 class="about-version-title">Czatbox <span id="appVersion">0.3.3</span></h2>
 
                   <h3 data-i18n="about.news.changes.title">Zmiany:</h3>
                   <ul class="about-list">
-                    <li data-i18n="about.news.032.viewersPanel">Poprawiono panel Widzowie przy dużej liczbie osób.</li>
-                    <li data-i18n="about.news.032.viewersGrid">Poprawiono odstępy i czytelność siatki widzów.</li>
-                    <li data-i18n="about.news.032.multipliers">Usprawniono wyświetlanie informacji o mnożnikach.</li>
-                    <li data-i18n="about.news.032.notifications">Poprawiono niezawodność toastów i archiwum powiadomień.</li>
+                    <li data-i18n="about.news.033.removeLikesWidget">Usunięto widget polubień, nie działał tak jak należy i raz zaniżał, a raz zawyżał ilości.</li>
+                    <li data-i18n="about.news.033.mobileSync">Zsynchronizowano wersję desktopową z wersją mobilną.</li>
+                    <li data-i18n="about.news.033.mobilePlatforms">Od teraz istnieje wersja mobilna na przeglądarkę, iOS i Androida.</li>
+                    <li data-i18n="about.news.033.giftSounds">Dodano do wersji desktopowej dźwięki i progi prezentów.</li>
                   </ul>
+                  <h3 data-i18n="about.news.033.mobileTitle">Wersja mobilna:</h3>
+                  <p data-i18n="about.news.033.mobileIntro">By uruchomić wersję mobilną na swoim telefonie:</p>
+                  <ol class="about-list">
+                    <li><span data-i18n="about.news.033.mobileStep1">Wejdź pod link:</span> <a href="https://czatbox-tt-mobile.p548bzdpmd.workers.dev/">https://czatbox-tt-mobile.p548bzdpmd.workers.dev/</a></li>
+                    <li data-i18n="about.news.033.mobileStep2">Wpisz hasło dostępu: L3AV3M3AL0N3W1KUSIA</li>
+                    <li data-i18n="about.news.033.mobileStep3">Następnie poszukaj w swojej przeglądarce opcji dodania skrótu strony do ekranu. Na iPhonie w Safari: naciśnij trzy kropki → Udostępnij → Pokaż więcej → Do ekranu głównego.</li>
+                    <li data-i18n="about.news.033.mobileStep4">Zamknij wersję w przeglądarce, uruchom skrót z ekranu głównego i ponownie wpisz hasło.</li>
+                    <li data-i18n="about.news.033.mobileStep5">W programie otwórz Ustawienia → Kody → Klucz Euler Stream.</li>
+                    <li data-i18n="about.news.033.mobileStep6">Naciśnij Klucz Euler Stream, załóż konto i wygeneruj klucz. Zachowaj jego kopię i nikomu go nie udostępniaj.</li>
+                    <li data-i18n="about.news.033.mobileStep7">Wprowadź klucz w Ustawienia → Klucz Euler Stream i zatwierdź.</li>
+                    <li data-i18n="about.news.033.mobileStep8">Program jest już gotowy do użytku.</li>
+                  </ol>
                 </div>
               </div>
             </section>

@@ -1882,6 +1882,26 @@ body {
   fill: color-mix(in srgb, #f35d83 28%, transparent);
 }
 
+.settings-subsection-heading { display: grid; gap: 4px; padding: 18px 16px 10px; border-top: 1px solid var(--line, rgba(91, 146, 184, .25)); }
+.settings-subsection-heading > strong { font-size: 15px; }
+.gift-sounds-settings { margin: 0; border: 0; border-radius: 0; overflow: hidden; }
+.gift-sounds-heading, .gift-sound-add { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.gift-sounds-heading { justify-content: space-between; }
+.gift-sounds-heading > span:first-child { display: grid; gap: 4px; }
+.gift-sound-limit { flex: 0 0 auto; font-weight: 800; opacity: .8; }
+.gift-sound-add { border-top: 1px solid var(--line, rgba(91, 146, 184, .25)); }
+.gift-sound-add label { font-weight: 700; }
+.gift-sound-add input, .gift-sound-threshold { min-width: 0; border: 1px solid var(--line, rgba(91, 146, 184, .35)); border-radius: 10px; padding: 9px 11px; background: var(--panel2, rgba(13, 29, 46, .82)); color: inherit; }
+.gift-sound-add input { flex: 1; }
+.gift-volume-row { border-top: 1px solid var(--line, rgba(91, 146, 184, .25)); }
+.gift-sound-row { display: grid; grid-template-columns: auto minmax(105px, .7fr) minmax(150px, 1fr) auto auto; gap: 10px; align-items: center; padding: 11px 16px; border-top: 1px solid var(--line, rgba(91, 146, 184, .25)); }
+.gift-sound-row .setting-select { width: 100%; }
+.gift-sound-icon-button { inline-size: 40px; block-size: 40px; min-inline-size: 40px; max-inline-size: 40px; min-block-size: 40px; padding: 0; display: inline-grid; place-items: center; border-radius: 50%; line-height: 1; }
+.gift-sound-icon-button .ui-icon { width: 18px; height: 18px; stroke-width: 2; }
+.gift-sound-icon-button[data-action="preview"] .ui-icon { transform: translateX(1px); }
+.gift-sound-delete { color: #ff7189; }
+@media (max-width: 720px) { .gift-sound-row { grid-template-columns: auto minmax(90px, .7fr) minmax(120px, 1fr) auto auto; } }
+
 .right-widget[data-right-widget="taps"] .right-widget-tab-icon,
 .right-widget[data-right-widget="taps"] .right-widget-tab:hover .right-widget-tab-icon,
 .right-widget[data-right-widget="taps"] .right-widget-tab:focus-visible .right-widget-tab-icon,
@@ -12506,6 +12526,11 @@ html[data-big-picture="true"] .app-bottom-taskbar {
   background: radial-gradient(circle at 18% 14%, rgba(255,255,255,.68), transparent 22%), radial-gradient(circle at 76% 22%, rgba(197,244,255,.48), transparent 27%), linear-gradient(135deg, #075a91 0%, #18a8e8 48%, #b6f2ff 100%) !important;
   box-shadow: 0 16px 34px rgba(24,168,232,.36), inset 0 0 22px rgba(255,255,255,.36) !important;
 }
+.program-toast[data-type="gift"] {
+  --program-toast-accent: #ffd76a;
+  background: radial-gradient(circle at 16% 10%, rgba(255,255,255,.28), transparent 32%), linear-gradient(135deg, #775000 0%, #c4870a 48%, #f4d46d 100%) !important;
+  box-shadow: 0 16px 34px rgba(196,135,10,.34), inset 0 0 18px rgba(255,255,255,.16) !important;
+}
 
 .program-toast[data-type="multiplier"]::before {
   inset: -28% -10% -18%;
@@ -12529,6 +12554,12 @@ html[data-big-picture="true"] .app-bottom-taskbar {
   mix-blend-mode: screen;
   animation: program-toast-freeze 2.4s ease-in-out infinite;
 }
+.program-toast[data-type="gift"]::before {
+  opacity: 1;
+  background: radial-gradient(circle at 18% 24%, rgba(255,246,180,.86) 0 2px, transparent 3px), radial-gradient(circle at 46% 70%, rgba(255,214,94,.8) 0 2px, transparent 3px), radial-gradient(circle at 78% 32%, rgba(255,248,198,.75) 0 2px, transparent 3px), linear-gradient(115deg, transparent 0 34%, rgba(255,255,255,.2) 44%, transparent 56% 100%);
+  mix-blend-mode: screen;
+  animation: czester-coin-sparkle 2.2s linear infinite;
+}
 
 @keyframes program-toast-flow {
   0% { background-position: 0% 50%; }
@@ -12547,6 +12578,8 @@ html[data-big-picture="true"] .app-bottom-taskbar {
 .program-toast[data-type="superfan"] .program-toast-message { color: #251500 !important; }
 .program-toast[data-type="freeze"] .program-toast-title,
 .program-toast[data-type="freeze"] .program-toast-message { color: #042033 !important; }
+.program-toast[data-type="gift"] .program-toast-title,
+.program-toast[data-type="gift"] .program-toast-message { color: #241700 !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .program-toast::before { animation: none !important; }

@@ -9,6 +9,7 @@ const APP_APPEARANCE_SETTINGS_KEY = 'czatbox.app.appearance';
 const APP_LANGUAGE_SETTINGS_KEY = 'czatbox.app.language';
 const TIME_FORMAT_SETTINGS_KEY = 'czatbox.time.format';
 const GENERAL_SETTINGS_KEY = 'czatbox.general.settings';
+const GIFT_SOUND_SETTINGS_KEY = 'czatbox.gift.sounds.v1';
 const RECENT_CREATORS_KEY = 'czatbox.recent.creators';
 const FAVORITE_CREATORS_KEY = 'czatbox.favorite.creators';
 const CZESTER_MEMORY_KEY = 'czatbox.czester.memory';
@@ -147,6 +148,7 @@ const UI_ICONS = {
   zap: '<path d="M13 2.75 5.5 13h6L11 21.25 18.5 11h-6L13 2.75Z"/>',
   sparkle: '<path d="M12 3.5c.6 3.1 2.4 4.9 5.5 5.5-3.1.6-4.9 2.4-5.5 5.5-.6-3.1-2.4-4.9-5.5-5.5 3.1-.6 4.9-2.4 5.5-5.5Z"/><path d="M18.5 14.5c.3 1.6 1.2 2.5 2.8 2.8-1.6.3-2.5 1.2-2.8 2.8-.3-1.6-1.2-2.5-2.8-2.8 1.6-.3 2.5-1.2 2.8-2.8Z"/>',
   coin: '<circle cx="12" cy="12" r="8.25"/><circle cx="12" cy="12" r="4.25"/><path d="M12 9.5v5M10.75 10.25h1.9a1.1 1.1 0 0 1 0 2.2h-1.3a1.1 1.1 0 0 0 0 2.2h1.9"/>',
+  play: '<path d="m9 6 9 6-9 6V6Z"/>',
   bell: '<path d="M6.5 16.5h11l-1.25-2V10a4.25 4.25 0 0 0-8.5 0v4.5l-1.25 2Z"/><path d="M10 19a2.25 2.25 0 0 0 4 0"/>',
   dinosaur: '<path d="M5 18v-5.5a6.5 6.5 0 0 1 6.5-6.5h3a4.5 4.5 0 0 1 4.5 4.5V13h-4v3.5M8 18h3M15 18h3M18 10h2.5M8 9h.01"/>',
   apple: '<path d="M12 8c-3-2-6 .5-6 4.5S8.5 19 12 19s6-2.5 6-6.5S15 6 12 8Z"/><path d="M12 7c0-2 1.5-3 3-3M12 5c-1.5-1.5-3-1.5-4-1"/>',
@@ -180,6 +182,27 @@ const DEFAULT_GENERAL_SETTINGS = {
   bigPictureMode: false,
   quietMode: false
 };
+const DEFAULT_GIFT_SOUNDS = [
+  { id: 'standard-1', threshold: 1, enabled: true, sound: 'blysk' },
+  { id: 'standard-100', threshold: 100, enabled: true, sound: 'cute-wow' },
+  { id: 'standard-500', threshold: 500, enabled: true, sound: 'donate-alert' },
+  { id: 'standard-1000', threshold: 1000, enabled: true, sound: 'perfumy' },
+  { id: 'standard-1500', threshold: 1500, enabled: true, sound: 'pinionszki' },
+  { id: 'standard-2000', threshold: 2000, enabled: true, sound: 'kraina-zapomnienia' },
+  { id: 'standard-2500', threshold: 2500, enabled: true, sound: 'auuuu' },
+  { id: 'standard-3000', threshold: 3000, enabled: true, sound: 'aura' }
+];
+const GIFT_SOUND_POOL = [
+  { id: 'aura', name: 'Aura', url: './assets/sounds/aura.mp3' },
+  { id: 'auuuu', name: 'Auuuu', url: './assets/sounds/auuuu.mp3' },
+  { id: 'blysk', name: 'Błysk', url: './assets/sounds/blysk.mp3' },
+  { id: 'cute-wow', name: 'Cute wow', url: './assets/sounds/cute-wow.mp3' },
+  { id: 'donate-alert', name: 'Donate alert', url: './assets/sounds/donate-alert.mp3' },
+  { id: 'kraina-zapomnienia', name: 'Kraina zapomnienia', url: './assets/sounds/kraina-zapomnienia.mp3' },
+  { id: 'perfumy', name: 'Perfumy', url: './assets/sounds/perfumy.mp3' },
+  { id: 'pinionszki', name: 'Pinionszki', url: './assets/sounds/pinionszki.mp3' },
+  { id: 'sklad', name: 'Skład', url: './assets/sounds/sklad.mp3' }
+];
 const LANGUAGE_LOCALES = {
   pl: 'pl-PL',
   en: 'en-US',
@@ -298,6 +321,8 @@ const I18N = {
     'programToast.moderator.body': 'Do czatu dołącza moderator {name}.',
     'programToast.superfan.title': 'Superfan dołączył',
     'programToast.superfan.body': 'Do czatu dołącza superfan {name}.',
+    'programToast.gift.title': 'Prezent od {name}',
+    'programToast.gift.body': '{gift} • {coins} monet',
     'programToast.history.title': 'Powiadomienia LIVE',
     'programToast.history.note': 'Historia z bieżącej transmisji.',
     'programToast.history.empty': 'Brak powiadomień podczas tego LIVE.',
@@ -716,6 +741,8 @@ const I18N = {
     'programToast.moderator.body': 'Moderator {name} joined the chat.',
     'programToast.superfan.title': 'Superfan joined',
     'programToast.superfan.body': 'Superfan {name} joined the chat.',
+    'programToast.gift.title': 'Gift from {name}',
+    'programToast.gift.body': '{gift} • {coins} coins',
     'programToast.history.title': 'LIVE notifications',
     'programToast.history.note': 'History from the current stream.',
     'programToast.history.empty': 'No notifications during this LIVE.',
@@ -1133,6 +1160,8 @@ const I18N = {
     'programToast.moderator.body': 'Moderator {name} ist dem Chat beigetreten.',
     'programToast.superfan.title': 'Superfan beigetreten',
     'programToast.superfan.body': 'Superfan {name} ist dem Chat beigetreten.',
+    'programToast.gift.title': 'Geschenk von {name}',
+    'programToast.gift.body': '{gift} • {coins} Münzen',
     'programToast.history.title': 'LIVE-Benachrichtigungen',
     'programToast.history.note': 'Verlauf des aktuellen Streams.',
     'programToast.history.empty': 'Keine Benachrichtigungen während dieses LIVE.',
@@ -1522,6 +1551,8 @@ I18N.hu = {
     'programToast.moderator.body': '{name} moderátor csatlakozott a csevegéshez.',
     'programToast.superfan.title': 'Szuperrajongó csatlakozott',
     'programToast.superfan.body': '{name} szuperrajongó csatlakozott a csevegéshez.',
+    'programToast.gift.title': 'Ajándék tőle: {name}',
+    'programToast.gift.body': '{gift} • {coins} érme',
     'programToast.history.title': 'LIVE értesítések',
     'programToast.history.note': 'Az aktuális közvetítés előzményei.',
     'programToast.history.empty': 'Nincs értesítés ezen a LIVE-on.',
@@ -1679,6 +1710,10 @@ I18N.hu['about.news.025.translations'] = 'A többi nyelv fordításai javítva.'
 I18N.hu['about.news.025.widgets'] = 'Javítva a widgetek akadozása Big Picture módra váltáskor.';
 
 Object.assign(I18N.pl, {
+  'settings.giftSounds.sectionTitle': 'Dźwięki',
+  'settings.giftSounds.sectionDescription': 'Powiadomienia o prezentach według wartości w monetach.',
+  'about.contact.title': 'Kontakt:',
+  'about.contact.body': 'Jeżeli masz pomysł na usprawnienie działania programu bądź jego nowe funkcje, skontaktuj się ze mną bezpośrednio pod e-mailem: czatboxttm@icloud.com',
   'about.news.next.title': 'Co dalej?',
   'about.news.026.intro': 'Tym razem aktualizacja jest naprawdę potężna, od systemu ekonomii i sklepu z motywami i grami, po poprawki tłumaczeń. Starałem się zawrzeć większość sugestii z ostatnich 2 tygodni. Mam nadzieję, że sprostałem - jeżeli tak poleć program dalej swoim znajomym - dziękuję!',
   'about.news.026.economy': 'System Talarków i nagrody za osiągnięcia oraz aktywność na LIVE.',
@@ -1702,6 +1737,8 @@ Object.assign(I18N.pl, {
 });
 
 Object.assign(I18N.en, {
+  'settings.giftSounds.sectionTitle': 'Sounds', 'settings.giftSounds.sectionDescription': 'Gift notifications based on their coin value.',
+  'about.contact.title': 'Contact:', 'about.contact.body': 'If you have an idea for improving the program or adding new features, contact me directly by email: czatboxttm@icloud.com',
   'about.news.next.title': 'What comes next?',
   'about.news.026.intro': 'This update is truly huge: from the economy system and a shop with themes and games to translation improvements. I tried to include most suggestions from the last two weeks. I hope I delivered — if so, please recommend the program to your friends. Thank you!',
   'about.news.026.economy': 'Talarki economy with rewards for achievements and LIVE activity.',
@@ -1725,6 +1762,8 @@ Object.assign(I18N.en, {
 });
 
 Object.assign(I18N.de, {
+  'settings.giftSounds.sectionTitle': 'Töne', 'settings.giftSounds.sectionDescription': 'Geschenkbenachrichtigungen nach ihrem Münzwert.',
+  'about.contact.title': 'Kontakt:', 'about.contact.body': 'Wenn du eine Idee zur Verbesserung des Programms oder für neue Funktionen hast, kontaktiere mich direkt per E-Mail: czatboxttm@icloud.com',
   'about.news.next.title': 'Wie geht es weiter?',
   'about.news.026.intro': 'Dieses Update ist wirklich riesig: vom Wirtschaftssystem und einem Shop mit Themes und Spielen bis hin zu verbesserten Übersetzungen. Ich habe versucht, die meisten Vorschläge der letzten zwei Wochen umzusetzen. Ich hoffe, es ist mir gelungen — wenn ja, empfehlt das Programm bitte euren Freunden. Danke!',
   'about.news.026.economy': 'Talarki-Wirtschaftssystem mit Belohnungen für Erfolge und LIVE-Aktivität.',
@@ -1748,6 +1787,8 @@ Object.assign(I18N.de, {
 });
 
 Object.assign(I18N.hu, {
+  'settings.giftSounds.sectionTitle': 'Hangok', 'settings.giftSounds.sectionDescription': 'Ajándékértesítések az érmeérték alapján.',
+  'about.contact.title': 'Kapcsolat:', 'about.contact.body': 'Ha ötleted van a program működésének javítására vagy új funkciókra, írj közvetlenül erre az e-mail-címre: czatboxttm@icloud.com',
   'about.news.next.title': 'Mi következik?',
   'about.news.026.intro': 'Ez a frissítés valóban hatalmas: a gazdasági rendszertől és a témákat, valamint játékokat kínáló bolttól egészen a fordítások javításáig. Igyekeztem beépíteni az elmúlt két hét legtöbb javaslatát. Remélem, sikerült — ha igen, ajánld a programot az ismerőseidnek is. Köszönöm!',
   'about.news.026.economy': 'Talarki gazdasági rendszer jutalmakkal a teljesítményekért és az ÉLŐ aktivitásért.',
@@ -1768,6 +1809,42 @@ Object.assign(I18N.hu, {
   'about.news.026.roles': 'Moderátori és szuperrajongói jelölések a nevek mellett.',
   'about.news.026.polish': 'Számos fordítási, elrendezési, keret- és reszponzivitási javítás.',
   'about.news.026.next': 'Ez egy titokzatos titok!'
+});
+
+Object.assign(I18N.pl, {
+  'settings.giftSounds.title': 'Dźwięki prezentów',
+  'settings.giftSounds.description': 'Ustal progi wartości prezentów i przypisz im dźwięki. Zadziała najwyższy osiągnięty próg.',
+  'settings.giftSounds.newThreshold': 'Nowy próg monet',
+  'settings.giftSounds.thresholdPlaceholder': 'Próg monet',
+  'settings.giftSounds.add': 'Dodaj próg',
+  'settings.giftSounds.volume': 'Głośność dźwięków prezentów',
+  'settings.giftSounds.volumeDescription': 'Reguluje głośność wszystkich powiadomień prezentowych.',
+  'settings.giftSounds.enabled': 'Włącz próg',
+  'settings.giftSounds.preview': 'Odtwórz próbkę',
+  'settings.giftSounds.delete': 'Usuń próg',
+  'settings.giftSounds.max': 'Możesz dodać maksymalnie 10 progów.',
+  'settings.giftSounds.duplicate': 'Taki próg już istnieje.',
+  'settings.giftSounds.invalid': 'Wpisz wartość progu w monetach.',
+  'about.news.033.removeLikesWidget': 'Usunięto widget polubień, nie działał tak jak należy i raz zaniżał, a raz zawyżał ilości.',
+  'about.news.033.mobileSync': 'Zsynchronizowano wersję desktopową z wersją mobilną.',
+  'about.news.033.mobilePlatforms': 'Od teraz istnieje wersja mobilna na przeglądarkę, iOS i Androida.',
+  'about.news.033.giftSounds': 'Dodano do wersji desktopowej dźwięki i progi prezentów.'
+  ,'about.news.033.mobileTitle': 'Wersja mobilna:', 'about.news.033.mobileIntro': 'By uruchomić wersję mobilną na swoim telefonie:', 'about.news.033.mobileStep1': 'Wejdź pod link:', 'about.news.033.mobileStep2': 'Wpisz hasło dostępu: L3AV3M3AL0N3W1KUSIA', 'about.news.033.mobileStep3': 'Następnie poszukaj w swojej przeglądarce opcji dodania skrótu strony do ekranu. Na iPhonie w Safari: naciśnij trzy kropki → Udostępnij → Pokaż więcej → Do ekranu głównego.', 'about.news.033.mobileStep4': 'Zamknij wersję w przeglądarce, uruchom skrót z ekranu głównego i ponownie wpisz hasło.', 'about.news.033.mobileStep5': 'W programie otwórz Ustawienia → Kody → Klucz Euler Stream.', 'about.news.033.mobileStep6': 'Naciśnij Klucz Euler Stream, załóż konto i wygeneruj klucz. Zachowaj jego kopię i nikomu go nie udostępniaj.', 'about.news.033.mobileStep7': 'Wprowadź klucz w Ustawienia → Klucz Euler Stream i zatwierdź.', 'about.news.033.mobileStep8': 'Program jest już gotowy do użytku.'
+});
+Object.assign(I18N.en, {
+  'settings.giftSounds.title': 'Gift sounds', 'settings.giftSounds.description': 'Set gift value thresholds and assign sounds. The highest reached threshold is played.', 'settings.giftSounds.newThreshold': 'New coin threshold', 'settings.giftSounds.thresholdPlaceholder': 'Coin threshold', 'settings.giftSounds.add': 'Add threshold', 'settings.giftSounds.volume': 'Gift sound volume', 'settings.giftSounds.volumeDescription': 'Controls the volume of all gift notifications.', 'settings.giftSounds.enabled': 'Enable threshold', 'settings.giftSounds.preview': 'Play sample', 'settings.giftSounds.delete': 'Delete threshold', 'settings.giftSounds.max': 'You can add up to 10 thresholds.', 'settings.giftSounds.duplicate': 'This threshold already exists.', 'settings.giftSounds.invalid': 'Enter a coin threshold.',
+  'about.news.033.removeLikesWidget': 'Removed the likes widget because it alternately undercounted and overcounted.', 'about.news.033.mobileSync': 'Synchronized the desktop and mobile versions.', 'about.news.033.mobilePlatforms': 'A mobile version is now available for browsers, iOS and Android.', 'about.news.033.giftSounds': 'Added gift sounds and gift thresholds to the desktop version.'
+  ,'about.news.033.mobileTitle': 'Mobile version:', 'about.news.033.mobileIntro': 'To launch the mobile version on your phone:', 'about.news.033.mobileStep1': 'Open:', 'about.news.033.mobileStep2': 'Enter the access password: L3AV3M3AL0N3W1KUSIA', 'about.news.033.mobileStep3': 'Find the option to add a website shortcut to your home screen. On iPhone in Safari: tap the three dots → Share → Show more → Add to Home Screen.', 'about.news.033.mobileStep4': 'Close the browser version, launch the home-screen shortcut and enter the password again.', 'about.news.033.mobileStep5': 'In the app open Settings → Codes → Euler Stream Key.', 'about.news.033.mobileStep6': 'Select Euler Stream Key, create an account and generate a key. Keep a private backup and never share it.', 'about.news.033.mobileStep7': 'Enter the key in Settings → Euler Stream Key and confirm.', 'about.news.033.mobileStep8': 'The app is ready to use.'
+});
+Object.assign(I18N.de, {
+  'settings.giftSounds.title': 'Geschenktöne', 'settings.giftSounds.description': 'Lege Geschenkewert-Schwellen fest und ordne Töne zu. Die höchste erreichte Schwelle wird abgespielt.', 'settings.giftSounds.newThreshold': 'Neue Münzschwelle', 'settings.giftSounds.thresholdPlaceholder': 'Münzschwelle', 'settings.giftSounds.add': 'Schwelle hinzufügen', 'settings.giftSounds.volume': 'Lautstärke der Geschenktöne', 'settings.giftSounds.volumeDescription': 'Regelt die Lautstärke aller Geschenkbenachrichtigungen.', 'settings.giftSounds.enabled': 'Schwelle aktivieren', 'settings.giftSounds.preview': 'Hörprobe abspielen', 'settings.giftSounds.delete': 'Schwelle löschen', 'settings.giftSounds.max': 'Du kannst höchstens 10 Schwellen hinzufügen.', 'settings.giftSounds.duplicate': 'Diese Schwelle existiert bereits.', 'settings.giftSounds.invalid': 'Gib eine Münzschwelle ein.',
+  'about.news.033.removeLikesWidget': 'Das Likes-Widget wurde entfernt, da es Werte abwechselnd zu niedrig und zu hoch zählte.', 'about.news.033.mobileSync': 'Desktop- und Mobilversion wurden synchronisiert.', 'about.news.033.mobilePlatforms': 'Eine Mobilversion ist jetzt für Browser, iOS und Android verfügbar.', 'about.news.033.giftSounds': 'Geschenktöne und Geschenkeschwellen wurden zur Desktopversion hinzugefügt.'
+  ,'about.news.033.mobileTitle': 'Mobilversion:', 'about.news.033.mobileIntro': 'So startest du die Mobilversion auf deinem Smartphone:', 'about.news.033.mobileStep1': 'Öffne:', 'about.news.033.mobileStep2': 'Gib das Zugangspasswort ein: L3AV3M3AL0N3W1KUSIA', 'about.news.033.mobileStep3': 'Suche im Browser die Option, eine Verknüpfung zum Startbildschirm hinzuzufügen. Auf dem iPhone in Safari: drei Punkte → Teilen → Mehr anzeigen → Zum Home-Bildschirm.', 'about.news.033.mobileStep4': 'Schließe die Browserversion, starte die Verknüpfung und gib das Passwort erneut ein.', 'about.news.033.mobileStep5': 'Öffne Einstellungen → Codes → Euler Stream Key.', 'about.news.033.mobileStep6': 'Wähle Euler Stream Key, erstelle ein Konto und generiere einen Schlüssel. Sichere ihn privat und teile ihn mit niemandem.', 'about.news.033.mobileStep7': 'Trage den Schlüssel unter Einstellungen → Euler Stream Key ein und bestätige.', 'about.news.033.mobileStep8': 'Die App ist einsatzbereit.'
+});
+Object.assign(I18N.hu, {
+  'settings.giftSounds.title': 'Ajándékhangok', 'settings.giftSounds.description': 'Állíts be ajándékérték-határokat és rendelj hozzájuk hangokat. A legmagasabb elért határ hangja szólal meg.', 'settings.giftSounds.newThreshold': 'Új érmehatár', 'settings.giftSounds.thresholdPlaceholder': 'Érmehatár', 'settings.giftSounds.add': 'Határ hozzáadása', 'settings.giftSounds.volume': 'Ajándékhangok hangereje', 'settings.giftSounds.volumeDescription': 'Az összes ajándékértesítés hangerejét szabályozza.', 'settings.giftSounds.enabled': 'Határ bekapcsolása', 'settings.giftSounds.preview': 'Minta lejátszása', 'settings.giftSounds.delete': 'Határ törlése', 'settings.giftSounds.max': 'Legfeljebb 10 határt adhatsz hozzá.', 'settings.giftSounds.duplicate': 'Ez a határ már létezik.', 'settings.giftSounds.invalid': 'Adj meg egy érmehatárt.',
+  'about.news.033.removeLikesWidget': 'Eltávolítottuk a kedvelés widgetet, mert hol kevesebbet, hol többet számolt.', 'about.news.033.mobileSync': 'Szinkronizáltuk az asztali és a mobilverziót.', 'about.news.033.mobilePlatforms': 'Mostantól böngészős, iOS- és Android-mobilverzió is elérhető.', 'about.news.033.giftSounds': 'Ajándékhangok és ajándékküszöbök kerültek az asztali verzióba.'
+  ,'about.news.033.mobileTitle': 'Mobilverzió:', 'about.news.033.mobileIntro': 'A mobilverzió elindítása a telefonodon:', 'about.news.033.mobileStep1': 'Nyisd meg:', 'about.news.033.mobileStep2': 'Írd be a hozzáférési jelszót: L3AV3M3AL0N3W1KUSIA', 'about.news.033.mobileStep3': 'Keresd meg a böngészőben a kezdőképernyőhöz adás lehetőségét. iPhone-on, Safariban: három pont → Megosztás → Továbbiak → Hozzáadás a Főképernyőhöz.', 'about.news.033.mobileStep4': 'Zárd be a böngészős verziót, indítsd el a kezdőképernyős parancsikont, és írd be újra a jelszót.', 'about.news.033.mobileStep5': 'Az alkalmazásban nyisd meg: Beállítások → Kódok → Euler Stream kulcs.', 'about.news.033.mobileStep6': 'Válaszd az Euler Stream kulcsot, hozz létre fiókot és generálj kulcsot. Őrizd meg biztonságosan, és ne oszd meg senkivel.', 'about.news.033.mobileStep7': 'Add meg a kulcsot a Beállítások → Euler Stream kulcs résznél, majd erősítsd meg.', 'about.news.033.mobileStep8': 'Az alkalmazás használatra kész.'
 });
 
 Object.assign(I18N.pl, {
@@ -2004,7 +2081,6 @@ const statusDelayEl = document.getElementById('statusDelay');
 const statusQueueEl = document.getElementById('statusQueue');
 const statusViewersEl = document.getElementById('statusViewers');
 const topGiftersContent = document.getElementById('topGiftersContent');
-const topTappersContent = document.getElementById('topTappersContent');
 const statusMessagesEl = document.getElementById('statusMessages');
 const statusMemberHeartsActiveEl = document.getElementById('statusMemberHeartsActive');
 const statusMemberHeartsExpiredEl = document.getElementById('statusMemberHeartsExpired');
@@ -2775,6 +2851,7 @@ const toastHistoryEmptyEl = document.getElementById('toastHistoryEmpty');
 const programToastQueue = [];
 const programToastHistory = [];
 const programToastRecentKeys = new Map();
+const giftSoundThresholdByMessage = new Map();
 let activeProgramToast = null;
 let programToastTimer = null;
 let programToastHideTimer = null;
@@ -2809,6 +2886,9 @@ function renderNextProgramToast() {
   programToastMessageEl.textContent = toast.message || '';
   programToastIconEl.replaceChildren(createUiIcon(toast.icon || 'message'));
   programToastEl.hidden = false;
+  if (toast.soundId) {
+    playGiftSound(toast.soundId);
+  }
   requestAnimationFrame(() => programToastEl.classList.add('is-visible'));
   programToastTimer = window.setTimeout(() => dismissProgramToast(), toast.duration || 7000);
 }
@@ -2860,17 +2940,18 @@ function resetProgramToastHistory({ close = true } = {}) {
   programToastHistory.length = 0;
   programToastQueue.length = 0;
   programToastRecentKeys.clear();
+  giftSoundThresholdByMessage.clear();
   renderProgramToastHistory();
   if (activeProgramToast) dismissProgramToast();
   if (close) setProgramToastHistoryOpen(false);
 }
 
-function enqueueProgramToast({ type = 'info', title = '', message = '', icon = 'message', duration = 7000, dedupeKey = '', dedupeMs = 30000, priority = false } = {}) {
+function enqueueProgramToast({ type = 'info', title = '', message = '', icon = 'message', duration = 7000, dedupeKey = '', dedupeMs = 30000, priority = false, soundId = '' } = {}) {
   const cleanMessage = String(message || '').trim();
   if (!cleanMessage || (dedupeKey && wasProgramToastRecentlyQueued(dedupeKey, dedupeMs))) {
     return;
   }
-  const toast = { type, title: String(title || '').trim(), message: cleanMessage, icon, duration, createdAt: Date.now() };
+  const toast = { type, title: String(title || '').trim(), message: cleanMessage, icon, duration, soundId, createdAt: Date.now() };
   if (isOnlineConnectionState(state) || (state.mode === 'chat' && state.creatorId)) {
     programToastHistory.push(toast);
     renderProgramToastHistory();
@@ -2918,6 +2999,12 @@ const ttsRateEl = document.getElementById('ttsRate');
 const ttsRateValueEl = document.getElementById('ttsRateValue');
 const ttsVolumeEl = document.getElementById('ttsVolume');
 const ttsVolumeValueEl = document.getElementById('ttsVolumeValue');
+const giftSoundVolumeEl = document.getElementById('giftSoundVolume');
+const giftSoundVolumeValueEl = document.getElementById('giftSoundVolumeValue');
+const giftSoundThresholdsEl = document.getElementById('giftSoundThresholds');
+const giftSoundLimitEl = document.getElementById('giftSoundLimit');
+const newGiftSoundThresholdEl = document.getElementById('newGiftSoundThreshold');
+const addGiftSoundThresholdEl = document.getElementById('addGiftSoundThreshold');
 const chatDelayEl = document.getElementById('chatDelay');
 const chatDelayValueEl = document.getElementById('chatDelayValue');
 const systemAutoLaunchEl = document.getElementById('systemAutoLaunch');
@@ -2992,6 +3079,8 @@ let redeemedFeatures = loadRedeemedFeatures();
 let appTheme = loadAppTheme();
 let appAppearance = loadAppAppearance();
 let generalSettings = loadGeneralSettings();
+let giftSoundSettings = loadGiftSoundSettings();
+let giftSoundAudio = null;
 let systemSettings = loadSystemSettings();
 let appLanguage = systemSettings.language;
 let timeFormat = systemSettings.timeFormat;
@@ -3173,6 +3262,115 @@ function loadGeneralSettings() {
 function saveGeneralSettings() {
   generalSettings.multiplierNotifications = true;
   localStorage.setItem(GENERAL_SETTINGS_KEY, JSON.stringify(generalSettings));
+}
+
+function loadGiftSoundSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(GIFT_SOUND_SETTINGS_KEY) || '{}');
+    const rows = Array.isArray(saved.thresholds) ? saved.thresholds : DEFAULT_GIFT_SOUNDS;
+    return {
+      volume: Math.max(0, Math.min(2, Number(saved.volume ?? 1) || 0)),
+      thresholds: rows.slice(0, 10).map((row, index) => ({
+        id: String(row.id || `gift-sound-${Date.now()}-${index}`),
+        threshold: Math.max(1, Math.min(99999999, Number(row.threshold) || 1)),
+        enabled: row.enabled !== false,
+        sound: GIFT_SOUND_POOL.some((sound) => sound.id === row.sound) ? row.sound : GIFT_SOUND_POOL[0].id
+      }))
+    };
+  } catch {
+    return { volume: 1, thresholds: DEFAULT_GIFT_SOUNDS.map((row) => ({ ...row })) };
+  }
+}
+
+function saveGiftSoundSettings() {
+  localStorage.setItem(GIFT_SOUND_SETTINGS_KEY, JSON.stringify(giftSoundSettings));
+}
+
+giftSoundVolumeEl?.addEventListener('input', () => {
+  giftSoundSettings.volume = Math.max(0, Math.min(2, Number(giftSoundVolumeEl.value) || 0));
+  if (giftSoundVolumeValueEl) giftSoundVolumeValueEl.value = `${Math.round(giftSoundSettings.volume * 100)}%`;
+  saveGiftSoundSettings();
+});
+addGiftSoundThresholdEl?.addEventListener('click', () => {
+  if (giftSoundSettings.thresholds.length >= 10) return window.alert(t('settings.giftSounds.max'));
+  const threshold = Math.max(1, Math.min(99999999, Number(newGiftSoundThresholdEl?.value) || 0));
+  if (!threshold) return window.alert(t('settings.giftSounds.invalid'));
+  if (giftSoundSettings.thresholds.some((entry) => entry.threshold === threshold)) return window.alert(t('settings.giftSounds.duplicate'));
+  giftSoundSettings.thresholds.push({ id: `gift-sound-${Date.now()}`, threshold, enabled: true, sound: GIFT_SOUND_POOL[giftSoundSettings.thresholds.length % GIFT_SOUND_POOL.length].id });
+  if (newGiftSoundThresholdEl) newGiftSoundThresholdEl.value = '';
+  saveGiftSoundSettings();
+  renderGiftSoundSettings();
+});
+
+function playGiftSound(soundId) {
+  const sound = GIFT_SOUND_POOL.find((entry) => entry.id === soundId) || GIFT_SOUND_POOL[0];
+  if (giftSoundAudio) {
+    giftSoundAudio.pause();
+  }
+  const audio = new Audio(sound.url);
+  audio.volume = Math.min(1, giftSoundSettings.volume);
+  if (giftSoundSettings.volume > 1) {
+    const context = new AudioContext();
+    const source = context.createMediaElementSource(audio);
+    const gain = context.createGain();
+    gain.gain.value = giftSoundSettings.volume;
+    source.connect(gain).connect(context.destination);
+    audio.addEventListener('ended', () => context.close().catch(() => {}), { once: true });
+  }
+  giftSoundAudio = audio;
+  void audio.play().catch(() => {});
+}
+
+function renderGiftSoundSettings() {
+  if (!giftSoundThresholdsEl) return;
+  giftSoundThresholdsEl.replaceChildren();
+  giftSoundSettings.thresholds.sort((a, b) => a.threshold - b.threshold).forEach((entry) => {
+    const row = document.createElement('div'); row.className = 'gift-sound-row';
+    const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.className = 'setting-toggle'; toggle.checked = entry.enabled; toggle.title = t('settings.giftSounds.enabled');
+    const threshold = document.createElement('input'); threshold.type = 'number'; threshold.min = '1'; threshold.max = '99999999'; threshold.value = String(entry.threshold); threshold.className = 'gift-sound-threshold';
+    const select = document.createElement('select'); select.className = 'setting-select';
+    GIFT_SOUND_POOL.forEach((sound) => { const option = document.createElement('option'); option.value = sound.id; option.textContent = sound.name; select.append(option); }); select.value = entry.sound;
+    const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'page-action gift-sound-icon-button'; preview.dataset.action = 'preview'; preview.title = t('settings.giftSounds.preview'); preview.setAttribute('aria-label', preview.title); preview.append(createUiIcon('play'));
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'page-action gift-sound-icon-button gift-sound-delete'; remove.dataset.action = 'delete'; remove.title = t('settings.giftSounds.delete'); remove.setAttribute('aria-label', remove.title); remove.append(createUiIcon('trash'));
+    toggle.onchange = () => { entry.enabled = toggle.checked; saveGiftSoundSettings(); };
+    threshold.onchange = () => { entry.threshold = Math.max(1, Math.min(99999999, Number(threshold.value) || 1)); saveGiftSoundSettings(); renderGiftSoundSettings(); };
+    select.onchange = () => { entry.sound = select.value; saveGiftSoundSettings(); playGiftSound(entry.sound); };
+    preview.onclick = () => playGiftSound(entry.sound);
+    remove.onclick = () => { giftSoundSettings.thresholds = giftSoundSettings.thresholds.filter((item) => item.id !== entry.id); saveGiftSoundSettings(); renderGiftSoundSettings(); };
+    row.append(toggle, threshold, select, preview, remove); giftSoundThresholdsEl.append(row);
+  });
+  if (giftSoundLimitEl) giftSoundLimitEl.textContent = `${giftSoundSettings.thresholds.length}/10`;
+  if (addGiftSoundThresholdEl) addGiftSoundThresholdEl.disabled = giftSoundSettings.thresholds.length >= 10;
+  if (giftSoundVolumeEl) giftSoundVolumeEl.value = String(giftSoundSettings.volume);
+  if (giftSoundVolumeValueEl) giftSoundVolumeValueEl.value = `${Math.round(giftSoundSettings.volume * 100)}%`;
+}
+
+function notifyGiftSoundThreshold(message) {
+  if (!message || (message.kind || '') !== 'gift') return;
+  const coins = Math.max(0, Number(message.giftCost) || 0);
+  const match = giftSoundSettings.thresholds.filter((entry) => entry.enabled && coins >= entry.threshold).sort((a, b) => b.threshold - a.threshold)[0];
+  if (!match) return;
+  const messageKey = getMessageIdKey(message)
+    || [message.uniqueId, message.giftName, message.timestamp, message.createTime].filter(Boolean).join(':')
+    || `${message.authorName || 'gift'}:${message.giftName || 'gift'}:${coins}`;
+  const previousThreshold = Number(giftSoundThresholdByMessage.get(messageKey) || 0);
+  if (previousThreshold >= match.threshold) return;
+  giftSoundThresholdByMessage.set(messageKey, match.threshold);
+  if (giftSoundThresholdByMessage.size > 500) {
+    giftSoundThresholdByMessage.delete(giftSoundThresholdByMessage.keys().next().value);
+  }
+  const author = String(message.authorName || message.uniqueId || 'Darczyńca').replace(/^@+/, '').trim();
+  const gift = String(message.giftName || 'Prezent').trim();
+  enqueueProgramToast({
+    type: 'gift',
+    title: t('programToast.gift.title', { name: author }),
+    message: t('programToast.gift.body', { gift, coins: formatCounter(coins) }),
+    icon: 'coin',
+    duration: 8000,
+    dedupeKey: `gift-threshold:${messageKey}:${match.threshold}`,
+    dedupeMs: 10 * 60 * 1000,
+    soundId: match.sound
+  });
 }
 
 function getChatDelayIndex(delayMs) {
@@ -5678,8 +5876,6 @@ function initGeneralSettings() {
       const shouldOpen = Boolean(widget && widget.dataset.expanded !== 'true');
       if (target === 'top' && shouldOpen) {
         renderTopGiftersPanel();
-      } else if (target === 'taps' && shouldOpen) {
-        renderTopTappersPanel();
       }
       setOpenRightWidget(shouldOpen ? target : '');
     });
@@ -5700,7 +5896,8 @@ function resetApplicationSettings() {
     APP_APPEARANCE_SETTINGS_KEY,
     APP_LANGUAGE_SETTINGS_KEY,
     TIME_FORMAT_SETTINGS_KEY,
-    GENERAL_SETTINGS_KEY
+    GENERAL_SETTINGS_KEY,
+    GIFT_SOUND_SETTINGS_KEY
   ].forEach((key) => localStorage.removeItem(key));
   window.location.reload();
 }
@@ -5721,9 +5918,7 @@ function syncRightWidgetDock() {
     const expanded = Boolean(widget && widget.dataset.expanded === 'true');
     const keyPrefix = target === 'top'
       ? 'topGifters'
-      : target === 'taps'
-        ? 'topTappers'
-        : target === 'moderators'
+      : target === 'moderators'
           ? 'moderatorsWidget'
           : 'statsWidget';
     button.setAttribute('aria-expanded', String(expanded));
@@ -6653,47 +6848,6 @@ function renderTopGiftersPanel() {
   topGiftersContent.replaceChildren(list);
 }
 
-function renderTopTappersPanel() {
-  if (!topTappersContent) {
-    return;
-  }
-
-  backfillTapStatsFromVisibleMessages();
-
-  const topTappers = getTopTappers();
-  if (!topTappers.length) {
-    const empty = document.createElement('div');
-    empty.className = 'top-gifters-empty top-tappers-empty';
-    empty.textContent = t('topTappers.empty');
-    topTappersContent.replaceChildren(empty);
-    return;
-  }
-
-  const list = document.createElement('ol');
-  list.className = 'top-gifters-list top-tappers-list';
-  topTappers.forEach((entry, index) => {
-    const item = document.createElement('li');
-    item.className = 'stats-widget-row top-tapper-row';
-
-    const rank = document.createElement('span');
-    rank.className = 'stats-widget-icon top-gifter-rank top-tapper-rank';
-    rank.textContent = String(index + 1);
-
-    const name = document.createElement('span');
-    name.className = 'stats-widget-label top-gifter-name top-tapper-name';
-    name.textContent = entry.name;
-
-    const taps = document.createElement('strong');
-    taps.className = 'top-gifter-coins top-tapper-count';
-    taps.append(createUiIcon('heart'), document.createTextNode(formatCounter(entry.taps)));
-
-    item.append(rank, name, taps);
-    list.appendChild(item);
-  });
-
-  topTappersContent.replaceChildren(list);
-}
-
 function backfillTapStatsFromVisibleMessages() {
   if (typeof window.tiktokLive.onTapStats === 'function') {
     return;
@@ -6748,10 +6902,6 @@ function updateStatus() {
     const topWidget = rightWidgetsByName.get('top');
     if (topWidget && topWidget.dataset.expanded === 'true') {
       renderTopGiftersPanel();
-    }
-    const tapsWidget = rightWidgetsByName.get('taps');
-    if (tapsWidget && tapsWidget.dataset.expanded === 'true') {
-      renderTopTappersPanel();
     }
   } else {
     statusEl.textContent = `${statusText} | ${delayText} | ${queueText}`;
@@ -10346,6 +10496,7 @@ window.tiktokLive.onChatMessage((message) => {
 
   recordCzesterLiveAnalysisMessage(message);
   trackIncomingMessageStats(message);
+  notifyGiftSoundThreshold(message);
   inspectCzesterSpam(message);
   const messageIdKey = getMessageIdKey(message);
 
@@ -10403,6 +10554,7 @@ if (appAppearance === 'retro-kb2') {
   unlockAchievement('retro-kb2');
 }
 initGeneralSettings();
+renderGiftSoundSettings();
 initRedeemCodeSettings();
 initSystemSettings();
 applyI18n();
