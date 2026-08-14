@@ -4,6 +4,7 @@ const { autoUpdater } = require('electron-updater');
 
 const APP_ORIGIN = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev';
 const APP_URL = `${APP_ORIGIN}/?platform=desktop&appVersion=${encodeURIComponent(app.getVersion())}`;
+const APP_VERSION = app.getVersion();
 const UPDATE_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 let mainWindow = null;
@@ -40,11 +41,11 @@ function applyDesktopBranding() {
     const gateTitle = document.querySelector('#betaGate h1');
     if (gateTitle) gateTitle.textContent = 'Czatbox TT';
     const aboutBadge = document.querySelector('#about > .eyebrow');
-    if (aboutBadge) aboutBadge.textContent = 'WERSJA DESKTOPOWA 0.3.4';
+    if (aboutBadge) aboutBadge.textContent = 'WERSJA DESKTOPOWA ${APP_VERSION}';
     const aboutTitle = document.querySelector('#about > h1');
     if (aboutTitle) aboutTitle.textContent = 'Czatbox TT';
     const aboutIntro = document.querySelector('#about .about-description > p');
-    if (aboutIntro) aboutIntro.textContent = 'Czatbox TT to desktopowy panel do odczytu czatu transmisji TikTok LIVE. Wersja 0.3.4 przenosi wygodny interfejs mobilny do aplikacji dla Windows i synchronizuje dane z telefonami z Androidem oraz iOS.';
+    if (aboutIntro) aboutIntro.textContent = 'Czatbox TT to desktopowy panel do odczytu czatu transmisji TikTok LIVE. Wersja ${APP_VERSION} korzysta ze wspólnego interfejsu wersji mobilnej i synchronizuje dane z telefonami z Androidem oraz iOS.';
   })()`, true).catch(() => {});
 }
 
