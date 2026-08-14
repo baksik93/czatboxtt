@@ -1,9 +1,9 @@
 {
   "name": "tiktok-live-electron",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "productName": "Czatbox TT",
-  "description": "Electron wrapper for a TikTok live stream with a separate chat pane.",
+  "description": "Desktopowy panel do odczytu czatu transmisji TikTok LIVE.",
   "author": "Baksik",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/app.js",
+    "check": "node --check src/main.js",
     "pack": "electron-builder --dir --publish never",
     "dist": "electron-builder --win nsis --publish never",
     "release": "electron-builder --win nsis --publish always"
@@ -24,7 +24,7 @@
     "artifactName": "Czatbox-TT-Setup-${version}.${ext}",
     "electronUpdaterCompatibility": ">=2.16",
     "releaseInfo": {
-    "releaseNotesFile": "release-notes-0.3.3.md"
+      "releaseNotesFile": "release-notes-0.3.4.md"
     },
     "directories": {
       "output": "dist"
@@ -39,22 +39,13 @@
     ],
     "files": [
       "src/**/*",
-      "!src/renderer/assets/brikers-alex-*.png",
-      "!src/renderer/assets/brikers-front-generated.png",
-      "!src/renderer/assets/brikers-pixel*.png",
-      "!src/renderer/assets/brikers-refined-*.png",
-      "!src/renderer/assets/brikers-simple-*.png",
-      "!src/renderer/assets/brikers-sleeping-alpha.png",
-      "!src/renderer/assets/brikers-sleeping-source.png",
-      "!src/renderer/assets/pet-needs-sheet-*.png",
-      "!src/renderer/assets/pet-poop-source.png",
+      "!src/preload.js",
+      "!src/renderer/**/*",
+      "!src/pic/**/*",
       "package.json",
       "release-notes-*.md",
       "RELEASE_NOTES.md",
       "!archives/**/*"
-    ],
-    "extraResources": [
-      { "from": "resources/piper", "to": "piper" }
     ],
     "win": {
       "icon": "src/assets/app-icon.ico",
@@ -82,8 +73,7 @@
     "electron-builder": "^26.15.3"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9",
-    "tiktok-live-connector": "2.4.0"
+    "electron-updater": "^6.8.9"
   },
   "overrides": {
     "form-data": "4.0.6"
