@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const readline = require('readline');
-const { app, BrowserWindow, shell, session, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 const APP_ORIGIN = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev';
@@ -14,11 +14,16 @@ const PIPER_RESOURCE_DIR = app.isPackaged
   : path.join(app.getAppPath(), 'resources', 'piper');
 const PIPER_EXECUTABLE = path.join(PIPER_RESOURCE_DIR, 'piper-tts.exe');
 const MR_DRWINA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-jarvis_wg_glos-medium.onnx');
+const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 
 let mainWindow = null;
 let updateTimer = null;
 let quittingForUpdate = false;
 let piperServer = null;
+let piperWarmPromise = null;
+let tray = null;
+let minimizeToTrayOnClose = false;
+let appIsQuitting = false;
 
 function stringifyPiperRequest(value) {
   return JSON.stringify(value).replace(/[\u007f-\uffff]/g, character =>
@@ -26,11 +31,23 @@ function stringifyPiperRequest(value) {
   );
 }
 
+const DECORATIVE_LETTER_MAP = Object.freeze({
+  'ᴀ': 'a', 'ʙ': 'b', 'ᴄ': 'c', 'ᴅ': 'd', 'ᴇ': 'e', 'ꜰ': 'f',
+  'ɢ': 'g', 'ʜ': 'h', 'ɪ': 'i', 'ᴊ': 'j', 'ᴋ': 'k', 'ʟ': 'l',
+  'ᴍ': 'm', 'ɴ': 'n', 'ᴏ': 'o', 'ᴘ': 'p', 'ʀ': 'r', 'ꜱ': 's',
+  'ᴛ': 't', 'ᴜ': 'u', 'ᴠ': 'v', 'ᴡ': 'w', 'ʏ': 'y', 'ᴢ': 'z'
+});
+
+function normalizeDecorativeText(value) {
+  return [...String(value || '').normalize('NFKC')]
+    .map(character => DECORATIVE_LETTER_MAP[character] || character)
+    .join('');
+}
+
 function sanitizePiperText(value) {
-  return String(value || '')
+  return normalizeDecorativeText(value)
     .replace(/<3/gi, ' ')
     .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{S}]/gu, ' ')
-    .normalize('NFKC')
     .replace(/\[[\p{L}\p{N}_ -]{1,40}\]/gu, ' ')
     .replace(/:[a-z0-9_+-]+:/gi, ' ')
     .replace(/(^|\s)(?:<3|x+d+|[:;=8][-']?[)\]([{}dDpPoO/\\|])(?=$|[\s.!?,])/gi, ' ')
@@ -103,6 +120,55 @@ function stopPiperServer() {
   try { piperServer.child.stdin.end(); } catch {}
   try { piperServer.child.kill(); } catch {}
   piperServer = null;
+  piperWarmPromise = null;
+}
+
+function warmPiperServer() {
+  if (piperWarmPromise) return piperWarmPromise;
+  const output = path.join(app.getPath('temp'), `czatbox-mr-drwina-warm-${process.pid}.wav`);
+  piperWarmPromise = getPiperServer().request('.', output).then(result => {
+    if (!result?.ok) throw new Error(result?.error || 'piper-warm-failed');
+    return { ok: true };
+  }).catch(error => {
+    piperWarmPromise = null;
+    return { ok: false, error: error?.message || 'piper-warm-failed' };
+  }).finally(() => {
+    try { fs.rmSync(output, { force: true }); } catch {}
+  });
+  return piperWarmPromise;
+}
+
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function destroyTray() {
+  if (!tray) return;
+  tray.destroy();
+  tray = null;
+}
+
+function ensureTray() {
+  if (tray) return tray;
+  tray = new Tray(APP_ICON_PATH);
+  tray.setToolTip('Czatbox TT');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Pokaż Czatbox TT', click: showMainWindow },
+    { type: 'separator' },
+    { label: 'Zamknij', click: () => { appIsQuitting = true; app.quit(); } }
+  ]));
+  tray.on('click', showMainWindow);
+  return tray;
+}
+
+function setMinimizeToTray(enabled) {
+  minimizeToTrayOnClose = Boolean(enabled);
+  if (minimizeToTrayOnClose) ensureTray();
+  else destroyTray();
+  return minimizeToTrayOnClose;
 }
 
 function isAllowedAppUrl(rawUrl) {
@@ -191,6 +257,23 @@ function desktopPageFeatures() {
   `;
   document.head.append(style);
 
+  const settingsPage = document.querySelector('#settings');
+  const desktopSettingsTarget = document.querySelector('#settings-data') || settingsPage;
+  if (desktopSettingsTarget && !document.querySelector('#desktopBehaviorSettings')) {
+    const group = document.createElement('div');
+    group.id = 'desktopBehaviorSettings';
+    group.className = 'settings-group';
+    group.innerHTML = '<div class="group-head"><h2>Wersja desktopowa</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><label class="setting-row"><span><b>Po kliknięciu X ukryj program w zasobniku</b><small>Czat i TTS nadal działają w tle. Program zamkniesz z menu ikony przy zegarze.</small></span><input id="desktopMinimizeToTray" class="switch" type="checkbox"></label></div>';
+    desktopSettingsTarget.prepend(group);
+    const toggle = group.querySelector('#desktopMinimizeToTray');
+    toggle.checked = localStorage.getItem('cttm-desktop-minimize-to-tray') === 'true';
+    window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
+    toggle.onchange = () => {
+      localStorage.setItem('cttm-desktop-minimize-to-tray', String(toggle.checked));
+      window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
+    };
+  }
+
   const widgetDefinitions = [
     { kind: 'gift', label: 'GIFT', title: 'Prezenty', icon: 'gift', count: 'giftCount' },
     { kind: 'topGifters', label: 'TOP', title: 'Top Gifterzy', icon: 'coin', count: 'topGifterCount' },
@@ -267,6 +350,9 @@ function desktopPageFeatures() {
     const originalSpeak = speech.speak.bind(speech);
     const originalCancel = speech.cancel.bind(speech);
     let piperAudio = null;
+    let piperAudioContext = null;
+    let piperAudioSource = null;
+    let piperGain = null;
     speech.__mrDrwinaPatched = true;
     speech.speak = utterance => {
       let selected = '';
@@ -279,6 +365,10 @@ function desktopPageFeatures() {
           piperAudio.onerror = null;
           piperAudio = null;
         }
+        try { piperAudioSource?.disconnect(); } catch {}
+        try { piperGain?.disconnect(); } catch {}
+        piperAudioSource = null;
+        piperGain = null;
         const callback = error ? utterance.onerror : utterance.onend;
         if (typeof callback === 'function') callback.call(utterance, { type: error ? 'error' : 'end', utterance });
       };
@@ -292,7 +382,19 @@ function desktopPageFeatures() {
         if (!result?.ok || !result.audio) throw new Error(result?.error || 'piper-failed');
         const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
         piperAudio = audio;
-        audio.volume = Math.max(0, Math.min(1, Number(utterance.volume) || 1));
+        const requestedVolume = Math.max(0, Math.min(2, Number(settings.volume ?? utterance.volume) || 0));
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          piperAudioContext ||= new AudioContextClass();
+          piperAudioSource = piperAudioContext.createMediaElementSource(audio);
+          piperGain = piperAudioContext.createGain();
+          piperGain.gain.value = requestedVolume;
+          piperAudioSource.connect(piperGain).connect(piperAudioContext.destination);
+          audio.volume = 1;
+          if (piperAudioContext.state === 'suspended') void piperAudioContext.resume();
+        } else {
+          audio.volume = Math.min(1, requestedVolume);
+        }
         audio.playbackRate = Math.max(0.5, Math.min(2, Number(utterance.rate) || 1));
         audio.preservesPitch = true;
         audio.onended = () => finish(false);
@@ -306,6 +408,10 @@ function desktopPageFeatures() {
         piperAudio.src = '';
         piperAudio = null;
       }
+      try { piperAudioSource?.disconnect(); } catch {}
+      try { piperGain?.disconnect(); } catch {}
+      piperAudioSource = null;
+      piperGain = null;
       originalCancel();
     };
     try {
@@ -339,8 +445,7 @@ ipcMain.handle('desktop:warm-mr-drwina', async () => {
     return { ok: false, error: 'piper-unavailable' };
   }
   try {
-    getPiperServer();
-    return { ok: true };
+    return await warmPiperServer();
   } catch (error) {
     return { ok: false, error: error?.message || 'piper-failed' };
   }
@@ -364,6 +469,11 @@ ipcMain.handle('desktop:synthesize-mr-drwina', async (_event, rawText) => {
   }
 });
 
+ipcMain.handle('desktop:set-minimize-to-tray', (_event, enabled) => ({
+  ok: true,
+  enabled: setMinimizeToTray(enabled)
+}));
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1120,
@@ -373,16 +483,23 @@ function createWindow() {
     show: false,
     backgroundColor: '#080b12',
     title: 'Czatbox TT',
-    icon: path.join(__dirname, 'assets', 'app-icon.ico'),
+    icon: APP_ICON_PATH,
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
       preload: path.join(__dirname, 'desktop-preload.js'),
+      backgroundThrottling: false,
       spellcheck: false,
       partition: 'persist:czatbox-tt'
     }
+  });
+  mainWindow.on('close', event => {
+    if (appIsQuitting || quittingForUpdate || !minimizeToTrayOnClose) return;
+    event.preventDefault();
+    ensureTray();
+    mainWindow.hide();
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -413,7 +530,7 @@ function createWindow() {
     void mainWindow.loadFile(path.join(__dirname, 'shell', 'offline.html'));
   });
   mainWindow.once('ready-to-show', () => mainWindow?.show());
-  mainWindow.on('closed', () => { mainWindow = null; });
+  mainWindow.on('closed', () => { mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
   void mainWindow.loadURL(APP_URL);
 }
 
@@ -447,10 +564,7 @@ if (!singleInstance) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.show();
-    mainWindow.focus();
+    showMainWindow();
   });
 
   app.whenReady().then(() => {
@@ -462,8 +576,10 @@ if (!singleInstance) {
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
   app.on('before-quit', event => {
+    appIsQuitting = true;
     if (updateTimer) clearInterval(updateTimer);
     stopPiperServer();
+    destroyTray();
     if (quittingForUpdate) return;
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.session.flushStorageData().catch(() => {});
   });
