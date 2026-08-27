@@ -2,8 +2,10 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const readline = require('readline');
-const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray } = require('electron');
+const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen } = require('electron');
 const { autoUpdater } = require('electron-updater');
+
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 const APP_ORIGIN = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev';
 const APP_URL = `${APP_ORIGIN}/?platform=desktop&appVersion=${encodeURIComponent(app.getVersion())}`;
@@ -24,6 +26,37 @@ let piperWarmPromise = null;
 let tray = null;
 let minimizeToTrayOnClose = false;
 let appIsQuitting = false;
+let widgetWindow = null;
+let widgetTimer = null;
+let latestWidgetData = { events: [], notes: [], language: 'pl', theme: 'dark', radio: { active: false, playing: false, muted: false, station: '', description: '' } };
+const WIDGET_PREF_PATH = path.join(app.getPath('userData'), 'desktop-widget.json');
+const RENDERER_CACHE_EPOCH = 'workspace-v93';
+const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
+let desktopWidgetPinned = (() => { try { return JSON.parse(fs.readFileSync(WIDGET_PREF_PATH, 'utf8')).pinned === true; } catch { return false; } })();
+function saveWidgetPreference() { try { fs.writeFileSync(WIDGET_PREF_PATH, JSON.stringify({ pinned: desktopWidgetPinned })); } catch {} }
+
+async function refreshDesktopWidget() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const data = await mainWindow.webContents.executeJavaScript(`(() => { try { const events=JSON.parse(localStorage.getItem('cttm-calendar-events')||'[]'); const categories=JSON.parse(localStorage.getItem('cttm-calendar-categories')||'[]'); const settings=JSON.parse(localStorage.getItem('cttm-settings')||'{}'); const notes=(Array.isArray(settings.notebook)?settings.notebook:[]).slice().sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0,5).map(note=>({id:String(note.id||''),title:String(note.title||'Notatka'),updatedAt:Number(note.updatedAt||0)})); const radio=JSON.parse(localStorage.getItem('cttm-radio-state')||'{}'); const theme=document.documentElement.dataset.theme||'dark'; return {events:events.map(event=>{const category=categories.find(item=>item.id===event.categoryId)||{};return {...event,code:category.code||'',category:category.name||'',palette:{bg:(category.color||'#4fdde5')+'24',text:category.color||'#4fdde5',border:category.color||'#4fdde5'}}),notes,language:'pl',theme,radio}; } catch { return null; } })()`);
+    if (data?.events) latestWidgetData = data;
+    if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
+  } catch {}
+}
+
+function createDesktopWidget() {
+  if (widgetWindow && !widgetWindow.isDestroyed()) return widgetWindow;
+  const area = screen.getPrimaryDisplay().workArea, width = 300, height = area.height;
+  widgetWindow = new BrowserWindow({ width, height, minWidth: width, minHeight: height, x: area.x + area.width - width - 12, y: area.y, frame: false, transparent: true, resizable: false, movable: false, show: false, skipTaskbar: true, focusable: true, hasShadow: true, alwaysOnTop: false, webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'desktop-preload.js'), partition: 'persist:czatbox-tt' } });
+  widgetWindow.setMenuBarVisibility(false);
+  widgetWindow.on('close', event => { if (!appIsQuitting) { event.preventDefault(); widgetWindow.hide(); } });
+  widgetWindow.webContents.on('did-finish-load', () => widgetWindow?.webContents.send('desktop:widget-data', latestWidgetData));
+  void widgetWindow.loadFile(path.join(__dirname, 'desktop-widget.html'));
+  return widgetWindow;
+}
+
+function showDesktopWidget() { const widget=createDesktopWidget(); void refreshDesktopWidget().finally(()=>widget.showInactive()); if(!widgetTimer)widgetTimer=setInterval(refreshDesktopWidget,15000); }
+function hideDesktopWidget(force = false) { if (!force && desktopWidgetPinned) return; if(widgetTimer){clearInterval(widgetTimer);widgetTimer=null}if(widgetWindow&&!widgetWindow.isDestroyed())widgetWindow.hide(); }
 
 function stringifyPiperRequest(value) {
   return JSON.stringify(value).replace(/[\u007f-\uffff]/g, character =>
@@ -143,6 +176,7 @@ function showMainWindow() {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
+  hideDesktopWidget();
 }
 
 function destroyTray() {
@@ -152,22 +186,24 @@ function destroyTray() {
 }
 
 function ensureTray() {
-  if (tray) return tray;
-  tray = new Tray(APP_ICON_PATH);
-  tray.setToolTip('Czatbox TT');
+  if (!tray) {
+    tray = new Tray(APP_ICON_PATH);
+    tray.setToolTip('Czatbox TT');
+    tray.on('click', showMainWindow);
+  }
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Pokaż Czatbox TT', click: showMainWindow },
     { type: 'separator' },
+    { label: 'Przypnij widgety na pulpicie', type: 'checkbox', checked: desktopWidgetPinned, click: item => { desktopWidgetPinned = item.checked; saveWidgetPreference(); if (desktopWidgetPinned) showDesktopWidget(); else if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) hideDesktopWidget(true); ensureTray(); } },
+    { type: 'separator' },
     { label: 'Zamknij', click: () => { appIsQuitting = true; app.quit(); } }
   ]));
-  tray.on('click', showMainWindow);
   return tray;
 }
 
 function setMinimizeToTray(enabled) {
   minimizeToTrayOnClose = Boolean(enabled);
-  if (minimizeToTrayOnClose) ensureTray();
-  else destroyTray();
+  ensureTray();
   return minimizeToTrayOnClose;
 }
 
@@ -473,6 +509,32 @@ ipcMain.handle('desktop:set-minimize-to-tray', (_event, enabled) => ({
   ok: true,
   enabled: setMinimizeToTray(enabled)
 }));
+ipcMain.on('desktop:radio-control', (event, action) => {
+  if (!widgetWindow || event.sender !== widgetWindow.webContents || !['toggle-play','toggle-mute'].includes(action) || !mainWindow || mainWindow.isDestroyed()) return;
+  void mainWindow.webContents.executeJavaScript(`window.dispatchEvent(new CustomEvent('cttm-radio-control',{detail:${JSON.stringify(action)}}))`);
+  setTimeout(refreshDesktopWidget, 350);
+});
+ipcMain.on('desktop:open-note', (event, id) => {
+  if (!widgetWindow || event.sender !== widgetWindow.webContents || !mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.show();
+  mainWindow.focus();
+  void mainWindow.webContents.executeJavaScript(`window.dispatchEvent(new CustomEvent('cttm-widget-open-note',{detail:${JSON.stringify(String(id || ''))}}))`);
+});
+ipcMain.on('desktop:widget-refresh', event => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return;
+  void refreshDesktopWidget();
+});
+ipcMain.on('desktop:widget-sync', (event, data) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents || !data || !Array.isArray(data.events)) return;
+  latestWidgetData = {
+    events: data.events.slice(-2000),
+    notes: Array.isArray(data.notes) ? data.notes.slice(0, 5) : [],
+    language: 'pl',
+    theme: String(data.theme || 'dark-titanium'),
+    radio: data.radio && typeof data.radio === 'object' ? data.radio : { active: false, playing: false, muted: false, station: '', description: '' }
+  };
+  if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -500,7 +562,11 @@ function createWindow() {
     event.preventDefault();
     ensureTray();
     mainWindow.hide();
+    showDesktopWidget();
   });
+  mainWindow.on('minimize', showDesktopWidget);
+  mainWindow.on('restore', () => hideDesktopWidget());
+  mainWindow.on('show', () => { if (!mainWindow?.isMinimized()) hideDesktopWidget(); });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (isSafeExternalUrl(url)) void shell.openExternal(url);
@@ -530,8 +596,20 @@ function createWindow() {
     void mainWindow.loadFile(path.join(__dirname, 'shell', 'offline.html'));
   });
   mainWindow.once('ready-to-show', () => mainWindow?.show());
-  mainWindow.on('closed', () => { mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
-  void mainWindow.loadURL(APP_URL);
+  mainWindow.on('closed', () => { mainWindow = null; hideDesktopWidget(); if (!minimizeToTrayOnClose) destroyTray(); });
+  const loadApp = async () => {
+    let applied = '';
+    try { applied = fs.readFileSync(RENDERER_CACHE_EPOCH_PATH, 'utf8').trim(); } catch {}
+    if (applied !== RENDERER_CACHE_EPOCH) {
+      try {
+        await mainWindow.webContents.session.clearCache();
+        await mainWindow.webContents.session.clearStorageData({ storages: ['serviceworkers'] });
+        fs.writeFileSync(RENDERER_CACHE_EPOCH_PATH, RENDERER_CACHE_EPOCH, 'utf8');
+      } catch {}
+    }
+    await mainWindow.loadURL(APP_URL);
+  };
+  void loadApp();
 }
 
 function configureUpdater() {
@@ -570,6 +648,8 @@ if (!singleInstance) {
   app.whenReady().then(() => {
     session.fromPartition('persist:czatbox-tt').setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
     createWindow();
+    ensureTray();
+    if (desktopWidgetPinned) setTimeout(showDesktopWidget, 2500);
     configureUpdater();
   });
 
@@ -581,6 +661,8 @@ if (!singleInstance) {
     stopPiperServer();
     destroyTray();
     if (quittingForUpdate) return;
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.session.flushStorageData().catch(() => {});
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      try { mainWindow.webContents.session.flushStorageData(); } catch {}
+    }
   });
 }
