@@ -1,6 +1,6 @@
 {
   "name": "tiktok-live-electron",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "private": true,
   "productName": "Czatbox TT",
   "description": "Desktopowy panel do odczytu czatu transmisji TikTok LIVE.",
@@ -24,7 +24,7 @@
     "artifactName": "Czatbox-TT-Setup-${version}.${ext}",
     "electronUpdaterCompatibility": ">=2.16",
     "releaseInfo": {
-      "releaseNotesFile": "release-notes-0.3.16.md"
+      "releaseNotesFile": "release-notes-0.3.17.md"
     },
     "directories": {
       "output": "dist"
@@ -59,6 +59,14 @@
       {
         "from": "resources/piper/pl_PL-jarvis_wg_glos-medium.onnx.json",
         "to": "piper/pl_PL-jarvis_wg_glos-medium.onnx.json"
+      },
+      {
+        "from": "resources/piper/pl_PL-justyna_wg_glos-medium.onnx",
+        "to": "piper/pl_PL-justyna_wg_glos-medium.onnx"
+      },
+      {
+        "from": "resources/piper/pl_PL-justyna_wg_glos-medium.onnx.json",
+        "to": "piper/pl_PL-justyna_wg_glos-medium.onnx.json"
       }
     ],
     "win": {

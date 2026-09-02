@@ -1,8 +1,9 @@
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const os = require('os');
+const { spawn, execFile } = require('child_process');
 const readline = require('readline');
-const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen } = require('electron');
+const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen, systemPreferences, powerMonitor } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -16,38 +17,78 @@ const PIPER_RESOURCE_DIR = app.isPackaged
   : path.join(app.getAppPath(), 'resources', 'piper');
 const PIPER_EXECUTABLE = path.join(PIPER_RESOURCE_DIR, 'piper-tts.exe');
 const MR_DRWINA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-jarvis_wg_glos-medium.onnx');
+const HALINKA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-justyna_wg_glos-medium.onnx');
+const PIPER_VOICES = Object.freeze({
+  'piper-mr-drwina': { label: 'Mr. Drwina — Piper (desktop)', model: MR_DRWINA_MODEL, slug: 'mr-drwina' },
+  'piper-halinka': { label: 'Halinka — Piper (desktop)', model: HALINKA_MODEL, slug: 'halinka' }
+});
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 
 let mainWindow = null;
 let updateTimer = null;
 let quittingForUpdate = false;
 let piperServer = null;
-let piperWarmPromise = null;
+const piperWarmPromises = new Map();
 let tray = null;
 let minimizeToTrayOnClose = false;
 let appIsQuitting = false;
 let widgetWindow = null;
 let widgetTimer = null;
-let latestWidgetData = { events: [], notes: [], language: 'pl', theme: 'dark', radio: { active: false, playing: false, muted: false, station: '', description: '' } };
-const WIDGET_PREF_PATH = path.join(app.getPath('userData'), 'desktop-widget.json');
-const RENDERER_CACHE_EPOCH = 'workspace-v93';
+let lastDesktopGreetingAt = 0;
+let latestWidgetData = { drives: [], accent: '#4fdde5' };
+const RENDERER_CACHE_EPOCH = 'workspace-v97';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
-let desktopWidgetPinned = (() => { try { return JSON.parse(fs.readFileSync(WIDGET_PREF_PATH, 'utf8')).pinned === true; } catch { return false; } })();
-function saveWidgetPreference() { try { fs.writeFileSync(WIDGET_PREF_PATH, JSON.stringify({ pinned: desktopWidgetPinned })); } catch {} }
+
+function normalizeAccentColor(value) {
+  const hex = String(value || '').replace(/[^a-f0-9]/gi, '').slice(0, 6);
+  return /^[a-f0-9]{6}$/i.test(hex) ? `#${hex}` : '#4fdde5';
+}
+
+function fallbackPartitions() {
+  const partitions = [];
+  for (let code = 67; code <= 90; code += 1) {
+    const root = `${String.fromCharCode(code)}:\\`;
+    try {
+      if (!fs.existsSync(root) || typeof fs.statfsSync !== 'function') continue;
+      const stats = fs.statfsSync(root);
+      const size = Number(stats.blocks) * Number(stats.bsize);
+      const free = Number(stats.bfree) * Number(stats.bsize);
+      if (size > 0) partitions.push({ id: root.slice(0, 2), name: '', size, free });
+    } catch {}
+  }
+  return partitions;
+}
+
+function readLocalPartitions() {
+  const command = "$ErrorActionPreference='Stop'; Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType=3' | Select-Object DeviceID,VolumeName,Size,FreeSpace | ConvertTo-Json -Compress";
+  return new Promise(resolve => {
+    execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], { windowsHide: true, timeout: 8000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
+      if (error || !stdout.trim()) return resolve(fallbackPartitions());
+      try {
+        const source = JSON.parse(stdout);
+        const values = Array.isArray(source) ? source : [source];
+        const partitions = values.map(item => ({
+          id: String(item.DeviceID || '').trim(),
+          name: String(item.VolumeName || '').trim(),
+          size: Number(item.Size) || 0,
+          free: Number(item.FreeSpace) || 0
+        })).filter(item => /^[A-Z]:$/i.test(item.id) && item.size > 0).sort((a, b) => a.id.localeCompare(b.id));
+        resolve(partitions.length ? partitions : fallbackPartitions());
+      } catch { resolve(fallbackPartitions()); }
+    });
+  });
+}
 
 async function refreshDesktopWidget() {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  try {
-    const data = await mainWindow.webContents.executeJavaScript(`(() => { try { const events=JSON.parse(localStorage.getItem('cttm-calendar-events')||'[]'); const categories=JSON.parse(localStorage.getItem('cttm-calendar-categories')||'[]'); const settings=JSON.parse(localStorage.getItem('cttm-settings')||'{}'); const notes=(Array.isArray(settings.notebook)?settings.notebook:[]).slice().sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0)).slice(0,5).map(note=>({id:String(note.id||''),title:String(note.title||'Notatka'),updatedAt:Number(note.updatedAt||0)})); const radio=JSON.parse(localStorage.getItem('cttm-radio-state')||'{}'); const theme=document.documentElement.dataset.theme||'dark'; return {events:events.map(event=>{const category=categories.find(item=>item.id===event.categoryId)||{};return {...event,code:category.code||'',category:category.name||'',palette:{bg:(category.color||'#4fdde5')+'24',text:category.color||'#4fdde5',border:category.color||'#4fdde5'}}),notes,language:'pl',theme,radio}; } catch { return null; } })()`);
-    if (data?.events) latestWidgetData = data;
-    if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
-  } catch {}
+  const drives = await readLocalPartitions();
+  latestWidgetData = { drives, accent: normalizeAccentColor(systemPreferences.getAccentColor?.()) };
+  if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
 }
 
 function createDesktopWidget() {
   if (widgetWindow && !widgetWindow.isDestroyed()) return widgetWindow;
-  const area = screen.getPrimaryDisplay().workArea, width = 300, height = area.height;
-  widgetWindow = new BrowserWindow({ width, height, minWidth: width, minHeight: height, x: area.x + area.width - width - 12, y: area.y, frame: false, transparent: true, resizable: false, movable: false, show: false, skipTaskbar: true, focusable: true, hasShadow: true, alwaysOnTop: false, webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'desktop-preload.js'), partition: 'persist:czatbox-tt' } });
+  const area = screen.getPrimaryDisplay().workArea, width = 184, height = area.height;
+  widgetWindow = new BrowserWindow({ width, height, minWidth: width, minHeight: height, x: area.x + area.width - width, y: area.y, frame: false, transparent: true, resizable: false, movable: false, show: false, skipTaskbar: true, focusable: true, hasShadow: true, alwaysOnTop: false, webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'desktop-preload.js'), partition: 'persist:czatbox-tt' } });
   widgetWindow.setMenuBarVisibility(false);
   widgetWindow.on('close', event => { if (!appIsQuitting) { event.preventDefault(); widgetWindow.hide(); } });
   widgetWindow.webContents.on('did-finish-load', () => widgetWindow?.webContents.send('desktop:widget-data', latestWidgetData));
@@ -55,8 +96,20 @@ function createDesktopWidget() {
   return widgetWindow;
 }
 
-function showDesktopWidget() { const widget=createDesktopWidget(); void refreshDesktopWidget().finally(()=>widget.showInactive()); if(!widgetTimer)widgetTimer=setInterval(refreshDesktopWidget,15000); }
-function hideDesktopWidget(force = false) { if (!force && desktopWidgetPinned) return; if(widgetTimer){clearInterval(widgetTimer);widgetTimer=null}if(widgetWindow&&!widgetWindow.isDestroyed())widgetWindow.hide(); }
+function positionDesktopWidget(widget) {
+  const area = screen.getPrimaryDisplay().workArea;
+  widget.setBounds({ x: area.x + area.width - 184, y: area.y, width: 184, height: area.height });
+}
+
+function showDesktopWidget() {
+  const widget = createDesktopWidget();
+  positionDesktopWidget(widget);
+  void refreshDesktopWidget().finally(() => {
+    widget.showInactive();
+    if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) mainWindow.moveTop();
+  });
+  if (!widgetTimer) widgetTimer = setInterval(refreshDesktopWidget, 60000);
+}
 
 function stringifyPiperRequest(value) {
   return JSON.stringify(value).replace(/[\u007f-\uffff]/g, character =>
@@ -94,9 +147,14 @@ function sanitizePiperText(value) {
     .trim();
 }
 
-function getPiperServer() {
-  if (piperServer?.child && !piperServer.child.killed) return piperServer;
-  const child = spawn(PIPER_EXECUTABLE, ['--server', '--model', MR_DRWINA_MODEL], {
+function getPiperVoice(value) {
+  return PIPER_VOICES[String(value || '')] || null;
+}
+
+function getPiperServer(voice) {
+  if (piperServer?.child && !piperServer.child.killed && piperServer.voice === voice) return piperServer;
+  if (piperServer) stopPiperServer();
+  const child = spawn(PIPER_EXECUTABLE, ['--server', '--model', voice.model], {
     windowsHide: true,
     stdio: ['pipe', 'pipe', 'ignore']
   });
@@ -122,6 +180,7 @@ function getPiperServer() {
   child.on('exit', () => stopPending('piper-exited'));
   piperServer = {
     child,
+    voice,
     pending,
     nextId: 1,
     request(text, output) {
@@ -153,22 +212,23 @@ function stopPiperServer() {
   try { piperServer.child.stdin.end(); } catch {}
   try { piperServer.child.kill(); } catch {}
   piperServer = null;
-  piperWarmPromise = null;
+  piperWarmPromises.clear();
 }
 
-function warmPiperServer() {
-  if (piperWarmPromise) return piperWarmPromise;
-  const output = path.join(app.getPath('temp'), `czatbox-mr-drwina-warm-${process.pid}.wav`);
-  piperWarmPromise = getPiperServer().request('.', output).then(result => {
+function warmPiperServer(voice) {
+  if (piperWarmPromises.has(voice.slug)) return piperWarmPromises.get(voice.slug);
+  const output = path.join(app.getPath('temp'), `czatbox-${voice.slug}-warm-${process.pid}.wav`);
+  const warmPromise = getPiperServer(voice).request('.', output).then(result => {
     if (!result?.ok) throw new Error(result?.error || 'piper-warm-failed');
     return { ok: true };
   }).catch(error => {
-    piperWarmPromise = null;
     return { ok: false, error: error?.message || 'piper-warm-failed' };
   }).finally(() => {
+    piperWarmPromises.delete(voice.slug);
     try { fs.rmSync(output, { force: true }); } catch {}
   });
-  return piperWarmPromise;
+  piperWarmPromises.set(voice.slug, warmPromise);
+  return warmPromise;
 }
 
 function showMainWindow() {
@@ -176,7 +236,7 @@ function showMainWindow() {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
-  hideDesktopWidget();
+  showDesktopWidget();
 }
 
 function destroyTray() {
@@ -194,7 +254,7 @@ function ensureTray() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Pokaż Czatbox TT', click: showMainWindow },
     { type: 'separator' },
-    { label: 'Przypnij widgety na pulpicie', type: 'checkbox', checked: desktopWidgetPinned, click: item => { desktopWidgetPinned = item.checked; saveWidgetPreference(); if (desktopWidgetPinned) showDesktopWidget(); else if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) hideDesktopWidget(true); ensureTray(); } },
+    { label: 'Pasek pulpitu jest stale aktywny', enabled: false },
     { type: 'separator' },
     { label: 'Zamknij', click: () => { appIsQuitting = true; app.quit(); } }
   ]));
@@ -276,6 +336,12 @@ function desktopPageFeatures() {
   if (window.__czatboxDesktopFeaturesInstalled) return;
   window.__czatboxDesktopFeaturesInstalled = true;
 
+  window.addEventListener('cttm-desktop-open-workspace', event => {
+    const workspace = String(event.detail || '');
+    const target = document.querySelector(`[data-workspace="${workspace}"]`);
+    if (target instanceof HTMLElement) target.click();
+  });
+
   const style = document.createElement('style');
   style.id = 'desktopFeatureStyles';
   style.textContent = `
@@ -299,8 +365,10 @@ function desktopPageFeatures() {
     const group = document.createElement('div');
     group.id = 'desktopBehaviorSettings';
     group.className = 'settings-group';
-    group.innerHTML = '<div class="group-head"><h2>Wersja desktopowa</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><label class="setting-row"><span><b>Po kliknięciu X ukryj program w zasobniku</b><small>Czat i TTS nadal działają w tle. Program zamkniesz z menu ikony przy zegarze.</small></span><input id="desktopMinimizeToTray" class="switch" type="checkbox"></label></div>';
-    desktopSettingsTarget.prepend(group);
+    group.innerHTML = '<div class="group-head"><h2>System</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><label class="setting-row"><span><b>Po kliknięciu X ukryj program w zasobniku</b><small>Czat i TTS nadal działają w tle. Program zamkniesz z menu ikony przy zegarze.</small></span><input id="desktopMinimizeToTray" class="switch" type="checkbox"></label></div>';
+    const codesSection = document.querySelector('#settings-codes');
+    if (codesSection?.parentElement) codesSection.parentElement.insertBefore(group, codesSection);
+    else desktopSettingsTarget.prepend(group);
     const toggle = group.querySelector('#desktopMinimizeToTray');
     toggle.checked = localStorage.getItem('cttm-desktop-minimize-to-tray') === 'true';
     window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
@@ -360,28 +428,49 @@ function desktopPageFeatures() {
   if (stats) statsObserver.observe(stats, { childList: true, subtree: true, characterData: true });
 
   const voiceSelect = document.querySelector('#voice');
+  const desktopPiperVoices = [
+    ['piper-mr-drwina', 'Mr. Drwina — Piper (desktop)'],
+    ['piper-halinka', 'Halinka — Piper (desktop)']
+  ];
   const ensurePiperOption = () => {
     if (!voiceSelect) return;
-    if (!voiceSelect.querySelector('option[value="piper-mr-drwina"]')) {
+    desktopPiperVoices.forEach(([value, label]) => {
+      if (voiceSelect.querySelector(`option[value="${value}"]`)) return;
       const option = document.createElement('option');
-      option.value = 'piper-mr-drwina';
-      option.textContent = 'Mr. Drwina — Piper (desktop)';
+      option.value = value;
+      option.textContent = label;
       voiceSelect.append(option);
-    }
+    });
     try {
       const selected = JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice;
-      if (selected === 'piper-mr-drwina') voiceSelect.value = selected;
+      if (desktopPiperVoices.some(([value]) => value === selected)) voiceSelect.value = selected;
     } catch {}
   };
   ensurePiperOption();
   if (voiceSelect) {
     new MutationObserver(ensurePiperOption).observe(voiceSelect, { childList: true });
     voiceSelect.addEventListener('change', () => {
-      if (voiceSelect.value === 'piper-mr-drwina') window.czatboxDesktop?.warmMrDrwina().catch(() => {});
+      if (desktopPiperVoices.some(([value]) => value === voiceSelect.value)) window.czatboxDesktop?.warmPiper(voiceSelect.value).catch(() => {});
     });
   }
 
-  if (window.czatboxDesktop?.synthesizeMrDrwina && !window.speechSynthesis.__mrDrwinaPatched) {
+  window.__czatboxSpeakGreeting = payload => {
+    const data = payload && typeof payload === 'object' ? payload : {};
+    const userName = String(data.userName || 'użytkowniku').trim() || 'użytkowniku';
+    const now = new Date();
+    const time = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now);
+    const utterance = new SpeechSynthesisUtterance(`Witaj ${userName} ponownie. Jest ${time}. Z którym twórcą się łączymy?`);
+    let settings = {};
+    try { settings = JSON.parse(localStorage.getItem('cttm-settings') || '{}'); } catch {}
+    utterance.rate = Math.max(0.6, Math.min(1.6, Number(settings.rate) || 1));
+    const configuredVolume = Number(settings.volume);
+    utterance.volume = Number.isFinite(configuredVolume) ? Math.max(0, Math.min(1, configuredVolume)) : 0.85;
+    utterance.__czatboxForce = true;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
+
+  if (window.czatboxDesktop?.synthesizePiper && !window.speechSynthesis.__desktopPiperPatched) {
     const speech = window.speechSynthesis;
     const originalSpeak = speech.speak.bind(speech);
     const originalCancel = speech.cancel.bind(speech);
@@ -389,12 +478,27 @@ function desktopPageFeatures() {
     let piperAudioContext = null;
     let piperAudioSource = null;
     let piperGain = null;
-    speech.__mrDrwinaPatched = true;
+    const feminineHoursAfterO = ['zerowej', 'pierwszej', 'drugiej', 'trzeciej', 'czwartej', 'piątej', 'szóstej', 'siódmej', 'ósmej', 'dziewiątej', 'dziesiątej', 'jedenastej', 'dwunastej', 'trzynastej', 'czternastej', 'piętnastej', 'szesnastej', 'siedemnastej', 'osiemnastej', 'dziewiętnastej', 'dwudziestej', 'dwudziestej pierwszej', 'dwudziestej drugiej', 'dwudziestej trzeciej'];
+    const feminineHoursStandalone = ['zero', 'pierwsza', 'druga', 'trzecia', 'czwarta', 'piąta', 'szósta', 'siódma', 'ósma', 'dziewiąta', 'dziesiąta', 'jedenasta', 'dwunasta', 'trzynasta', 'czternasta', 'piętnasta', 'szesnasta', 'siedemnasta', 'osiemnasta', 'dziewiętnasta', 'dwudziesta', 'dwudziesta pierwsza', 'dwudziesta druga', 'dwudziesta trzecia'];
+    const spokenMinute = value => {
+      const ones = ['zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć', 'siedem', 'osiem', 'dziewięć'];
+      const teens = ['dziesięć', 'jedenaście', 'dwanaście', 'trzynaście', 'czternaście', 'piętnaście', 'szesnaście', 'siedemnaście', 'osiemnaście', 'dziewiętnaście'];
+      const tens = ['', '', 'dwadzieścia', 'trzydzieści', 'czterdzieści', 'pięćdziesiąt'];
+      if (value < 10) return ones[value];
+      if (value < 20) return teens[value - 10];
+      return `${tens[Math.floor(value / 10)]}${value % 10 ? ` ${ones[value % 10]}` : ''}`;
+    };
+    const normalizeHalinkaTimes = value => String(value || '').replace(/(?:\bo\s+)?\b([01]?\d|2[0-3]):([0-5]\d)\b/giu, (match, rawHour, rawMinute) => {
+      const afterO = /^o\s/i.test(match), prefix = afterO ? 'o ' : '';
+      const hour = Number(rawHour), minute = Number(rawMinute);
+      return `${prefix}${(afterO ? feminineHoursAfterO : feminineHoursStandalone)[hour]}${minute ? ` ${spokenMinute(minute)}` : ''}`;
+    });
+    speech.__desktopPiperPatched = true;
     speech.speak = utterance => {
       let selected = '';
       let settings = {};
       try { settings = JSON.parse(localStorage.getItem('cttm-settings') || '{}'); selected = settings.voice || ''; } catch {}
-      if (selected !== 'piper-mr-drwina') return originalSpeak(utterance);
+      if (!desktopPiperVoices.some(([value]) => value === selected)) return originalSpeak(utterance);
       const finish = (error = false) => {
         if (piperAudio) {
           piperAudio.onended = null;
@@ -408,13 +512,14 @@ function desktopPageFeatures() {
         const callback = error ? utterance.onerror : utterance.onend;
         if (typeof callback === 'function') callback.call(utterance, { type: error ? 'error' : 'end', utterance });
       };
-      if (!settings.tts) return finish(false);
+      if (!settings.tts && !utterance.__czatboxForce) return finish(false);
       if (settings.cleanSpeech) {
         const spokenText = String(utterance.text || '').toLowerCase();
         const rejected = /(.)\1{5,}/.test(spokenText) || /(https?:\/\/|www\.)/.test(spokenText) || spokenText.length > 320 || /\b(?:kurw\w*|chuj\w*|pierdol\w*|jeb\w*|skurwysyn\w*|pizd\w*|cipa\w*)\b/i.test(spokenText);
         if (rejected) return finish(false);
       }
-      window.czatboxDesktop.synthesizeMrDrwina(utterance.text).then(result => {
+      const textForVoice = selected === 'piper-halinka' ? normalizeHalinkaTimes(utterance.text) : utterance.text;
+      window.czatboxDesktop.synthesizePiper(selected, textForVoice).then(result => {
         if (!result?.ok || !result.audio) throw new Error(result?.error || 'piper-failed');
         const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
         piperAudio = audio;
@@ -451,7 +556,8 @@ function desktopPageFeatures() {
       originalCancel();
     };
     try {
-      if (JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice === 'piper-mr-drwina') window.czatboxDesktop.warmMrDrwina().catch(() => {});
+      const selected = JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice;
+      if (desktopPiperVoices.some(([value]) => value === selected)) window.czatboxDesktop.warmPiper(selected).catch(() => {});
     } catch {}
   }
 }
@@ -459,6 +565,16 @@ function desktopPageFeatures() {
 function applyDesktopFeatures() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   return mainWindow.webContents.executeJavaScript(`(${desktopPageFeatures.toString()})()`, true).catch(() => {});
+}
+
+function speakDesktopGreeting() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const now = Date.now();
+  if (now - lastDesktopGreetingAt < 5000) return;
+  lastDesktopGreetingAt = now;
+  let userName = 'użytkowniku';
+  try { userName = os.userInfo().username || userName; } catch {}
+  void mainWindow.webContents.executeJavaScript(`window.__czatboxSpeakGreeting?.(${JSON.stringify({ userName })})`, true).catch(() => {});
 }
 
 function pushUpdateUi(payload) {
@@ -476,26 +592,28 @@ function installDownloadedUpdate() {
   autoUpdater.quitAndInstall(true, true);
 }
 
-ipcMain.handle('desktop:warm-mr-drwina', async () => {
-  if (!fs.existsSync(PIPER_EXECUTABLE) || !fs.existsSync(MR_DRWINA_MODEL)) {
+ipcMain.handle('desktop:warm-piper', async (_event, requestedVoice) => {
+  const voice = getPiperVoice(requestedVoice);
+  if (!voice || !fs.existsSync(PIPER_EXECUTABLE) || !fs.existsSync(voice.model)) {
     return { ok: false, error: 'piper-unavailable' };
   }
   try {
-    return await warmPiperServer();
+    return await warmPiperServer(voice);
   } catch (error) {
     return { ok: false, error: error?.message || 'piper-failed' };
   }
 });
 
-ipcMain.handle('desktop:synthesize-mr-drwina', async (_event, rawText) => {
-  if (!fs.existsSync(PIPER_EXECUTABLE) || !fs.existsSync(MR_DRWINA_MODEL)) {
+ipcMain.handle('desktop:synthesize-piper', async (_event, requestedVoice, rawText) => {
+  const voice = getPiperVoice(requestedVoice);
+  if (!voice || !fs.existsSync(PIPER_EXECUTABLE) || !fs.existsSync(voice.model)) {
     return { ok: false, error: 'piper-unavailable' };
   }
   const text = sanitizePiperText(rawText).slice(0, 600);
   if (!text) return { ok: false, error: 'empty-text' };
-  const output = path.join(app.getPath('temp'), `czatbox-mr-drwina-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
+  const output = path.join(app.getPath('temp'), `czatbox-${voice.slug}-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
   try {
-    const result = await getPiperServer().request(text, output);
+    const result = await getPiperServer(voice).request(text, output);
     if (!result?.ok || !fs.existsSync(output)) return { ok: false, error: result?.error || 'piper-failed' };
     return { ok: true, audio: fs.readFileSync(output).toString('base64') };
   } catch (error) {
@@ -509,31 +627,24 @@ ipcMain.handle('desktop:set-minimize-to-tray', (_event, enabled) => ({
   ok: true,
   enabled: setMinimizeToTray(enabled)
 }));
-ipcMain.on('desktop:radio-control', (event, action) => {
-  if (!widgetWindow || event.sender !== widgetWindow.webContents || !['toggle-play','toggle-mute'].includes(action) || !mainWindow || mainWindow.isDestroyed()) return;
-  void mainWindow.webContents.executeJavaScript(`window.dispatchEvent(new CustomEvent('cttm-radio-control',{detail:${JSON.stringify(action)}}))`);
-  setTimeout(refreshDesktopWidget, 350);
-});
-ipcMain.on('desktop:open-note', (event, id) => {
+ipcMain.on('desktop:open-workspace', (event, name) => {
   if (!widgetWindow || event.sender !== widgetWindow.webContents || !mainWindow || mainWindow.isDestroyed()) return;
+  const workspace = String(name || '');
+  if (!['calendar', 'notes', 'radio'].includes(workspace)) return;
   mainWindow.show();
   mainWindow.focus();
-  void mainWindow.webContents.executeJavaScript(`window.dispatchEvent(new CustomEvent('cttm-widget-open-note',{detail:${JSON.stringify(String(id || ''))}}))`);
+  void mainWindow.webContents.executeJavaScript(`window.dispatchEvent(new CustomEvent('cttm-desktop-open-workspace',{detail:${JSON.stringify(workspace)}}))`);
+  showDesktopWidget();
 });
-ipcMain.on('desktop:widget-refresh', event => {
-  if (!mainWindow || event.sender !== mainWindow.webContents) return;
-  void refreshDesktopWidget();
+ipcMain.on('desktop:open-control-panel', event => {
+  if (!widgetWindow || event.sender !== widgetWindow.webContents) return;
+  try { spawn('control.exe', [], { detached: true, stdio: 'ignore', windowsHide: true }).unref(); } catch {}
 });
-ipcMain.on('desktop:widget-sync', (event, data) => {
-  if (!mainWindow || event.sender !== mainWindow.webContents || !data || !Array.isArray(data.events)) return;
-  latestWidgetData = {
-    events: data.events.slice(-2000),
-    notes: Array.isArray(data.notes) ? data.notes.slice(0, 5) : [],
-    language: 'pl',
-    theme: String(data.theme || 'dark-titanium'),
-    radio: data.radio && typeof data.radio === 'object' ? data.radio : { active: false, playing: false, muted: false, station: '', description: '' }
-  };
-  if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
+ipcMain.on('desktop:open-drive', (event, drive) => {
+  if (!widgetWindow || event.sender !== widgetWindow.webContents) return;
+  const root = String(drive || '').trim().toUpperCase();
+  if (!/^[A-Z]:$/.test(root)) return;
+  void shell.openPath(`${root}\\`);
 });
 
 function createWindow() {
@@ -565,8 +676,8 @@ function createWindow() {
     showDesktopWidget();
   });
   mainWindow.on('minimize', showDesktopWidget);
-  mainWindow.on('restore', () => hideDesktopWidget());
-  mainWindow.on('show', () => { if (!mainWindow?.isMinimized()) hideDesktopWidget(); });
+  mainWindow.on('restore', showDesktopWidget);
+  mainWindow.on('show', () => { if (!mainWindow?.isMinimized()) showDesktopWidget(); });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (isSafeExternalUrl(url)) void shell.openExternal(url);
@@ -587,6 +698,7 @@ function createWindow() {
   mainWindow.webContents.on('dom-ready', async () => {
     await applyDesktopBranding();
     await applyDesktopFeatures();
+    setTimeout(speakDesktopGreeting, 700);
     if (process.env.CZATBOX_UPDATE_PREVIEW === '1') {
       pushUpdateUi({ title: 'Dostępna aktualizacja', text: 'Dostępna jest wersja testowa 0.3.6. Pobrać ją teraz?', button: 'Pobierz', action: 'download', dismissible: true });
     }
@@ -596,7 +708,7 @@ function createWindow() {
     void mainWindow.loadFile(path.join(__dirname, 'shell', 'offline.html'));
   });
   mainWindow.once('ready-to-show', () => mainWindow?.show());
-  mainWindow.on('closed', () => { mainWindow = null; hideDesktopWidget(); if (!minimizeToTrayOnClose) destroyTray(); });
+  mainWindow.on('closed', () => { mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
   const loadApp = async () => {
     let applied = '';
     try { applied = fs.readFileSync(RENDERER_CACHE_EPOCH_PATH, 'utf8').trim(); } catch {}
@@ -649,7 +761,8 @@ if (!singleInstance) {
     session.fromPartition('persist:czatbox-tt').setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
     createWindow();
     ensureTray();
-    if (desktopWidgetPinned) setTimeout(showDesktopWidget, 2500);
+    setTimeout(showDesktopWidget, 1200);
+    powerMonitor.on('resume', () => setTimeout(speakDesktopGreeting, 1200));
     configureUpdater();
   });
 
