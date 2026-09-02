@@ -1,6 +1,6 @@
 {
   "name": "tiktok-live-electron",
-  "version": "0.3.18",
+  "version": "0.3.19",
   "private": true,
   "productName": "Czatbox TT",
   "description": "Desktopowy panel do odczytu czatu transmisji TikTok LIVE.",
