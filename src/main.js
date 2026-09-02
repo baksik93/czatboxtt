@@ -36,7 +36,7 @@ let widgetWindow = null;
 let widgetTimer = null;
 let lastDesktopGreetingAt = 0;
 let latestWidgetData = { drives: [], accent: '#4fdde5' };
-const RENDERER_CACHE_EPOCH = 'workspace-v97';
+const RENDERER_CACHE_EPOCH = 'workspace-v98';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 
 function normalizeAccentColor(value) {
@@ -488,11 +488,36 @@ function desktopPageFeatures() {
       if (value < 20) return teens[value - 10];
       return `${tens[Math.floor(value / 10)]}${value % 10 ? ` ${ones[value % 10]}` : ''}`;
     };
-    const normalizeHalinkaTimes = value => String(value || '').replace(/(?:\bo\s+)?\b([01]?\d|2[0-3]):([0-5]\d)\b/giu, (match, rawHour, rawMinute) => {
+    const masculineOrdinal = value => {
+      const direct = ['zerowy', 'pierwszy', 'drugi', 'trzeci', 'czwarty', 'piąty', 'szósty', 'siódmy', 'ósmy', 'dziewiąty', 'dziesiąty', 'jedenasty', 'dwunasty', 'trzynasty', 'czternasty', 'piętnasty', 'szesnasty', 'siedemnasty', 'osiemnasty', 'dziewiętnasty'];
+      const tens = ['', '', 'dwudziesty', 'trzydziesty', 'czterdziesty', 'pięćdziesiąty', 'sześćdziesiąty', 'siedemdziesiąty', 'osiemdziesiąty', 'dziewięćdziesiąty'];
+      if (value < 20) return direct[value];
+      return `${tens[Math.floor(value / 10)]}${value % 10 ? ` ${direct[value % 10]}` : ''}`;
+    };
+    const genitiveOrdinal = value => {
+      const direct = ['', 'pierwszego', 'drugiego', 'trzeciego', 'czwartego', 'piątego', 'szóstego', 'siódmego', 'ósmego', 'dziewiątego', 'dziesiątego', 'jedenastego', 'dwunastego', 'trzynastego', 'czternastego', 'piętnastego', 'szesnastego', 'siedemnastego', 'osiemnastego', 'dziewiętnastego'];
+      const tens = ['', '', 'dwudziestego', 'trzydziestego', 'czterdziestego', 'pięćdziesiątego', 'sześćdziesiątego', 'siedemdziesiątego', 'osiemdziesiątego', 'dziewięćdziesiątego'];
+      if (value < 20) return direct[value];
+      return `${tens[Math.floor(value / 10)]}${value % 10 ? ` ${direct[value % 10]}` : ''}`;
+    };
+    const months = ['', 'stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
+    const spokenYear = value => {
+      const year = Number(value), remainder = year % 100;
+      if (year >= 2000 && year <= 2099) return `dwa tysiące${remainder ? ` ${genitiveOrdinal(remainder)}` : ''}`;
+      if (year >= 1900 && year <= 1999) return `tysiąc dziewięćset${remainder ? ` ${genitiveOrdinal(remainder)}` : ''}`;
+      return String(year);
+    };
+    const normalizePiperDates = value => String(value || '').replace(/\b(?:(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})|(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2}))\b/gu, (match, isoYear, isoMonth, isoDay, localDay, localMonth, localYear) => {
+      const day = Number(isoDay || localDay), month = Number(isoMonth || localMonth), year = Number(isoYear || localYear);
+      if (day < 1 || day > 31 || month < 1 || month > 12) return match;
+      return `${masculineOrdinal(day)} ${months[month]} ${spokenYear(year)} roku`;
+    });
+    const normalizePiperTimes = value => String(value || '').replace(/(?:\bo\s+)?\b([01]?\d|2[0-3]):([0-5]\d)\b/giu, (match, rawHour, rawMinute) => {
       const afterO = /^o\s/i.test(match), prefix = afterO ? 'o ' : '';
       const hour = Number(rawHour), minute = Number(rawMinute);
       return `${prefix}${(afterO ? feminineHoursAfterO : feminineHoursStandalone)[hour]}${minute ? ` ${spokenMinute(minute)}` : ''}`;
     });
+    const normalizePiperText = value => normalizePiperTimes(normalizePiperDates(value));
     speech.__desktopPiperPatched = true;
     speech.speak = utterance => {
       let selected = '';
@@ -518,7 +543,7 @@ function desktopPageFeatures() {
         const rejected = /(.)\1{5,}/.test(spokenText) || /(https?:\/\/|www\.)/.test(spokenText) || spokenText.length > 320 || /\b(?:kurw\w*|chuj\w*|pierdol\w*|jeb\w*|skurwysyn\w*|pizd\w*|cipa\w*)\b/i.test(spokenText);
         if (rejected) return finish(false);
       }
-      const textForVoice = selected === 'piper-halinka' ? normalizeHalinkaTimes(utterance.text) : utterance.text;
+      const textForVoice = normalizePiperText(utterance.text);
       window.czatboxDesktop.synthesizePiper(selected, textForVoice).then(result => {
         if (!result?.ok || !result.audio) throw new Error(result?.error || 'piper-failed');
         const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
