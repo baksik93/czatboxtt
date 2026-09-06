@@ -1,0 +1,22 @@
+.topbar{position:relative;top:auto;background:transparent!important}
+.topbar::before{content:"";position:absolute;z-index:-1;top:calc(0px - env(safe-area-inset-top));bottom:0;left:50%;width:100vw;width:100dvw;transform:translateX(-50%);background:var(--header-bg,var(--panel));border-bottom:1px solid var(--line);pointer-events:none}
+.all-themes{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+
+:root[data-theme="dark-titanium"]{--bg:#080b12;--panel:#10151f;--panel2:#171d29;--text:#f6f7fb;--muted:#8992a3;--line:#242c3b;--cyan:#24d9d5;--pink:#ff3e77;--accent:#7d6cff;--shadow:0 22px 70px rgba(0,0,0,.28);--header-bg:#080b12;color-scheme:dark}
+:root[data-theme="white-titanium"]{--bg:#f6f5f0;--panel:#ebeae4;--panel2:#fbfaf6;--text:#25272c;--muted:#6b717d;--line:#c9c7bf;--cyan:#66717f;--pink:#a86672;--accent:#777c86;--shadow:0 18px 36px rgba(62,58,50,.18);--header-bg:#ebeae4;color-scheme:light}
+:root[data-theme="chill-serwis"]{--bg:#06172e;--panel:#071d3a;--panel2:#082449;--text:#f4fbff;--muted:#a8d8ff;--line:rgba(149,214,255,.34);--cyan:#28a8ff;--pink:#60d4ff;--accent:#0b5ea5;--shadow:0 18px 36px rgba(0,13,31,.42);--header-bg:linear-gradient(100deg,rgba(4,19,38,.98),rgba(11,61,115,.96) 58%,rgba(30,144,214,.86));color-scheme:dark}
+:root[data-theme="rose-gold-glass"]{--bg:#f7e2dc;--panel:rgba(255,248,245,.76);--panel2:#fff8f5;--text:#33272b;--muted:#80656a;--line:rgba(151,90,74,.26);--cyan:#b45f72;--pink:#d7788f;--accent:#e28c7a;--shadow:0 18px 36px rgba(105,64,55,.18);--header-bg:linear-gradient(135deg,rgba(255,255,255,.76),rgba(255,225,214,.58));color-scheme:light}
+:root[data-theme="lazarskie-rejony"]{--bg:#0a0f17;--panel:rgba(13,18,27,.72);--panel2:rgba(24,32,46,.78);--text:#eef4ff;--muted:#98a6bb;--line:rgba(108,132,178,.26);--cyan:#6de7ff;--pink:#84a9ff;--accent:#477fb9;--shadow:0 22px 54px rgba(0,0,0,.46);--header-bg:linear-gradient(145deg,rgba(24,31,43,.92),rgba(10,15,23,.9));color-scheme:dark}
+:root[data-theme="miami-vice"]{--bg:#160f35;--panel:#21184f;--panel2:rgba(37,30,76,.92);--text:#fff7ff;--muted:#ffd2f0;--line:rgba(255,139,211,.38);--cyan:#6de7ff;--pink:#ff75c8;--accent:#ff75c8;--shadow:0 24px 52px rgba(53,16,82,.42);--header-bg:linear-gradient(120deg,rgba(34,14,72,.98),rgba(255,117,200,.24) 42%,rgba(109,231,255,.24) 74%,rgba(255,224,138,.2));color-scheme:dark}
+
+:root[data-theme="dark-titanium"] body{background:#080b12}
+:root[data-theme="white-titanium"] body{background:#f6f5f0}
+:root[data-theme="chill-serwis"] body{background:radial-gradient(circle at top left,rgba(42,169,255,.22),transparent 34vw),linear-gradient(135deg,#041326 0%,#082b55 48%,#0e5f9d 100%)}
+:root[data-theme="rose-gold-glass"] body{background:linear-gradient(135deg,#fff8f5 0%,#f5d6ca 34%,#dca085 68%,#fff5ec 100%),#f7e2dc}
+:root[data-theme="lazarskie-rejony"] body{background:radial-gradient(circle at 18% 10%,rgba(61,91,138,.22),transparent 34%),radial-gradient(circle at 88% 16%,rgba(58,149,201,.12),transparent 28%),linear-gradient(135deg,rgba(8,12,19,.96),rgba(13,19,29,.9) 48%,rgba(8,13,21,.96)),#0a0f17}
+:root[data-theme="miami-vice"] body{background:radial-gradient(circle at 12% 10%,rgba(255,117,200,.34),transparent 32vw),radial-gradient(circle at 88% 8%,rgba(110,231,255,.28),transparent 30vw),radial-gradient(circle at 64% 92%,rgba(255,224,138,.18),transparent 34vw),linear-gradient(135deg,#170b38 0%,#202267 48%,#053a67 100%)}
+
+:root[data-theme="rose-gold-glass"] .settings-card,:root[data-theme="rose-gold-glass"] .surface,:root[data-theme="rose-gold-glass"] .chat-shell,:root[data-theme="lazarskie-rejony"] .settings-card,:root[data-theme="lazarskie-rejony"] .surface,:root[data-theme="lazarskie-rejony"] .chat-shell{backdrop-filter:blur(18px) saturate(1.25)}
+
+
+@media(max-width:620px){.all-themes{grid-template-columns:1fr}.all-themes button{min-height:36px}}

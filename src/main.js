@@ -36,7 +36,7 @@ let widgetWindow = null;
 let widgetTimer = null;
 let lastDesktopGreetingAt = 0;
 let latestWidgetData = { drives: [], accent: '#4fdde5' };
-const RENDERER_CACHE_EPOCH = 'workspace-v99';
+const RENDERER_CACHE_EPOCH = 'workspace-v100';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 
 function normalizeAccentColor(value) {

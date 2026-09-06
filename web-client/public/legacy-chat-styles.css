@@ -1,0 +1,12 @@
+/* Układ "Przestrzenny" przeniesiony z desktopowego Czatboxa 0.3.3.
+   W bieżącym interfejsie etykieta "Przestrzenny" używa wartości `modern`. */
+:root[data-chat-style="modern"] .chat-feed{padding:12px 14px}
+:root[data-chat-style="modern"] .chat-message{align-items:flex-start;gap:12px;margin:0;padding:12px 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:0;background:transparent;box-shadow:none;transition:none}
+:root[data-chat-style="modern"] .chat-message:hover{background:transparent}
+:root[data-chat-style="modern"] .chat-message:last-child{border-bottom:0}
+:root[data-chat-style="modern"] .message-avatar{width:2.45em;height:2.45em;flex:0 0 2.45em;margin-top:2px}
+:root[data-chat-style="modern"] .chat-message>div>div{justify-content:flex-start;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:2px}
+:root[data-chat-style="modern"] .chat-message .message-author{font-size:15px;line-height:1.42}
+:root[data-chat-style="modern"] .chat-message time{margin-left:0;color:var(--muted);font-size:12px;font-weight:400;line-height:1.2}
+:root[data-chat-style="modern"] .chat-message p{display:block;margin:0;padding:0;font-size:15px;line-height:1.42}
+@media(max-width:390px){:root[data-chat-style="modern"] .chat-feed{padding-right:11px;padding-left:11px}}
