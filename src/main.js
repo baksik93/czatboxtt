@@ -5,8 +5,20 @@ const { spawn, execFile } = require('child_process');
 const readline = require('readline');
 const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen, systemPreferences, powerMonitor } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const { LocalLive } = require('./local-live');
+const localLive = new LocalLive();
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+function prioritizeAudioProcess(pid) {
+  try { os.setPriority(pid, os.constants.priority.PRIORITY_ABOVE_NORMAL); } catch (error) { console.warn('Process priority unavailable:', error.code); }
+}
+prioritizeAudioProcess(process.pid);
+app.on('web-contents-created', (_event, contents) => {
+  contents.on('did-finish-load', () => prioritizeAudioProcess(contents.getOSProcessId()));
+});
 
 const APP_ORIGIN = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev';
 const APP_URL = `${APP_ORIGIN}/?platform=desktop&appVersion=${encodeURIComponent(app.getVersion())}`;
@@ -36,7 +48,7 @@ let widgetWindow = null;
 let widgetTimer = null;
 let lastDesktopGreetingAt = 0;
 let latestWidgetData = { drives: [], accent: '#4fdde5' };
-const RENDERER_CACHE_EPOCH = 'workspace-v100';
+const RENDERER_CACHE_EPOCH = 'workspace-v101-local-live';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 
 function normalizeAccentColor(value) {
@@ -672,6 +684,23 @@ ipcMain.on('desktop:open-drive', (event, drive) => {
   void shell.openPath(`${root}\\`);
 });
 
+function isLiveSender(event) {
+  return mainWindow && !mainWindow.isDestroyed() && event.sender === mainWindow.webContents
+    && event.senderFrame === event.sender.mainFrame && isAllowedAppUrl(event.senderFrame.url);
+}
+ipcMain.on('desktop:live-connect', (event, id, username) => {
+  if (!isLiveSender(event) || typeof id !== 'string' || !/^[\w-]{1,80}$/.test(id)
+      || typeof username !== 'string' || !/^[a-zA-Z0-9_.]{1,64}$/.test(username)) return;
+  const owner = event.sender;
+  void localLive.start(id, username, packet => {
+    if (!owner.isDestroyed()) owner.send('desktop:live-event', packet);
+  });
+});
+ipcMain.on('desktop:live-disconnect', (event, id) => {
+  if (isLiveSender(event) && typeof id === 'string') localLive.stop(id);
+});
+app.on('before-quit', () => localLive.stop());
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1120,
@@ -733,7 +762,10 @@ function createWindow() {
     void mainWindow.loadFile(path.join(__dirname, 'shell', 'offline.html'));
   });
   mainWindow.once('ready-to-show', () => mainWindow?.show());
-  mainWindow.on('closed', () => { mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
+  mainWindow.webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
+    if (isMainFrame && !isInPlace) localLive.stop();
+  });
+  mainWindow.on('closed', () => { localLive.stop(); mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
   const loadApp = async () => {
     let applied = '';
     try { applied = fs.readFileSync(RENDERER_CACHE_EPOCH_PATH, 'utf8').trim(); } catch {}
