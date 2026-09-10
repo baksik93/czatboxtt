@@ -24,7 +24,7 @@ test('connects without key, forwards events and does not request backlog', async
   const starting = live.start('one', 'creator', packet => packets.push(packet));
   await tick(); const c = connections[0];
   assert.equal(c.options.processInitialData, false);
-  assert.equal(c.options.enableExtendedGiftInfo, true);
+  assert.equal(c.options.enableExtendedGiftInfo, false);
   assert.equal(c.options.signApiKey, undefined);
   c.resolve(); await starting;
   c.emit('chat', { comment: 'hello', msgId: 123n, nickname: 'N', uniqueId: 'u' });

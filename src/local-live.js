@@ -40,7 +40,9 @@ class LocalLive {
       const connection = new sdk.TikTokLiveConnection(username, {
         processInitialData: false,
         fetchRoomInfoOnConnect: true,
-        enableExtendedGiftInfo: true,
+        // Extended gift metadata requires an Euler Stream Business endpoint.
+        // Standard gift packets already contain the data used by the app.
+        enableExtendedGiftInfo: false,
         webClientOptions: { timeout: 15000 }
       });
       run.connection = connection;
