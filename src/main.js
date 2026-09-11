@@ -1,11 +1,14 @@
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const os = require('os');
 const { spawn, execFile } = require('child_process');
 const readline = require('readline');
-const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen, systemPreferences, powerMonitor } = require('electron');
+const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen, systemPreferences, powerMonitor, powerSaveBlocker } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const { LocalLive } = require('./local-live');
+const LOCAL_UI_PREVIEW = process.argv.includes('--local-ui-preview');
+if (LOCAL_UI_PREVIEW) app.setPath('userData', path.join(app.getPath('userData'), 'LocalUiPreview'));
 const localLive = new LocalLive();
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -28,6 +31,10 @@ const PIPER_RESOURCE_DIR = app.isPackaged
   ? path.join(process.resourcesPath, 'piper')
   : path.join(app.getAppPath(), 'resources', 'piper');
 const PIPER_EXECUTABLE = path.join(PIPER_RESOURCE_DIR, 'piper-tts.exe');
+const AUDIO_DUCK_SCRIPT = app.isPackaged
+  ? path.join(process.resourcesPath, 'audio-duck.ps1')
+  : path.join(app.getAppPath(), 'resources', 'audio-duck.ps1');
+const AUDIO_DUCK_STATE = path.join(app.getPath('userData'), 'audio-duck-state.json');
 const MR_DRWINA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-jarvis_wg_glos-medium.onnx');
 const HALINKA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-justyna_wg_glos-medium.onnx');
 const PIPER_VOICES = Object.freeze({
@@ -37,6 +44,8 @@ const PIPER_VOICES = Object.freeze({
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 
 let mainWindow = null;
+let localPreviewServer = null;
+let localPreviewOrigin = '';
 let updateTimer = null;
 let quittingForUpdate = false;
 let piperServer = null;
@@ -48,8 +57,30 @@ let widgetWindow = null;
 let widgetTimer = null;
 let lastDesktopGreetingAt = 0;
 let latestWidgetData = { drives: [], accent: '#4fdde5' };
+let livePowerBlockerId = null;
+let audioDuckDepth = 0;
+let audioDuckChain = Promise.resolve();
 const RENDERER_CACHE_EPOCH = 'workspace-v101-local-live';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
+
+function runAudioDuck(mode) {
+  return new Promise(resolve => {
+    execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', AUDIO_DUCK_SCRIPT, '-Mode', mode, '-StatePath', AUDIO_DUCK_STATE], { windowsHide: true, timeout: 12000 }, error => {
+      if (error) console.warn(`Audio ${mode.toLowerCase()} unavailable:`, error.message);
+      resolve(!error);
+    });
+  });
+}
+
+function queueAudioDuck(mode) {
+  audioDuckChain = audioDuckChain.then(() => runAudioDuck(mode), () => runAudioDuck(mode));
+  return audioDuckChain;
+}
+
+function forceRestoreAudio() {
+  audioDuckDepth = 0;
+  return queueAudioDuck('Restore');
+}
 
 function normalizeAccentColor(value) {
   const hex = String(value || '').replace(/[^a-f0-9]/gi, '').slice(0, 6);
@@ -114,6 +145,7 @@ function positionDesktopWidget(widget) {
 }
 
 function showDesktopWidget() {
+  if (LOCAL_UI_PREVIEW) return;
   const widget = createDesktopWidget();
   positionDesktopWidget(widget);
   void refreshDesktopWidget().finally(() => {
@@ -248,7 +280,7 @@ function showMainWindow() {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
-  showDesktopWidget();
+  if (!LOCAL_UI_PREVIEW) showDesktopWidget();
 }
 
 function destroyTray() {
@@ -258,6 +290,7 @@ function destroyTray() {
 }
 
 function ensureTray() {
+  if (LOCAL_UI_PREVIEW) return null;
   if (!tray) {
     tray = new Tray(APP_ICON_PATH);
     tray.setToolTip('Czatbox TT');
@@ -274,15 +307,89 @@ function ensureTray() {
 }
 
 function setMinimizeToTray(enabled) {
+  if (LOCAL_UI_PREVIEW) {
+    minimizeToTrayOnClose = false;
+    destroyTray();
+    return false;
+  }
   minimizeToTrayOnClose = Boolean(enabled);
   ensureTray();
   return minimizeToTrayOnClose;
 }
 
+function localPreviewDirectory() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'web-client')
+    : path.join(app.getAppPath(), 'web-client', 'public');
+}
+
+function localPreviewContentType(filePath) {
+  return ({
+    '.css': 'text/css; charset=utf-8',
+    '.html': 'text/html; charset=utf-8',
+    '.ico': 'image/x-icon',
+    '.js': 'text/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.m3u8': 'application/vnd.apple.mpegurl',
+    '.mp3': 'audio/mpeg',
+    '.mp4': 'video/mp4',
+    '.png': 'image/png',
+    '.svg': 'image/svg+xml; charset=utf-8',
+    '.webmanifest': 'application/manifest+json; charset=utf-8'
+  })[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+}
+
+function startLocalUiPreview() {
+  if (localPreviewServer && localPreviewOrigin) return Promise.resolve(localPreviewOrigin);
+  const root = path.resolve(localPreviewDirectory());
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((request, response) => {
+      let pathname = '/';
+      try { pathname = decodeURIComponent(new URL(request.url || '/', 'http://127.0.0.1').pathname); } catch {}
+      const relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^[/\\]+/, '');
+      const filePath = path.resolve(root, relativePath);
+      if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
+        response.writeHead(403).end('Forbidden');
+        return;
+      }
+      fs.readFile(filePath, (error, data) => {
+        if (error) {
+          response.writeHead(error.code === 'ENOENT' ? 404 : 500).end('Not found');
+          return;
+        }
+        if (relativePath === 'index.html') {
+          const previewStyle = '<style id="localUiPreview">.beta-locked .app{visibility:visible!important}#betaGate{display:none!important}</style>';
+          data = Buffer.from(data.toString('utf8').replace('</head>', `${previewStyle}</head>`), 'utf8');
+        }
+        response.writeHead(200, {
+          'Content-Type': localPreviewContentType(filePath),
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff'
+        });
+        response.end(data);
+      });
+    });
+    server.once('error', reject);
+    // Stały port zachowuje ten sam origin, więc lokalny podgląd nie traci
+    // zapamiętanych twórców i ustawień pomiędzy kolejnymi uruchomieniami.
+    server.listen(47821, '127.0.0.1', () => {
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        server.close();
+        reject(new Error('Nie udało się ustalić portu lokalnego podglądu.'));
+        return;
+      }
+      localPreviewServer = server;
+      localPreviewOrigin = `http://127.0.0.1:${address.port}`;
+      resolve(localPreviewOrigin);
+    });
+  });
+}
+
 function isAllowedAppUrl(rawUrl) {
   try {
     const url = new URL(rawUrl);
-    return url.origin === APP_ORIGIN;
+    return url.origin === APP_ORIGIN || (LOCAL_UI_PREVIEW && url.origin === localPreviewOrigin);
   } catch {
     return false;
   }
@@ -402,8 +509,18 @@ function desktopPageFeatures() {
   dock.innerHTML = widgetDefinitions.map(item => `<section class="desktop-side-widget" data-desktop-widget="${item.kind}" data-expanded="false"><div class="desktop-widget-panel"><h2>${item.title}</h2><p></p><div class="stat-dialog-content"></div></div><button class="desktop-widget-tab" type="button" aria-expanded="false" aria-label="Rozwiń: ${item.title}"><svg><use href="/icons.svg#${item.icon}"></use></svg><span>${item.label}</span></button></section>`).join('');
   document.body.append(dock);
   const toolboxToggle = document.querySelector('#toolbox');
-  const syncToolboxVisibility = () => { dock.hidden = Boolean(toolboxToggle && !toolboxToggle.checked); };
+  let activeDesktopWorkspace = 'chat';
+  const syncToolboxVisibility = () => {
+    const chatTabActive = document.querySelector('#chat')?.classList.contains('active');
+    dock.hidden = Boolean((toolboxToggle && !toolboxToggle.checked) || !chatTabActive || activeDesktopWorkspace !== 'chat');
+  };
   toolboxToggle?.addEventListener('change', syncToolboxVisibility);
+  window.addEventListener('cttm-workspace-change', event => {
+    activeDesktopWorkspace = String(event.detail || '');
+    syncToolboxVisibility();
+  });
+  const chatTab = document.querySelector('#chat');
+  if (chatTab) new MutationObserver(syncToolboxVisibility).observe(chatTab, { attributes: true, attributeFilter: ['class'] });
   syncToolboxVisibility();
 
   const refreshWidget = item => {
@@ -688,18 +805,35 @@ function isLiveSender(event) {
   return mainWindow && !mainWindow.isDestroyed() && event.sender === mainWindow.webContents
     && event.senderFrame === event.sender.mainFrame && isAllowedAppUrl(event.senderFrame.url);
 }
+ipcMain.handle('desktop:audio-duck-start', async event => {
+  if (!isLiveSender(event)) return { ok: false };
+  audioDuckDepth += 1;
+  if (audioDuckDepth === 1) await queueAudioDuck('Duck');
+  return { ok: true, depth: audioDuckDepth };
+});
+ipcMain.handle('desktop:audio-duck-stop', async event => {
+  if (!isLiveSender(event)) return { ok: false };
+  audioDuckDepth = Math.max(0, audioDuckDepth - 1);
+  if (audioDuckDepth === 0) await queueAudioDuck('Restore');
+  return { ok: true, depth: audioDuckDepth };
+});
 ipcMain.on('desktop:live-connect', (event, id, username) => {
   if (!isLiveSender(event) || typeof id !== 'string' || !/^[\w-]{1,80}$/.test(id)
       || typeof username !== 'string' || !/^[a-zA-Z0-9_.]{1,64}$/.test(username)) return;
   const owner = event.sender;
+  if (livePowerBlockerId == null || !powerSaveBlocker.isStarted(livePowerBlockerId)) livePowerBlockerId = powerSaveBlocker.start('prevent-app-suspension');
   void localLive.start(id, username, packet => {
     if (!owner.isDestroyed()) owner.send('desktop:live-event', packet);
   });
 });
 ipcMain.on('desktop:live-disconnect', (event, id) => {
-  if (isLiveSender(event) && typeof id === 'string') localLive.stop(id);
+  if (isLiveSender(event) && typeof id === 'string') {
+    localLive.stop(id);
+    if (livePowerBlockerId != null && powerSaveBlocker.isStarted(livePowerBlockerId)) powerSaveBlocker.stop(livePowerBlockerId);
+    livePowerBlockerId = null;
+  }
 });
-app.on('before-quit', () => localLive.stop());
+app.on('before-quit', () => { localLive.stop(); if (livePowerBlockerId != null && powerSaveBlocker.isStarted(livePowerBlockerId)) powerSaveBlocker.stop(livePowerBlockerId); livePowerBlockerId = null; void forceRestoreAudio(); });
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -722,16 +856,23 @@ function createWindow() {
       partition: 'persist:czatbox-tt'
     }
   });
+  mainWindow.webContents.setBackgroundThrottling(false);
   mainWindow.on('close', event => {
+    if (LOCAL_UI_PREVIEW) {
+      appIsQuitting = true;
+      return;
+    }
     if (appIsQuitting || quittingForUpdate || !minimizeToTrayOnClose) return;
     event.preventDefault();
     ensureTray();
     mainWindow.hide();
     showDesktopWidget();
   });
-  mainWindow.on('minimize', showDesktopWidget);
-  mainWindow.on('restore', showDesktopWidget);
-  mainWindow.on('show', () => { if (!mainWindow?.isMinimized()) showDesktopWidget(); });
+  if (!LOCAL_UI_PREVIEW) {
+    mainWindow.on('minimize', showDesktopWidget);
+    mainWindow.on('restore', showDesktopWidget);
+    mainWindow.on('show', () => { if (!mainWindow?.isMinimized()) showDesktopWidget(); });
+  }
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (isSafeExternalUrl(url)) void shell.openExternal(url);
@@ -765,8 +906,13 @@ function createWindow() {
   mainWindow.webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
     if (isMainFrame && !isInPlace) localLive.stop();
   });
-  mainWindow.on('closed', () => { localLive.stop(); mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
+  mainWindow.on('closed', () => { localLive.stop(); void forceRestoreAudio(); mainWindow = null; if (!minimizeToTrayOnClose) destroyTray(); });
   const loadApp = async () => {
+    if (LOCAL_UI_PREVIEW) {
+      const previewOrigin = await startLocalUiPreview();
+      await mainWindow.loadURL(`${previewOrigin}/?platform=desktop&localPreview=1&appVersion=${encodeURIComponent(APP_VERSION)}`);
+      return;
+    }
     let applied = '';
     try { applied = fs.readFileSync(RENDERER_CACHE_EPOCH_PATH, 'utf8').trim(); } catch {}
     if (applied !== RENDERER_CACHE_EPOCH) {
@@ -782,7 +928,7 @@ function createWindow() {
 }
 
 function configureUpdater() {
-  if (!app.isPackaged) return;
+  if (!app.isPackaged || LOCAL_UI_PREVIEW) return;
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.logger = null;
@@ -814,11 +960,14 @@ if (!singleInstance) {
     showMainWindow();
   });
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
+    await forceRestoreAudio();
     session.fromPartition('persist:czatbox-tt').setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
     createWindow();
-    ensureTray();
-    setTimeout(showDesktopWidget, 1200);
+    if (!LOCAL_UI_PREVIEW) {
+      ensureTray();
+      setTimeout(showDesktopWidget, 1200);
+    }
     powerMonitor.on('resume', () => setTimeout(speakDesktopGreeting, 1200));
     configureUpdater();
   });
@@ -829,6 +978,11 @@ if (!singleInstance) {
     appIsQuitting = true;
     if (updateTimer) clearInterval(updateTimer);
     stopPiperServer();
+    if (localPreviewServer) {
+      localPreviewServer.close();
+      localPreviewServer = null;
+      localPreviewOrigin = '';
+    }
     destroyTray();
     if (quittingForUpdate) return;
     if (mainWindow && !mainWindow.isDestroyed()) {

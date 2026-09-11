@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('czatboxDesktop', {
   },
   synthesizePiper: (voice, text) => ipcRenderer.invoke('desktop:synthesize-piper', String(voice || ''), String(text || '')),
   warmPiper: voice => ipcRenderer.invoke('desktop:warm-piper', String(voice || '')),
+  startAudioDucking: () => ipcRenderer.invoke('desktop:audio-duck-start'),
+  stopAudioDucking: () => ipcRenderer.invoke('desktop:audio-duck-stop'),
   setMinimizeToTray: enabled => ipcRenderer.invoke('desktop:set-minimize-to-tray', Boolean(enabled)),
   onWidgetData: callback => ipcRenderer.on('desktop:widget-data', (_event, data) => callback(data)),
   openWorkspace: name => ipcRenderer.send('desktop:open-workspace', String(name || '')),

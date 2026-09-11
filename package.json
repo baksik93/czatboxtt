@@ -49,6 +49,10 @@
     ],
     "extraResources": [
       {
+        "from": "web-client/public",
+        "to": "web-client"
+      },
+      {
         "from": "resources/piper/piper-tts.exe",
         "to": "piper/piper-tts.exe"
       },
@@ -67,6 +71,10 @@
       {
         "from": "resources/piper/pl_PL-justyna_wg_glos-medium.onnx.json",
         "to": "piper/pl_PL-justyna_wg_glos-medium.onnx.json"
+      },
+      {
+        "from": "resources/audio-duck.ps1",
+        "to": "audio-duck.ps1"
       }
     ],
     "win": {
