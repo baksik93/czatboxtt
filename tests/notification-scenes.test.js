@@ -32,8 +32,17 @@ test('all six selectable theme families define full opaque palettes', () => {
     const start = css.indexOf(`data-theme="${theme}"`);
     assert.notEqual(start, -1, `missing ${theme}`);
     const block = css.slice(start, css.indexOf('}', start));
-    for (const token of ['--bg:', '--panel:', '--panel2:', '--line:', '--text:', '--muted:', '--cyan:', '--pink:', '--accent:', '--shadow:']) {
+    for (const token of ['--bg:', '--panel:', '--panel2:', '--line:', '--text:', '--muted:', '--cyan:', '--pink:', '--accent:', '--shadow:', '--theme-canvas:', '--theme-chrome:', '--theme-panel:', '--theme-row:', '--theme-control:']) {
       assert.ok(block.includes(token), `${theme} missing ${token}`);
     }
   }
+});
+
+test('Miami Vice restores distinct pink, violet and cyan surfaces', () => {
+  const start = css.indexOf('data-theme="miami-vice"');
+  const block = css.slice(start, css.indexOf('}', start));
+  assert.match(block, /#ff68c6/i);
+  assert.match(block, /#7b246c/i);
+  assert.match(block, /#075f79/i);
+  assert.match(block, /--theme-(canvas|chrome|panel|row|control):/);
 });

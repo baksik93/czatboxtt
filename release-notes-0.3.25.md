@@ -3,4 +3,5 @@
 - Dodano powiadomienie o zamrożeniu twórcy w prawym dolnym rogu.
 - Przebudowano animowane sceny powiadomień moderatora, superfana, Strażnika, mnożnika bitwy i zamrożenia.
 - Zachowano jednakowy rozmiar wszystkich powiadomień specjalnych i prezentów.
-- Odświeżono kompletne, nieprzezroczyste palety kolorów, kontrast, obramowania i cieniowanie wszystkich motywów.
+- Przywrócono wielotonową budowę wszystkich motywów: osobne gradienty tła, nagłówków, bocznego paska, kart, wierszy i kontrolek.
+- Miami Vice ponownie łączy róż, fiolet i turkus zamiast jednolitej fioletowej powierzchni.

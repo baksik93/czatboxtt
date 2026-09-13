@@ -563,31 +563,37 @@ html[data-platform="desktop"] #settings .settings-content{width:100%;height:100%
 /* Pełne, nieprzezroczyste palety dla nowego układu. */
 :root[data-theme="dark-titanium"]{
   --bg:#070a10;--panel:#10151e;--panel2:#19212d;--line:#344156;--text:#f5f7fb;--muted:#9aa8bc;--cyan:#67c7f5;--pink:#f06b92;--accent:#8aa4c8;--shadow:0 16px 38px #0008;
+  --theme-canvas:linear-gradient(145deg,#070a10,#111722 56%,#0b1018);--theme-chrome:linear-gradient(110deg,#0c1119,#18202c);--theme-panel:linear-gradient(145deg,#111722,#0d121b);--theme-row:linear-gradient(100deg,#19212d,#131a25);--theme-control:linear-gradient(145deg,#202a38,#151c28);
   --header-bg:#10151f;--desktop-chrome:#10151f;--desktop-surface:#0d121b;
   --stat-gift:#ff6b93;--stat-top:#ffd15c;--stat-box:#65b8ff;--stat-viewers:#4de0ae
 }
 :root[data-theme="white-titanium"]{
   --bg:#ecebe6;--panel:#f7f6f1;--panel2:#deddd6;--line:#aaa9a2;--text:#20242b;--muted:#686d76;--cyan:#236f91;--pink:#a33f61;--accent:#65758a;--shadow:0 14px 34px #4b4a431f;
+  --theme-canvas:linear-gradient(145deg,#f9f8f3,#deddd7 58%,#eeede7);--theme-chrome:linear-gradient(110deg,#deddd6,#faf9f5);--theme-panel:linear-gradient(145deg,#fffefa,#e7e6df);--theme-row:linear-gradient(100deg,#f8f7f2,#d9d8d1);--theme-control:linear-gradient(145deg,#fdfcf8,#d4d3cc);
   --header-bg:#e7e6df;--desktop-chrome:#e7e6df;--desktop-surface:#f4f3ee;
   --stat-gift:#a55367;--stat-top:#946d18;--stat-box:#4e718f;--stat-viewers:#3f806b
 }
 :root[data-theme="chill-serwis"]{
   --bg:#041328;--panel:#08213f;--panel2:#0c315b;--line:#3577a8;--text:#f2f9ff;--muted:#93bad9;--cyan:#58d6ff;--pink:#ff759e;--accent:#238dce;--shadow:0 16px 40px #00132d99;
+  --theme-canvas:radial-gradient(circle at 88% 8%,#12639b 0,#082e58 26%,transparent 51%),linear-gradient(145deg,#031126,#082c54 55%,#064a78);--theme-chrome:linear-gradient(110deg,#06182f,#0a3b70 68%,#1269a0);--theme-panel:linear-gradient(145deg,#092748,#061a34);--theme-row:linear-gradient(100deg,#0d3763,#082542);--theme-control:linear-gradient(145deg,#125086,#092d52);
   --header-bg:#08213f;--desktop-chrome:#08213f;--desktop-surface:#06172e;
   --stat-gift:#60d4ff;--stat-top:#ffd166;--stat-box:#4faaff;--stat-viewers:#5ce1c1
 }
 :root[data-theme="rose-gold-glass"],:root[data-theme="rose-glass"]{
   --bg:#efd8d1;--panel:#fff6f1;--panel2:#ead0c8;--line:#bd8f82;--text:#402c2c;--muted:#80625e;--cyan:#347b82;--pink:#bd4f76;--accent:#b47c68;--shadow:0 16px 36px #6c3d312b;
+  --theme-canvas:linear-gradient(140deg,#fff8f5,#f0d2c8 42%,#dca087 72%,#f8e7df);--theme-chrome:linear-gradient(110deg,#fff8f4,#e8bbaa 58%,#cf927e);--theme-panel:linear-gradient(145deg,#fffaf7,#efd8cf);--theme-row:linear-gradient(100deg,#fff6f1,#e7c7bd);--theme-control:linear-gradient(145deg,#fffaf7,#ddb4a7);
   --header-bg:#f0d4ca;--desktop-chrome:#f0d4ca;--desktop-surface:#f5ddd5;
   --stat-gift:#c65778;--stat-top:#a46d22;--stat-box:#9a5d80;--stat-viewers:#4c8b77
 }
 :root[data-theme="lazarskie-rejony"],:root[data-theme="enigma-z"]{
   --bg:#080d15;--panel:#101a28;--panel2:#1b2a40;--line:#4b6388;--text:#f3f6fb;--muted:#9eb0c8;--cyan:#72ddf7;--pink:#df7ca0;--accent:#7799cf;--shadow:0 18px 42px #02050a99;
+  --theme-canvas:radial-gradient(circle at 82% 12%,#183c5a 0,transparent 34%),linear-gradient(145deg,#070b12,#162235 55%,#0a111c);--theme-chrome:linear-gradient(110deg,#0c131e,#24354e 64%,#14263a);--theme-panel:linear-gradient(145deg,#142033,#0b121d);--theme-row:linear-gradient(100deg,#1e304a,#111c2b);--theme-control:linear-gradient(145deg,#29405f,#17263b);
   --header-bg:#111a28;--desktop-chrome:#111a28;--desktop-surface:#0a0f17;
   --stat-gift:#84a9ff;--stat-top:#d8b45c;--stat-box:#6de7ff;--stat-viewers:#69c9a7
 }
 :root[data-theme="miami-vice"]{
   --bg:#110b2b;--panel:#21164d;--panel2:#342568;--line:#8a5da2;--text:#fff4ff;--muted:#c0add3;--cyan:#5de8ef;--pink:#ff68c6;--accent:#a877e8;--shadow:0 18px 42px #07021999;
+  --theme-canvas:radial-gradient(circle at 8% 8%,#752269 0,transparent 32%),radial-gradient(circle at 92% 10%,#086785 0,transparent 29%),linear-gradient(145deg,#160936,#3a1762 48%,#073d67);--theme-chrome:linear-gradient(110deg,#24104d,#7b246c 48%,#075f79);--theme-panel:linear-gradient(145deg,#31165c,#171038 65%,#0b3f60);--theme-row:linear-gradient(100deg,#442064,#251348 55%,#0d4965);--theme-control:linear-gradient(145deg,#672659,#352059 55%,#12627a);
   --header-bg:#21184f;--desktop-chrome:#21184f;--desktop-surface:#160f35;
   --stat-gift:#ff75c8;--stat-top:#ffe08a;--stat-box:#6de7ff;--stat-viewers:#83f0c5
 }
@@ -598,19 +604,21 @@ html[data-platform="desktop"] #settings .settings-content{width:100%;height:100%
 :root .calendar-panel,:root .radio-panel,:root .timer-dialog,
 :root .live-tool-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 
+html[data-platform="desktop"] body,
+html[data-platform="desktop"] .app{background:var(--theme-canvas,var(--bg))!important}
 html[data-platform="desktop"] .desktop-menu-bar,
-html[data-platform="desktop"] .topbar{background:var(--desktop-chrome,var(--panel))!important}
+html[data-platform="desktop"] .topbar{background:var(--theme-chrome,var(--desktop-chrome,var(--panel)))!important}
 html[data-platform="desktop"] .topbar::before{display:none!important}
 html[data-platform="desktop"] .desktop-menu-dropdown,
-html[data-platform="desktop"] .desktop-submenu{background:var(--panel)!important}
+html[data-platform="desktop"] .desktop-submenu{background:var(--theme-panel,var(--panel))!important}
 html[data-platform="desktop"] .desktop-creator-host .creator-panel,
-html[data-platform="desktop"] .desktop-filter-host .filters-popover{background:var(--panel2)!important}
+html[data-platform="desktop"] .desktop-filter-host .filters-popover{background:var(--theme-row,var(--panel2))!important}
 html[data-platform="desktop"] .tab.active,
 html[data-platform="desktop"] #chat,
 html[data-platform="desktop"] #chat.tab.active,
 html[data-platform="desktop"] .chat-workspace,
 html[data-platform="desktop"] .chat-workspace-main,
-html[data-platform="desktop"] .chat-main-column{background:var(--desktop-surface,var(--bg))!important}
+html[data-platform="desktop"] .chat-main-column{background:var(--theme-canvas,var(--desktop-surface,var(--bg)))!important}
 html[data-platform="desktop"] .workspace-panel,
 html[data-platform="desktop"] #archive.workspace-panel.page,
 html[data-platform="desktop"] .chat-card,
@@ -620,13 +628,13 @@ html[data-platform="desktop"] .notes-dialog,
 html[data-platform="desktop"] .calendar-panel,
 html[data-platform="desktop"] .radio-panel,
 html[data-platform="desktop"] .timer-dialog,
-html[data-platform="desktop"] .live-tool-card{background:var(--panel)!important}
+html[data-platform="desktop"] .live-tool-card{background:var(--theme-panel,var(--panel))!important}
 html[data-platform="desktop"] .setting-row,
 html[data-platform="desktop"] .category-row,
 html[data-platform="desktop"] .calendar-day,
 html[data-platform="desktop"] .archive-row,
 html[data-platform="desktop"] .radio-station-row,
-html[data-platform="desktop"] .notes-list button{background:var(--panel2)!important}
+html[data-platform="desktop"] .notes-list button{background:var(--theme-row,var(--panel2))!important}
 html[data-platform="desktop"] .settings-card,
 html[data-platform="desktop"] .chat-card,
 html[data-platform="desktop"] .calendar-panel,
@@ -636,7 +644,16 @@ html[data-platform="desktop"] .live-tool-card{border-color:var(--line)!important
 html[data-platform="desktop"] input,
 html[data-platform="desktop"] select,
 html[data-platform="desktop"] textarea,
-html[data-platform="desktop"] button.control{border-color:var(--line)!important;background:var(--panel2)!important;color:var(--text)!important}
+html[data-platform="desktop"] button.control{border-color:var(--line)!important;background:var(--theme-control,var(--panel2))!important;color:var(--text)!important}
+html[data-platform="desktop"] .desktop-sidebar,
+html[data-platform="desktop"] .settings-index{background:var(--theme-chrome,var(--panel))!important}
+html[data-platform="desktop"] .desktop-sidebar button.active,
+html[data-platform="desktop"] .settings-index button.active,
+html[data-platform="desktop"] .tab-button.active{background:color-mix(in srgb,var(--pink) 20%,var(--theme-row,var(--panel2)))!important;border-color:color-mix(in srgb,var(--cyan) 42%,var(--line))!important}
+:root[data-theme="miami-vice"] .brand-mark,
+:root[data-theme="miami-vice"] .empty-orbit{background:linear-gradient(135deg,#ff68c6,#7d49db 48%,#5de8ef)!important;box-shadow:0 0 24px #ff68c655}
+:root[data-theme="miami-vice"] .desktop-sidebar button:hover,
+:root[data-theme="miami-vice"] .settings-index button:hover{background:linear-gradient(100deg,#64215e,#31205d 58%,#10536d)!important;color:#fff!important}
 
 /* Jednolity system oznaczeń ról na czacie. */
 .chat-message .role-badges{gap:5px;margin-left:auto;margin-right:0;flex:0 0 auto}

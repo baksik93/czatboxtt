@@ -61,7 +61,7 @@ let latestWidgetData = { drives: [], accent: '#4fdde5' };
 let livePowerBlockerId = null;
 let audioDuckDepth = 0;
 let audioDuckChain = Promise.resolve();
-const RENDERER_CACHE_EPOCH = 'workspace-v133-notification-scenes';
+const RENDERER_CACHE_EPOCH = 'workspace-v134-restored-theme-depth';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 
 function runAudioDuck(mode) {
