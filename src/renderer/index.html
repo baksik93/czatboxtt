@@ -41,13 +41,29 @@
         </section>
       </aside>
 
+      <nav class="section-nav" aria-label="Nawigacja programu">
+        <div class="section-nav-group">
+          <span class="section-nav-heading">Program</span>
+          <button class="sidebar-button" type="button" data-section="chatbox" data-active="true"><span class="launcher-icon" data-ui-icon="message" aria-hidden="true"></span><span data-i18n="nav.chatbox">Czatbox</span></button>
+          <button class="sidebar-button" type="button" data-section="archive"><span class="launcher-icon" data-ui-icon="archive" aria-hidden="true"></span><span data-i18n="nav.archive">Archiwum</span></button>
+          <button class="sidebar-button" type="button" data-section="boxes" hidden><span class="launcher-icon" data-ui-icon="chest" aria-hidden="true"></span><span data-i18n="nav.boxes">Skrzyneczki</span></button>
+          <button class="sidebar-button" type="button" data-section="about"><span class="launcher-icon" data-ui-icon="info" aria-hidden="true"></span><span data-i18n="nav.about">O programie</span></button>
+        </div>
+        <div class="section-nav-group">
+          <span class="section-nav-heading">Narzędzia</span>
+          <button class="creator-launcher sidebar-tool-button" id="creatorLauncher" type="button" aria-label="Otwórz twórców" title="Twórcy" aria-haspopup="dialog" aria-controls="creatorLauncherPanel"><span class="launcher-icon" data-ui-icon="user" aria-hidden="true"></span><span>Twórcy</span></button>
+          <button class="viewers-launcher sidebar-tool-button" id="viewersLauncher" type="button" aria-label="Pokaż widzów" title="Widzowie" aria-haspopup="dialog" aria-controls="viewersDialog"><span class="launcher-icon" data-ui-icon="users" aria-hidden="true"></span><span>Widzowie</span></button>
+          <button class="radio-launcher sidebar-tool-button" id="radioLauncher" type="button" aria-label="Otwórz radio" title="Radio" aria-haspopup="dialog" aria-controls="radioDialog"><span class="launcher-icon" id="radioLauncherIcon" data-ui-icon="broadcast" aria-hidden="true"></span><span>Radio</span></button>
+          <button class="notes-launcher sidebar-tool-button" id="notesLauncher" type="button" aria-label="Otwórz notatki" title="Notatki" aria-haspopup="dialog" aria-controls="notesDialog"><span class="launcher-icon" data-ui-icon="message" aria-hidden="true"></span><span>Notatki</span></button>
+          <button class="achievements-launcher sidebar-tool-button" id="achievementsLauncher" type="button" aria-label="Otwórz osiągnięcia" title="Osiągnięcia" aria-haspopup="dialog" aria-controls="achievementsDialog"><span class="launcher-icon" data-ui-icon="trophy" aria-hidden="true"></span><span>Osiągnięcia</span></button>
+          <button class="settings-launcher sidebar-tool-button" id="settingsLauncher" type="button" aria-label="Otwórz ustawienia" title="Ustawienia" aria-haspopup="dialog" aria-controls="settingsDialog"><span class="launcher-icon" data-ui-icon="settings" aria-hidden="true"></span><span>Ustawienia</span></button>
+          <button class="shop-launcher sidebar-tool-button" id="shopLauncher" type="button" aria-label="Otwórz sklep" title="Sklep" aria-haspopup="dialog" aria-controls="shopDialog"><span class="launcher-icon" data-ui-icon="shopping-bag" aria-hidden="true"></span><span>Sklep</span></button>
+          <button class="tamagotchi-launcher sidebar-tool-button" id="tamagotchiLauncher" type="button" aria-label="Otwórz Tamagotchi" title="Tamagochi" aria-haspopup="dialog" aria-controls="tamagotchiDialog" hidden><span class="launcher-icon" data-ui-icon="dinosaur" aria-hidden="true"></span><span>Tamagochi</span></button>
+          <button class="czester-launcher sidebar-tool-button" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Czester" data-i18n-aria-label="czester.open"><span class="launcher-icon" data-ui-icon="chat" aria-hidden="true"></span><span>Czester</span><span class="czester-launcher-badge" aria-hidden="true"></span></button>
+        </div>
+      </nav>
+
       <section class="content">
-        <nav class="section-nav" aria-label="Nawigacja">
-          <button class="sidebar-button" type="button" data-section="chatbox" data-active="true">Czatbox</button>
-          <button class="sidebar-button" type="button" data-section="archive">Archiwum</button>
-          <button class="sidebar-button" type="button" data-section="boxes" data-i18n="nav.boxes" hidden>Skrzyneczki</button>
-          <button class="sidebar-button" type="button" data-section="about">O programie</button>
-        </nav>
         <section class="view-panel chat-view" data-view="chatbox">
           <section class="filters" aria-label="Filtry czatu">
             <div class="filter-buttons">
@@ -823,34 +839,6 @@
         </section>
       </section>
       <footer class="app-bottom-taskbar" id="appBottomTaskbar" aria-label="Pasek aplikacji">
-        <div class="app-bottom-taskbar-actions">
-          <button class="creator-launcher" id="creatorLauncher" type="button" aria-label="Otwórz twórców" title="Twórcy" aria-haspopup="dialog" aria-controls="creatorLauncherPanel">
-            <span class="launcher-icon" data-ui-icon="user" aria-hidden="true"></span>
-          </button>
-          <button class="viewers-launcher" id="viewersLauncher" type="button" aria-label="Pokaż widzów" title="Widzowie" aria-haspopup="dialog" aria-controls="viewersDialog">
-            <span class="launcher-icon" data-ui-icon="users" aria-hidden="true"></span>
-          </button>
-          <button class="radio-launcher" id="radioLauncher" type="button" aria-label="Otwórz radio" title="Otwórz radio" aria-haspopup="dialog" aria-controls="radioDialog">
-            <span class="launcher-icon" id="radioLauncherIcon" data-ui-icon="broadcast" aria-hidden="true"></span>
-          </button>
-          <button class="notes-launcher" id="notesLauncher" type="button" aria-label="Otwórz notatki" title="Otwórz notatki" aria-haspopup="dialog" aria-controls="notesDialog">
-            <span class="launcher-icon" data-ui-icon="message" aria-hidden="true"></span>
-          </button>
-          <button class="achievements-launcher" id="achievementsLauncher" type="button" aria-label="Otwórz osiągnięcia" title="Otwórz osiągnięcia" aria-haspopup="dialog" aria-controls="achievementsDialog">
-            <span class="launcher-icon" data-ui-icon="trophy" aria-hidden="true"></span>
-          </button>
-          <button class="settings-launcher" id="settingsLauncher" type="button" aria-label="Otwórz ustawienia" title="Otwórz ustawienia" aria-haspopup="dialog" aria-controls="settingsDialog">
-            <span class="launcher-icon" data-ui-icon="settings" aria-hidden="true"></span>
-          </button>
-          <button class="shop-launcher" id="shopLauncher" type="button" aria-label="Otwórz sklep" title="Sklep" aria-haspopup="dialog" aria-controls="shopDialog">
-            <span class="launcher-icon" data-ui-icon="shopping-bag" aria-hidden="true"></span>
-          </button>
-          <button class="tamagotchi-launcher" id="tamagotchiLauncher" type="button" aria-label="Otwórz Tamagotchi" title="Tamagochi" aria-haspopup="dialog" aria-controls="tamagotchiDialog" hidden><span class="launcher-icon" data-ui-icon="dinosaur" aria-hidden="true"></span></button>
-          <button class="czester-launcher" id="czesterLauncher" type="button" aria-label="Otwórz Czestera" title="Otwórz Czestera" data-i18n-aria-label="czester.open" data-i18n-title="czester.open">
-            <span class="launcher-icon" data-ui-icon="chat" aria-hidden="true"></span>
-            <span class="czester-launcher-badge" aria-hidden="true"></span>
-          </button>
-        </div>
         <div class="app-taskbar-clock" id="appTaskbarClock" aria-label="Aktualna data i godzina">
           <span class="taskbar-clock-line"><time id="appTaskbarTime"></time><span class="taskbar-clock-icon" data-ui-icon="clock" aria-hidden="true"></span></span>
           <span class="taskbar-clock-line"><time id="appTaskbarDate"></time><span class="taskbar-clock-icon" data-ui-icon="calendar" aria-hidden="true"></span></span>

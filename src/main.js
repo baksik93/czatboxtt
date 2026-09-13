@@ -46,6 +46,7 @@ const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 let mainWindow = null;
 let localPreviewServer = null;
 let localPreviewOrigin = '';
+let bundledAssetOverrideInstalled = false;
 let updateTimer = null;
 let quittingForUpdate = false;
 let piperServer = null;
@@ -60,7 +61,7 @@ let latestWidgetData = { drives: [], accent: '#4fdde5' };
 let livePowerBlockerId = null;
 let audioDuckDepth = 0;
 let audioDuckChain = Promise.resolve();
-const RENDERER_CACHE_EPOCH = 'workspace-v101-local-live';
+const RENDERER_CACHE_EPOCH = 'workspace-v132-account-profile';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 
 function runAudioDuck(mode) {
@@ -343,9 +344,41 @@ function startLocalUiPreview() {
   if (localPreviewServer && localPreviewOrigin) return Promise.resolve(localPreviewOrigin);
   const root = path.resolve(localPreviewDirectory());
   return new Promise((resolve, reject) => {
-    const server = http.createServer((request, response) => {
+    const server = http.createServer(async (request, response) => {
       let pathname = '/';
       try { pathname = decodeURIComponent(new URL(request.url || '/', 'http://127.0.0.1').pathname); } catch {}
+      if (pathname.startsWith('/api/')) {
+        try {
+          const chunks = [];
+          for await (const chunk of request) chunks.push(chunk);
+          const body = chunks.length ? Buffer.concat(chunks) : undefined;
+          const headers = {
+            accept: request.headers.accept || 'application/json',
+            'content-type': request.headers['content-type'] || 'application/json',
+            origin: APP_ORIGIN
+          };
+          if (request.headers.cookie) headers.cookie = request.headers.cookie;
+          const upstream = await fetch(`${APP_ORIGIN}${request.url || pathname}`, {
+            method: request.method,
+            headers,
+            body: ['GET', 'HEAD'].includes(request.method || 'GET') ? undefined : body,
+            redirect: 'manual'
+          });
+          const responseHeaders = {
+            'Content-Type': upstream.headers.get('content-type') || 'application/json; charset=utf-8',
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
+          };
+          const setCookie = upstream.headers.get('set-cookie');
+          if (setCookie) responseHeaders['Set-Cookie'] = setCookie.replace(/;\s*Secure/gi, '');
+          response.writeHead(upstream.status, responseHeaders);
+          response.end(Buffer.from(await upstream.arrayBuffer()));
+        } catch (error) {
+          response.writeHead(502, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+          response.end(JSON.stringify({error:'Lokalny podgląd nie może połączyć się z usługą kont.'}));
+        }
+        return;
+      }
       const relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^[/\\]+/, '');
       const filePath = path.resolve(root, relativePath);
       if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
@@ -357,13 +390,10 @@ function startLocalUiPreview() {
           response.writeHead(error.code === 'ENOENT' ? 404 : 500).end('Not found');
           return;
         }
-        if (relativePath === 'index.html') {
-          const previewStyle = '<style id="localUiPreview">.beta-locked .app{visibility:visible!important}#betaGate{display:none!important}</style>';
-          data = Buffer.from(data.toString('utf8').replace('</head>', `${previewStyle}</head>`), 'utf8');
-        }
         response.writeHead(200, {
           'Content-Type': localPreviewContentType(filePath),
           'Cache-Control': 'no-store',
+          'Access-Control-Allow-Origin': '*',
           'X-Content-Type-Options': 'nosniff'
         });
         response.end(data);
@@ -384,6 +414,30 @@ function startLocalUiPreview() {
       resolve(localPreviewOrigin);
     });
   });
+}
+
+async function installBundledAssetOverrides() {
+  if (bundledAssetOverrideInstalled) return;
+  const bundledOrigin = await startLocalUiPreview();
+  const root = path.resolve(localPreviewDirectory());
+  const appSession = session.fromPartition('persist:czatbox-tt');
+  appSession.webRequest.onBeforeRequest({ urls: [`${APP_ORIGIN}/*`] }, (details, callback) => {
+    try {
+      const pathname = decodeURIComponent(new URL(details.url).pathname);
+      if (pathname === '/' || pathname === '/index.html' || pathname === '/icons.svg' || pathname.startsWith('/api/')) {
+        callback({});
+        return;
+      }
+      const relativePath = pathname.replace(/^[/\\]+/, '');
+      const filePath = path.resolve(root, relativePath);
+      if ((filePath === root || filePath.startsWith(`${root}${path.sep}`)) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        callback({ redirectURL: `${bundledOrigin}/${relativePath.replace(/\\/g, '/')}` });
+        return;
+      }
+    } catch {}
+    callback({});
+  });
+  bundledAssetOverrideInstalled = true;
 }
 
 function isAllowedAppUrl(rawUrl) {
@@ -461,29 +515,12 @@ function desktopPageFeatures() {
     if (target instanceof HTMLElement) target.click();
   });
 
-  const style = document.createElement('style');
-  style.id = 'desktopFeatureStyles';
-  style.textContent = `
-    html[data-platform="desktop"] #stats{display:none!important}
-    .desktop-widget-dock{position:fixed;z-index:90;right:0;top:50%;display:grid;gap:8px;transform:translateY(-50%);pointer-events:none}
-    .desktop-side-widget{display:flex;justify-content:flex-end;min-height:70px;pointer-events:auto}
-    .desktop-widget-panel{display:none;width:310px;max-height:min(68vh,620px);overflow:auto;padding:14px;border:1px solid var(--line);border-right:0;border-radius:18px 0 0 18px;background:var(--panel);box-shadow:0 18px 55px #0009}
-    .desktop-side-widget[data-expanded="true"] .desktop-widget-panel{display:block}
-    .desktop-widget-panel h2{margin:0 0 5px;font-size:14px}.desktop-widget-panel>p{margin:0 0 11px;color:var(--muted);font-size:10px}
-    .desktop-widget-panel .stat-dialog-content{padding:0;overflow:visible}.desktop-widget-panel .stat-empty{padding:18px 8px}
-    .desktop-widget-tab{width:46px;min-height:70px;display:grid;place-items:center;align-content:center;gap:5px;border:1px solid var(--line);border-right:0;border-radius:14px 0 0 14px;background:var(--panel2);color:var(--cyan);box-shadow:0 12px 35px #0006}
-    .desktop-widget-tab svg{width:19px;height:19px}.desktop-widget-tab span{font-size:8px;font-weight:900;letter-spacing:.05em}
-    .desktop-widget-tab[aria-expanded="true"]{background:var(--accent);color:#fff;border-radius:0}
-    @media(max-width:760px){.desktop-widget-panel{width:min(310px,calc(100vw - 54px))}}
-  `;
-  document.head.append(style);
-
   const settingsPage = document.querySelector('#settings');
   const desktopSettingsTarget = document.querySelector('#settings-data') || settingsPage;
   if (desktopSettingsTarget && !document.querySelector('#desktopBehaviorSettings')) {
     const group = document.createElement('div');
     group.id = 'desktopBehaviorSettings';
-    group.className = 'settings-group';
+    group.className = 'settings-section';
     group.innerHTML = '<div class="group-head"><h2>System</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><label class="setting-row"><span><b>Po kliknięciu X ukryj program w zasobniku</b><small>Czat i TTS nadal działają w tle. Program zamkniesz z menu ikony przy zegarze.</small></span><input id="desktopMinimizeToTray" class="switch" type="checkbox"></label></div>';
     const codesSection = document.querySelector('#settings-codes');
     if (codesSection?.parentElement) codesSection.parentElement.insertBefore(group, codesSection);
@@ -496,65 +533,6 @@ function desktopPageFeatures() {
       window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
     };
   }
-
-  const widgetDefinitions = [
-    { kind: 'gift', label: 'GIFT', title: 'Prezenty', icon: 'gift', count: 'giftCount' },
-    { kind: 'topGifters', label: 'TOP', title: 'Top Gifterzy', icon: 'coin', count: 'topGifterCount' },
-    { kind: 'envelope', label: 'BOX', title: 'Skrzynki', icon: 'box', count: 'boxCount' },
-    { kind: 'viewers', label: 'GUEST', title: 'Widzowie', icon: 'viewers', count: 'viewerCount' }
-  ];
-  const dock = document.createElement('aside');
-  dock.className = 'desktop-widget-dock';
-  dock.setAttribute('aria-label', 'Przybornik statystyk LIVE');
-  dock.innerHTML = widgetDefinitions.map(item => `<section class="desktop-side-widget" data-desktop-widget="${item.kind}" data-expanded="false"><div class="desktop-widget-panel"><h2>${item.title}</h2><p></p><div class="stat-dialog-content"></div></div><button class="desktop-widget-tab" type="button" aria-expanded="false" aria-label="Rozwiń: ${item.title}"><svg><use href="/icons.svg#${item.icon}"></use></svg><span>${item.label}</span></button></section>`).join('');
-  document.body.append(dock);
-  const toolboxToggle = document.querySelector('#toolbox');
-  let activeDesktopWorkspace = 'chat';
-  const syncToolboxVisibility = () => {
-    const chatTabActive = document.querySelector('#chat')?.classList.contains('active');
-    dock.hidden = Boolean((toolboxToggle && !toolboxToggle.checked) || !chatTabActive || activeDesktopWorkspace !== 'chat');
-  };
-  toolboxToggle?.addEventListener('change', syncToolboxVisibility);
-  window.addEventListener('cttm-workspace-change', event => {
-    activeDesktopWorkspace = String(event.detail || '');
-    syncToolboxVisibility();
-  });
-  const chatTab = document.querySelector('#chat');
-  if (chatTab) new MutationObserver(syncToolboxVisibility).observe(chatTab, { attributes: true, attributeFilter: ['class'] });
-  syncToolboxVisibility();
-
-  const refreshWidget = item => {
-    const widget = dock.querySelector(`[data-desktop-widget="${item.kind}"]`);
-    if (!widget || widget.dataset.expanded !== 'true') return;
-    const source = document.querySelector(`[data-stat-detail="${item.kind}"]`);
-    const backdrop = document.querySelector('#statDialogBackdrop');
-    if (source) source.click();
-    const meta = document.querySelector('#statDialogMeta');
-    const content = document.querySelector('#statDialogContent');
-    widget.querySelector('.desktop-widget-panel>p').textContent = meta?.textContent || `Wartość: ${document.querySelector('#' + item.count)?.textContent || '0'}`;
-    widget.querySelector('.stat-dialog-content').innerHTML = content?.innerHTML || '<p class="stat-empty">Brak danych.</p>';
-    if (backdrop) backdrop.hidden = true;
-  };
-  dock.querySelectorAll('.desktop-side-widget').forEach(widget => {
-    const item = widgetDefinitions.find(candidate => candidate.kind === widget.dataset.desktopWidget);
-    const button = widget.querySelector('.desktop-widget-tab');
-    button.onclick = () => {
-      const open = widget.dataset.expanded !== 'true';
-      dock.querySelectorAll('.desktop-side-widget').forEach(other => {
-        other.dataset.expanded = 'false';
-        other.querySelector('.desktop-widget-tab').setAttribute('aria-expanded', 'false');
-      });
-      widget.dataset.expanded = String(open);
-      button.setAttribute('aria-expanded', String(open));
-      if (open) refreshWidget(item);
-    };
-  });
-  const statsObserver = new MutationObserver(() => {
-    const open = dock.querySelector('.desktop-side-widget[data-expanded="true"]');
-    if (open) refreshWidget(widgetDefinitions.find(item => item.kind === open.dataset.desktopWidget));
-  });
-  const stats = document.querySelector('#stats');
-  if (stats) statsObserver.observe(stats, { childList: true, subtree: true, characterData: true });
 
   const voiceSelect = document.querySelector('#voice');
   const desktopPiperVoices = [
@@ -667,6 +645,7 @@ function desktopPageFeatures() {
         if (typeof callback === 'function') callback.call(utterance, { type: error ? 'error' : 'end', utterance });
       };
       if (!settings.tts && !utterance.__czatboxForce) return finish(false);
+      if (settings.privileged && !utterance.__czatboxTtsApproved && !utterance.__czatboxForce) return finish(false);
       if (settings.cleanSpeech) {
         const spokenText = String(utterance.text || '').toLowerCase();
         const rejected = /(.)\1{5,}/.test(spokenText) || /(https?:\/\/|www\.)/.test(spokenText) || spokenText.length > 320 || /\b(?:kurw\w*|chuj\w*|pierdol\w*|jeb\w*|skurwysyn\w*|pizd\w*|cipa\w*)\b/i.test(spokenText);
@@ -913,6 +892,7 @@ function createWindow() {
       await mainWindow.loadURL(`${previewOrigin}/?platform=desktop&localPreview=1&appVersion=${encodeURIComponent(APP_VERSION)}`);
       return;
     }
+    await installBundledAssetOverrides();
     let applied = '';
     try { applied = fs.readFileSync(RENDERER_CACHE_EPOCH_PATH, 'utf8').trim(); } catch {}
     if (applied !== RENDERER_CACHE_EPOCH) {

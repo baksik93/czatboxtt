@@ -5512,14 +5512,14 @@ function applyI18n() {
   [
     ['.tagline', 'app.tagline'],
     ['.creator-picker > label', 'creator.label'],
-    ['.sidebar-button[data-section="chatbox"]', 'nav.chatbox'],
-    ['.sidebar-button[data-section="archive"]', 'nav.archive'],
+    ['.sidebar-button[data-section="chatbox"] > span:last-child', 'nav.chatbox'],
+    ['.sidebar-button[data-section="archive"] > span:last-child', 'nav.archive'],
     ['.sidebar-button[data-section="notes"]', 'nav.notes'],
     ['.sidebar-button[data-section="achievements"]', 'nav.achievements'],
     ['.sidebar-button[data-section="coins"]', 'nav.coins'],
     ['.sidebar-button[data-section="radio"]', 'nav.radio'],
     ['.sidebar-button[data-section="settings"]', 'nav.settings'],
-    ['.sidebar-button[data-section="about"]', 'nav.about'],
+    ['.sidebar-button[data-section="about"] > span:last-child', 'nav.about'],
     ['.filter-button[data-filter="chat"]', 'filters.chat'],
     ['.filter-button[data-filter="like"]', 'filters.like'],
     ['.filter-button[data-filter="gift"]', 'filters.gift'],
@@ -10161,6 +10161,45 @@ sidebarButtons.forEach((button) => {
     setActiveSection(button.dataset.section);
   });
 });
+
+const desktopSidebarEl = document.querySelector('.chat-app > .section-nav');
+const desktopSidebarTools = [
+  ['creatorLauncher', 'creatorLauncherPanel', 'creatorLauncherPanelClose'],
+  ['viewersLauncher', 'viewersDialogBackdrop', 'viewersDialogClose'],
+  ['radioLauncher', 'radioDialogBackdrop', 'radioDialogClose'],
+  ['notesLauncher', 'notesDialogBackdrop', 'notesDialogClose'],
+  ['achievementsLauncher', 'achievementsDialogBackdrop', 'achievementsDialogClose'],
+  ['settingsLauncher', 'settingsDialogBackdrop', 'settingsDialogClose'],
+  ['shopLauncher', 'shopDialogBackdrop', 'shopDialogClose'],
+  ['tamagotchiLauncher', 'tamagotchiDialogBackdrop', 'tamagotchiDialogClose'],
+  ['czesterLauncher', 'czesterPanel', 'czesterClose']
+].map(([launcherId, panelId, closeId]) => ({
+  launcher: document.getElementById(launcherId),
+  panel: document.getElementById(panelId),
+  close: document.getElementById(closeId)
+})).filter((entry) => entry.launcher && entry.panel);
+
+function closeDesktopSidebarTools(exceptLauncher = null) {
+  desktopSidebarTools.forEach((entry) => {
+    if (entry.launcher === exceptLauncher || entry.panel.hidden) {
+      return;
+    }
+    entry.close?.click();
+  });
+}
+
+desktopSidebarEl?.addEventListener('click', (event) => {
+  const sectionButton = event.target.closest('.sidebar-button[data-section]');
+  if (sectionButton) {
+    closeDesktopSidebarTools();
+    return;
+  }
+
+  const toolButton = event.target.closest('.sidebar-tool-button');
+  if (toolButton) {
+    closeDesktopSidebarTools(toolButton);
+  }
+}, true);
 
 window.addEventListener('beforeunload', stopRadioPlayers);
 

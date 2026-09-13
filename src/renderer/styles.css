@@ -12769,3 +12769,129 @@ html[data-big-picture="true"] .app-bottom-taskbar {
   position: fixed !important;
   right: 0 !important;
 }
+
+/* Desktop: stały indeks po lewej oraz zawartość wybranej zakładki po prawej. */
+:root { --desktop-nav-width: clamp(190px, 16vw, 238px); --desktop-header-height: 70px; --desktop-footer-height: 38px; }
+
+:root .chat-app,
+:root[data-app-appearance="ozdobny"] .chat-app,
+:root[data-app-appearance="retro-kb2"] .chat-app {
+  display: grid !important;
+  grid-template-columns: var(--desktop-nav-width) minmax(0, 1fr) !important;
+  grid-template-rows: var(--desktop-header-height) minmax(0, 1fr) var(--desktop-footer-height) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+:root .chat-app > .chat-header { grid-column: 1 / -1 !important; grid-row: 1 !important; border-radius: 0 !important; }
+
+:root .chat-app > .section-nav {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 55;
+  grid-column: 1 !important;
+  grid-row: 2 / 4 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 18px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 14px 10px !important;
+  overflow: hidden auto !important;
+  border: 0 !important;
+  border-right: 1px solid var(--dropdown-border) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--dropdown-bg) 97%, #17191d) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.section-nav-group { display: grid; gap: 3px; }
+.section-nav-heading { padding: 4px 10px 6px; color: var(--dropdown-muted); font-size: 11px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+
+:root .chat-app > .section-nav button.sidebar-button,
+:root .chat-app > .section-nav button.sidebar-tool-button {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 7px 10px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--dropdown-text) !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  line-height: 1.15 !important;
+  text-align: left !important;
+  cursor: pointer;
+}
+
+:root .chat-app > .section-nav button[hidden] { display: none !important; }
+:root .chat-app > .section-nav button.sidebar-button:hover,
+:root .chat-app > .section-nav button.sidebar-tool-button:hover,
+:root .chat-app > .section-nav button:focus-visible { outline: 0; background: color-mix(in srgb, var(--dropdown-active-bg) 58%, transparent) !important; }
+:root .chat-app > .section-nav button.sidebar-button[data-active="true"],
+:root .chat-app > .section-nav button.sidebar-tool-button[data-open="true"],
+:root .chat-app > .section-nav button.sidebar-tool-button[aria-expanded="true"] { background: var(--dropdown-active-bg) !important; color: var(--dropdown-active-text) !important; }
+:root .chat-app > .section-nav:has(.sidebar-tool-button[aria-expanded="true"], .sidebar-tool-button[data-open="true"]) button.sidebar-button[data-active="true"] { background: transparent !important; color: var(--dropdown-text) !important; }
+
+:root .chat-app > .section-nav .launcher-icon { display: grid !important; flex: 0 0 18px !important; place-items: center !important; width: 18px !important; height: 18px !important; margin: 0 !important; }
+:root .chat-app > .section-nav .launcher-icon .ui-icon { width: 17px !important; height: 17px !important; stroke-width: 1.9; }
+:root .chat-app > .section-nav .czester-launcher-badge { right: 8px !important; top: 8px !important; }
+
+:root .chat-app > .content { grid-column: 2 !important; grid-row: 2 !important; width: 100% !important; min-width: 0 !important; min-height: 0 !important; border-radius: 0 !important; }
+:root .content > .view-panel { grid-column: 1 !important; grid-row: 1 !important; border-radius: 0 !important; }
+:root .chat-app > .app-bottom-taskbar { grid-column: 2 !important; grid-row: 3 !important; min-height: 0 !important; height: var(--desktop-footer-height) !important; padding: 0 12px !important; border-radius: 0 !important; }
+
+/* Istniejące funkcje są pełnymi panelami treści, nie oknami na środku ekranu. */
+:root .radio-dialog-backdrop,
+:root .notes-dialog-backdrop,
+:root .widget-dialog-backdrop {
+  position: fixed !important;
+  inset: var(--desktop-header-height) 0 var(--desktop-footer-height) var(--desktop-nav-width) !important;
+  z-index: 110 !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  padding: 0 !important;
+  background: var(--dropdown-bg) !important;
+  backdrop-filter: none !important;
+}
+
+:root .radio-dialog,
+:root .notes-dialog,
+:root .widget-dialog { width: 100% !important; max-width: none !important; height: 100% !important; max-height: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+
+:root .creator-launcher-panel,
+:root .czester-floating-panel,
+:root[data-chat-style="compact"] .czester-floating-panel,
+:root[data-chat-style="spacious"] .czester-floating-panel,
+:root[data-chat-style="testowy"] .czester-floating-panel {
+  position: fixed !important;
+  inset: var(--desktop-header-height) 0 var(--desktop-footer-height) var(--desktop-nav-width) !important;
+  z-index: 110 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  :root { --desktop-nav-width: 168px; }
+  :root .chat-app > .section-nav { padding-inline: 7px !important; }
+  :root .chat-app > .section-nav button.sidebar-button,
+  :root .chat-app > .section-nav button.sidebar-tool-button { font-size: 12px !important; }
+}
