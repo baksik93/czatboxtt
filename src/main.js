@@ -8,7 +8,6 @@ const { app, BrowserWindow, shell, session, ipcMain, Menu, Tray, screen, systemP
 const { autoUpdater } = require('electron-updater');
 const { LocalLive } = require('./local-live');
 const LOCAL_UI_PREVIEW = process.argv.includes('--local-ui-preview');
-if (LOCAL_UI_PREVIEW) app.setPath('userData', path.join(app.getPath('userData'), 'LocalUiPreview'));
 const localLive = new LocalLive();
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -49,8 +48,9 @@ let localPreviewOrigin = '';
 let bundledAssetOverrideInstalled = false;
 let updateTimer = null;
 let quittingForUpdate = false;
-let piperServer = null;
+const piperServers = new Map();
 const piperWarmPromises = new Map();
+const piperWarmedVoices = new Set();
 let tray = null;
 let minimizeToTrayOnClose = false;
 let appIsQuitting = false;
@@ -61,8 +61,31 @@ let latestWidgetData = { drives: [], accent: '#4fdde5' };
 let livePowerBlockerId = null;
 let audioDuckDepth = 0;
 let audioDuckChain = Promise.resolve();
-const RENDERER_CACHE_EPOCH = 'workspace-v134-restored-theme-depth';
+const RENDERER_CACHE_EPOCH = 'workspace-v136-canonical-user-data';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
+const CANONICAL_USER_DATA_PATH = path.join(app.getPath('userData'), 'canonical-user-data.json');
+let canonicalUserDataCache = '';
+
+function readCanonicalUserData() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(CANONICAL_USER_DATA_PATH, 'utf8'));
+    return parsed && typeof parsed.values === 'object' ? parsed : { schema: 1, updatedAt: 0, values: {} };
+  } catch { return { schema: 1, updatedAt: 0, values: {} }; }
+}
+
+function saveCanonicalUserData(values) {
+  if (!values || typeof values !== 'object') return false;
+  const safeValues = Object.fromEntries(Object.entries(values).filter(([key, value]) => key.startsWith('cttm-') && typeof value === 'string'));
+  const valuesSnapshot = JSON.stringify(safeValues);
+  if (valuesSnapshot === canonicalUserDataCache) return true;
+  const payload = JSON.stringify({ schema: 1, updatedAt: Date.now(), values: safeValues }, null, 2);
+  if (Buffer.byteLength(payload) > 32 * 1024 * 1024) return false;
+  const temporaryPath = `${CANONICAL_USER_DATA_PATH}.tmp`;
+  fs.writeFileSync(temporaryPath, payload, 'utf8');
+  fs.renameSync(temporaryPath, CANONICAL_USER_DATA_PATH);
+  canonicalUserDataCache = valuesSnapshot;
+  return true;
+}
 
 function runAudioDuck(mode) {
   return new Promise(resolve => {
@@ -197,8 +220,8 @@ function getPiperVoice(value) {
 }
 
 function getPiperServer(voice) {
-  if (piperServer?.child && !piperServer.child.killed && piperServer.voice === voice) return piperServer;
-  if (piperServer) stopPiperServer();
+  const existing = piperServers.get(voice.slug);
+  if (existing?.child && !existing.child.killed && existing.child.exitCode == null) return existing;
   const child = spawn(PIPER_EXECUTABLE, ['--server', '--model', voice.model], {
     windowsHide: true,
     stdio: ['pipe', 'pipe', 'ignore']
@@ -219,11 +242,13 @@ function getPiperServer(voice) {
   const stopPending = error => {
     for (const job of pending.values()) job({ ok: false, error });
     pending.clear();
-    piperServer = null;
+    if (piperServers.get(voice.slug)?.child === child) piperServers.delete(voice.slug);
+    piperWarmedVoices.delete(voice.slug);
+    piperWarmPromises.delete(voice.slug);
   };
   child.on('error', () => stopPending('piper-error'));
   child.on('exit', () => stopPending('piper-exited'));
-  piperServer = {
+  const server = {
     child,
     voice,
     pending,
@@ -249,22 +274,38 @@ function getPiperServer(voice) {
       });
     }
   };
-  return piperServer;
+  piperServers.set(voice.slug, server);
+  return server;
 }
 
-function stopPiperServer() {
-  if (!piperServer) return;
-  try { piperServer.child.stdin.end(); } catch {}
-  try { piperServer.child.kill(); } catch {}
-  piperServer = null;
-  piperWarmPromises.clear();
+function stopPiperServer(voiceSlug = '') {
+  const servers = voiceSlug
+    ? [[voiceSlug, piperServers.get(voiceSlug)]]
+    : [...piperServers.entries()];
+  for (const [slug, server] of servers) {
+    if (!server) continue;
+    piperServers.delete(slug);
+    piperWarmedVoices.delete(slug);
+    piperWarmPromises.delete(slug);
+    try { server.child.stdin.end(); } catch {}
+    try { server.child.kill(); } catch {}
+  }
+  if (!voiceSlug) {
+    piperWarmPromises.clear();
+    piperWarmedVoices.clear();
+  }
 }
 
 function warmPiperServer(voice) {
+  const existing = piperServers.get(voice.slug);
+  if (piperWarmedVoices.has(voice.slug) && existing?.child && !existing.child.killed && existing.child.exitCode == null) {
+    return Promise.resolve({ ok: true, cached: true });
+  }
   if (piperWarmPromises.has(voice.slug)) return piperWarmPromises.get(voice.slug);
   const output = path.join(app.getPath('temp'), `czatbox-${voice.slug}-warm-${process.pid}.wav`);
-  const warmPromise = getPiperServer(voice).request('.', output).then(result => {
+  const warmPromise = getPiperServer(voice).request('start', output).then(result => {
     if (!result?.ok) throw new Error(result?.error || 'piper-warm-failed');
+    piperWarmedVoices.add(voice.slug);
     return { ok: true };
   }).catch(error => {
     return { ok: false, error: error?.message || 'piper-warm-failed' };
@@ -688,10 +729,12 @@ function desktopPageFeatures() {
       piperGain = null;
       originalCancel();
     };
-    try {
-      const selected = JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice;
-      if (desktopPiperVoices.some(([value]) => value === selected)) window.czatboxDesktop.warmPiper(selected).catch(() => {});
-    } catch {}
+    window.setTimeout(async () => {
+      let selected = '';
+      try { selected = JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice || ''; } catch {}
+      const orderedVoices = desktopPiperVoices.map(([value]) => value).sort(value => value === selected ? -1 : 1);
+      for (const value of orderedVoices) await window.czatboxDesktop.warmPiper(value).catch(() => {});
+    }, 350);
   }
 }
 
@@ -778,6 +821,14 @@ ipcMain.on('desktop:open-drive', (event, drive) => {
   const root = String(drive || '').trim().toUpperCase();
   if (!/^[A-Z]:$/.test(root)) return;
   void shell.openPath(`${root}\\`);
+});
+
+ipcMain.on('desktop:user-data-load', event => {
+  event.returnValue = mainWindow && event.sender === mainWindow.webContents ? readCanonicalUserData() : { schema: 1, updatedAt: 0, values: {} };
+});
+ipcMain.handle('desktop:user-data-save', (event, values) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return false;
+  return saveCanonicalUserData(values);
 });
 
 function isLiveSender(event) {

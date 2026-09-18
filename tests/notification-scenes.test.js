@@ -29,7 +29,8 @@ test('each requested notification scene has its own palette and animation', () =
 
 test('all six selectable theme families define full opaque palettes', () => {
   for (const theme of ['dark-titanium', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice']) {
-    const start = css.indexOf(`data-theme="${theme}"`);
+    const match = new RegExp(`:root\\[data-theme="${theme}"\\](?:,:root\\[data-theme="[^"]+"\\])?\\{`).exec(css);
+    const start = match?.index ?? -1;
     assert.notEqual(start, -1, `missing ${theme}`);
     const block = css.slice(start, css.indexOf('}', start));
     for (const token of ['--bg:', '--panel:', '--panel2:', '--line:', '--text:', '--muted:', '--cyan:', '--pink:', '--accent:', '--shadow:', '--theme-canvas:', '--theme-chrome:', '--theme-panel:', '--theme-row:', '--theme-control:']) {
@@ -39,7 +40,7 @@ test('all six selectable theme families define full opaque palettes', () => {
 });
 
 test('Miami Vice restores distinct pink, violet and cyan surfaces', () => {
-  const start = css.indexOf('data-theme="miami-vice"');
+  const start = css.indexOf(':root[data-theme="miami-vice"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(block, /#ff68c6/i);
   assert.match(block, /#7b246c/i);

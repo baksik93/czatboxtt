@@ -50,6 +50,19 @@ html[data-platform="desktop"] .account-dock b{min-width:0;overflow:hidden;text-o
 html[data-platform="desktop"] .account-dock button{width:28px;height:28px;display:grid;place-items:center;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
 html[data-platform="desktop"] .account-dock button:hover{background:color-mix(in srgb,var(--cyan) 10%,var(--panel2));color:var(--cyan)}
 html[data-platform="desktop"] .account-dock button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html[data-platform="desktop"] .support-qr-card{position:relative;width:174px;flex:0 0 auto;align-self:center;margin-top:auto;padding:10px 10px 9px;border:1px solid color-mix(in srgb,var(--cyan) 32%,var(--line));border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--cyan) 8%,var(--panel)),color-mix(in srgb,var(--pink) 7%,var(--panel2)));box-shadow:0 10px 26px color-mix(in srgb,var(--bg) 48%,transparent);text-align:center;overflow:hidden}
+html[data-platform="desktop"] .support-qr-card[hidden],html:not([data-platform="desktop"]) .support-qr-card{display:none!important}
+html[data-platform="desktop"] .support-qr-frame{width:152px;height:152px;padding:5px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px #0001,0 5px 16px #0003}
+html[data-platform="desktop"] .support-qr-card img{display:block;width:142px;height:142px;object-fit:contain;image-rendering:auto;user-select:none}
+html[data-platform="desktop"] .support-qr-card b{display:block;margin-top:8px;color:var(--text);font-size:10px;line-height:1.25}
+html[data-platform="desktop"] .support-qr-card small{display:block;margin-top:2px;color:var(--muted);font-size:8px;line-height:1.2}
+html[data-platform="desktop"] .support-qr-card:not([hidden])+.account-dock{margin-top:0}
+html[data-platform="desktop"] .topbar.settings-mode>.support-qr-card{display:none!important}
+:root[data-theme="white-titanium"] .support-qr-card{box-shadow:0 10px 24px #6b655d24}
+:root[data-theme="rose-gold-glass"] .support-qr-card,:root[data-theme="rose-glass"] .support-qr-card{border-color:color-mix(in srgb,var(--pink) 46%,var(--line))}
+:root[data-theme="miami-vice"] .support-qr-card{background:linear-gradient(145deg,color-mix(in srgb,var(--pink) 18%,var(--panel)),color-mix(in srgb,var(--cyan) 17%,var(--panel2)));box-shadow:0 10px 28px #ff68c62c}
+@media(max-height:760px){html[data-platform="desktop"] .support-qr-card{width:150px;padding:8px}html[data-platform="desktop"] .support-qr-frame{width:132px;height:132px}html[data-platform="desktop"] .support-qr-card img{width:122px;height:122px}}
+@media(max-height:650px){html[data-platform="desktop"] .support-qr-card{display:none!important}}
 html[data-platform="desktop"] .tab.active{grid-column:2;grid-row:1;width:100%;max-width:none!important;height:100%!important;min-width:0;min-height:0;margin:0;padding:26px 30px 18px;overflow:hidden}
 html[data-platform="desktop"] #settings.tab.active,html[data-platform="desktop"] #about.tab.active{padding-top:30px}
 html[data-platform="desktop"] #chat.tab.active{padding-top:18px}
@@ -230,7 +243,7 @@ html[data-platform="desktop"] #settings .calendar-transfer-action{min-height:52p
   html[data-platform="desktop"] #settings .range-row{align-items:stretch;flex-direction:column;gap:12px}
   html[data-platform="desktop"] #settings .range-row>input[type="range"]{width:100%;min-width:0;max-width:none;flex:0 0 auto;margin-left:0}
 }
-html[data-platform="desktop"] .calendar-event-chip{border-left:0;border-radius:8px;padding:4px 6px;background:color-mix(in srgb,var(--event-color) 18%,var(--panel2))}
+html[data-platform="desktop"] .calendar-event-chip{border-left:3px solid var(--event-color);border-radius:8px;padding:4px 6px;background:color-mix(in srgb,var(--event-color) 68%,var(--panel2));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
 html[data-platform="desktop"] .radio-station-row{grid-template-columns:42px minmax(0,1fr) 42px}
 html[data-platform="desktop"] .radio-play{border-radius:50%}
 html[data-platform="desktop"] .calendar-transfer-action{width:min(360px,100%);min-height:52px!important;display:grid!important;grid-template-columns:34px minmax(0,1fr);align-items:center;justify-content:start!important;gap:10px!important;padding:9px 12px!important;text-align:left!important}html[data-platform="desktop"] .calendar-settings-actions .calendar-transfer-action,html[data-platform="desktop"] .category-manager-actions .calendar-transfer-action{flex:0 1 300px;width:300px;max-width:calc(50% - 5px)}html[data-platform="desktop"] .calendar-transfer-action>svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9}html[data-platform="desktop"] .calendar-transfer-action>span{display:grid;gap:2px;min-width:0}html[data-platform="desktop"] .calendar-transfer-action b{font-size:11px}html[data-platform="desktop"] .calendar-transfer-action small{color:var(--muted);font-size:9px;font-weight:600}html[data-platform="desktop"] .calendar-transfer-action input{display:none}
@@ -560,6 +573,57 @@ html[data-platform="desktop"] .topbar.settings-mode .settings-index nav button.a
 html[data-platform="desktop"] #settings .settings-layout{display:block;width:100%;min-height:0}
 html[data-platform="desktop"] #settings .settings-content{width:100%;height:100%;max-width:none;padding-right:5px}
 
+/* Archiwum, Notatki i Kalendarz korzystają z tego samego lewego indeksu co Ustawienia. */
+html[data-platform="desktop"] .topbar.module-mode>.desktop-module-sidebar{padding:9px 7px;max-width:100%;overflow:hidden}
+html[data-platform="desktop"] .desktop-module-sidebar>[data-module-title]{padding:3px 9px 8px!important;font-size:12px;line-height:16px}
+html[data-platform="desktop"] .desktop-module-sidebar>.desktop-module-tools{display:grid;gap:5px;width:100%;min-width:0;padding:0 4px 8px;flex:0 0 auto;overflow:hidden}
+html[data-platform="desktop"] .desktop-module-sidebar>.desktop-module-list{display:flex;flex-direction:column;gap:5px;min-height:0;overflow:auto;padding:0 2px 8px}
+html[data-platform="desktop"] .desktop-module-archive-tools{display:block;width:100%;min-width:0;overflow:hidden}
+html[data-platform="desktop"] .desktop-module-archive-tools .archive-search-mobile{display:block;width:100%;height:auto;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent}
+html[data-platform="desktop"] .desktop-module-archive-tools .archive-search-mobile svg{display:none}
+html[data-platform="desktop"] .desktop-module-archive-tools .archive-search-mobile input{width:100%;min-width:0;height:36px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--text);font-size:11px;outline:0}
+html[data-platform="desktop"] .desktop-module-notes-tools{display:block;width:100%;min-width:0;overflow:hidden}
+html[data-platform="desktop"] .desktop-module-notes-tools #notesSearch{width:100%;min-width:0;height:36px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:11px}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-list,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list{display:flex!important;flex-direction:column;gap:5px;width:100%;min-height:0;overflow:visible;padding:0;border:0}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list>button{display:grid;grid-template-columns:minmax(0,1fr);gap:0;width:100%;min-width:0;min-height:38px;margin:0;border:1px solid transparent;border-radius:8px;padding:6px 8px;text-align:left;background:transparent!important;color:var(--text)}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card:hover,
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card.active,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list>button:hover,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list>button.active{border-color:color-mix(in srgb,var(--cyan) 42%,var(--line));background:color-mix(in srgb,var(--cyan) 14%,var(--theme-row,var(--panel2)))!important}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card>span:nth-child(2){min-width:0}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card b,
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card small,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list b,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list small{display:block;max-width:100%;overflow:visible;text-overflow:clip;white-space:normal!important;overflow-wrap:anywhere}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card b,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list b{font-size:11px;line-height:14px}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-card small,
+html[data-platform="desktop"] .desktop-module-sidebar .notes-list small{font-size:9px;line-height:12px;color:var(--muted);margin:0}
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-icon,
+html[data-platform="desktop"] .desktop-module-sidebar .archive-session-coins{display:none}
+html[data-platform="desktop"] .desktop-category-button{display:flex;align-items:center;gap:9px;width:100%;height:36px;min-height:36px;border:1px solid transparent;border-radius:8px;padding:5px 8px;background:transparent;color:var(--text);text-align:left;font-size:11px}
+html[data-platform="desktop"] .desktop-category-button:hover,
+html[data-platform="desktop"] .desktop-category-button.active{border-color:color-mix(in srgb,var(--cyan) 32%,var(--line));background:color-mix(in srgb,var(--cyan) 13%,var(--panel2))}
+html[data-platform="desktop"] .desktop-category-button>i{width:13px;height:13px;flex:0 0 13px;border-radius:50%;background:var(--category-color,var(--cyan));box-shadow:0 0 0 3px color-mix(in srgb,var(--category-color,var(--cyan)) 20%,transparent)}
+html[data-platform="desktop"] .desktop-category-button>i.desktop-category-all{background:linear-gradient(135deg,var(--pink),var(--cyan))}
+html[data-platform="desktop"] .desktop-category-button>span{display:flex;align-items:baseline;gap:6px;min-width:0;overflow:hidden}
+html[data-platform="desktop"] .desktop-category-button b{flex:0 0 auto;font-size:11px}
+html[data-platform="desktop"] .desktop-category-button small{min-width:0;color:var(--muted);font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-platform="desktop"] #archive.workspace-panel.page{padding:0!important}
+html[data-platform="desktop"] #archive>.page-title{display:none}
+html[data-platform="desktop"] #archive .archive-mobile-workspace{height:100%;padding:0}
+html[data-platform="desktop"] #archive #archiveBack{display:none}
+html[data-platform="desktop"] #archive .archive-detail-mobile{height:100%;padding:18px}
+html[data-platform="desktop"] #archive #archiveEmpty{height:100%;margin:0;border:0;border-radius:0}
+html[data-platform="desktop"] .notes-backdrop{position:static!important;inset:auto!important;padding:0!important;background:transparent!important}
+html[data-platform="desktop"] .notes-dialog{border:0!important;border-radius:0!important;box-shadow:none!important}
+html[data-platform="desktop"] .notes-dialog>header #notesClose{display:none}
+html[data-platform="desktop"] .notes-toolbar{display:flex;justify-content:flex-end;grid-template-columns:none}
+html[data-platform="desktop"] .notes-workspace{display:block!important;min-height:0;overflow:auto}
+html[data-platform="desktop"] .notes-workspace>.note-editor{width:100%;height:100%}
+
 /* Pełne, nieprzezroczyste palety dla nowego układu. */
 :root[data-theme="dark-titanium"]{
   --bg:#070a10;--panel:#10151e;--panel2:#19212d;--line:#344156;--text:#f5f7fb;--muted:#9aa8bc;--cyan:#67c7f5;--pink:#f06b92;--accent:#8aa4c8;--shadow:0 16px 38px #0008;
@@ -738,7 +802,7 @@ html[data-platform="desktop"] .gift-alert-card{
   background:var(--panel)!important;box-shadow:0 16px 44px #0008!important
 }
 html[data-platform="desktop"] .gift-alert-visual{width:76px;height:76px;display:grid;place-items:center;position:relative;z-index:2}
-html[data-platform="desktop"] .gift-alert-visual img{width:76px;height:76px;object-fit:contain}
+html[data-platform="desktop"] .gift-alert-visual img{width:auto;height:auto;max-width:72px;max-height:72px;object-fit:contain;filter:drop-shadow(0 5px 9px rgba(0,0,0,.3))}
 html[data-platform="desktop"] .gift-alert-visual svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:1.8}
 html[data-platform="desktop"] .gift-alert-copy{position:relative;z-index:2;align-items:flex-start;text-align:left}
 html[data-platform="desktop"] .gift-alert-copy strong{font-size:15px}
