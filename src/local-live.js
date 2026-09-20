@@ -63,10 +63,26 @@ class LocalLive {
       const sendEvent = (type, data) => {
         if (!active()) return;
         try {
-          const payload = { ...data, user: data.user || {
+          const flattenedUser = {
             uniqueId: data.uniqueId, nickname: data.nickname,
-            profilePictureUrl: data.profilePictureUrl
-          } };
+            profilePictureUrl: data.profilePictureUrl,
+            isModerator: data.isModerator,
+            isSuperFan: data.isSuperFan,
+            badges: data.badges,
+            badgeList: data.badgeList,
+            userBadges: data.userBadges,
+            userBadgeList: data.userBadgeList,
+            badgeImageList: data.badgeImageList,
+            badgeInfo: data.badgeInfo
+          };
+          const user = { ...(data.user || flattenedUser) };
+          const isSuperFanEvent = type === sdk.WebcastEvent.SUPER_FAN ||
+            type === sdk.WebcastEvent.SUPER_FAN_JOIN;
+          const payload = { ...data, user };
+          if (isSuperFanEvent) {
+            payload.isSuperFan = true;
+            payload.user.isSuperFan = true;
+          }
           emit({ kind: 'message', data: JSON.stringify({ event: type, data: payload },
             (_key, value) => typeof value === 'bigint' ? value.toString() : value) });
         } catch { /* A malformed optional event must not tear down LIVE. */ }
@@ -104,7 +120,10 @@ class LocalLive {
     } catch (error) {
       if (!active()) return;
       const is = name => typeof sdk?.[name] === 'function' && error instanceof sdk[name];
-      finish(is('UserOfflineError') ? 4404 : is('SignatureRateLimitError') ? 4429 : 1011);
+      const errorName = String(error?.name || error?.constructor?.name || '');
+      const errorText = `${errorName} ${error?.message || ''} ${error?.stack || ''}`;
+      const rateLimited = is('SignatureRateLimitError') || /SignatureRateLimitError|rate[_ -]?limit|too many connections/i.test(errorText);
+      finish(is('UserOfflineError') ? 4404 : rateLimited ? 4429 : 1011);
     }
   }
 }

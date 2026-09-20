@@ -14,7 +14,8 @@ function fixture() {
   const sdk = { TikTokLiveConnection: Connection, UserOfflineError,
     ControlEvent: { ERROR: 'error', DISCONNECTED: 'disconnected' },
     WebcastEvent: { CHAT: 'chat', MEMBER: 'member', GIFT: 'gift', ROOM_USER: 'roomUser', LIKE: 'like',
-      FOLLOW: 'follow', SHARE: 'share', SOCIAL: 'social', ENVELOPE: 'envelope', STREAM_END: 'streamEnd' } };
+      FOLLOW: 'follow', SHARE: 'share', SOCIAL: 'social', ENVELOPE: 'envelope', STREAM_END: 'streamEnd',
+      SUPER_FAN: 'superFan', SUPER_FAN_JOIN: 'superFanJoin', SUPER_FAN_BOX: 'superFanBox' } };
   return { connections, sdk, live: new LocalLive(async () => sdk) };
 }
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -94,4 +95,31 @@ test('offline and import failures are handled without unhandled rejections', asy
   const broken = new LocalLive(async () => { throw new Error('missing dependency'); });
   await broken.start('two', 'creator', p => packets.push(p));
   assert.equal(packets[1].code, 1011);
+});
+
+test('a malformed connector rate-limit error is reported as 4429', async () => {
+  const { live, connections } = fixture(); const packets = [];
+  const start = live.start('one', 'creator', p => packets.push(p)); await tick();
+  const error = new TypeError("Cannot read properties of undefined (reading 'retry-after')");
+  error.stack = `SignatureRateLimitError.calculateRetryAfter\n${error.stack}`;
+  connections[0].reject(error); await start;
+  assert.equal(packets[0].code, 4429);
+  assert.equal(live.current, null);
+});
+
+test('superfan events and flattened role badges survive the local LIVE bridge', async () => {
+  const { live, connections } = fixture(); const packets = [];
+  const start = live.start('one', 'creator', p => packets.push(p)); await tick();
+  connections[0].resolve(); await start;
+  const superFanBadge = { badgeSceneType: 10, priorityType: 30, icon: 'super_fans_badge_icon' };
+  connections[0].emit('superFanJoin', { uniqueId: 'superfan', nickname: 'Superfan', userBadges: [superFanBadge] });
+  const guardianBadge = { image: { urlList: ['https://p16-webcast.tiktokcdn.com/webcast-va/guardian-badge-icon-4.png'] } };
+  connections[0].emit('chat', { uniqueId: 'guardian', nickname: 'Strażnik', comment: 'hej', userBadges: [guardianBadge] });
+  const messages = packets.filter(packet => packet.kind === 'message').map(packet => JSON.parse(packet.data));
+  assert.equal(messages[0].event, 'superFanJoin');
+  assert.equal(messages[0].data.isSuperFan, true);
+  assert.equal(messages[0].data.user.isSuperFan, true);
+  assert.deepEqual(messages[0].data.user.userBadges, [superFanBadge]);
+  assert.deepEqual(messages[1].data.user.userBadges, [guardianBadge]);
+  live.stop();
 });

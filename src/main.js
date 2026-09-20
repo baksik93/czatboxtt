@@ -52,7 +52,7 @@ const piperServers = new Map();
 const piperWarmPromises = new Map();
 const piperWarmedVoices = new Set();
 let tray = null;
-let minimizeToTrayOnClose = false;
+let minimizeToTrayOnClose = true;
 let appIsQuitting = false;
 let widgetWindow = null;
 let widgetTimer = null;
@@ -152,11 +152,17 @@ async function refreshDesktopWidget() {
   if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.webContents.send('desktop:widget-data', latestWidgetData);
 }
 
+function desktopWidgetDisplay() {
+  if (mainWindow && !mainWindow.isDestroyed()) return screen.getDisplayMatching(mainWindow.getBounds());
+  return screen.getPrimaryDisplay();
+}
+
 function createDesktopWidget() {
   if (widgetWindow && !widgetWindow.isDestroyed()) return widgetWindow;
-  const area = screen.getPrimaryDisplay().workArea, width = 184, height = area.height;
+  const area = desktopWidgetDisplay().workArea, width = 184, height = area.height;
   widgetWindow = new BrowserWindow({ width, height, minWidth: width, minHeight: height, x: area.x + area.width - width, y: area.y, frame: false, transparent: true, resizable: false, movable: false, show: false, skipTaskbar: true, focusable: true, hasShadow: true, alwaysOnTop: false, webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'desktop-preload.js'), partition: 'persist:czatbox-tt' } });
   widgetWindow.setMenuBarVisibility(false);
+  widgetWindow.setAlwaysOnTop(false);
   widgetWindow.on('close', event => { if (!appIsQuitting) { event.preventDefault(); widgetWindow.hide(); } });
   widgetWindow.webContents.on('did-finish-load', () => widgetWindow?.webContents.send('desktop:widget-data', latestWidgetData));
   void widgetWindow.loadFile(path.join(__dirname, 'desktop-widget.html'));
@@ -164,7 +170,7 @@ function createDesktopWidget() {
 }
 
 function positionDesktopWidget(widget) {
-  const area = screen.getPrimaryDisplay().workArea;
+  const area = desktopWidgetDisplay().workArea;
   widget.setBounds({ x: area.x + area.width - 184, y: area.y, width: 184, height: area.height });
 }
 
@@ -173,6 +179,9 @@ function showDesktopWidget() {
   const widget = createDesktopWidget();
   positionDesktopWidget(widget);
   void refreshDesktopWidget().finally(() => {
+    if (widget.isDestroyed()) return;
+    positionDesktopWidget(widget);
+    widget.setAlwaysOnTop(false);
     widget.showInactive();
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) mainWindow.moveTop();
   });
@@ -318,7 +327,10 @@ function warmPiperServer(voice) {
 }
 
 function showMainWindow() {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+    return;
+  }
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
@@ -341,7 +353,7 @@ function ensureTray() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Pokaż Czatbox TT', click: showMainWindow },
     { type: 'separator' },
-    { label: 'Pasek pulpitu jest stale aktywny', enabled: false },
+    { label: 'Widget pulpitu działa razem z oknem programu', enabled: false },
     { type: 'separator' },
     { label: 'Zamknij', click: () => { appIsQuitting = true; app.quit(); } }
   ]));
@@ -350,13 +362,12 @@ function ensureTray() {
 
 function setMinimizeToTray(enabled) {
   if (LOCAL_UI_PREVIEW) {
-    minimizeToTrayOnClose = false;
-    destroyTray();
-    return false;
+    minimizeToTrayOnClose = true;
+    return true;
   }
-  minimizeToTrayOnClose = Boolean(enabled);
+  minimizeToTrayOnClose = true;
   ensureTray();
-  return minimizeToTrayOnClose;
+  return true;
 }
 
 function localPreviewDirectory() {
@@ -562,17 +573,12 @@ function desktopPageFeatures() {
     const group = document.createElement('div');
     group.id = 'desktopBehaviorSettings';
     group.className = 'settings-section';
-    group.innerHTML = '<div class="group-head"><h2>System</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><label class="setting-row"><span><b>Po kliknięciu X ukryj program w zasobniku</b><small>Czat i TTS nadal działają w tle. Program zamkniesz z menu ikony przy zegarze.</small></span><input id="desktopMinimizeToTray" class="switch" type="checkbox"></label></div>';
+    group.innerHTML = '<div class="group-head"><h2>System</h2><p>Zachowanie okna programu</p></div><div class="settings-card"><div class="setting-row"><span><b>Przycisk X ukrywa program w zasobniku</b><small>Główne okno i widget zostają ukryte, a czat i TTS nadal działają w tle. Program zamkniesz całkowicie z menu ikony przy zegarze.</small></span></div></div>';
     const codesSection = document.querySelector('#settings-codes');
     if (codesSection?.parentElement) codesSection.parentElement.insertBefore(group, codesSection);
     else desktopSettingsTarget.prepend(group);
-    const toggle = group.querySelector('#desktopMinimizeToTray');
-    toggle.checked = localStorage.getItem('cttm-desktop-minimize-to-tray') === 'true';
-    window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
-    toggle.onchange = () => {
-      localStorage.setItem('cttm-desktop-minimize-to-tray', String(toggle.checked));
-      window.czatboxDesktop?.setMinimizeToTray(toggle.checked).catch(() => {});
-    };
+    localStorage.setItem('cttm-desktop-minimize-to-tray', 'true');
+    window.czatboxDesktop?.setMinimizeToTray(true).catch(() => {});
   }
 
   const voiceSelect = document.querySelector('#voice');
@@ -892,11 +898,11 @@ function createWindow() {
       appIsQuitting = true;
       return;
     }
-    if (appIsQuitting || quittingForUpdate || !minimizeToTrayOnClose) return;
+    if (appIsQuitting || quittingForUpdate) return;
     event.preventDefault();
     ensureTray();
     mainWindow.hide();
-    showDesktopWidget();
+    if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.hide();
   });
   if (!LOCAL_UI_PREVIEW) {
     mainWindow.on('minimize', showDesktopWidget);
@@ -998,12 +1004,21 @@ if (!singleInstance) {
     if (!LOCAL_UI_PREVIEW) {
       ensureTray();
       setTimeout(showDesktopWidget, 1200);
+      const repositionWidget = () => {
+        if (widgetWindow && !widgetWindow.isDestroyed() && widgetWindow.isVisible()) positionDesktopWidget(widgetWindow);
+      };
+      screen.on('display-added', repositionWidget);
+      screen.on('display-removed', repositionWidget);
+      screen.on('display-metrics-changed', repositionWidget);
     }
     powerMonitor.on('resume', () => setTimeout(speakDesktopGreeting, 1200));
     configureUpdater();
   });
 
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  app.on('activate', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) createWindow();
+    else showMainWindow();
+  });
   app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
   app.on('before-quit', event => {
     appIsQuitting = true;
