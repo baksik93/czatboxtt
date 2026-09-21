@@ -12,7 +12,7 @@ test('gift sound settings use the embedded gift catalog instead of coin threshol
   assert.match(html, />Ustawienia prezentów<\/button>/);
   assert.match(app, /Object\.entries\(window\.CZATBOX_GIFT_CATALOG\|\|\{\}\)/);
   assert.match(app, /giftId:\s*String\(entry\.giftId\)/);
-  assert.match(app, /giftSoundEntry\(item\.giftId\)/);
+  assert.match(app, /assignedGiftSound\(item\.giftId\)/);
   assert.doesNotMatch(app, /item\.coins>=Number\(setting\.threshold\)/);
   assert.doesNotMatch(app, /Nowy próg monet|Dodaj próg|Progi prezentów/);
 });
@@ -33,10 +33,20 @@ test('gifts default to silence and legacy Blysk assignments are migrated once', 
   assert.match(app, /DEFAULT_GIFT_SOUND='none'/);
   assert.match(app, /cttm-gift-blysk-silent-v1/);
   assert.match(app, /if\(entry\.sound==='blysk'\)entry\.sound='none'/);
-  assert.match(app, /selected=giftSoundEntry\(item\.giftId\)\?\.sound\|\|DEFAULT_GIFT_SOUND/);
+  assert.match(app, /const selected=giftSoundEntry\(giftId\)\?\.sound/);
   assert.match(app, /sort\(\(a,b\)=>Number\(a\.coins\)-Number\(b\.coins\)\|\|a\.catalogIndex-b\.catalogIndex\)/);
   assert.doesNotMatch(app, /configured\.has\(b\.giftId\)/);
   assert.match(app, /NO_GIFT_SOUND='none'/);
+});
+
+test('audio ducking starts only after an assigned gift sound has loaded', () => {
+  assert.match(app, /function assignedGiftSound\(giftId\)/);
+  assert.match(app, /if\(!selected\|\|selected===NO_GIFT_SOUND\)return''/);
+  assert.match(app, /const sound=assignedGiftSound\(item\.giftId\)/);
+  assert.match(app, /if\(!soundId\|\|soundId===NO_GIFT_SOUND\)return false/);
+  assert.match(app, /source\.connect\(master\);await window\.czatboxDesktop\?\.startAudioDucking\?\.\(\)/);
+  assert.match(app, /finally\{if\(ducking\)await window\.czatboxDesktop\?\.stopAudioDucking\?\.\(\)\}/);
+  assert.doesNotMatch(app, /playGiftSoundWithoutDucking/);
 });
 
 test('gifts can be hidden, filtered by visibility and updated in bulk', () => {

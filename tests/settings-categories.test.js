@@ -17,3 +17,13 @@ test('desktop settings show only the selected category', () => {
 test('account pencil opens the isolated account category', () => {
   assert.match(workspace, /showSettingsCategory\('settings-account',\{focus:true\}\)/);
 });
+
+test('project support offers Patreon by default and keeps PayPal available', () => {
+  assert.match(workspace, /https:\/\/www\.patreon\.com\/15802701\/join/);
+  assert.match(workspace, /support-patreon-qr\.png/);
+  assert.match(workspace, /https:\/\/www\.paypal\.com\/pool\/9sNTKAuayB\?sr=wccr/);
+  assert.match(workspace, /support-paypal-pool-qr\.png/);
+  assert.doesNotMatch(workspace, /buycoffee/i);
+  assert.ok(fs.existsSync(path.join(root, 'web-client/public/support-patreon-qr.png')));
+  assert.equal(fs.existsSync(path.join(root, 'web-client/public/support-qr.png')), false);
+});
