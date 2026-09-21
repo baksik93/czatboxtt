@@ -29,10 +29,12 @@ test('legacy thresholds are backed up before migration', () => {
   assert.match(app, /cttm-gift-threshold-backup-v1/);
 });
 
-test('gifts default to silence and legacy Blysk assignments are migrated once', () => {
+test('gifts default to silence and the 0.3.28 Blysk regression is repaired once', () => {
   assert.match(app, /DEFAULT_GIFT_SOUND='none'/);
   assert.match(app, /cttm-gift-blysk-silent-v1/);
-  assert.match(app, /if\(entry\.sound==='blysk'\)entry\.sound='none'/);
+  assert.doesNotMatch(app, /if\(entry\.sound==='blysk'\)entry\.sound='none'/);
+  assert.match(app, /cttm-gift-blysk-restore-v2/);
+  assert.match(app, /if\(entry\.sound==='none'&&entry\.manualSound===false\)\{entry\.sound='blysk';entry\.manualSound=true\}/);
   assert.match(app, /const selected=giftSoundEntry\(giftId\)\?\.sound/);
   assert.match(app, /sort\(\(a,b\)=>Number\(a\.coins\)-Number\(b\.coins\)\|\|a\.catalogIndex-b\.catalogIndex\)/);
   assert.doesNotMatch(app, /configured\.has\(b\.giftId\)/);
@@ -44,7 +46,9 @@ test('audio ducking starts only after an assigned gift sound has loaded', () => 
   assert.match(app, /if\(!selected\|\|selected===NO_GIFT_SOUND\)return''/);
   assert.match(app, /const sound=assignedGiftSound\(item\.giftId\)/);
   assert.match(app, /if\(!soundId\|\|soundId===NO_GIFT_SOUND\)return false/);
-  assert.match(app, /source\.connect\(master\);await window\.czatboxDesktop\?\.startAudioDucking\?\.\(\)/);
+  assert.match(app, /source\.connect\(master\);ducking=Boolean\(window\.czatboxDesktop\?\.startAudioDucking\)/);
+  assert.match(app, /source\.start\(context\.currentTime\+\.02\)/);
+  assert.match(app, /await duckPromise;return playback/);
   assert.match(app, /finally\{if\(ducking\)await window\.czatboxDesktop\?\.stopAudioDucking\?\.\(\)\}/);
   assert.doesNotMatch(app, /playGiftSoundWithoutDucking/);
 });
