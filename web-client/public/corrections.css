@@ -40,23 +40,40 @@ html[data-platform="desktop"] #chat .creator-strip{margin-bottom:13px}
 /* Katalog prezentów: pełna szerokość oraz stabilne kafelki. */
 html[data-platform="desktop"] #settings #settings-thresholds.settings-section{width:100%;max-width:none;padding:0 18px;margin-left:0;margin-right:0}
 html[data-platform="desktop"] #settings-thresholds .gift-sounds-card{background:transparent!important;border:0;border-radius:0}
-html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head{display:grid;grid-template-columns:minmax(260px,440px) minmax(190px,250px);align-items:end;justify-content:space-between;padding:0 0 16px;border:0}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head{display:grid;grid-template-columns:minmax(240px,1.25fr) minmax(170px,.65fr) minmax(160px,.6fr) minmax(230px,.8fr);align-items:end;gap:12px;padding:0 0 16px;border:0}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head label{width:100%;display:grid;gap:7px;flex:none}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head select{width:100%;height:40px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);padding:0 34px 0 12px;font:inherit;font-size:11px;outline:0}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-bulk{display:grid;gap:7px;color:var(--muted);font-size:10px;font-weight:750}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-bulk>div{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-bulk button{height:40px;border:1px solid var(--line);border-radius:11px;background:var(--theme-control,var(--panel2));color:var(--text);padding:0 10px;font-size:10px;font-weight:850;white-space:nowrap}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-bulk button:hover{border-color:var(--cyan);color:var(--cyan)}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-list{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-html[data-platform="desktop"] #settings-thresholds .gift-sound-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 38px;grid-template-areas:"gift gift" "picker actions";align-content:start;gap:12px;min-width:0;min-height:154px;padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel)!important;box-shadow:0 8px 22px color-mix(in srgb,var(--bg) 20%,transparent)}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 84px;grid-template-areas:"gift gift" "picker actions";align-content:start;gap:12px;min-width:0;min-height:154px;padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--panel)!important;box-shadow:0 8px 22px color-mix(in srgb,var(--bg) 20%,transparent)}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-row:focus-within{z-index:20;border-color:color-mix(in srgb,var(--cyan) 55%,var(--line))}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-row.configured{background:color-mix(in srgb,var(--cyan) 5%,var(--panel))!important}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-row.is-hidden{opacity:.64;border-style:dashed}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-gift{grid-area:gift;align-items:center}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-gift img{width:66px;height:66px;flex-basis:66px;border-radius:15px}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-gift b{font-size:12px}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-gift small{font-size:9px}
 html[data-platform="desktop"] #settings-thresholds .sound-picker{grid-area:picker}
-html[data-platform="desktop"] #settings-thresholds .gift-sound-actions{grid-area:actions}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-actions{grid-area:actions;display:grid;grid-template-columns:38px 38px;gap:8px}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-actions button{width:38px}
+html[data-platform="desktop"] #settings-thresholds .gift-visibility-toggle{height:38px;border:1px solid var(--line);border-radius:9px;background:var(--theme-control,var(--panel2));color:var(--muted)}
+html[data-platform="desktop"] #settings-thresholds .gift-visibility-toggle:hover{border-color:var(--pink);color:var(--pink)}
+html[data-platform="desktop"] #settings-thresholds .gift-visibility-toggle svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sound-picker-menu.gift-sound-popover{position:fixed!important;z-index:1000!important;overflow-y:auto;overscroll-behavior:contain;contain:layout paint;background:var(--panel)!important;box-shadow:0 20px 55px #000c!important}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-list{padding-bottom:82px}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination{position:fixed;left:calc(var(--desktop-main-nav-width) + 18px);right:18px;bottom:14px;z-index:90;display:flex;align-items:center;justify-content:center;gap:14px;margin:0;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 -12px 30px color-mix(in srgb,var(--bg) 55%,transparent)}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination span{display:grid;gap:2px;min-width:130px;color:var(--text);font-weight:850;text-align:center}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination small{color:var(--muted);font-size:9px;font-weight:650}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination button{height:36px;border:1px solid var(--line);border-radius:9px;background:var(--theme-control,var(--panel2));color:var(--text);padding:0 14px;font-size:10px;font-weight:850}
+html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination button:disabled{opacity:.35}
+@media(max-width:760px){html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination{left:calc(var(--desktop-main-nav-width) + 8px);right:8px;bottom:8px}}
 html[data-platform="desktop"] #settings-thresholds .sound-picker-menu{left:0;right:auto;width:max(100%,270px)}
 html[data-platform="desktop"] #settings-thresholds .gift-sound-pagination{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
-@media(max-width:900px){html[data-platform="desktop"] #settings #settings-thresholds.settings-section{padding:0 8px}html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head{grid-template-columns:minmax(220px,1fr) minmax(180px,230px)}html[data-platform="desktop"] #settings-thresholds .gift-sound-list{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}}
+@media(max-width:1100px){html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head{grid-template-columns:minmax(220px,1fr) minmax(170px,.7fr);}.gift-sound-visibility-filter,.gift-sound-bulk{grid-row:2}}
+@media(max-width:900px){html[data-platform="desktop"] #settings #settings-thresholds.settings-section{padding:0 8px}html[data-platform="desktop"] #settings-thresholds .gift-sound-list{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}}
 @media(max-width:620px){html[data-platform="desktop"] #settings-thresholds .gift-sound-catalog-head{grid-template-columns:1fr}}
 #chat .chat-feed,#chat .empty{height:auto;min-height:0;flex:1 1 auto}
 @media(max-width:650px){#chat.tab.active{height:calc(100dvh - 82px - env(safe-area-inset-top) - 13px - env(safe-area-inset-bottom))}}

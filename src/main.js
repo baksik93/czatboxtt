@@ -61,16 +61,33 @@ let latestWidgetData = { drives: [], accent: '#4fdde5' };
 let livePowerBlockerId = null;
 let audioDuckDepth = 0;
 let audioDuckChain = Promise.resolve();
-const RENDERER_CACHE_EPOCH = 'workspace-v136-canonical-user-data';
+const RENDERER_CACHE_EPOCH = 'workspace-v151-gifts-drwinka';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 const CANONICAL_USER_DATA_PATH = path.join(app.getPath('userData'), 'canonical-user-data.json');
+const CANONICAL_USER_DATA_BACKUP_DIR = path.join(app.getPath('userData'), 'canonical-user-data-backups');
 let canonicalUserDataCache = '';
 
 function readCanonicalUserData() {
   try {
     const parsed = JSON.parse(fs.readFileSync(CANONICAL_USER_DATA_PATH, 'utf8'));
-    return parsed && typeof parsed.values === 'object' ? parsed : { schema: 1, updatedAt: 0, values: {} };
+    if (parsed && typeof parsed.values === 'object') {
+      canonicalUserDataCache = JSON.stringify(parsed.values);
+      return parsed;
+    }
+    return { schema: 1, updatedAt: 0, values: {} };
   } catch { return { schema: 1, updatedAt: 0, values: {} }; }
+}
+
+function backupCanonicalUserData() {
+  if (!fs.existsSync(CANONICAL_USER_DATA_PATH)) return;
+  fs.mkdirSync(CANONICAL_USER_DATA_BACKUP_DIR, { recursive: true });
+  const backupPath = path.join(CANONICAL_USER_DATA_BACKUP_DIR, `canonical-user-data-${Date.now()}.json`);
+  fs.copyFileSync(CANONICAL_USER_DATA_PATH, backupPath);
+  const backups = fs.readdirSync(CANONICAL_USER_DATA_BACKUP_DIR)
+    .filter(name => /^canonical-user-data-\d+\.json$/.test(name))
+    .sort()
+    .reverse();
+  for (const staleName of backups.slice(10)) fs.rmSync(path.join(CANONICAL_USER_DATA_BACKUP_DIR, staleName), { force: true });
 }
 
 function saveCanonicalUserData(values) {
@@ -82,6 +99,7 @@ function saveCanonicalUserData(values) {
   if (Buffer.byteLength(payload) > 32 * 1024 * 1024) return false;
   const temporaryPath = `${CANONICAL_USER_DATA_PATH}.tmp`;
   fs.writeFileSync(temporaryPath, payload, 'utf8');
+  backupCanonicalUserData();
   fs.renameSync(temporaryPath, CANONICAL_USER_DATA_PATH);
   canonicalUserDataCache = valuesSnapshot;
   return true;

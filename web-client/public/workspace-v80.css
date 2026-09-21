@@ -688,6 +688,12 @@ html[data-platform="desktop"] .notes-workspace>.note-editor{width:100%;height:10
   --header-bg:#21184f;--desktop-chrome:#21184f;--desktop-surface:#160f35;
   --stat-gift:#ff75c8;--stat-top:#ffe08a;--stat-box:#6de7ff;--stat-viewers:#83f0c5
 }
+:root[data-theme="drwinka"]{
+  --bg:#050505;--panel:#11110f;--panel2:#1c1b16;--line:#5b552a;--text:#fffef4;--muted:#c5bd89;--cyan:#ffd900;--pink:#fff4a8;--accent:#f1c900;--shadow:0 18px 46px #000c,0 0 24px #ffd90012;
+  --theme-canvas:radial-gradient(circle at 86% 7%,#4d4100 0,transparent 28%),linear-gradient(145deg,#030303,#15140d 52%,#070700);--theme-chrome:linear-gradient(110deg,#050505,#24200b 58%,#0a0a08);--theme-panel:linear-gradient(145deg,#17160e,#080807);--theme-row:linear-gradient(100deg,#24210c,#11110d 62%,#070707);--theme-control:linear-gradient(145deg,#2a270e,#10100c);
+  --header-bg:#090907;--desktop-chrome:#090907;--desktop-surface:#070706;
+  --stat-gift:#ffd900;--stat-top:#fff8c9;--stat-box:#e7c100;--stat-viewers:#ffffff
+}
 
 /* Starsze efekty szkła nie mogą prześwitywać przez panele ani menu. */
 :root .surface,:root .settings-card,:root .chat-shell,
@@ -745,6 +751,169 @@ html[data-platform="desktop"] .tab-button.active{background:color-mix(in srgb,va
 :root[data-theme="miami-vice"] .empty-orbit{background:linear-gradient(135deg,#ff68c6,#7d49db 48%,#5de8ef)!important;box-shadow:0 0 24px #ff68c655}
 :root[data-theme="miami-vice"] .desktop-sidebar button:hover,
 :root[data-theme="miami-vice"] .settings-index button:hover{background:linear-gradient(100deg,#64215e,#31205d 58%,#10536d)!important;color:#fff!important}
+:root[data-theme="drwinka"] .brand-mark,
+:root[data-theme="drwinka"] .empty-orbit{background:linear-gradient(135deg,#fff,#ffd900 42%,#252000)!important;color:#050505!important;box-shadow:0 0 28px #ffd90066}
+:root[data-theme="drwinka"] .desktop-sidebar button,
+:root[data-theme="drwinka"] .settings-index button{position:relative;isolation:isolate;overflow:hidden;transition:transform .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+:root[data-theme="drwinka"] .desktop-sidebar button::before,
+:root[data-theme="drwinka"] .settings-index button::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(105deg,transparent 0 26%,#ffd900 43%,#fff8c7 50%,#ffd900 57%,transparent 74%);transform:translateX(-145%) skewX(-18deg);transition:transform .48s cubic-bezier(.2,.8,.2,1)}
+:root[data-theme="drwinka"] .desktop-sidebar button:hover,
+:root[data-theme="drwinka"] .settings-index button:hover{transform:translateX(4px);border-color:#ffd900!important;color:#fff!important;box-shadow:0 8px 22px #0009,0 0 16px #ffd9002e}
+:root[data-theme="drwinka"] .desktop-sidebar button:hover::before,
+:root[data-theme="drwinka"] .settings-index button:hover::before{transform:translateX(145%) skewX(-18deg)}
+:root[data-theme="drwinka"] .desktop-sidebar button.active,
+:root[data-theme="drwinka"] .settings-index button.active{background:linear-gradient(100deg,#ffd900,#8f7900)!important;border-color:#fff2a6!important;color:#080808!important;box-shadow:0 10px 26px #000b,0 0 20px #ffd90055!important}
+:root[data-theme="drwinka"] .desktop-sidebar button.active svg,
+:root[data-theme="drwinka"] .settings-index button.active svg{color:#080808!important;stroke:#080808!important}
+@media(prefers-reduced-motion:reduce){:root[data-theme="drwinka"] .desktop-sidebar button,:root[data-theme="drwinka"] .settings-index button,:root[data-theme="drwinka"] .desktop-sidebar button::before,:root[data-theme="drwinka"] .settings-index button::before{transition:none!important}}
+
+/* Drwinka: wysoki kontrast, głęboka czerń i energetyczne żółte akcenty. */
+:root[data-theme="drwinka"] body{background:#020202!important}
+:root[data-theme="drwinka"] .desktop-menu-bar,
+:root[data-theme="drwinka"] .topbar{border-bottom-color:#ffd900!important;background:linear-gradient(100deg,#020202 0 70%,#241f00 100%)!important;box-shadow:0 2px 0 #ffd900,0 9px 30px #000!important}
+:root[data-theme="drwinka"] .desktop-sidebar{position:relative;overflow:hidden;border-right:1px solid #ffd900!important;background:linear-gradient(180deg,#030303,#0a0a08 58%,#161300)!important;box-shadow:12px 0 38px #000b}
+:root[data-theme="drwinka"] .desktop-sidebar::before{content:"";position:absolute;inset:-15% -55% auto 18%;height:48%;pointer-events:none;background:repeating-linear-gradient(118deg,transparent 0 28px,#ffd9000d 29px 31px);transform:rotate(-8deg)}
+:root[data-theme="drwinka"] .desktop-sidebar::after{content:"";position:absolute;right:-50px;bottom:70px;width:145px;height:145px;border:18px solid #ffd90018;border-radius:34px;transform:rotate(32deg);pointer-events:none}
+:root[data-theme="drwinka"] .desktop-sidebar>*{position:relative;z-index:1}
+:root[data-theme="drwinka"] .desktop-brand{border-bottom-color:#5f5100!important}
+:root[data-theme="drwinka"] .desktop-brand strong,
+:root[data-theme="drwinka"] .page-title h1,
+:root[data-theme="drwinka"] .group-head h2{color:#fff!important;text-shadow:0 0 18px #ffd90024}
+:root[data-theme="drwinka"] .desktop-nav-label,
+:root[data-theme="drwinka"] .eyebrow,
+:root[data-theme="drwinka"] .settings-index>strong{color:#ffd900!important}
+:root[data-theme="drwinka"] .settings-index{border-color:#5f5100!important;background:#070706!important;box-shadow:0 18px 48px #000c,0 0 0 1px #ffd90012}
+:root[data-theme="drwinka"] .settings-card,
+:root[data-theme="drwinka"] .surface,
+:root[data-theme="drwinka"] .chat-card,
+:root[data-theme="drwinka"] .gift-sound-row{border-color:#494217!important;background:linear-gradient(145deg,#11110d,#050505 72%)!important;box-shadow:0 12px 34px #000a!important}
+:root[data-theme="drwinka"] input,
+:root[data-theme="drwinka"] select,
+:root[data-theme="drwinka"] textarea,
+:root[data-theme="drwinka"] .sound-picker-toggle{border-color:#504818!important;background:#050505!important;color:#fff!important}
+:root[data-theme="drwinka"] input:focus,
+:root[data-theme="drwinka"] select:focus,
+:root[data-theme="drwinka"] textarea:focus{border-color:#ffd900!important;box-shadow:0 0 0 3px #ffd90020!important;outline:0}
+:root[data-theme="drwinka"] .segmented{border-color:#504818!important;background:#050505!important}
+:root[data-theme="drwinka"] .segmented button.active,
+:root[data-theme="drwinka"] .primary{background:linear-gradient(115deg,#ffe600,#d2ad00)!important;color:#050505!important;box-shadow:0 8px 24px #ffd90035!important}
+:root[data-theme="drwinka"] ::selection{background:#ffd900;color:#050505}
+:root[data-theme="drwinka"] ::-webkit-scrollbar-thumb{background:linear-gradient(#ffe600,#8b7600);border:2px solid #050505;border-radius:99px}
+:root[data-theme="drwinka"] ::-webkit-scrollbar-track{background:#050505}
+
+/* Drwinka ma dwie czytelne strefy: żółtą nawigację i czarną przestrzeń roboczą. */
+:root[data-theme="drwinka"] .desktop-menu-bar,
+:root[data-theme="drwinka"] .topbar{background:#ffd900!important;border-color:#050505!important;box-shadow:0 2px 0 #fff18a,0 8px 28px #0009!important}
+:root[data-theme="drwinka"] .desktop-menu-bar button,
+:root[data-theme="drwinka"] .topbar button,
+:root[data-theme="drwinka"] .topbar a{color:#080808!important;text-shadow:none!important}
+:root[data-theme="drwinka"] .desktop-menu-bar button:hover,
+:root[data-theme="drwinka"] .topbar button:hover{background:#050505!important;color:#fff!important}
+:root[data-theme="drwinka"] .desktop-sidebar,
+:root[data-theme="drwinka"] .settings-index{border-color:#050505!important;background:linear-gradient(155deg,#ffe51a 0%,#ffd500 56%,#e6b900 100%)!important;color:#080808!important;box-shadow:10px 0 34px #0009!important}
+:root[data-theme="drwinka"] .desktop-sidebar::before{background:repeating-linear-gradient(118deg,transparent 0 30px,#fff4a828 31px 34px)}
+:root[data-theme="drwinka"] .desktop-sidebar::after{border-color:#05050518}
+:root[data-theme="drwinka"] .desktop-brand,
+:root[data-theme="drwinka"] .desktop-account,
+:root[data-theme="drwinka"] .settings-index>strong{border-color:#8e7600!important;color:#080808!important}
+:root[data-theme="drwinka"] .desktop-brand strong,
+:root[data-theme="drwinka"] .desktop-brand small,
+:root[data-theme="drwinka"] .desktop-nav-label,
+:root[data-theme="drwinka"] .desktop-account,
+:root[data-theme="drwinka"] .desktop-sidebar button,
+:root[data-theme="drwinka"] .settings-index button,
+:root[data-theme="drwinka"] .settings-index button svg{color:#080808!important;stroke:#080808!important;text-shadow:none!important}
+:root[data-theme="drwinka"] .desktop-sidebar button:hover,
+:root[data-theme="drwinka"] .settings-index button:hover{background:#fff2a6!important;color:#080808!important;border-color:#080808!important;box-shadow:0 8px 20px #8a720055!important}
+:root[data-theme="drwinka"] .desktop-sidebar button.active,
+:root[data-theme="drwinka"] .settings-index button.active{background:#050505!important;border-color:#fff!important;color:#fff!important;box-shadow:0 10px 24px #806a0080!important}
+:root[data-theme="drwinka"] .desktop-sidebar button.active svg,
+:root[data-theme="drwinka"] .settings-index button.active svg{color:#ffd900!important;stroke:#ffd900!important}
+:root[data-theme="drwinka"] .tab.active,
+:root[data-theme="drwinka"] #chat,
+:root[data-theme="drwinka"] .settings-content,
+:root[data-theme="drwinka"] .chat-workspace,
+:root[data-theme="drwinka"] .chat-workspace-main{background:radial-gradient(circle at 88% 4%,#332b00 0,transparent 24%),#030303!important}
+html[data-platform="desktop"] .settings-index{max-height:none!important;overflow:hidden!important;scrollbar-width:none}
+html[data-platform="desktop"] .settings-index::-webkit-scrollbar{display:none}
+
+/* Czytelność Drwinki: na żółtym zawsze czerń, na czarnym zawsze biel. */
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .brand strong,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .brand small,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .round-nav button,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .round-nav button svg,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .account-dock,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .account-dock b,
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .account-dock svg,
+:root[data-theme="drwinka"] .topbar.settings-mode .desktop-settings-back,
+:root[data-theme="drwinka"] .topbar.settings-mode .desktop-settings-sidebar>strong,
+:root[data-theme="drwinka"] .topbar.settings-mode .settings-index nav button,
+:root[data-theme="drwinka"] .topbar.settings-mode .settings-index nav button svg{color:#080808!important;stroke:#080808!important;-webkit-text-fill-color:#080808!important}
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .round-nav button.active,
+:root[data-theme="drwinka"] .topbar.settings-mode .settings-index nav button.active{background:#080808!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .topbar:not(.settings-mode) .round-nav button.active svg,
+:root[data-theme="drwinka"] .topbar.settings-mode .settings-index nav button.active svg{color:#ffd900!important;stroke:#ffd900!important}
+:root[data-theme="drwinka"] .creator-panel,
+:root[data-theme="drwinka"] .desktop-menu-dropdown,
+:root[data-theme="drwinka"] .desktop-submenu{background:#080808!important;color:#fff!important}
+:root[data-theme="drwinka"] .creator-panel button,
+:root[data-theme="drwinka"] .creator-panel b,
+:root[data-theme="drwinka"] .creator-panel span,
+:root[data-theme="drwinka"] .desktop-menu-dropdown button,
+:root[data-theme="drwinka"] .desktop-submenu button{color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .creator-panel button:hover,
+:root[data-theme="drwinka"] .desktop-menu-dropdown button:hover,
+:root[data-theme="drwinka"] .desktop-submenu button:hover{background:#272100!important;color:#ffd900!important;-webkit-text-fill-color:#ffd900!important}
+:root[data-theme="drwinka"] .support-qr-card{background:#080808!important;color:#fff!important}
+:root[data-theme="drwinka"] .support-qr-card b{color:#fff!important}
+:root[data-theme="drwinka"] .support-qr-card small{color:#ffd900!important}
+:root[data-theme="drwinka"] .support-qr-switch button{color:#aaa!important;-webkit-text-fill-color:#aaa!important}
+:root[data-theme="drwinka"] .support-qr-switch button.active,
+:root[data-theme="drwinka"] .support-qr-action{color:#ffd900!important;-webkit-text-fill-color:#ffd900!important}
+html[data-platform="desktop"] .topbar.settings-mode>.desktop-settings-sidebar,
+html[data-platform="desktop"] .topbar.settings-mode>.desktop-settings-sidebar>nav,
+html[data-platform="desktop"] .topbar.settings-mode .settings-index nav,
+html[data-platform="desktop"] .topbar.settings-mode .settings-index nav button{box-sizing:border-box;min-width:0;max-width:100%}
+html[data-platform="desktop"] .topbar.settings-mode>.desktop-settings-sidebar>nav{overflow-x:hidden!important;scrollbar-width:none}
+html[data-platform="desktop"] .topbar.settings-mode>.desktop-settings-sidebar>nav::-webkit-scrollbar{display:none}
+
+/* Drwinka: spójne panele modułów Archiwum, Notatki i Kalendarz. */
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-sidebar,
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-sidebar>[data-module-title],
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-settings-back{color:#080808!important;-webkit-text-fill-color:#080808!important}
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-settings-back{border-bottom-color:#8f7600!important}
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button,
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button b,
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button small,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card b,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card small{color:#080808!important;-webkit-text-fill-color:#080808!important}
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button:hover,
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button.active,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card:hover,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card.active{border-color:#080808!important;background:#080808!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button.active b,
+:root[data-theme="drwinka"] .topbar.module-mode .desktop-module-list button.active small,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card.active b,
+:root[data-theme="drwinka"] .topbar.module-mode .archive-session-card.active small{color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .topbar.module-mode input{border-color:#080808!important;background:#080808!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .topbar.module-mode input::placeholder{color:#aaa!important;-webkit-text-fill-color:#aaa!important}
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter span,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter b,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter small{color:#080808!important;-webkit-text-fill-color:#080808!important}
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter.active,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter[aria-pressed="true"]{background:#080808!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter.active span,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter.active b,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter.active small,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter[aria-pressed="true"] span,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter[aria-pressed="true"] b,
+:root[data-theme="drwinka"] .topbar.module-mode .calendar-category-filter[aria-pressed="true"] small{color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root[data-theme="drwinka"] .workspace-panel,
+:root[data-theme="drwinka"] .calendar-panel,
+:root[data-theme="drwinka"] .notes-workspace,
+:root[data-theme="drwinka"] .archive-workspace{background:#030303!important;color:#fff!important}
 
 /* Jednolity system oznaczeń ról na czacie. */
 .chat-message .role-badges{gap:5px;margin-left:auto;margin-right:0;flex:0 0 auto}

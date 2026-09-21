@@ -27,8 +27,8 @@ test('each requested notification scene has its own palette and animation', () =
   assert.match(css, /data-alert-type="freeze"[^}]*#092957[^}]*#d9f5ff/);
 });
 
-test('all six selectable theme families define full opaque palettes', () => {
-  for (const theme of ['dark-titanium', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice']) {
+test('all seven selectable theme families define full opaque palettes', () => {
+  for (const theme of ['dark-titanium', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'drwinka']) {
     const match = new RegExp(`:root\\[data-theme="${theme}"\\](?:,:root\\[data-theme="[^"]+"\\])?\\{`).exec(css);
     const start = match?.index ?? -1;
     assert.notEqual(start, -1, `missing ${theme}`);
@@ -37,6 +37,20 @@ test('all six selectable theme families define full opaque palettes', () => {
       assert.ok(block.includes(token), `${theme} missing ${token}`);
     }
   }
+});
+
+test('Drwinka uses a black yellow white palette and animated menu accents', () => {
+  const start = css.indexOf(':root[data-theme="drwinka"]{');
+  const block = css.slice(start, css.indexOf('}', start));
+  assert.match(block, /#050505/i);
+  assert.match(block, /#ffd900/i);
+  assert.match(block, /#fffef4/i);
+  assert.match(css, /data-theme="drwinka"[^}]*\.desktop-sidebar button::before/);
+  assert.match(css, /translateX\(-145%\) skewX\(-18deg\)/);
+  assert.match(css, /data-theme="drwinka"[^}]*\.settings-index button:hover/);
+  assert.match(css, /data-theme="drwinka"[^}]*\.desktop-menu-bar/);
+  assert.match(css, /background:#ffd900!important/);
+  assert.match(css, /data-theme="drwinka"[^}]*\.settings-content/);
 });
 
 test('Miami Vice restores distinct pink, violet and cyan surfaces', () => {
