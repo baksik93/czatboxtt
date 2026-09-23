@@ -26,11 +26,19 @@ test('cloud synchronization reapplies filters to rendered messages', () => {
   assert.match(app, /filters:\[\.\.\.state\.filters\]/);
 });
 
+test('a local filter change always gets a version newer than cloud state', () => {
+  assert.match(app, /nextSyncVersion=section=>Math\.max\(Date\.now\(\),Number\(syncMeta\[section\]\|\|0\)\+1\)/);
+  assert.match(app, /syncMeta\[section\]=nextSyncVersion\(section\)/);
+  const futureCloudVersion = Date.now() + 60_000;
+  const localVersion = Math.max(Date.now(), futureCloudVersion + 1);
+  assert.ok(localVersion > futureCloudVersion);
+});
+
 test('published assets force a fresh filter script and service worker cache', () => {
   const html = fs.readFileSync(path.resolve(__dirname, '../web-client/public/index.html'), 'utf8');
   const worker = fs.readFileSync(path.resolve(__dirname, '../web-client/public/sw.js'), 'utf8');
-  assert.match(html, /app\.js\?v=129/);
-  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=129'\)/);
-  assert.match(worker, /czatbox-ttm-v129/);
-  assert.match(worker, /app\.js\?v=129/);
+  assert.match(html, /app\.js\?v=130/);
+  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=130'\)/);
+  assert.match(worker, /czatbox-ttm-v130/);
+  assert.match(worker, /app\.js\?v=130/);
 });
