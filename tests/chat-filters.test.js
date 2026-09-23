@@ -37,8 +37,17 @@ test('a local filter change always gets a version newer than cloud state', () =>
 test('published assets force a fresh filter script and service worker cache', () => {
   const html = fs.readFileSync(path.resolve(__dirname, '../web-client/public/index.html'), 'utf8');
   const worker = fs.readFileSync(path.resolve(__dirname, '../web-client/public/sw.js'), 'utf8');
-  assert.match(html, /app\.js\?v=130/);
-  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=130'\)/);
-  assert.match(worker, /czatbox-ttm-v130/);
-  assert.match(worker, /app\.js\?v=130/);
+  const hotfix = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v131.js'), 'utf8');
+  assert.match(html, /app-hotfix-v131\.js\?v=131/);
+  assert.doesNotMatch(html, /src="\/app\.js/);
+  assert.equal(hotfix, app);
+  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=131'\)/);
+  assert.match(worker, /czatbox-ttm-v131/);
+  assert.match(worker, /app-hotfix-v131\.js\?v=131/);
+});
+
+test('installed desktop cannot replace the uniquely named remote hotfix with its bundled app.js', () => {
+  const main = fs.readFileSync(path.resolve(__dirname, '../src/main.js'), 'utf8');
+  assert.match(main, /fs\.existsSync\(filePath\)/);
+  assert.doesNotMatch(main, /app-hotfix-v131/);
 });

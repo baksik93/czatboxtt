@@ -36,7 +36,9 @@ test('lokalny katalog prezentow jest kompletny i spojny', () => {
 
 test('interfejs laduje katalog przed kodem obslugi LIVE', () => {
   const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
-  assert.ok(html.indexOf('/gift-catalog.js') < html.indexOf('/app.js'));
+  const runtimeScript = html.match(/<script src="\/(app(?:-hotfix-v\d+)?\.js)[^"]*"/)?.[1];
+  assert.ok(runtimeScript, 'brak glownego skryptu aplikacji');
+  assert.ok(html.indexOf('/gift-catalog.js') < html.indexOf(`/${runtimeScript}`));
 
   const app = fs.readFileSync(path.join(publicDir, 'app.js'), 'utf8');
   assert.match(app, /window\.CZATBOX_GIFT_CATALOG/);
