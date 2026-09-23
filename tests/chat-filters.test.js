@@ -42,7 +42,7 @@ test('published assets force a fresh filter script and service worker cache', ()
   assert.doesNotMatch(html, /src="\/app\.js/);
   assert.equal(hotfix, app);
   assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=131'\)/);
-  assert.match(worker, /czatbox-ttm-v131/);
+  assert.match(worker, /czatbox-ttm-v132/);
   assert.match(worker, /app-hotfix-v131\.js\?v=131/);
 });
 

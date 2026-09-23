@@ -38,8 +38,8 @@ test('static notification backgrounds are exact 360 by 112 assets', () => {
   assert.match(css, /gift-alert-card:not\(\[data-alert-type="gift"\]\) \.gift-alert-visual\{visibility:hidden\}/);
 });
 
-test('all seven selectable theme families define full opaque palettes', () => {
-  for (const theme of ['dark-titanium', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'drwinka']) {
+test('all eight selectable theme families define full opaque palettes', () => {
+  for (const theme of ['dark-titanium', 'white-titanium', 'chill-serwis', 'rose-gold-glass', 'lazarskie-rejony', 'miami-vice', 'drwinka', 'sloneczna-polana']) {
     const match = new RegExp(`:root\\[data-theme="${theme}"\\](?:,:root\\[data-theme="[^"]+"\\])?\\{`).exec(css);
     const start = match?.index ?? -1;
     assert.notEqual(start, -1, `missing ${theme}`);
@@ -48,6 +48,21 @@ test('all seven selectable theme families define full opaque palettes', () => {
       assert.ok(block.includes(token), `${theme} missing ${token}`);
     }
   }
+});
+
+test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
+  const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-theme-v132.css'), 'utf8');
+  const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
+  const block = css.slice(start, css.indexOf('}', start));
+  assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
+  assert.match(block, /#052d36/i);
+  assert.match(block, /#ffd23f/i);
+  assert.match(block, /#eeb718/i);
+  assert.match(block, /#ffffff/i);
+  assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
+  assert.equal(deployedCss, css);
+  assert.match(html, /workspace-theme-v132\.css\?v=132/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
