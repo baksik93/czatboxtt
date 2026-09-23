@@ -44,15 +44,23 @@ test('all eight selectable theme families define full opaque palettes', () => {
     const start = match?.index ?? -1;
     assert.notEqual(start, -1, `missing ${theme}`);
     const block = css.slice(start, css.indexOf('}', start));
-    for (const token of ['--bg:', '--panel:', '--panel2:', '--line:', '--text:', '--muted:', '--cyan:', '--pink:', '--accent:', '--shadow:', '--theme-canvas:', '--theme-chrome:', '--theme-panel:', '--theme-row:', '--theme-control:']) {
+    for (const token of ['--bg:', '--panel:', '--panel2:', '--line:', '--text:', '--muted:', '--cyan:', '--pink:', '--accent:', '--shadow:', '--theme-canvas:', '--theme-chrome:', '--theme-panel:', '--theme-row:', '--theme-control:', '--workspace-shell-border:', '--workspace-shell-shadow:']) {
       assert.ok(block.includes(token), `${theme} missing ${token}`);
     }
   }
 });
 
+test('desktop workspaces use one rounded Codex-style shell without square module overrides', () => {
+  assert.match(css, /--workspace-shell-radius:17px/);
+  assert.match(css, /\.tab\.active\{[\s\S]*?margin:var\(--workspace-shell-gap\)!important;[\s\S]*?border-radius:var\(--workspace-shell-radius\)!important/);
+  assert.match(css, /#chat \.desktop-chat-content\{[\s\S]*?border-radius:var\(--workspace-shell-radius\);[\s\S]*?overflow:hidden/);
+  assert.match(css, /\.notes-dialog,[\s\S]*?\.calendar-panel,[\s\S]*?\.radio-panel\{[\s\S]*?border-radius:calc\(var\(--workspace-shell-radius\) - 1px\)!important/);
+  assert.match(css, /\.timer-dialog\{[\s\S]*?border-radius:var\(--workspace-shell-radius\)!important/);
+});
+
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
   const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-theme-v132.css'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-rounded-v133.css'), 'utf8');
   const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
@@ -62,7 +70,7 @@ test('Słoneczna polana uses dark teal, gold, yellow and white throughout the in
   assert.match(block, /#ffffff/i);
   assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
   assert.equal(deployedCss, css);
-  assert.match(html, /workspace-theme-v132\.css\?v=132/);
+  assert.match(html, /workspace-rounded-v133\.css\?v=133/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
