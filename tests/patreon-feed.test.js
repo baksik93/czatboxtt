@@ -12,7 +12,7 @@ assert.ok(workspace.indexOf("dataset.timer='true'")<workspace.indexOf("dataset.w
 assert.match(workspace,/cttm-patreon-posts-cache-v1/,'brak pamięci podręcznej postów');
 assert.match(workspace,/CZATBOX_PATREON_FEED_ENDPOINT\|\|'https:\/\/czatbox-patreon-feed\.p548bzdpmd\.workers\.dev\/posts'/,'brak niezależnego od cache adresu kanału');
 assert.match(workspace,/supportQr\.hidden=!\['chat','patreon'\]\.includes\(name\)/,'kody QR muszą pozostać widoczne w zakładce Patreon');
-assert.match(html,/patreon-feed-config\.js[^<]*<\/script><script src="\/workspace\.js/,'konfiguracja kanału musi ładować się przed workspace.js');
+assert.match(html,/patreon-feed-config\.js[^<]*<\/script><script src="\/workspace(?:-shell-v134)?\.js/,'konfiguracja kanału musi ładować się przed workspace.js');
 assert.match(worker,/env\.PATREON_ACCESS_TOKEN/,'Worker musi odczytywać token z sekretu');
 assert.doesNotMatch(worker,/PATREON_ACCESS_TOKEN\s*[:=]\s*['"][^'"]+['"]/,'token nie może być zapisany w kodzie');
 assert.match(worker,/excerpt:isPublic\?excerpt\(data\.content\):''/,'treść płatnych postów musi być ukryta');

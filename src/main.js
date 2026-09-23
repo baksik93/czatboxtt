@@ -830,6 +830,23 @@ ipcMain.handle('desktop:set-minimize-to-tray', (_event, enabled) => ({
   ok: true,
   enabled: setMinimizeToTray(enabled)
 }));
+
+const titleBarThemes = {
+  'dark-titanium': { color: '#0c1119', symbolColor: '#f5f7fb' },
+  'white-titanium': { color: '#deddd6', symbolColor: '#20242b' },
+  'chill-serwis': { color: '#06182f', symbolColor: '#f2f9ff' },
+  'rose-gold-glass': { color: '#fff8f4', symbolColor: '#402c2c' },
+  'rose-glass': { color: '#fff8f4', symbolColor: '#402c2c' },
+  'lazarskie-rejony': { color: '#0c131e', symbolColor: '#f3f6fb' },
+  'enigma-z': { color: '#0c131e', symbolColor: '#f3f6fb' },
+  'miami-vice': { color: '#24104d', symbolColor: '#fff4ff' },
+  drwinka: { color: '#ffd900', symbolColor: '#080808' },
+  'sloneczna-polana': { color: '#042832', symbolColor: '#ffffff' }
+};
+ipcMain.on('desktop:titlebar-theme', (event, theme) => {
+  if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents || process.platform !== 'win32') return;
+  mainWindow.setTitleBarOverlay({ ...(titleBarThemes[String(theme)] || titleBarThemes['dark-titanium']), height: 35 });
+});
 ipcMain.on('desktop:open-workspace', (event, name) => {
   if (!widgetWindow || event.sender !== widgetWindow.webContents || !mainWindow || mainWindow.isDestroyed()) return;
   const workspace = String(name || '');
@@ -909,6 +926,10 @@ function createWindow() {
     title: 'Czatbox TT',
     icon: APP_ICON_PATH,
     autoHideMenuBar: true,
+    ...(process.platform === 'win32' ? {
+      titleBarStyle: 'hidden',
+      titleBarOverlay: { color: '#0c1119', symbolColor: '#f5f7fb', height: 35 }
+    } : {}),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

@@ -52,15 +52,31 @@ test('all eight selectable theme families define full opaque palettes', () => {
 
 test('desktop workspaces use one rounded Codex-style shell without square module overrides', () => {
   assert.match(css, /--workspace-shell-radius:17px/);
-  assert.match(css, /\.tab\.active\{[\s\S]*?margin:var\(--workspace-shell-gap\)!important;[\s\S]*?border-radius:var\(--workspace-shell-radius\)!important/);
-  assert.match(css, /#chat \.desktop-chat-content\{[\s\S]*?border-radius:var\(--workspace-shell-radius\);[\s\S]*?overflow:hidden/);
-  assert.match(css, /\.notes-dialog,[\s\S]*?\.calendar-panel,[\s\S]*?\.radio-panel\{[\s\S]*?border-radius:calc\(var\(--workspace-shell-radius\) - 1px\)!important/);
-  assert.match(css, /\.timer-dialog\{[\s\S]*?border-radius:var\(--workspace-shell-radius\)!important/);
+  assert.match(css, /\.tab\.active\{[\s\S]*?margin:0!important;[\s\S]*?border-radius:var\(--workspace-shell-radius\) var\(--workspace-shell-radius\) 0 0!important/);
+  assert.match(css, /#chat \.desktop-chat-content\{[\s\S]*?border:0;[\s\S]*?border-radius:var\(--workspace-shell-radius\) var\(--workspace-shell-radius\) 0 0;[\s\S]*?overflow:hidden/);
+  assert.match(css, /\.notes-dialog,[\s\S]*?\.calendar-panel,[\s\S]*?\.radio-panel\{[\s\S]*?border-radius:var\(--workspace-shell-radius\) var\(--workspace-shell-radius\) 0 0!important/);
+  assert.match(css, /\.timer-dialog\{[\s\S]*?border-radius:var\(--workspace-shell-radius\) var\(--workspace-shell-radius\) 0 0!important/);
+  assert.doesNotMatch(css, /--workspace-shell-gap:/);
+});
+
+test('Electron merges the application menu with one theme-aware Windows title bar', () => {
+  const main = fs.readFileSync(path.join(root, 'src/main.js'), 'utf8');
+  const preload = fs.readFileSync(path.join(root, 'src/desktop-preload.js'), 'utf8');
+  const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace.js'), 'utf8');
+  const deployedWorkspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v134.js'), 'utf8');
+  assert.match(main, /titleBarStyle: 'hidden'/);
+  assert.match(main, /titleBarOverlay: \{ color: '#0c1119', symbolColor: '#f5f7fb', height: 35 \}/);
+  assert.match(main, /desktop:titlebar-theme/);
+  assert.match(preload, /setTitleBarTheme:/);
+  assert.match(workspace, /classList\.add\('electron-shell'\)/);
+  assert.match(css, /electron-shell \.desktop-menu-bar\{padding-right:146px\}/);
+  assert.match(css, /-webkit-app-region:drag/);
+  assert.equal(deployedWorkspace, workspace);
 });
 
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
   const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-rounded-v133.css'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v134.css'), 'utf8');
   const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
@@ -70,7 +86,7 @@ test('Słoneczna polana uses dark teal, gold, yellow and white throughout the in
   assert.match(block, /#ffffff/i);
   assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
   assert.equal(deployedCss, css);
-  assert.match(html, /workspace-rounded-v133\.css\?v=133/);
+  assert.match(html, /workspace-shell-v134\.css\?v=134/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
