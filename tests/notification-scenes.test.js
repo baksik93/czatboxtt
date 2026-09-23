@@ -7,9 +7,10 @@ const root = path.resolve(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'web-client/public/app.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-v80.css'), 'utf8');
 
-test('freeze battle event is queued as a right-side alert and retained in chat', () => {
+test('freeze battle event is queued only as a right-side alert', () => {
   assert.match(app, /function notifyBattleFreeze\(/);
-  assert.match(app, /notifyBattleFreeze\(event\.special\);appendEvent\(/);
+  assert.match(app, /else notifyBattleFreeze\(event\.special\);return/);
+  assert.doesNotMatch(app, /notifyBattleFreeze\(event\.special\);appendEvent\(/);
 });
 
 test('all special notifications share one fixed card size', () => {
@@ -25,6 +26,16 @@ test('each requested notification scene has its own palette and animation', () =
   }
   assert.match(css, /data-alert-type="multiplier"[^}]*#5c1508[^}]*#ff7c27/);
   assert.match(css, /data-alert-type="freeze"[^}]*#092957[^}]*#d9f5ff/);
+});
+
+test('static notification backgrounds are exact 360 by 112 assets', () => {
+  for (const type of ['moderator', 'superfan', 'guardian', 'multiplier', 'freeze']) {
+    const image = fs.readFileSync(path.join(root, `web-client/public/alerts/${type}.png`));
+    assert.equal(image.readUInt32BE(16), 360, `${type} width`);
+    assert.equal(image.readUInt32BE(20), 112, `${type} height`);
+    assert.match(css, new RegExp(`url\\('/alerts/${type}\\.png'\\)`));
+  }
+  assert.match(css, /gift-alert-card:not\(\[data-alert-type="gift"\]\) \.gift-alert-visual\{visibility:hidden\}/);
 });
 
 test('all seven selectable theme families define full opaque palettes', () => {

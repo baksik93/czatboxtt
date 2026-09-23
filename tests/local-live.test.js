@@ -107,7 +107,7 @@ test('a malformed connector rate-limit error is reported as 4429', async () => {
   assert.equal(live.current, null);
 });
 
-test('superfan events and flattened role badges survive the local LIVE bridge', async () => {
+test('moderator, superfan and guardian roles survive the local LIVE bridge', async () => {
   const { live, connections } = fixture(); const packets = [];
   const start = live.start('one', 'creator', p => packets.push(p)); await tick();
   connections[0].resolve(); await start;
@@ -115,11 +115,14 @@ test('superfan events and flattened role badges survive the local LIVE bridge', 
   connections[0].emit('superFanJoin', { uniqueId: 'superfan', nickname: 'Superfan', userBadges: [superFanBadge] });
   const guardianBadge = { image: { urlList: ['https://p16-webcast.tiktokcdn.com/webcast-va/guardian-badge-icon-4.png'] } };
   connections[0].emit('chat', { uniqueId: 'guardian', nickname: 'Strażnik', comment: 'hej', userBadges: [guardianBadge] });
+  connections[0].emit('chat', { uniqueId: 'moderator', nickname: 'Moderator', comment: 'hej', isModerator: true });
   const messages = packets.filter(packet => packet.kind === 'message').map(packet => JSON.parse(packet.data));
   assert.equal(messages[0].event, 'superFanJoin');
   assert.equal(messages[0].data.isSuperFan, true);
   assert.equal(messages[0].data.user.isSuperFan, true);
   assert.deepEqual(messages[0].data.user.userBadges, [superFanBadge]);
   assert.deepEqual(messages[1].data.user.userBadges, [guardianBadge]);
+  assert.equal(messages[2].data.isModerator, true);
+  assert.equal(messages[2].data.user.isModerator, true);
   live.stop();
 });

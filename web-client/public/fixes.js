@@ -24,7 +24,7 @@
       audioContext ||= new (window.AudioContext||window.webkitAudioContext)();
       if(audioContext.state==='suspended')await audioContext.resume();
       if(!keepAliveTone){const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();gain.gain.value=.00001;oscillator.connect(gain).connect(audioContext.destination);oscillator.start();keepAliveTone=oscillator}
-      if('mediaSession'in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:'Czytanie czatu LIVE',artist:'Czatbox TT(M)'});
+      if('mediaSession'in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:'Czytanie czatu LIVE',artist:'Czatbox TT'});
     }catch(error){console.warn('System iOS nie udostępnił sesji audio',error)}
   };
   document.querySelector('#tts')?.addEventListener('change',claimAudioSession);

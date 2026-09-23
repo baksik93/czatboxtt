@@ -61,6 +61,7 @@ let latestWidgetData = { drives: [], accent: '#4fdde5' };
 let livePowerBlockerId = null;
 let audioDuckDepth = 0;
 let audioDuckChain = Promise.resolve();
+let audioDuckSafetyTimer = null;
 const RENDERER_CACHE_EPOCH = 'workspace-v152-gift-sound-hotfix';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 const CANONICAL_USER_DATA_PATH = path.join(app.getPath('userData'), 'canonical-user-data.json');
@@ -121,6 +122,8 @@ function queueAudioDuck(mode) {
 
 function forceRestoreAudio() {
   audioDuckDepth = 0;
+  clearTimeout(audioDuckSafetyTimer);
+  audioDuckSafetyTimer = null;
   return queueAudioDuck('Restore');
 }
 
@@ -863,12 +866,18 @@ ipcMain.handle('desktop:audio-duck-start', async event => {
   if (!isLiveSender(event)) return { ok: false };
   audioDuckDepth += 1;
   if (audioDuckDepth === 1) await queueAudioDuck('Duck');
+  clearTimeout(audioDuckSafetyTimer);
+  audioDuckSafetyTimer = setTimeout(() => void forceRestoreAudio(), 90000);
   return { ok: true, depth: audioDuckDepth };
 });
 ipcMain.handle('desktop:audio-duck-stop', async event => {
   if (!isLiveSender(event)) return { ok: false };
   audioDuckDepth = Math.max(0, audioDuckDepth - 1);
-  if (audioDuckDepth === 0) await queueAudioDuck('Restore');
+  if (audioDuckDepth === 0) {
+    clearTimeout(audioDuckSafetyTimer);
+    audioDuckSafetyTimer = null;
+    await queueAudioDuck('Restore');
+  }
   return { ok: true, depth: audioDuckDepth };
 });
 ipcMain.on('desktop:live-connect', (event, id, username) => {
@@ -1007,7 +1016,7 @@ function configureUpdater() {
   updateTimer = setInterval(check, UPDATE_INTERVAL_MS);
 }
 
-const singleInstance = app.requestSingleInstanceLock();
+const singleInstance = LOCAL_UI_PREVIEW || app.requestSingleInstanceLock();
 if (!singleInstance) {
   app.quit();
 } else {

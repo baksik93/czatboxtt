@@ -38,4 +38,5 @@
 <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
 <symbol id="back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6M8 12h11"/></symbol>
 <symbol id="forward" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6M16 12H5"/></symbol>
+<symbol id="logout" viewBox="0 0 24 24"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h9"/></symbol>
 </defs></svg>

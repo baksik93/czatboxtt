@@ -14,8 +14,9 @@ test('desktop settings show only the selected category', () => {
   assert.match(css, /\.settings-section\.settings-category-hidden\{display:none!important\}/);
 });
 
-test('account pencil opens the isolated account category', () => {
-  assert.match(workspace, /showSettingsCategory\('settings-account',\{focus:true\}\)/);
+test('account menu opens the account category in regular settings', () => {
+  assert.match(workspace, /cttm-open-account-settings',\(\)=>\{switchTopTab\('settings'\);showSettingsCategory\('settings-account',\{focus:true\}\)\}/);
+  assert.doesNotMatch(workspace, /accountPage\.id='account'/);
 });
 
 test('project support offers Patreon by default and keeps PayPal available', () => {
