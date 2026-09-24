@@ -832,16 +832,16 @@ ipcMain.handle('desktop:set-minimize-to-tray', (_event, enabled) => ({
 }));
 
 const titleBarThemes = {
-  'dark-titanium': { color: '#0c1119', symbolColor: '#f5f7fb' },
-  'white-titanium': { color: '#deddd6', symbolColor: '#20242b' },
+  'dark-titanium': { color: '#202124', symbolColor: '#f5f7fb' },
+  'white-titanium': { color: '#e2e1dc', symbolColor: '#20242b' },
   'chill-serwis': { color: '#06182f', symbolColor: '#f2f9ff' },
-  'rose-gold-glass': { color: '#fff8f4', symbolColor: '#402c2c' },
-  'rose-glass': { color: '#fff8f4', symbolColor: '#402c2c' },
+  'rose-gold-glass': { color: '#ead0c8', symbolColor: '#402c2c' },
+  'rose-glass': { color: '#ead0c8', symbolColor: '#402c2c' },
   'lazarskie-rejony': { color: '#0c131e', symbolColor: '#f3f6fb' },
   'enigma-z': { color: '#0c131e', symbolColor: '#f3f6fb' },
   'miami-vice': { color: '#24104d', symbolColor: '#fff4ff' },
-  drwinka: { color: '#ffd900', symbolColor: '#080808' },
-  'sloneczna-polana': { color: '#042832', symbolColor: '#ffffff' }
+  drwinka: { color: '#e9c600', symbolColor: '#080808' },
+  'sloneczna-polana': { color: '#06343e', symbolColor: '#ffffff' }
 };
 ipcMain.on('desktop:titlebar-theme', (event, theme) => {
   if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents || process.platform !== 'win32') return;
