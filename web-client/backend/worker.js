@@ -235,9 +235,77 @@ async function proxyAvatar(source) {
   return json({ error: "Zbyt wiele przekierowa\u0144 awatara." }, 502);
 }
 __name(proxyAvatar, "proxyAvatar");
+var RADIO_PLAYLIST_SOURCES = {
+  "radio-zet": { type: "triton", mount: "RADIO_ZET" },
+  "rmf-fm": { type: "rmf" },
+  "radio-eska": { type: "eska", host: "https://www.eska.pl", id: "2380" },
+  "eska-rock": { type: "eska", host: "https://www.eskarock.pl", id: "5380" },
+  eska2: { type: "eska", host: "https://dwa.eska.pl", id: "1380" }
+};
+function radioText(value) {
+  return String(value || "").trim().slice(0, 180);
+}
+__name(radioText, "radioText");
+function radioTrack({ title, artist, playedAt, image = "" }) {
+  return { title: radioText(title), artist: radioText(artist), playedAt: Number(playedAt) || 0, image: /^https:\/\//i.test(image) ? image : "" };
+}
+__name(radioTrack, "radioTrack");
+async function fetchRadioEska(source) {
+  const response = await fetch(`${source.host}/api/mobile/station/${source.id}/was_played/`, { headers: { accept: "application/json" }, cf: { cacheTtl: 3600, cacheEverything: true } });
+  if (!response.ok) throw new Error(`radio_eska_${response.status}`);
+  const data = await response.json();
+  if (!Array.isArray(data)) throw new Error("radio_eska_format");
+  return data.map((item) => radioTrack({ title: item?.name, artist: Array.isArray(item?.artists) ? item.artists.map((artist) => artist?.name).filter(Boolean).join(" / ") : "", playedAt: Date.parse(item?.play_date || ""), image: item?.thumb || item?.image })).filter((item) => item.title).sort((a, b) => b.playedAt - a.playedAt).slice(0, 18);
+}
+__name(fetchRadioEska, "fetchRadioEska");
+async function fetchRadioRmf() {
+  const listResponse = await fetch("https://live.rmf.fm/items-list.html", { headers: { accept: "application/json" }, cf: { cacheTtl: 3600, cacheEverything: true } });
+  if (!listResponse.ok) throw new Error(`radio_rmf_list_${listResponse.status}`);
+  const list = await listResponse.json();
+  const songs = Array.isArray(list) ? list.filter((item) => item?.category === "song").slice(0, 18) : [];
+  if (!songs.length) return [];
+  const detailsResponse = await fetch(`https://live.rmf.fm/items.html?ids=${songs.map((item) => item.ID).join(",")}`, { headers: { accept: "application/json" }, cf: { cacheTtl: 3600, cacheEverything: true } });
+  if (!detailsResponse.ok) throw new Error(`radio_rmf_items_${detailsResponse.status}`);
+  const details = await detailsResponse.json();
+  return songs.map((item) => {
+    const detail = details?.[item.ID] || {}, combined = radioText(detail.title), split = combined.indexOf(" - ");
+    return radioTrack({ title: split >= 0 ? combined.slice(split + 3) : combined, artist: split >= 0 ? combined.slice(0, split) : "RMF FM", playedAt: Number(item.timestamp), image: String(detail.photo || "").startsWith("//") ? `https:${detail.photo}` : detail.photo });
+  }).filter((item) => item.title);
+}
+__name(fetchRadioRmf, "fetchRadioRmf");
+function tritonProperty(block, name) {
+  const match = block.match(new RegExp(`<property\\s+name=["']${name}["'][^>]*>\\s*(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?\\s*</property>`, "i"));
+  return radioText(match?.[1] || "").replaceAll("&amp;", "&").replaceAll("&quot;", '"').replaceAll("&apos;", "'").replaceAll("&lt;", "<").replaceAll("&gt;", ">");
+}
+__name(tritonProperty, "tritonProperty");
+async function fetchRadioTriton(source) {
+  const endpoint = `https://np.tritondigital.com/public/nowplaying?mountName=${encodeURIComponent(source.mount)}&numberToFetch=18&eventType=track`;
+  const response = await fetch(endpoint, { headers: { accept: "application/xml,text/xml" }, cf: { cacheTtl: 3600, cacheEverything: true } });
+  if (!response.ok) throw new Error(`radio_triton_${response.status}`);
+  const xml = await response.text(), tracks = [];
+  for (const match of xml.matchAll(/<nowplaying-info\b([^>]*)>([\s\S]*?)<\/nowplaying-info>/gi)) {
+    const timestamp = match[1].match(/timestamp=["'](\d+)["']/i)?.[1];
+    tracks.push(radioTrack({ title: tritonProperty(match[2], "cue_title"), artist: tritonProperty(match[2], "track_artist_name"), playedAt: Number(tritonProperty(match[2], "cue_time_start")) || Number(timestamp) * 1e3 }));
+  }
+  return tracks.filter((item) => item.title);
+}
+__name(fetchRadioTriton, "fetchRadioTriton");
+async function radioPlaylist(station) {
+  const source = RADIO_PLAYLIST_SOURCES[station];
+  if (!source) return json({ error: "Nieznana stacja radiowa." }, 404);
+  try {
+    const tracks = source.type === "eska" ? await fetchRadioEska(source) : source.type === "rmf" ? await fetchRadioRmf() : await fetchRadioTriton(source);
+    return json({ station, updatedAt: Date.now(), refreshAfterMs: 36e5, tracks }, 200, { "cache-control": "public, max-age=3600, s-maxage=3600", "access-control-allow-origin": "*" });
+  } catch (error) {
+    console.error(JSON.stringify({ event: "radio_playlist_failed", station, message: error?.message || "unknown" }));
+    return json({ error: "Nie udało się pobrać playlisty stacji." }, 502, { "cache-control": "no-store" });
+  }
+}
+__name(radioPlaylist, "radioPlaylist");
 async function api(request, env) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
   if (method !== "GET" && !sameOrigin(request)) return json({ error: "Niedozwolone \u017Ar\xF3d\u0142o \u017C\u0105dania." }, 403);
+  if (path === "/api/radio/playlist" && method === "GET") return radioPlaylist(String(url.searchParams.get("station") || ""));
   if (path === "/api/auth/register" && method === "POST") {
     const input = await body(request), name = String(input?.name || "").trim(), email = normalizeEmail(input?.email), password = input?.password;
     if (name.length < 2 || name.length > 60 || !validEmail(email) || !validPassword(password)) {

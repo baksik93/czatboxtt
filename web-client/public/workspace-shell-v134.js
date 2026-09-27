@@ -207,6 +207,7 @@
     const moduleMode=isDesktop&&['archive','notes','calendar'].includes(name);desktopSidebar?.classList.toggle('settings-mode',moduleMode);desktopSidebar?.classList.toggle('module-mode',moduleMode);if(desktopSettingsSidebar)desktopSettingsSidebar.hidden=true;moduleSidebar.hidden=!moduleMode;if(moduleMode)renderModuleSidebar(name);
     const stats=$('#stats');if(stats)stats.hidden=name!=='chat';renderLiveTools();
     window.dispatchEvent(new CustomEvent('cttm-workspace-change',{detail:name}));
+    if(name==='archive'){$('#refreshArchive')?.click();requestAnimationFrame(()=>renderModuleSidebar('archive'))}
     if(name==='notes'){notes.hidden=false;$('#notesSearch')?.dispatchEvent(new Event('input'));}
     if(name==='calendar')renderCalendar();if(name==='radio')renderRadio();if(name==='patreon'){markPatreonSeen();void loadPatreonPosts()}
   }
