@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const app = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v150.js'), 'utf8');
+const app = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v163.js'), 'utf8');
 const css = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app.css'), 'utf8');
 
 test('every chat filter button owns a click handler and persists changes', () => {
@@ -37,17 +37,17 @@ test('a local filter change always gets a version newer than cloud state', () =>
 test('published assets force a fresh filter script and service worker cache', () => {
   const html = fs.readFileSync(path.resolve(__dirname, '../web-client/public/index.html'), 'utf8');
   const worker = fs.readFileSync(path.resolve(__dirname, '../web-client/public/sw.js'), 'utf8');
-  const hotfix = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v150.js'), 'utf8');
-  assert.match(html, /app-hotfix-v150\.js\?v=150/);
+  const hotfix = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v163.js'), 'utf8');
+  assert.match(html, /app-hotfix-v163\.js\?v=163/);
   assert.doesNotMatch(html, /src="\/app\.js/);
   assert.equal(hotfix, app);
-  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=151'\)/);
-  assert.match(worker, /czatbox-ttm-v162/);
-  assert.match(worker, /app-hotfix-v150\.js\?v=150/);
+  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=175'\)/);
+  assert.match(worker, /czatbox-ttm-v175/);
+  assert.match(worker, /app-hotfix-v163\.js\?v=163/);
 });
 
 test('installed desktop cannot replace the uniquely named remote hotfix with its bundled app.js', () => {
   const main = fs.readFileSync(path.resolve(__dirname, '../src/main.js'), 'utf8');
   assert.match(main, /fs\.existsSync\(filePath\)/);
-  assert.doesNotMatch(main, /app-hotfix-v150/);
+  assert.doesNotMatch(main, /app-hotfix-v163/);
 });

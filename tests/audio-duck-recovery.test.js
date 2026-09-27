@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const renderer = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v150.js'), 'utf8');
-const workspace = fs.readFileSync(path.resolve(__dirname, '../web-client/public/workspace-shell-v138.js'), 'utf8');
+const renderer = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v163.js'), 'utf8');
+const workspace = fs.readFileSync(path.resolve(__dirname, '../web-client/public/workspace-shell-v145.js'), 'utf8');
 const main = fs.readFileSync(path.resolve(__dirname, '../src/main.js'), 'utf8');
 
 test('TTS and gift duck leases are idempotent and always have a timeout', () => {

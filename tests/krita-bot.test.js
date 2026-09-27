@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const publicDir = path.resolve(__dirname, '../web-client/public');
-const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v150.js'), 'utf8');
-const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v160.css'), 'utf8');
+const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v163.js'), 'utf8');
+const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v170.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 const icons = fs.readFileSync(path.join(publicDir, 'icons.svg'), 'utf8');
@@ -42,10 +42,10 @@ test('Krita has an animated blue nickname and an accessible reduced-motion fallb
 });
 
 test('published entrypoint and offline cache reference all Krita assets', () => {
-  assert.match(html, /workspace-codex-v160\.css\?v=160/);
-  assert.match(html, /app-hotfix-v150\.js\?v=150/);
-  assert.match(worker, /czatbox-ttm-v162/);
-  assert.match(worker, /workspace-codex-v160\.css\?v=160/);
-  assert.match(worker, /app-hotfix-v150\.js\?v=150/);
+  assert.match(html, /workspace-codex-v170\.css\?v=170/);
+  assert.match(html, /app-hotfix-v163\.js\?v=163/);
+  assert.match(worker, /czatbox-ttm-v175/);
+  assert.match(worker, /workspace-codex-v170\.css\?v=170/);
+  assert.match(worker, /app-hotfix-v163\.js\?v=163/);
   assert.match(worker, /\/avatars\/krita\.jpeg/);
 });

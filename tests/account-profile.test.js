@@ -4,10 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const appSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'app.js'), 'utf8');
+const appSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'app-hotfix-v163.js'), 'utf8');
 const mainSource = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8');
 const workspaceSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace.js'), 'utf8');
-const workspaceCss = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace-v80.css'), 'utf8');
+const workspaceCss = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace-codex-v170.css'), 'utf8');
 const indexSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'index.html'), 'utf8');
 
 test('account avatar stays in local storage and is removed from profile requests', () => {
@@ -29,6 +29,7 @@ test('clicking the account dock opens the quick account menu', () => {
   assert.match(appSource, /id="accountDailyLimit">100%/);
   assert.match(appSource, /Tygodniowy/);
   assert.match(appSource, /Żeton resetu/);
+  assert.match(appSource, /id="accountUseResetToken"/);
   assert.match(appSource, /id="accountMenuSettings"/);
   assert.match(appSource, /id="accountMenuLogout"/);
   assert.match(workspaceCss, /\.account-quick-menu/);

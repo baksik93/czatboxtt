@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v150.js'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v160.css'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v163.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v170.css'), 'utf8');
 
 test('freeze battle event is queued only as a right-side alert', () => {
   assert.match(app, /function notifyBattleFreeze\(/);
@@ -62,7 +62,7 @@ test('desktop workspaces use one rounded Codex-style shell without square module
 test('Electron merges the application menu with one theme-aware Windows title bar', () => {
   const main = fs.readFileSync(path.join(root, 'src/main.js'), 'utf8');
   const preload = fs.readFileSync(path.join(root, 'src/desktop-preload.js'), 'utf8');
-  const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v138.js'), 'utf8');
+  const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v145.js'), 'utf8');
   assert.match(main, /titleBarStyle: 'hidden'/);
   assert.match(main, /titleBarOverlay: \{ color: '#0c1119', symbolColor: '#f5f7fb', height: 35 \}/);
   assert.match(main, /desktop:titlebar-theme/);
@@ -71,12 +71,12 @@ test('Electron merges the application menu with one theme-aware Windows title ba
   assert.match(css, /electron-shell \.desktop-menu-bar\{padding-right:146px\}/);
   assert.match(css, /-webkit-app-region:drag/);
   assert.match(workspace, /setTitleBarTheme/);
-  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v138\.js\?v=138/);
+  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v145\.js\?v=145/);
 });
 
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
   const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v160.css'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v170.css'), 'utf8');
   const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
@@ -86,7 +86,7 @@ test('Słoneczna polana uses dark teal, gold, yellow and white throughout the in
   assert.match(block, /#ffffff/i);
   assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
   assert.equal(deployedCss, css);
-  assert.match(html, /workspace-codex-v160\.css\?v=160/);
+  assert.match(html, /workspace-codex-v170\.css\?v=170/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
