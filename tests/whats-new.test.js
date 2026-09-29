@@ -5,8 +5,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const publicDir = path.join(root, 'web-client', 'public');
-const workspace = fs.readFileSync(path.join(publicDir, 'workspace-shell-v145.js'), 'utf8');
-const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v170.css'), 'utf8');
+const workspace = fs.readFileSync(path.join(publicDir, 'workspace-shell-v150.js'), 'utf8');
+const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v178.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 
@@ -24,15 +24,15 @@ test('Co nowego is removed from Pomoc and launched by the round account-dock que
 test('Co nowego follows the supplied editorial changelog structure with Czatbox content', () => {
   assert.match(workspace, /id='aboutWhatsNew'/);
   assert.match(workspace, /<h2 id="whatsNewTitle">Co nowego<\/h2>/);
-  assert.match(workspace, /<time datetime="2026-09-27">27 września 2026<\/time>/);
+  assert.match(workspace, /<time datetime="2026-09-28">28 września 2026<\/time>/);
   assert.match(workspace, /class="whats-new-hero"/);
   assert.match(workspace, /Co nowego/);
   assert.match(workspace, /Co ulepszyliśmy/);
   assert.match(workspace, /Co pod maską/);
-  assert.match(workspace, /Większe limity wiadomości TTS/);
-  assert.match(workspace, /Dziennie możesz odsłuchać 800 wiadomości, a tygodniowo 5600/);
-  assert.match(workspace, /Krita pilnuje pozostałego limitu/);
-  assert.match(workspace, /Radio w czytelniejszym układzie/);
+  assert.match(workspace, /Cztery języki całej aplikacji/);
+  assert.match(workspace, /Precyzyjne reguły TTS/);
+  assert.match(workspace, /Archiwa zostają na miejscu/);
+  assert.match(workspace, /Historia aktualizacji/);
   assert.match(workspace, /whatsNewSupport\.className='whats-new-section is-support'/);
   assert.match(workspace, /<h3><span>Wsparcie<\/span><\/h3>/);
   assert.match(workspace, /Pomóż rozwinąć Czatbox TT na urządzenia Apple/);
@@ -52,12 +52,21 @@ test('the changelog has a right-side close control, no footer and an independent
   assert.match(workspace, /event\.key==='Escape'/);
   assert.match(css, /\.whats-new-frame\{grid-template-rows:auto minmax\(0,1fr\)\}/);
   assert.match(css, /\.whats-new-scroll\{min-height:0;overflow:auto/);
+  assert.match(css, /\.whats-new-scroll\{[^}]*scrollbar-width:none;[^}]*-ms-overflow-style:none/);
+  assert.match(css, /\.whats-new-scroll::-webkit-scrollbar\{display:none;width:0;height:0\}/);
   assert.match(css, /\.whats-new-article\{[^}]*text-align:left/);
   assert.match(css, /\.whats-new-header\{/);
   assert.match(css, /\.whats-new-backdrop\{[^}]*position:fixed;[^}]*display:grid;place-items:center/);
   assert.match(css, /\.whats-new-backdrop #aboutWhatsNew\.whats-new-panel\{[^}]*width:min\(720px/);
   assert.match(css, /@media\(max-width:760px\)/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test('the release hero uses a clean transparent icon without an added navy outline', () => {
+  assert.match(workspace, /<img src="\/whats-new-app-icon-v1\.png" alt="Czatbox TT">/);
+  assert.doesNotMatch(workspace, /<img src="\/app-icon-512\.png" alt="Czatbox TT">/);
+  assert.match(css, /\.whats-new-hero img\{[^}]*filter:none/);
+  assert.match(worker, /\/whats-new-app-icon-v1\.png/);
 });
 
 test('the hero is edge-to-edge, section labels have symmetric lines and technical points reuse the gold markers', () => {
@@ -81,20 +90,22 @@ test('the hero is edge-to-edge, section labels have symmetric lines and technica
 });
 
 test('after an update the changelog opens once and there is no separate support popup', () => {
-  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.33'/);
+  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.34'/);
   assert.match(workspace, /localStorage\.getItem\(whatsNewSeenKey\)==='true'/);
-  assert.match(workspace, /localStorage\.setItem\(whatsNewSeenKey,'true'\);openWhatsNew\(\);return true/);
+  assert.match(workspace, /localStorage\.setItem\(whatsNewSeenKey,'true'\);openWhatsNew\(\);window\.playCzatboxNotificationSound\?\.\(\);return true/);
+  assert.match(workspace, /whatsNewLauncher\.onclick=openWhatsNew/);
+  assert.doesNotMatch(workspace, /whatsNewLauncher\.onclick=\(\)=>\{[^}]*playCzatboxNotificationSound/);
   assert.doesNotMatch(workspace, /supportIntro|showSupportIntro|openSupportAfterWhatsNew|cttm-support-intro-shown/);
   assert.doesNotMatch(css, /support-intro-backdrop|support-intro-card|support-intro-actions/);
 });
 
 test('published assets use the new changelog shell and cache generation', () => {
-  assert.match(html, /workspace-codex-v170\.css\?v=170/);
-  assert.match(html, /app-hotfix-v163\.js\?v=163/);
-  assert.match(html, /workspace-shell-v145\.js\?v=145/);
-  assert.match(worker, /czatbox-ttm-v175/);
-  assert.match(worker, /workspace-codex-v170\.css\?v=170/);
-  assert.match(worker, /app-hotfix-v163\.js\?v=163/);
-  assert.match(worker, /workspace-shell-v145\.js\?v=145/);
+  assert.match(html, /workspace-codex-v178\.css\?v=180/);
+  assert.match(html, /app-hotfix-v176\.js\?v=177/);
+  assert.match(html, /workspace-shell-v150\.js\?v=156/);
+  assert.match(worker, /czatbox-ttm-v204/);
+  assert.match(worker, /workspace-codex-v178\.css\?v=180/);
+  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
+  assert.match(worker, /workspace-shell-v150\.js\?v=156/);
   assert.match(worker, /fonts\/InterDisplay-ExtraBold\.woff2/);
 });

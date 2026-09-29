@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const renderer = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v163.js'), 'utf8');
-const workspace = fs.readFileSync(path.resolve(__dirname, '../web-client/public/workspace-shell-v145.js'), 'utf8');
+const renderer = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v176.js'), 'utf8');
+const workspace = fs.readFileSync(path.resolve(__dirname, '../web-client/public/workspace-shell-v150.js'), 'utf8');
 const main = fs.readFileSync(path.resolve(__dirname, '../src/main.js'), 'utf8');
 
 test('TTS and gift duck leases are idempotent and always have a timeout', () => {
@@ -36,6 +36,18 @@ test('gift and TTS duck both desktop audio and in-app radio with independent lea
 test('test and unlock utterances release ducking even when speech events are lost', () => {
   assert.match(renderer, /acquireAudioDuck\(20000\)/);
   assert.match(renderer, /watchdog=setTimeout\(\(\)=>\{speechSynthesis\.cancel\(\);done\(\)\},15000\)/);
+  assert.match(renderer, /let ttsControlSequence=0/);
+  assert.match(renderer, /const TTS_CONTROL_COPY=\{pl:/);
+  for (const text of ['Text to speech enabled.', 'Sprachausgabe aktiviert.', 'A szövegfelolvasás bekapcsolva.']) assert.match(renderer, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(renderer, /if\(sequence!==ttsControlSequence\)\{releaseDuck\(\);return\}/);
+  assert.match(renderer, /if\(state\.settings\.tts\)pumpSpeech\(\)/);
+});
+
+test('desktop Piper cancellation invalidates pending synthesis and completes the interrupted utterance', () => {
+  assert.match(main, /let piperSequence = 0/);
+  assert.match(main, /let finishActivePiper = null/);
+  assert.match(main, /if \(sequence !== piperSequence \|\| finished\) return/);
+  assert.match(main, /const finish = finishActivePiper;[\s\S]*if \(finish\) finish\(true\)/);
 });
 
 test('desktop process restores audio after an orphaned duck request', () => {

@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v163.js'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v170.css'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v178.css'), 'utf8');
 
 test('freeze battle event is queued only as a right-side alert', () => {
   assert.match(app, /function notifyBattleFreeze\(/);
@@ -62,7 +62,7 @@ test('desktop workspaces use one rounded Codex-style shell without square module
 test('Electron merges the application menu with one theme-aware Windows title bar', () => {
   const main = fs.readFileSync(path.join(root, 'src/main.js'), 'utf8');
   const preload = fs.readFileSync(path.join(root, 'src/desktop-preload.js'), 'utf8');
-  const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v145.js'), 'utf8');
+  const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v150.js'), 'utf8');
   assert.match(main, /titleBarStyle: 'hidden'/);
   assert.match(main, /titleBarOverlay: \{ color: '#0c1119', symbolColor: '#f5f7fb', height: 35 \}/);
   assert.match(main, /desktop:titlebar-theme/);
@@ -71,12 +71,12 @@ test('Electron merges the application menu with one theme-aware Windows title ba
   assert.match(css, /electron-shell \.desktop-menu-bar\{padding-right:146px\}/);
   assert.match(css, /-webkit-app-region:drag/);
   assert.match(workspace, /setTitleBarTheme/);
-  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v145\.js\?v=145/);
+  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v150\.js\?v=156/);
 });
 
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
   const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v170.css'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v178.css'), 'utf8');
   const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
@@ -86,7 +86,7 @@ test('Słoneczna polana uses dark teal, gold, yellow and white throughout the in
   assert.match(block, /#ffffff/i);
   assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
   assert.equal(deployedCss, css);
-  assert.match(html, /workspace-codex-v170\.css\?v=170/);
+  assert.match(html, /workspace-codex-v178\.css\?v=180/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
@@ -110,4 +110,63 @@ test('Miami Vice restores distinct pink, violet and cyan surfaces', () => {
   assert.match(block, /#7b246c/i);
   assert.match(block, /#075f79/i);
   assert.match(block, /--theme-(canvas|chrome|panel|row|control):/);
+  assert.match(css, /data-theme="miami-vice"[^\n]+\.chat-main-column \.chat-card\{[^}]*radial-gradient\(circle at 10% 8%,#ff58c75c[^}]*radial-gradient\(circle at 92% 14%,#32dff05c[^}]*linear-gradient\(132deg,#180c38 0%,#4b1b67 48%,#0a5270 100%\)/s);
+  assert.match(css, /data-theme="miami-vice"[^\n]+\.chat-main-column \.chat-feed,[^}]+background:transparent!important/);
+});
+
+test('Dark Titanium uses one coherent graphite and cold-metal palette', () => {
+  const refresh = css.indexOf(':root[data-theme="dark-titanium"]{', css.indexOf('/* Titanium and Enigma refresh'));
+  const block = css.slice(refresh, css.indexOf('}', refresh));
+  assert.match(block, /#070a0f/i);
+  assert.match(block, /#53d7f4/i);
+  assert.match(block, /#df6d9e/i);
+  assert.match(css, /data-theme="dark-titanium"[^\n]+\.chat-message\{background:transparent!important/);
+  assert.match(css, /data-theme="dark-titanium"[^\n]+:is\(\.brand-mark,\.empty-orbit\)/);
+});
+
+test('White Titanium has a readable animated pearlescent underlay', () => {
+  assert.match(css, /data-theme="white-titanium"[^\n]+#chat \.desktop-chat-content,[\s\S]*?animation:white-titanium-flow 18s ease-in-out infinite alternate/);
+  assert.match(css, /@keyframes white-titanium-flow/);
+  assert.match(css, /data-theme="white-titanium"[^\n]+\.chat-message\{background:#ffffff24!important/);
+  assert.match(css, /prefers-reduced-motion:reduce[^}]*white-titanium/s);
+});
+
+test('Enigma-Z keeps a near-black canvas and restores cyan violet pink neon accents', () => {
+  const refresh = css.indexOf(':root[data-theme="lazarskie-rejony"],:root[data-theme="enigma-z"]{', css.indexOf('/* Titanium and Enigma refresh'));
+  const block = css.slice(refresh, css.indexOf('}', refresh));
+  assert.match(block, /#050712/i);
+  assert.match(block, /#39e7ff/i);
+  assert.match(block, /#ff4fb8/i);
+  assert.match(block, /#8b62ff/i);
+  assert.match(css, /data-theme="enigma-z"[^\n]+\.chat-message:hover[^}]*box-shadow:inset 3px 0 0 #ff4fb8[^}]*#39e7ff20/);
+});
+
+test('refreshed themes share the complete Codex surface architecture', () => {
+  const family = /:is\(\[data-theme="dark-titanium"\],\[data-theme="white-titanium"\],\[data-theme="lazarskie-rejony"\],\[data-theme="enigma-z"\]\)/;
+  assert.match(css, new RegExp(`${family.source} :is\\(\\.desktop-menu-bar,\\.topbar\\)`));
+  assert.match(css, new RegExp(`${family.source} :is\\(\\.desktop-sidebar,\\.settings-index\\)`));
+  assert.match(css, new RegExp(`${family.source} #chat \\.desktop-chat-content`));
+  assert.match(css, new RegExp(`${family.source} :is\\(\\.settings-card,\\.account-profile-card,\\.gift-sound-row,\\.surface,\\.live-tool-card,\\.support-qr-card\\)`));
+  assert.match(css, new RegExp(`${family.source} :is\\(\\.desktop-menu-dropdown,\\.desktop-submenu,\\.creator-panel,\\.account-quick-menu\\)`));
+});
+
+test('refreshed themes use one solid shell and only the workspace top-left corner is rounded', () => {
+  for (const [theme, shell] of [['dark-titanium', '#0a0e14'], ['white-titanium', '#dce3e9'], ['enigma-z', '#080a13']]) {
+    const pattern = theme === 'enigma-z'
+      ? /:root\[data-theme="lazarskie-rejony"\],:root\[data-theme="enigma-z"\]\{--theme-shell:#080a13\}/
+      : new RegExp(`:root\\[data-theme="${theme}"\\]\\{--theme-shell:${shell}\\}`);
+    assert.match(css, pattern);
+  }
+  assert.match(css, /:is\(\.desktop-menu-bar,\.topbar,\.desktop-sidebar,\.settings-index\),[\s\S]*?#chat \.desktop-chat-layout\{\s*background:var\(--theme-shell\)!important/);
+  assert.match(css, /:is\(\.desktop-sidebar,\.desktop-settings-sidebar,\.settings-index,\.desktop-module-sidebar\),[\s\S]*?background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important/);
+  assert.match(css, /#chat\.tab\.active,[\s\S]*?#chat \.desktop-chat-layout\{\s*border-radius:0!important/);
+  assert.match(css, /#chat \.desktop-chat-content,[\s\S]*?\.workspace-panel\[data-workspace-panel="chat"\]:not\(\[hidden\]\) \.chat-head\{\s*border-radius:16px 0 0 0!important/);
+  const fixStart = css.indexOf('/* The real left navigation surface is .topbar.');
+  const fix = css.slice(fixStart);
+  assert.doesNotMatch(fix, /border-radius:16px 16px/);
+  assert.doesNotMatch(fix, /desktop-sidebar[^}]*background:var\(--theme-shell\)/);
+  const finalContract = css.slice(css.indexOf('/* Refreshed themes follow the same final shell contract'));
+  assert.match(finalContract, /:is\(\.desktop-menu-bar,\.topbar\)\{[\s\S]*?border:0!important;[\s\S]*?box-shadow:none!important/);
+  assert.match(finalContract, /#chat\.tab\.active,[\s\S]*?#chat \.desktop-chat-layout\{[\s\S]*?border-radius:0!important/);
+  assert.doesNotMatch(finalContract, /border-radius:16px 16px/);
 });

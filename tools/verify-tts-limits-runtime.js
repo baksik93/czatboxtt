@@ -43,7 +43,7 @@ const wait = milliseconds => new Promise(resolve => setTimeout(resolve, millisec
   };
 
   const baseUrl = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev/';
-  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.33&quotaVerify=${Date.now()}` });
+  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.34&quotaVerify=${Date.now()}` });
   await wait(5000);
   const result = JSON.parse(await evaluate(`JSON.stringify((()=>{
     const quotaKeys=()=>Object.keys(localStorage).filter(key=>key.startsWith('cttm-tts-quota:'));
@@ -63,9 +63,9 @@ const wait = milliseconds => new Promise(resolve => setTimeout(resolve, millisec
     const repeatedState=JSON.parse(localStorage.getItem(key));
     for(const candidate of quotaKeys())localStorage.removeItem(candidate);
     for(const[candidate,value]of Object.entries(backup))localStorage.setItem(candidate,value);
-    return{unlocked:!document.body.classList.contains('beta-locked'),script:[...document.scripts].some(script=>script.src.includes('app-hotfix-v163.js?v=163')),style:[...document.styleSheets].some(sheet=>sheet.href?.includes('workspace-codex-v170.css?v=170')),before,resetState,repeatedTokens:repeatedState.resetTokens,restored:Object.keys(backup).every(candidate=>localStorage.getItem(candidate)===backup[candidate])};
+    return{unlocked:!document.body.classList.contains('beta-locked'),script:[...document.scripts].some(script=>script.src.includes('app-hotfix-v176.js?v=175')),style:[...document.styleSheets].some(sheet=>sheet.href?.includes('workspace-codex-v178.css?v=177')),before,resetState,repeatedTokens:repeatedState.resetTokens,restored:Object.keys(backup).every(candidate=>localStorage.getItem(candidate)===backup[candidate])};
   })())`));
-  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.33&quotaVerifyDone=${Date.now()}` });
+  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.34&quotaVerifyDone=${Date.now()}` });
   socket.close();
   if (!result.unlocked || !result.script || !result.style) throw new Error(`Nieprawidłowe zasoby runtime: ${JSON.stringify(result)}`);
   if (result.before.daily !== '85%' || result.before.weekly !== '92%' || result.before.tokens !== '1' || result.before.resetDisabled) throw new Error(`Nieprawidłowy licznik: ${JSON.stringify(result.before)}`);

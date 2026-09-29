@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v163.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(root, 'web-client/public/sw.js'), 'utf8');
 
@@ -37,8 +37,12 @@ test('only messages accepted by the active TTS role and content filters reach th
   const quotaRecord = app.indexOf('recordTtsQuotaUsage()');
   assert.ok(finalSpeak > quotaRecord);
   const source = app.slice(finalSpeak, app.indexOf('\n', finalSpeak));
-  assert.match(source, /state\.settings\.privileged&&!item\.moderator&&!item\.superfan&&!isTopThreeGifter\(item\)/);
-  assert.match(source, /shouldSkipTts\(item\)/);
+  assert.match(source, /roleFilters=state\.settings\.ttsModerators\|\|state\.settings\.ttsSuperfans\|\|state\.settings\.ttsTopThree/);
+  assert.match(source, /state\.settings\.ttsModerators&&item\.moderator/);
+  assert.match(source, /state\.settings\.ttsSuperfans&&item\.superfan/);
+  assert.match(source, /state\.settings\.ttsTopThree&&isTopThreeGifter\(item\)/);
+  assert.match(source, /isAllowedTtsUser\(item\)/);
+  assert.match(source, /isIgnoredTtsUser\(item\)/);
   assert.match(source, /state\.speechQueue\.push/);
 });
 
@@ -50,6 +54,7 @@ test('the reusable test code grants reset tokens and a token resets both quotas'
   assert.match(app, /id="accountUseResetToken"/);
   assert.match(app, /addTtsResetHistory\(quota,'received'\)/);
   assert.match(app, /addTtsResetHistory\(quota,'used'\)/);
+  assert.match(app, /addTtsResetHistory\(quota,'used'\);usageResetView='history';[^\n]*saveTtsQuota\(quota\)/);
 });
 
 test('usage settings expose quota bars, exact reset timing, available tokens and 30-day history', () => {
@@ -64,6 +69,17 @@ test('usage settings expose quota bars, exact reset timing, available tokens and
   assert.match(app, /function nextTtsWeeklyReset/);
   assert.match(app, /function renderUsageSettings/);
   assert.match(app, /Brak historii resetów z ostatnich 30 dni/);
+  assert.match(app, /day:'2-digit',month:'2-digit',year:'numeric'/);
+  assert.match(app, /hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'/);
+  assert.match(app, /<strong>\$\{escapeMarkup\(dateLabel\)\}<\/strong><small>\$\{escapeMarkup\(timeLabel\)\}<\/small>/);
+  assert.doesNotMatch(app, /\$\{safe\((?:dateLabel|timeLabel)\)\}/);
+});
+
+test('usage history tabs are handled by a delegated click after the desktop shell loads', () => {
+  assert.match(app, /function setUsageResetView\(view\)/);
+  assert.match(app, /document\.addEventListener\('click',event=>\{const tab=event\.target\.closest\?\.\('#usageAvailableTab,#usageHistoryTab'\)/);
+  assert.match(app, /setUsageResetView\(tab\.id==='usageHistoryTab'\?'history':'available'\)\},true\)/);
+  assert.match(app, /function installUsageSettings\(\)\{const available=[^\n]+!history\|\|!use/);
 });
 
 test('Krita warns exactly once when 10 percent of a daily or weekly quota remains', () => {
@@ -93,9 +109,9 @@ test('Krita quota warnings render bold percentage, do not count as TTS and rearm
 });
 
 test('published entrypoint and offline cache use the quota-enabled assets', () => {
-  assert.match(html, /app-hotfix-v163\.js\?v=163/);
-  assert.match(html, /workspace-codex-v170\.css\?v=170/);
-  assert.match(worker, /czatbox-ttm-v175/);
-  assert.match(worker, /app-hotfix-v163\.js\?v=163/);
+  assert.match(html, /app-hotfix-v176\.js\?v=177/);
+  assert.match(html, /workspace-codex-v178\.css\?v=180/);
+  assert.match(worker, /czatbox-ttm-v204/);
+  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
   assert.match(worker, /fonts\/InterVariable\.woff2/);
 });

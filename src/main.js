@@ -37,8 +37,8 @@ const AUDIO_DUCK_STATE = path.join(app.getPath('userData'), 'audio-duck-state.js
 const MR_DRWINA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-jarvis_wg_glos-medium.onnx');
 const HALINKA_MODEL = path.join(PIPER_RESOURCE_DIR, 'pl_PL-justyna_wg_glos-medium.onnx');
 const PIPER_VOICES = Object.freeze({
-  'piper-mr-drwina': { label: 'Mr. Drwina — Piper (desktop)', model: MR_DRWINA_MODEL, slug: 'mr-drwina' },
-  'piper-halinka': { label: 'Halinka — Piper (desktop)', model: HALINKA_MODEL, slug: 'halinka' }
+  'piper-mr-drwina': { label: 'Natan PL (desktop)', model: MR_DRWINA_MODEL, slug: 'mr-drwina' },
+  'piper-halinka': { label: 'Jowita PL (desktop)', model: HALINKA_MODEL, slug: 'halinka' }
 });
 const APP_ICON_PATH = path.join(__dirname, 'assets', 'app-icon.ico');
 
@@ -444,9 +444,15 @@ function startLocalUiPreview() {
           };
           const setCookie = upstream.headers.get('set-cookie');
           if (setCookie) responseHeaders['Set-Cookie'] = setCookie.replace(/;\s*Secure/gi, '');
+          const responseBody = Buffer.from(await upstream.arrayBuffer());
+          if (response.destroyed || response.writableEnded) return;
           response.writeHead(upstream.status, responseHeaders);
-          response.end(Buffer.from(await upstream.arrayBuffer()));
+          response.end(responseBody);
         } catch (error) {
+          if (response.headersSent || response.destroyed || response.writableEnded) {
+            if (!response.destroyed) response.destroy(error);
+            return;
+          }
           response.writeHead(502, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
           response.end(JSON.stringify({error:'Lokalny podgląd nie może połączyć się z usługą kont.'}));
         }
@@ -604,8 +610,8 @@ function desktopPageFeatures() {
 
   const voiceSelect = document.querySelector('#voice');
   const desktopPiperVoices = [
-    ['piper-mr-drwina', 'Mr. Drwina — Piper (desktop)'],
-    ['piper-halinka', 'Halinka — Piper (desktop)']
+    ['piper-mr-drwina', 'Natan PL (desktop)'],
+    ['piper-halinka', 'Jowita PL (desktop)']
   ];
   const ensurePiperOption = () => {
     if (!voiceSelect) return;
@@ -653,6 +659,8 @@ function desktopPageFeatures() {
     let piperAudioContext = null;
     let piperAudioSource = null;
     let piperGain = null;
+    let piperSequence = 0;
+    let finishActivePiper = null;
     const feminineHoursAfterO = ['zerowej', 'pierwszej', 'drugiej', 'trzeciej', 'czwartej', 'piątej', 'szóstej', 'siódmej', 'ósmej', 'dziewiątej', 'dziesiątej', 'jedenastej', 'dwunastej', 'trzynastej', 'czternastej', 'piętnastej', 'szesnastej', 'siedemnastej', 'osiemnastej', 'dziewiętnastej', 'dwudziestej', 'dwudziestej pierwszej', 'dwudziestej drugiej', 'dwudziestej trzeciej'];
     const feminineHoursStandalone = ['zero', 'pierwsza', 'druga', 'trzecia', 'czwarta', 'piąta', 'szósta', 'siódma', 'ósma', 'dziewiąta', 'dziesiąta', 'jedenasta', 'dwunasta', 'trzynasta', 'czternasta', 'piętnasta', 'szesnasta', 'siedemnasta', 'osiemnasta', 'dziewiętnasta', 'dwudziesta', 'dwudziesta pierwsza', 'dwudziesta druga', 'dwudziesta trzecia'];
     const spokenMinute = value => {
@@ -695,12 +703,19 @@ function desktopPageFeatures() {
     const normalizePiperText = value => normalizePiperTimes(normalizePiperDates(value));
     speech.__desktopPiperPatched = true;
     speech.speak = utterance => {
+      if (finishActivePiper) finishActivePiper(true);
+      const sequence = ++piperSequence;
       let selected = '';
       let settings = {};
       try { settings = JSON.parse(localStorage.getItem('cttm-settings') || '{}'); selected = settings.voice || ''; } catch {}
       if (!desktopPiperVoices.some(([value]) => value === selected)) return originalSpeak(utterance);
+      let finished = false;
       const finish = (error = false) => {
+        if (finished) return;
+        finished = true;
+        if (finishActivePiper === finish) finishActivePiper = null;
         if (piperAudio) {
+          try { piperAudio.pause(); } catch {}
           piperAudio.onended = null;
           piperAudio.onerror = null;
           piperAudio = null;
@@ -712,8 +727,8 @@ function desktopPageFeatures() {
         const callback = error ? utterance.onerror : utterance.onend;
         if (typeof callback === 'function') callback.call(utterance, { type: error ? 'error' : 'end', utterance });
       };
+      finishActivePiper = finish;
       if (!settings.tts && !utterance.__czatboxForce) return finish(false);
-      if (settings.privileged && !utterance.__czatboxTtsApproved && !utterance.__czatboxForce) return finish(false);
       if (settings.cleanSpeech) {
         const spokenText = String(utterance.text || '').toLowerCase();
         const rejected = /(.)\1{5,}/.test(spokenText) || /(https?:\/\/|www\.)/.test(spokenText) || spokenText.length > 320 || /\b(?:kurw\w*|chuj\w*|pierdol\w*|jeb\w*|skurwysyn\w*|pizd\w*|cipa\w*)\b/i.test(spokenText);
@@ -721,6 +736,7 @@ function desktopPageFeatures() {
       }
       const textForVoice = normalizePiperText(utterance.text);
       window.czatboxDesktop.synthesizePiper(selected, textForVoice).then(result => {
+        if (sequence !== piperSequence || finished) return;
         if (!result?.ok || !result.audio) throw new Error(result?.error || 'piper-failed');
         const audio = new Audio(`data:audio/wav;base64,${result.audio}`);
         piperAudio = audio;
@@ -745,6 +761,10 @@ function desktopPageFeatures() {
       }).catch(() => finish(true));
     };
     speech.cancel = () => {
+      ++piperSequence;
+      const finish = finishActivePiper;
+      finishActivePiper = null;
+      if (finish) finish(true);
       if (piperAudio) {
         piperAudio.pause();
         piperAudio.src = '';

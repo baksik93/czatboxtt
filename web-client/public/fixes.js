@@ -6,6 +6,7 @@
     scope.querySelectorAll('.chat-message.gift:not([data-gift-formatted])').forEach(row=>{
       row.dataset.giftFormatted='true';
       if(row.querySelector('.coin-value'))return;
+      if(row.querySelector('.live-event-text'))return;
       row.querySelectorAll('.gift-image').forEach(image=>image.remove());
       const paragraph=row.querySelector('p'),text=paragraph?.innerText.replace('wysłał(a) prezent:','wysyła prezent:')||'';
       if(!paragraph)return;

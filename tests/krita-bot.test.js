@@ -4,10 +4,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const publicDir = path.resolve(__dirname, '../web-client/public');
-const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v163.js'), 'utf8');
-const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v170.css'), 'utf8');
+const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v176.js'), 'utf8');
+const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v178.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
+const notificationSound = fs.readFileSync(path.join(publicDir, 'notification-sound-v3.js'), 'utf8');
 const icons = fs.readFileSync(path.join(publicDir, 'icons.svg'), 'utf8');
 
 test('Krita appears after every 50 non-empty chat messages while connected', () => {
@@ -39,13 +40,31 @@ test('Krita has an animated blue nickname and an accessible reduced-motion fallb
   assert.match(css, /animation:krita-name-glow/);
   assert.match(css, /@keyframes krita-name-glow/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(app, /body\.classList\.add\('krita-message-text'\)/);
+  assert.match(css, /\.chat-message\.krita-bot \.krita-message-text,/);
+  assert.match(css, /\.krita-message-text :is\(strong,a\)\{[^}]*color:transparent!important;[^}]*background:linear-gradient\(90deg,#44c8ff/s);
+  assert.doesNotMatch(css, /\.chat-message\.krita-bot\{[^}]*background:/);
+});
+
+test('every Krita message plays the bundled Codex notification sound', () => {
+  assert.match(app, /function appendKritaMessage\([^\n]+appendEvent\([^\n]+;window\.playCzatboxNotificationSound\?\.\(\)\}/);
+  assert.ok(fs.statSync(path.join(publicDir, 'sounds/codex-notification.wav')).size > 0);
+  assert.match(notificationSound, /const source='\/sounds\/codex-notification\.wav'/);
+  assert.match(notificationSound, /window\.playCzatboxNotificationSound=/);
+  assert.match(notificationSound, /new AudioContextClass\(\)/);
+  assert.match(notificationSound, /activeContext\.createBufferSource\(\)/);
+  assert.match(notificationSound, /return await playFallback\(\)/);
+  assert.match(notificationSound, /document\.documentElement\.dataset\.notificationSound='ready'/);
+  assert.match(html, /notification-sound-v3\.js\?v=3[^]*app-hotfix-v176\.js\?v=177/);
 });
 
 test('published entrypoint and offline cache reference all Krita assets', () => {
-  assert.match(html, /workspace-codex-v170\.css\?v=170/);
-  assert.match(html, /app-hotfix-v163\.js\?v=163/);
-  assert.match(worker, /czatbox-ttm-v175/);
-  assert.match(worker, /workspace-codex-v170\.css\?v=170/);
-  assert.match(worker, /app-hotfix-v163\.js\?v=163/);
+  assert.match(html, /workspace-codex-v178\.css\?v=180/);
+  assert.match(html, /app-hotfix-v176\.js\?v=177/);
+  assert.match(worker, /czatbox-ttm-v204/);
+  assert.match(worker, /workspace-codex-v178\.css\?v=180/);
+  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
   assert.match(worker, /\/avatars\/krita\.jpeg/);
+  assert.match(worker, /\/sounds\/codex-notification\.wav/);
+  assert.match(worker, /\/notification-sound-v3\.js\?v=3/);
 });

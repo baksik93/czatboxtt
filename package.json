@@ -1,6 +1,6 @@
 {
   "name": "tiktok-live-electron",
-  "version": "0.3.33",
+  "version": "0.3.34",
   "private": true,
   "productName": "Czatbox TT",
   "description": "Desktopowy panel do odczytu czatu transmisji TikTok LIVE.",
@@ -11,8 +11,10 @@
   },
   "main": "src/main.js",
   "scripts": {
+    "test": "node --test tests/*.test.js",
     "start": "electron .",
     "dev": "electron .",
+    "preview": "electron . --local-ui-preview",
     "check": "node --check src/main.js",
     "pack": "electron-builder --dir --publish never",
     "dist": "electron-builder --win nsis --publish never",
@@ -24,7 +26,7 @@
     "artifactName": "Czatbox-TT-Setup-${version}.${ext}",
     "electronUpdaterCompatibility": ">=2.16",
     "releaseInfo": {
-      "releaseNotesFile": "release-notes-0.3.33.md"
+      "releaseNotesFile": "release-notes-0.3.34.md"
     },
     "directories": {
       "output": "dist"

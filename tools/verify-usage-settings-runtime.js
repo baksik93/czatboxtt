@@ -45,14 +45,14 @@ const wait = milliseconds => new Promise(resolve => setTimeout(resolve, millisec
   };
 
   const baseUrl = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev/';
-  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.33&usageVerify=${Date.now()}` });
+  await call('Page.navigate', { url: `${baseUrl}?platform=desktop&appVersion=0.3.34&usageVerify=${Date.now()}` });
   await wait(5500);
   const result = JSON.parse(await evaluate(`new Promise(resolve=>{
     const closeWhats=()=>{const backdrop=document.querySelector('.whats-new-backdrop');if(backdrop&&!backdrop.hidden)document.querySelector('#whatsNewClose')?.click()};
     closeWhats();setTimeout(()=>{document.querySelector('[data-menu-settings]')?.click();setTimeout(()=>{document.querySelector('[data-settings-target="settings-usage"]')?.click();setTimeout(()=>{
       const section=document.querySelector('#settings-usage'),daily=document.querySelector('#usageDailyBar'),weekly=document.querySelector('#usageWeeklyBar'),historyTab=document.querySelector('#usageHistoryTab'),availableTab=document.querySelector('#usageAvailableTab');
       historyTab.click();const historyVisible=!document.querySelector('#usageHistoryPanel').hidden;availableTab.click();
-      document.fonts.load('16px "Czatbox Inter"').then(()=>resolve(JSON.stringify({script:[...document.scripts].some(script=>script.src.includes('app-hotfix-v163.js?v=163')),style:[...document.styleSheets].some(sheet=>sheet.href?.includes('workspace-codex-v170.css?v=170')),shell:[...document.scripts].some(script=>script.src.includes('workspace-shell-v145.js?v=145')),sectionVisible:section&&!section.classList.contains('settings-category-hidden'),navActive:document.querySelector('[data-settings-target="settings-usage"]')?.classList.contains('active'),dailyWidth:daily?.style.width,weeklyWidth:weekly?.style.width,dailyReset:document.querySelector('#usageDailyReset')?.textContent,weeklyReset:document.querySelector('#usageWeeklyReset')?.textContent,availableCount:document.querySelector('#usageResetAvailableCount')?.textContent,historyVisible,fontLoaded:document.fonts.check('16px "Czatbox Inter"'),fontFamily:getComputedStyle(section).fontFamily})));
+      document.fonts.load('16px "Czatbox Inter"').then(()=>resolve(JSON.stringify({script:[...document.scripts].some(script=>script.src.includes('app-hotfix-v176.js?v=176')),style:[...document.styleSheets].some(sheet=>sheet.href?.includes('workspace-codex-v178.css?v=178')),shell:[...document.scripts].some(script=>script.src.includes('workspace-shell-v150.js?v=152')),sectionVisible:section&&!section.classList.contains('settings-category-hidden'),navActive:document.querySelector('[data-settings-target="settings-usage"]')?.classList.contains('active'),dailyWidth:daily?.style.width,weeklyWidth:weekly?.style.width,dailyReset:document.querySelector('#usageDailyReset')?.textContent,weeklyReset:document.querySelector('#usageWeeklyReset')?.textContent,availableCount:document.querySelector('#usageResetAvailableCount')?.textContent,historyVisible,fontLoaded:document.fonts.check('16px "Czatbox Inter"'),fontFamily:getComputedStyle(section).fontFamily})));
     },250)},100)},100)})`));
   const screenshot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   const output = path.resolve(__dirname, 'usage-settings-runtime.png');
