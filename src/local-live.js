@@ -71,9 +71,13 @@ class LocalLive {
             badges: data.badges,
             badgeList: data.badgeList,
             userBadges: data.userBadges,
+            newUserBadges: data.newUserBadges,
             userBadgeList: data.userBadgeList,
             badgeImageList: data.badgeImageList,
-            badgeInfo: data.badgeInfo
+            mediaBadgeImageList: data.mediaBadgeImageList,
+            badgeInfo: data.badgeInfo,
+            avatarBorder: data.avatarBorder,
+            borders: data.borders
           };
           const user = { ...(data.user || flattenedUser) };
           const isSuperFanEvent = type === sdk.WebcastEvent.SUPER_FAN ||

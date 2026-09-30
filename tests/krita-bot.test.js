@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const publicDir = path.resolve(__dirname, '../web-client/public');
-const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v176.js'), 'utf8');
-const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v178.css'), 'utf8');
+const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v177.js'), 'utf8');
+const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v179.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 const notificationSound = fs.readFileSync(path.join(publicDir, 'notification-sound-v3.js'), 'utf8');
@@ -55,15 +55,15 @@ test('every Krita message plays the bundled Codex notification sound', () => {
   assert.match(notificationSound, /activeContext\.createBufferSource\(\)/);
   assert.match(notificationSound, /return await playFallback\(\)/);
   assert.match(notificationSound, /document\.documentElement\.dataset\.notificationSound='ready'/);
-  assert.match(html, /notification-sound-v3\.js\?v=3[^]*app-hotfix-v176\.js\?v=177/);
+  assert.match(html, /notification-sound-v3\.js\?v=3[^]*app-hotfix-v177\.js\?v=179/);
 });
 
 test('published entrypoint and offline cache reference all Krita assets', () => {
-  assert.match(html, /workspace-codex-v178\.css\?v=180/);
-  assert.match(html, /app-hotfix-v176\.js\?v=177/);
-  assert.match(worker, /czatbox-ttm-v204/);
-  assert.match(worker, /workspace-codex-v178\.css\?v=180/);
-  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
+  assert.match(html, /workspace-codex-v179\.css\?v=182/);
+  assert.match(html, /app-hotfix-v177\.js\?v=179/);
+  assert.match(worker, /czatbox-ttm-v213/);
+  assert.match(worker, /workspace-codex-v179\.css\?v=182/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
   assert.match(worker, /\/avatars\/krita\.jpeg/);
   assert.match(worker, /\/sounds\/codex-notification\.wav/);
   assert.match(worker, /\/notification-sound-v3\.js\?v=3/);

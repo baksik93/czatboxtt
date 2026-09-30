@@ -1925,6 +1925,58 @@ html:root[data-platform="desktop"][data-theme="drwinka"] .account-quick-menu .ac
   object-fit:cover
 }
 
+/* Role avatar frames are visible only in Przestrzenny and Nowoczesny. */
+.message-avatar-frame-shell{display:contents}
+.message-avatar-frame{display:none}
+:root[data-chat-style="modern"] .message-avatar-frame-shell,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:68px;
+  height:68px;
+  flex:0 0 68px;
+  margin:0;
+  isolation:isolate
+}
+:root[data-chat-style="modern"] .message-avatar-frame-shell .message-avatar,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell .message-avatar{
+  width:50px!important;
+  height:50px!important;
+  flex:0 0 50px!important;
+  margin:0!important;
+  border-radius:50%;
+  object-fit:cover;
+  z-index:1
+}
+:root[data-chat-style="modern"] .message-avatar-frame-shell .message-avatar-frame,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell .message-avatar-frame{
+  position:absolute;
+  z-index:2;
+  inset:-3px;
+  display:block;
+  width:74px;
+  height:74px;
+  max-width:none;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none
+}
+:root[data-chat-style="modern"] .message-avatar-frame-shell.guardian-frame .message-avatar-frame,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell.guardian-frame .message-avatar-frame{
+  filter:drop-shadow(0 2px 5px #7e4e1680)
+}
+:root[data-chat-style="modern"] .message-avatar-frame-shell.guardian-frame .message-avatar,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell.guardian-frame .message-avatar{
+  width:60px!important;
+  height:60px!important;
+  flex-basis:60px!important
+}
+:root[data-chat-style="modern"] .message-avatar-frame-shell.enigma-frame .message-avatar-frame,
+:root[data-chat-style="spacious"] .message-avatar-frame-shell.enigma-frame .message-avatar-frame{
+  filter:drop-shadow(0 2px 6px #718cff80)
+}
+
 /* Pomoc > Co nowego: editorial changelog inspired by a native release-notes view. */
 html[data-platform="desktop"] #about[data-help-view="whats-new"]{
   padding:0!important;overflow:hidden!important;background:color-mix(in srgb,var(--bg) 88%,#171925)!important

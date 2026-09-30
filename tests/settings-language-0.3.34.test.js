@@ -5,9 +5,9 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const shell = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v150.js'), 'utf8');
-const workspaceCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v178.css'), 'utf8');
+const workspaceCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v179.css'), 'utf8');
 const localization = fs.readFileSync(path.join(root, 'web-client/public/localization-v1.js'), 'utf8');
 const fixes = fs.readFileSync(path.join(root, 'web-client/public/fixes.js'), 'utf8');
 const main = fs.readFileSync(path.join(root, 'src/main.js'), 'utf8');
@@ -20,7 +20,7 @@ test('chat settings expose four persisted interface languages', () => {
   }
   assert.match(app, /language:\s*"pl"/);
   assert.match(app, /\['pl','en','de','hu'\]\.includes\(state\.settings\.language\)/);
-  assert.match(html, /localization-v1\.js\?v=9/);
+  assert.match(html, /localization-v1\.js\?v=10/);
   assert.match(localization, /const locales=\{pl:'pl-PL',en:'en-GB',de:'de-DE',hu:'hu-HU'\}/);
   assert.match(localization, /MutationObserver/);
   assert.match(localization, /cttm-language-change/);
@@ -121,9 +121,26 @@ test('desktop voice labels changed without changing compatible voice ids', () =>
   assert.doesNotMatch(main, /label: 'Halinka - Piper \(desktop\)'/);
 });
 
-test('0.3.34 is the application version and release-only caveats are absent', () => {
-  assert.equal(pkg.version, '0.3.34');
-  assert.match(shell, /AKTUALIZACJA 0\.3\.34/);
+test('desktop Piper options are restored when a fresh page replaces the voice selector', () => {
+  assert.match(main, /const ensurePiperOptions = \(\) => \{\s*const voiceSelect = document\.querySelector\('#voice'\)/);
+  assert.match(main, /if \(observedVoiceSelect === voiceSelect\) return/);
+  assert.match(main, /voiceOptionObserver = new MutationObserver\(ensurePiperOptions\)/);
+  assert.match(main, /new MutationObserver\(ensurePiperOptions\)\.observe\(voiceHost, \{ childList: true, subtree: true \}\)/);
+  for (const resource of [
+    'piper-tts.exe',
+    'pl_PL-jarvis_wg_glos-medium.onnx',
+    'pl_PL-jarvis_wg_glos-medium.onnx.json',
+    'pl_PL-justyna_wg_glos-medium.onnx',
+    'pl_PL-justyna_wg_glos-medium.onnx.json'
+  ]) {
+    assert.ok(fs.existsSync(path.join(root, 'resources/piper', resource)), `missing bundled Piper resource: ${resource}`);
+    assert.ok(pkg.build.extraResources.some(item => item.from === `resources/piper/${resource}`), `Piper resource is not packaged: ${resource}`);
+  }
+});
+
+test('0.3.35 is the application version and release-only caveats are absent', () => {
+  assert.equal(pkg.version, '0.3.35');
+  assert.match(shell, /AKTUALIZACJA 0\.3\.35/);
   assert.doesNotMatch(shell, /opcja usuwania konta zniknęła z interfejsu/);
   assert.doesNotMatch(shell, /numer programu nie został jeszcze podniesiony/);
 });

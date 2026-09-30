@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(root, 'web-client/public/sw.js'), 'utf8');
 
@@ -109,9 +109,9 @@ test('Krita quota warnings render bold percentage, do not count as TTS and rearm
 });
 
 test('published entrypoint and offline cache use the quota-enabled assets', () => {
-  assert.match(html, /app-hotfix-v176\.js\?v=177/);
-  assert.match(html, /workspace-codex-v178\.css\?v=180/);
-  assert.match(worker, /czatbox-ttm-v204/);
-  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
+  assert.match(html, /app-hotfix-v177\.js\?v=179/);
+  assert.match(html, /workspace-codex-v179\.css\?v=182/);
+  assert.match(worker, /czatbox-ttm-v213/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
   assert.match(worker, /fonts\/InterVariable\.woff2/);
 });

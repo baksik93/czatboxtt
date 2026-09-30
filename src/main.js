@@ -499,6 +499,10 @@ async function installBundledAssetOverrides() {
   if (bundledAssetOverrideInstalled) return;
   const bundledOrigin = await startLocalUiPreview();
   const root = path.resolve(localPreviewDirectory());
+  const bundledAssetAliases = new Map([
+    ['/app-hotfix-v176.js', 'app-hotfix-v177.js'],
+    ['/workspace-codex-v178.css', 'workspace-codex-v179.css']
+  ]);
   const appSession = session.fromPartition('persist:czatbox-tt');
   appSession.webRequest.onBeforeRequest({ urls: [`${APP_ORIGIN}/*`] }, (details, callback) => {
     try {
@@ -507,7 +511,7 @@ async function installBundledAssetOverrides() {
         callback({});
         return;
       }
-      const relativePath = pathname.replace(/^[/\\]+/, '');
+      const relativePath = bundledAssetAliases.get(pathname) || pathname.replace(/^[/\\]+/, '');
       const filePath = path.resolve(root, relativePath);
       if ((filePath === root || filePath.startsWith(`${root}${path.sep}`)) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         callback({ redirectURL: `${bundledOrigin}/${relativePath.replace(/\\/g, '/')}` });
@@ -608,12 +612,14 @@ function desktopPageFeatures() {
     window.czatboxDesktop?.setMinimizeToTray(true).catch(() => {});
   }
 
-  const voiceSelect = document.querySelector('#voice');
   const desktopPiperVoices = [
     ['piper-mr-drwina', 'Natan PL (desktop)'],
     ['piper-halinka', 'Jowita PL (desktop)']
   ];
-  const ensurePiperOption = () => {
+  let observedVoiceSelect = null;
+  let voiceOptionObserver = null;
+  const ensurePiperOptions = () => {
+    const voiceSelect = document.querySelector('#voice');
     if (!voiceSelect) return;
     desktopPiperVoices.forEach(([value, label]) => {
       if (voiceSelect.querySelector(`option[value="${value}"]`)) return;
@@ -626,14 +632,19 @@ function desktopPageFeatures() {
       const selected = JSON.parse(localStorage.getItem('cttm-settings') || '{}').voice;
       if (desktopPiperVoices.some(([value]) => value === selected)) voiceSelect.value = selected;
     } catch {}
-  };
-  ensurePiperOption();
-  if (voiceSelect) {
-    new MutationObserver(ensurePiperOption).observe(voiceSelect, { childList: true });
+    if (observedVoiceSelect === voiceSelect) return;
+    voiceOptionObserver?.disconnect();
+    observedVoiceSelect = voiceSelect;
+    voiceOptionObserver = new MutationObserver(ensurePiperOptions);
+    voiceOptionObserver.observe(voiceSelect, { childList: true });
     voiceSelect.addEventListener('change', () => {
       if (desktopPiperVoices.some(([value]) => value === voiceSelect.value)) window.czatboxDesktop?.warmPiper(voiceSelect.value).catch(() => {});
     });
-  }
+  };
+  const voiceHost = document.querySelector('#settings') || document.body;
+  new MutationObserver(ensurePiperOptions).observe(voiceHost, { childList: true, subtree: true });
+  ensurePiperOptions();
+  window.addEventListener('load', ensurePiperOptions, { once: true });
 
   window.__czatboxSpeakGreeting = payload => {
     const data = payload && typeof payload === 'object' ? payload : {};

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
 const serviceWorker = fs.readFileSync(path.join(root, 'web-client/public/sw.js'), 'utf8');
 
@@ -23,7 +23,7 @@ test('canonical desktop persistence never overlaps writes and rechecks changes q
 test('fallback persistence check is infrequent and published cache generation is coherent', () => {
   assert.doesNotMatch(app, /persistCanonicalUserData\(\),2000/);
   assert.match(app, /persistCanonicalUserData\(\),30000/);
-  assert.match(app, /register\('\/sw\.js\?v=204'\)/);
-  assert.match(serviceWorker, /czatbox-ttm-v204/);
-  assert.match(html, /app-hotfix-v176\.js/);
+  assert.match(app, /register\('\/sw\.js\?v=206'\)/);
+  assert.match(serviceWorker, /czatbox-ttm-v213/);
+  assert.match(html, /app-hotfix-v177\.js/);
 });

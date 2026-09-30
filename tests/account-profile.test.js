@@ -4,11 +4,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const appSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'app-hotfix-v176.js'), 'utf8');
+const appSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'app-hotfix-v177.js'), 'utf8');
 const mainSource = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8');
 const workspaceSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace.js'), 'utf8');
 const shellSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace-shell-v150.js'), 'utf8');
-const workspaceCss = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace-codex-v178.css'), 'utf8');
+const workspaceCss = fs.readFileSync(path.join(root, 'web-client', 'public', 'workspace-codex-v179.css'), 'utf8');
 const indexSource = fs.readFileSync(path.join(root, 'web-client', 'public', 'index.html'), 'utf8');
 
 test('account avatar stays in local storage and is removed from profile requests', () => {

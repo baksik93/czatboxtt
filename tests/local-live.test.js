@@ -38,6 +38,22 @@ test('connects without key, forwards events and does not request backlog', async
   assert.equal(packets.length, 2); assert.equal(c.closed, true);
 });
 
+test('forwards the real TikTok room ranks structure used by TOP 3 TTS', async () => {
+  const { live, connections } = fixture(); const packets = [];
+  const starting = live.start('one', 'creator', packet => packets.push(packet));
+  await tick(); const c = connections[0]; c.resolve(); await starting;
+  const ranks = [
+    { rank: 1, score: 900, user: { displayId: 'first', nickname: 'Pierwszy' } },
+    { rank: 2, score: 700, user: { displayId: 'second', nickname: 'Drugi' } },
+    { rank: 3, score: 500, user: { displayId: 'third', nickname: 'Trzeci' } }
+  ];
+  c.emit('roomUser', { totalUser: 123, ranks });
+  const message = JSON.parse(packets.find(packet => packet.kind === 'message').data);
+  assert.equal(message.event, 'roomUser');
+  assert.deepEqual(message.data.ranks, ranks);
+  live.stop();
+});
+
 test('a streak gift is finalized after TikTok omits its final frame', async () => {
   const { live, connections } = fixture(); const packets = [];
   const start = live.start('one', 'creator', p => packets.push(p)); await tick();
@@ -113,15 +129,17 @@ test('moderator, superfan and guardian roles survive the local LIVE bridge', asy
   connections[0].resolve(); await start;
   const superFanBadge = { badgeSceneType: 10, priorityType: 30, icon: 'super_fans_badge_icon' };
   connections[0].emit('superFanJoin', { uniqueId: 'superfan', nickname: 'Superfan', userBadges: [superFanBadge] });
-  const guardianBadge = { image: { urlList: ['https://p16-webcast.tiktokcdn.com/webcast-va/guardian-badge-icon-4.png'] } };
-  connections[0].emit('chat', { uniqueId: 'guardian', nickname: 'Strażnik', comment: 'hej', userBadges: [guardianBadge] });
+  const guardianBadge = { badgeScene: 11, str: { str: 'LIVE_PRO' } };
+  const guardianBorder = { urlList: ['https://p16-webcast.tiktokcdn.com/webcast-va/live-pro-border.png'] };
+  connections[0].emit('chat', { uniqueId: 'guardian', nickname: 'Strażnik', comment: 'hej', newUserBadges: [guardianBadge], avatarBorder: guardianBorder });
   connections[0].emit('chat', { uniqueId: 'moderator', nickname: 'Moderator', comment: 'hej', isModerator: true });
   const messages = packets.filter(packet => packet.kind === 'message').map(packet => JSON.parse(packet.data));
   assert.equal(messages[0].event, 'superFanJoin');
   assert.equal(messages[0].data.isSuperFan, true);
   assert.equal(messages[0].data.user.isSuperFan, true);
   assert.deepEqual(messages[0].data.user.userBadges, [superFanBadge]);
-  assert.deepEqual(messages[1].data.user.userBadges, [guardianBadge]);
+  assert.deepEqual(messages[1].data.user.newUserBadges, [guardianBadge]);
+  assert.deepEqual(messages[1].data.user.avatarBorder, guardianBorder);
   assert.equal(messages[2].data.isModerator, true);
   assert.equal(messages[2].data.user.isModerator, true);
   live.stop();

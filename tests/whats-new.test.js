@@ -6,7 +6,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const publicDir = path.join(root, 'web-client', 'public');
 const workspace = fs.readFileSync(path.join(publicDir, 'workspace-shell-v150.js'), 'utf8');
-const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v178.css'), 'utf8');
+const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v179.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 
@@ -24,14 +24,14 @@ test('Co nowego is removed from Pomoc and launched by the round account-dock que
 test('Co nowego follows the supplied editorial changelog structure with Czatbox content', () => {
   assert.match(workspace, /id='aboutWhatsNew'/);
   assert.match(workspace, /<h2 id="whatsNewTitle">Co nowego<\/h2>/);
-  assert.match(workspace, /<time datetime="2026-09-28">28 września 2026<\/time>/);
+  assert.match(workspace, /<time datetime="2026-09-30">30 września 2026<\/time>/);
   assert.match(workspace, /class="whats-new-hero"/);
   assert.match(workspace, /Co nowego/);
   assert.match(workspace, /Co ulepszyliśmy/);
   assert.match(workspace, /Co pod maską/);
-  assert.match(workspace, /Cztery języki całej aplikacji/);
-  assert.match(workspace, /Precyzyjne reguły TTS/);
-  assert.match(workspace, /Archiwa zostają na miejscu/);
+  assert.match(workspace, /TOP 3 prosto z TikToka/);
+  assert.match(workspace, /Krita śledzi zmiany rankingu/);
+  assert.match(workspace, /Pewniejsze rozpoznawanie ról/);
   assert.match(workspace, /Historia aktualizacji/);
   assert.match(workspace, /whatsNewSupport\.className='whats-new-section is-support'/);
   assert.match(workspace, /<h3><span>Wsparcie<\/span><\/h3>/);
@@ -90,7 +90,7 @@ test('the hero is edge-to-edge, section labels have symmetric lines and technica
 });
 
 test('after an update the changelog opens once and there is no separate support popup', () => {
-  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.34'/);
+  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.35'/);
   assert.match(workspace, /localStorage\.getItem\(whatsNewSeenKey\)==='true'/);
   assert.match(workspace, /localStorage\.setItem\(whatsNewSeenKey,'true'\);openWhatsNew\(\);window\.playCzatboxNotificationSound\?\.\(\);return true/);
   assert.match(workspace, /whatsNewLauncher\.onclick=openWhatsNew/);
@@ -100,12 +100,12 @@ test('after an update the changelog opens once and there is no separate support 
 });
 
 test('published assets use the new changelog shell and cache generation', () => {
-  assert.match(html, /workspace-codex-v178\.css\?v=180/);
-  assert.match(html, /app-hotfix-v176\.js\?v=177/);
-  assert.match(html, /workspace-shell-v150\.js\?v=156/);
-  assert.match(worker, /czatbox-ttm-v204/);
-  assert.match(worker, /workspace-codex-v178\.css\?v=180/);
-  assert.match(worker, /app-hotfix-v176\.js\?v=177/);
-  assert.match(worker, /workspace-shell-v150\.js\?v=156/);
+  assert.match(html, /workspace-codex-v179\.css\?v=182/);
+  assert.match(html, /app-hotfix-v177\.js\?v=179/);
+  assert.match(html, /workspace-shell-v150\.js\?v=157/);
+  assert.match(worker, /czatbox-ttm-v213/);
+  assert.match(worker, /workspace-codex-v179\.css\?v=182/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
+  assert.match(worker, /workspace-shell-v150\.js\?v=157/);
   assert.match(worker, /fonts\/InterDisplay-ExtraBold\.woff2/);
 });

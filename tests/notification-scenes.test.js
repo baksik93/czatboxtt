@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v176.js'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v178.css'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v179.css'), 'utf8');
 
 test('freeze battle event is queued only as a right-side alert', () => {
   assert.match(app, /function notifyBattleFreeze\(/);
@@ -71,12 +71,12 @@ test('Electron merges the application menu with one theme-aware Windows title ba
   assert.match(css, /electron-shell \.desktop-menu-bar\{padding-right:146px\}/);
   assert.match(css, /-webkit-app-region:drag/);
   assert.match(workspace, /setTitleBarTheme/);
-  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v150\.js\?v=156/);
+  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v150\.js\?v=157/);
 });
 
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {
   const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
-  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v178.css'), 'utf8');
+  const deployedCss = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v179.css'), 'utf8');
   const start = css.indexOf(':root[data-theme="sloneczna-polana"]{');
   const block = css.slice(start, css.indexOf('}', start));
   assert.match(html, /data-value="sloneczna-polana">Słoneczna polana</);
@@ -86,7 +86,7 @@ test('Słoneczna polana uses dark teal, gold, yellow and white throughout the in
   assert.match(block, /#ffffff/i);
   assert.match(css, /data-theme="sloneczna-polana"[^}]*\.desktop-sidebar/);
   assert.equal(deployedCss, css);
-  assert.match(html, /workspace-codex-v178\.css\?v=180/);
+  assert.match(html, /workspace-codex-v179\.css\?v=182/);
 });
 
 test('Drwinka uses a black yellow white palette and animated menu accents', () => {
