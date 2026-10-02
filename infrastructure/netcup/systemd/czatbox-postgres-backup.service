@@ -1,0 +1,8 @@
+[Unit]
+Description=Czatbox TT PostgreSQL backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/czatbox/scripts/backup-postgres.sh

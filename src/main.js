@@ -26,6 +26,7 @@ const APP_ORIGIN = 'https://czatbox-tt-mobile.p548bzdpmd.workers.dev';
 const APP_URL = `${APP_ORIGIN}/?platform=desktop&appVersion=${encodeURIComponent(app.getVersion())}`;
 const APP_VERSION = app.getVersion();
 const UPDATE_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const UPDATE_FEED_URL = 'https://updates.czatboxtt.com/windows';
 const PIPER_RESOURCE_DIR = app.isPackaged
   ? path.join(process.resourcesPath, 'piper')
   : path.join(app.getAppPath(), 'resources', 'piper');
@@ -66,6 +67,7 @@ const RENDERER_CACHE_EPOCH = 'workspace-v155-remote-runtime-hotfix';
 const RENDERER_CACHE_EPOCH_PATH = path.join(app.getPath('userData'), 'renderer-cache-epoch.txt');
 const CANONICAL_USER_DATA_PATH = path.join(app.getPath('userData'), 'canonical-user-data.json');
 const CANONICAL_USER_DATA_BACKUP_DIR = path.join(app.getPath('userData'), 'canonical-user-data-backups');
+const MAX_CANONICAL_USER_DATA_BYTES = 64 * 1024 * 1024;
 let canonicalUserDataCache = '';
 
 function readCanonicalUserData() {
@@ -97,7 +99,7 @@ function saveCanonicalUserData(values) {
   const valuesSnapshot = JSON.stringify(safeValues);
   if (valuesSnapshot === canonicalUserDataCache) return true;
   const payload = JSON.stringify({ schema: 1, updatedAt: Date.now(), values: safeValues }, null, 2);
-  if (Buffer.byteLength(payload) > 32 * 1024 * 1024) return false;
+  if (Buffer.byteLength(payload) > MAX_CANONICAL_USER_DATA_BYTES) return false;
   const temporaryPath = `${CANONICAL_USER_DATA_PATH}.tmp`;
   fs.writeFileSync(temporaryPath, payload, 'utf8');
   backupCanonicalUserData();
@@ -428,7 +430,8 @@ function startLocalUiPreview() {
           const headers = {
             accept: request.headers.accept || 'application/json',
             'content-type': request.headers['content-type'] || 'application/json',
-            origin: APP_ORIGIN
+            origin: APP_ORIGIN,
+            'x-czatbox-client': 'desktop'
           };
           if (request.headers.cookie) headers.cookie = request.headers.cookie;
           const upstream = await fetch(`${APP_ORIGIN}${request.url || pathname}`, {
@@ -1045,6 +1048,7 @@ function createWindow() {
 
 function configureUpdater() {
   if (!app.isPackaged || LOCAL_UI_PREVIEW) return;
+  autoUpdater.setFeedURL({ provider: 'generic', url: UPDATE_FEED_URL });
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.logger = null;

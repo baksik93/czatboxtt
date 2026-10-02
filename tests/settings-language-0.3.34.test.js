@@ -88,12 +88,12 @@ test('archive retention is controlled only by the seven-day option', () => {
   assert.doesNotMatch(app, /archive\.length\s*>\s*5000/);
 });
 
-test('application data moved into Account and update history replaced its old category', () => {
+test('account opens externally, application reset remains local and update history keeps its category', () => {
   assert.match(html, /data-settings-target="settings-account">Konto/);
   assert.match(html, /data-settings-target="settings-data">Historia aktualizacji/);
-  assert.match(app, /\$\('\.account-profile-card'\)\?\.append\(resetGroup\)/);
-  assert.doesNotMatch(app, /\$\('#settings-account'\)\?\.append\(resetGroup\)/);
-  assert.match(app, /\$\('#deleteAccount'\)\?\.closest\('\.setting-row'\)\?\.remove\(\)/);
+  assert.match(app, /\$\('#settings-usage'\)\?\.append\(resetGroup\)/);
+  assert.match(app, /window\.open\('https:\/\/czatboxtt\.com\/\?account=1'/);
+  assert.doesNotMatch(html, /id="settings-account"/);
   assert.match(shell, /class="update-history-browser"/);
   assert.match(shell, /class="update-history-sidebar"/);
   assert.match(shell, /class="update-history-versions" role="tablist"/);
@@ -138,8 +138,8 @@ test('desktop Piper options are restored when a fresh page replaces the voice se
   }
 });
 
-test('0.3.35 is the application version and release-only caveats are absent', () => {
-  assert.equal(pkg.version, '0.3.35');
+test('0.3.36 is the application version and release-only caveats are absent', () => {
+  assert.equal(pkg.version, '0.3.36');
   assert.match(shell, /AKTUALIZACJA 0\.3\.35/);
   assert.doesNotMatch(shell, /opcja usuwania konta zniknęła z interfejsu/);
   assert.doesNotMatch(shell, /numer programu nie został jeszcze podniesiony/);

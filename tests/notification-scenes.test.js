@@ -6,6 +6,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-codex-v179.css'), 'utf8');
+const mobileCss = fs.readFileSync(path.join(root, 'web-client/public/mobile-adaptive.css'), 'utf8');
 
 test('freeze battle event is queued only as a right-side alert', () => {
   assert.match(app, /function notifyBattleFreeze\(/);
@@ -36,6 +37,30 @@ test('static notification backgrounds are exact 360 by 112 assets', () => {
     assert.match(css, new RegExp(`url\\('/alerts/${type}\\.png'\\)`));
   }
   assert.match(css, /gift-alert-card:not\(\[data-alert-type="gift"\]\) \.gift-alert-visual\{visibility:hidden\}/);
+});
+
+test('mobile notifications are rendered over the chat frame with matching role scenes', () => {
+  assert.match(app, /function giftAlertHost\(\)\{return document\.documentElement\.dataset\.platform==='mobile'\?\$\('\.chat-card'\)\|\|document\.body:document\.body\}/);
+  assert.match(app, /if\(overlay\.parentElement!==host\)host\.append\(overlay\)/);
+  assert.match(mobileCss, /\.chat-card>\.gift-alert-overlay\{position:absolute!important;inset:0!important;z-index:30!important/);
+  for (const type of ['moderator', 'superfan', 'guardian']) {
+    assert.match(mobileCss, new RegExp(`data-alert-type="${type}"[^}]*url\\('/alerts/${type}\\.png'\\)`));
+  }
+});
+
+test('gift events resolve their image from the shared local catalog before mobile rendering', () => {
+  assert.match(app, /catalogGift=\(window\.CZATBOX_GIFT_CATALOG\|\|\{\}\)\[giftId\]/);
+  assert.match(app, /event\.giftImage=String\(catalogGift\.image\|\|remoteImage\|\|''\)/);
+  assert.match(app, /giftImage:item\.giftImage\|\|'\/gift-alert\.png'/);
+});
+
+test('delayed role alerts require a recent neutral join and include moderators', () => {
+  assert.match(app, /function notifyDelayedRoleJoin\(event,role\)/);
+  assert.match(app, /pendingKey=keys\.find\(key=>state\.pendingMemberJoins\.has\(key\)\)/);
+  assert.match(app, /if\(!pendingKey\)return false/);
+  assert.match(app, /function notifyDelayedModeratorJoin\(event\)\{return notifyDelayedRoleJoin\(event,'moderator'\)\}/);
+  assert.match(app, /notifyDelayedGuardianJoin\(event\);\s*notifyDelayedModeratorJoin\(event\);\s*notifyDelayedSuperFanJoin\(event\)/);
+  assert.match(app, /state\.moderatorNoticeSeen=new Map\(\)/);
 });
 
 test('all eight selectable theme families define full opaque palettes', () => {
@@ -71,7 +96,7 @@ test('Electron merges the application menu with one theme-aware Windows title ba
   assert.match(css, /electron-shell \.desktop-menu-bar\{padding-right:146px\}/);
   assert.match(css, /-webkit-app-region:drag/);
   assert.match(workspace, /setTitleBarTheme/);
-  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v150\.js\?v=157/);
+  assert.match(fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8'), /workspace-shell-v150\.js\?v=158/);
 });
 
 test('Słoneczna polana uses dark teal, gold, yellow and white throughout the interface', () => {

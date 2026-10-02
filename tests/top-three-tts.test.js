@@ -107,13 +107,13 @@ test('a real TikTok ranking update emits exactly one structured TOP 3 change eve
   assert.equal(events.length, 1, 'position-only changes must not emit another event');
 });
 
-test('Krita publishes localized entered and dropped TOP 3 messages with notification sound', () => {
+test('Krita publishes localized entered and dropped TOP 3 messages without notification spam', () => {
   assert.match(app, /rankingEntered:'\{name\} wchodzi do TOP 3 giftujących!'/);
   assert.match(app, /rankingDropped:'\{name\} spada z TOP 3 giftujących\.'/);
   assert.match(app, /window\.addEventListener\('cttm-top-three-changed'/);
   assert.match(app, /appendKritaMessage\(Date\.now\(\),'','ranking-dropped'/);
   assert.match(app, /appendKritaMessage\(Date\.now\(\),'','ranking-entered'/);
-  assert.match(app, /window\.playCzatboxNotificationSound\?\.\(\)/);
+  assert.doesNotMatch(app, /function appendKritaMessage\([^\n]+playCzatboxNotificationSound/);
 });
 
 test('an open TOP gifter dialog is refreshed after every TikTok ranking update', () => {

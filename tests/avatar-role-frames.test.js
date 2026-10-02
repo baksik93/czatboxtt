@@ -7,6 +7,7 @@ const vm = require('node:vm');
 const publicDir = path.join(__dirname, '..', 'web-client', 'public');
 const app = fs.readFileSync(path.join(publicDir, 'app-hotfix-v177.js'), 'utf8');
 const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v179.css'), 'utf8');
+const mobileCss = fs.readFileSync(path.join(publicDir, 'mobile-adaptive.css'), 'utf8');
 const index = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const serviceWorker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 
@@ -51,12 +52,15 @@ test('frames are enabled only for spacious and modern chat layouts', () => {
 
 test('guardian avatar fills the complete transparent opening of the asymmetric gold frame', () => {
   assert.match(css, /message-avatar-frame-shell\.guardian-frame \.message-avatar\{\s*width:60px!important;\s*height:60px!important;\s*flex-basis:60px!important/);
+  assert.match(mobileCss, /message-avatar-frame-shell\.guardian-frame\{position:relative!important;display:grid!important/);
+  assert.match(mobileCss, /message-avatar-frame-shell\.guardian-frame \.message-avatar-frame\{[^}]*display:block!important/);
 });
 
 test('versioned app, stylesheet and frame assets are wired into the shell cache', () => {
   assert.match(index, /workspace-codex-v179\.css\?v=182/);
-  assert.match(index, /app-hotfix-v177\.js\?v=179/);
-  assert.match(serviceWorker, /czatbox-ttm-v213/);
+  assert.match(index, /app-hotfix-v177\.js\?v=184/);
+  assert.match(index, /mobile-adaptive\.css\?v=128/);
+  assert.match(serviceWorker, /czatbox-ttm-v221/);
   for (const asset of ['guardian-frame-hd.png', 'enigma-frame-hd.png']) {
     assert.match(serviceWorker, new RegExp(`/avatar-frames/${asset.replace('.', '\\.')}`));
   }

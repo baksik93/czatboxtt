@@ -109,9 +109,9 @@ test('Krita quota warnings render bold percentage, do not count as TTS and rearm
 });
 
 test('published entrypoint and offline cache use the quota-enabled assets', () => {
-  assert.match(html, /app-hotfix-v177\.js\?v=179/);
+  assert.match(html, /app-hotfix-v177\.js\?v=184/);
   assert.match(html, /workspace-codex-v179\.css\?v=182/);
-  assert.match(worker, /czatbox-ttm-v213/);
-  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
+  assert.match(worker, /czatbox-ttm-v221/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=184/);
   assert.match(worker, /fonts\/InterVariable\.woff2/);
 });

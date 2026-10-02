@@ -9,6 +9,7 @@ const workspace = fs.readFileSync(path.join(publicDir, 'workspace-shell-v150.js'
 const css = fs.readFileSync(path.join(publicDir, 'workspace-codex-v179.css'), 'utf8');
 const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
+const preview = fs.readFileSync(path.join(publicDir, 'whats-new-0.3.36-preview.js'), 'utf8');
 
 test('Co nowego is removed from Pomoc and launched by the round account-dock question button', () => {
   assert.match(workspace, /data-menu="help"/);
@@ -40,6 +41,24 @@ test('Co nowego follows the supplied editorial changelog structure with Czatbox 
   assert.match(workspace, /https:\/\/www\.paypal\.com\/pool\/9sNTKAuayB\?sr=wccr/);
   assert.match(workspace, /\$\('\.whats-new-article',whatsNewPanel\)\.append\(whatsNewSupport\)/);
   assert.doesNotMatch(workspace, /Discorda|React Native|Popularne gry/);
+});
+
+test('0.3.36 release presents the approved migration and repair scope', () => {
+  assert.match(html, /whats-new-0\.3\.36-preview\.js\?v=3/);
+  assert.match(preview, /AKTUALIZACJA 0\.3\.36/);
+  assert.match(preview, /title\.textContent = 'Co nowego'/);
+  assert.match(preview, /Konto zarządzane w przeglądarce/);
+  assert.match(preview, /Spokojniejsza Krita/);
+  assert.match(preview, /Pewne alerty ważnych widzów/);
+  assert.match(preview, /Test prezentu zapisuje wybrany dźwięk/);
+  assert.match(preview, /updates\.czatboxtt\.com/);
+  assert.match(preview, /get\('localPreview'\) === '1'/);
+  assert.match(preview, /CzatboxI18n\?\.apply\?\.\('pl'\)/);
+  assert.match(preview, /backdrop\.style\.zIndex = '1200'/);
+  assert.match(preview, /querySelector\('#whatsNewLauncher'\)\?\.click\(\)/);
+  assert.match(preview, /Co poprawiliśmy/);
+  assert.match(preview, /release035Article/);
+  assert.match(preview, /version: '0\.3\.36'/);
 });
 
 test('the changelog has a right-side close control, no footer and an independently scrolling article', () => {
@@ -90,7 +109,7 @@ test('the hero is edge-to-edge, section labels have symmetric lines and technica
 });
 
 test('after an update the changelog opens once and there is no separate support popup', () => {
-  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.35'/);
+  assert.match(workspace, /whatsNewSeenKey='cttm-whats-new-seen-0\.3\.36'/);
   assert.match(workspace, /localStorage\.getItem\(whatsNewSeenKey\)==='true'/);
   assert.match(workspace, /localStorage\.setItem\(whatsNewSeenKey,'true'\);openWhatsNew\(\);window\.playCzatboxNotificationSound\?\.\(\);return true/);
   assert.match(workspace, /whatsNewLauncher\.onclick=openWhatsNew/);
@@ -101,11 +120,12 @@ test('after an update the changelog opens once and there is no separate support 
 
 test('published assets use the new changelog shell and cache generation', () => {
   assert.match(html, /workspace-codex-v179\.css\?v=182/);
-  assert.match(html, /app-hotfix-v177\.js\?v=179/);
-  assert.match(html, /workspace-shell-v150\.js\?v=157/);
-  assert.match(worker, /czatbox-ttm-v213/);
+  assert.match(html, /app-hotfix-v177\.js\?v=184/);
+  assert.match(html, /workspace-shell-v150\.js\?v=158/);
+  assert.match(worker, /czatbox-ttm-v221/);
   assert.match(worker, /workspace-codex-v179\.css\?v=182/);
-  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
-  assert.match(worker, /workspace-shell-v150\.js\?v=157/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=184/);
+  assert.match(worker, /workspace-shell-v150\.js\?v=158/);
+  assert.match(worker, /whats-new-0\.3\.36-preview\.js\?v=3/);
   assert.match(worker, /fonts\/InterDisplay-ExtraBold\.woff2/);
 });

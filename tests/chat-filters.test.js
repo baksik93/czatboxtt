@@ -46,12 +46,12 @@ test('published assets force a fresh filter script and service worker cache', ()
   const html = fs.readFileSync(path.resolve(__dirname, '../web-client/public/index.html'), 'utf8');
   const worker = fs.readFileSync(path.resolve(__dirname, '../web-client/public/sw.js'), 'utf8');
   const hotfix = fs.readFileSync(path.resolve(__dirname, '../web-client/public/app-hotfix-v177.js'), 'utf8');
-  assert.match(html, /app-hotfix-v177\.js\?v=179/);
+  assert.match(html, /app-hotfix-v177\.js\?v=184/);
   assert.doesNotMatch(html, /src="\/app\.js/);
   assert.equal(hotfix, app);
-  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=206'\)/);
-  assert.match(worker, /czatbox-ttm-v213/);
-  assert.match(worker, /app-hotfix-v177\.js\?v=179/);
+  assert.match(app, /serviceWorker\.register\('\/sw\.js\?v=208'\)/);
+  assert.match(worker, /czatbox-ttm-v221/);
+  assert.match(worker, /app-hotfix-v177\.js\?v=184/);
   assert.match(html, /workspace-codex-v179\.css\?v=182/);
   assert.match(worker, /workspace-codex-v179\.css\?v=182/);
 });

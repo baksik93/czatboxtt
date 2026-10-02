@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace.js'), 'utf8');
+const workspace = fs.readFileSync(path.join(root, 'web-client/public/workspace-shell-v150.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'web-client/public/workspace-v80.css'), 'utf8');
 
 test('desktop settings show only the selected category', () => {
@@ -14,9 +15,10 @@ test('desktop settings show only the selected category', () => {
   assert.match(css, /\.settings-section\.settings-category-hidden\{display:none!important\}/);
 });
 
-test('account menu opens the account category in regular settings', () => {
-  assert.match(workspace, /cttm-open-account-settings',\(\)=>\{switchTopTab\('settings'\);showSettingsCategory\('settings-account',\{focus:true\}\)\}/);
-  assert.doesNotMatch(workspace, /accountPage\.id='account'/);
+test('account menu opens the shared website account editor', () => {
+  assert.match(workspace, /target==='settings-account'\)\{window\.dispatchEvent\(new CustomEvent\('cttm-open-account-settings'\)\);return\}/);
+  assert.match(app, /window\.open\('https:\/\/czatboxtt\.com\/\?account=1','_blank','noopener,noreferrer'\)/);
+  assert.doesNotMatch(workspace, /showSettingsCategory\('settings-account'/);
 });
 
 test('project support offers Patreon by default and keeps PayPal available', () => {

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "czatbox-tt-mobile",
+  "main": "./worker.mjs",
+  "compatibility_date": "2026-09-30",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "czatbox-tt-mobile",
+      "database_id": "eb05a9b4-777a-4e0c-b5de-d3a11fbcc312"
+    }
+  ],
+  "vars": {
+    "MIGRATION_MODE": "proxy"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

@@ -23,7 +23,7 @@ test('canonical desktop persistence never overlaps writes and rechecks changes q
 test('fallback persistence check is infrequent and published cache generation is coherent', () => {
   assert.doesNotMatch(app, /persistCanonicalUserData\(\),2000/);
   assert.match(app, /persistCanonicalUserData\(\),30000/);
-  assert.match(app, /register\('\/sw\.js\?v=206'\)/);
-  assert.match(serviceWorker, /czatbox-ttm-v213/);
+  assert.match(app, /register\('\/sw\.js\?v=208'\)/);
+  assert.match(serviceWorker, /czatbox-ttm-v221/);
   assert.match(html, /app-hotfix-v177\.js/);
 });

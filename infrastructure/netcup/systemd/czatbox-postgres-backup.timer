@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Czatbox TT PostgreSQL backup
+
+[Timer]
+OnCalendar=*-*-* 03:17:00 Europe/Berlin
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,68 @@
+{
+	servers {
+		protocols h1 h2 h3
+	}
+}
+
+(secure_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	encode zstd gzip
+}
+
+czatboxtt.com, www.czatboxtt.com {
+	import secure_headers
+
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		root * /srv/landing
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+app.czatboxtt.com {
+	import secure_headers
+
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		root * /srv/site
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+api.czatboxtt.com {
+	import secure_headers
+	reverse_proxy api:3000
+}
+
+updates.czatboxtt.com {
+	import secure_headers
+	root * /srv/updates
+	file_server
+}
+
+admin.czatboxtt.com {
+	import secure_headers
+	respond "Panel administracyjny nie jest jeszcze publicznie dostępny." 403
+}

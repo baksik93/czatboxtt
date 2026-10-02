@@ -1,11 +1,11 @@
-const CACHE = "czatbox-ttm-v213";
+const CACHE = "czatbox-ttm-v221";
 const CORE = [
   "/", "/app.css?v=99", "/special.css?v=99", "/enhancements.css?v=99",
   "/corrections.css?v=107", "/legacy-themes.css?v=99", "/legacy-chat-styles.css?v=99",
-  "/tool-rail-notes.css?v=99", "/workspace-codex-v179.css?v=182", "/mobile-adaptive.css?v=126",
+  "/tool-rail-notes.css?v=99", "/workspace-codex-v179.css?v=182", "/mobile-adaptive.css?v=128",
   "/hls.min.js?v=99", "/profanity-words.js?v=99", "/notification-sound-v3.js?v=3",
-  "/app-hotfix-v177.js?v=179", "/fixes.js?v=101", "/workspace-shell-v150.js?v=157",
-  "/localization-v1.js?v=10", "/manifest.webmanifest", "/icons.svg", "/app-icon.ico",
+  "/app-hotfix-v177.js?v=184", "/fixes.js?v=101", "/workspace-shell-v150.js?v=158",
+  "/localization-v1.js?v=10", "/whats-new-0.3.36-preview.js?v=3", "/manifest.webmanifest", "/icons.svg", "/app-icon.ico",
   "/app-icon-192.png", "/app-icon-512.png", "/whats-new-app-icon-v1.png", "/gift-alert.png",
   "/avatars/krita.jpeg", "/avatar-frames/guardian-frame-hd.png", "/avatar-frames/enigma-frame-hd.png",
   "/themes/chill-serwis-frost-v1.png", "/themes/drwinka-sunflowers-v1.png",

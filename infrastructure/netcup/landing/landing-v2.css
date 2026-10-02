@@ -1,0 +1,48 @@
+body {
+  overflow-x: clip;
+}
+
+.pattern-sections {
+  position: relative;
+  isolation: isolate;
+  margin-top: 0;
+  padding-top: 0;
+  overflow: visible;
+  background-image:
+    linear-gradient(115deg, rgba(9, 5, 18, 0.88), rgba(29, 10, 43, 0.82)),
+    url('/czatbox-doodle-v2.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+}
+
+.pattern-sections::before {
+  content: '';
+  position: absolute;
+  inset: -110px 0 auto;
+  z-index: 0;
+  height: 220px;
+  background:
+    radial-gradient(ellipse at -4% 46%, rgba(156, 44, 129, 0.42) 0, rgba(95, 29, 112, 0.28) 34%, rgba(48, 16, 62, 0.11) 57%, transparent 74%),
+    linear-gradient(to bottom, transparent 0, rgba(9, 4, 17, 0.48) 25%, rgba(9, 4, 17, 0.72) 48%, rgba(9, 4, 17, 0.38) 72%, transparent 100%);
+  -webkit-backdrop-filter: blur(14px) saturate(0.88);
+  backdrop-filter: blur(14px) saturate(0.88);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24% 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24% 72%, transparent 100%);
+  pointer-events: none;
+}
+
+.pattern-sections > section {
+  position: relative;
+  z-index: 1;
+}
+
+.final-cta {
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+footer {
+  background: #07040e;
+}

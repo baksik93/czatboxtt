@@ -1,0 +1,6 @@
+.env
+backups/
+migration/private/
+__pycache__/
+site/*
+!site/.gitkeep

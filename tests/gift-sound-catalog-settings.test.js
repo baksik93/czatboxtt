@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'web-client/public/app.js'), 'utf8');
+const hotfix = fs.readFileSync(path.join(root, 'web-client/public/app-hotfix-v177.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'web-client/public/index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'web-client/public/corrections.css'), 'utf8');
 
@@ -51,6 +52,13 @@ test('audio ducking starts only after an assigned gift sound has loaded', () => 
   assert.match(app, /await duckPromise;return playback/);
   assert.match(app, /finally\{if\(ducking\)await window\.czatboxDesktop\?\.stopAudioDucking\?\.\(\)\}/);
   assert.doesNotMatch(app, /playGiftSoundWithoutDucking/);
+});
+
+test('gift preview persists and resolves the current selection before playback', () => {
+  assert.match(hotfix, /row\.querySelector\('\.sound-preview'\)\.onclick=async\(\)=>\{/);
+  assert.match(hotfix, /entry=ensureGiftSoundEntry\(giftSoundEntry\(gift\.giftId\)\|\|entry\)/);
+  assert.match(hotfix, /saveGiftSoundSettings\(\);await playGiftSound\(selectedSound,gift\.giftId\)/);
+  assert.doesNotMatch(hotfix, /sound-preview'\)\.onclick=\(\)=>\{if\(activeSound\)void playGiftSound\(activeSound/);
 });
 
 test('gifts can be hidden, filtered by visibility and updated in bulk', () => {
